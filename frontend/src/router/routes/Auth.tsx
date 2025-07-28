@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 
 const styles = css({
@@ -7,13 +6,13 @@ const styles = css({
   backgroundColor: "yellow"
 })
 
-function App() {
+function Auth() {
 
   return (
     <div css={styles}>
-      <p>Hello</p>
+      <p>Login</p>
     </div>
   )
 }
 
-export default App
+export default Auth;
