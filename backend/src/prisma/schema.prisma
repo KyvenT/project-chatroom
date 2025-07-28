@@ -1,0 +1,27 @@
+datasource db {
+  provider = "postgresql"
+  url      = "env.DB_PORT"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Chatroom {
+    id      Int     @id @default(autoincrement())
+    name    String
+    messages Message[]
+}
+
+model Message {
+  id        Int     @id @default(autoincrement())
+  content   String
+  author    User?   @relation(fields: [authorId], references: [id])
+  authorId  Int?
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+}
