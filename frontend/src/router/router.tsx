@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
-import Chat from "./routes/Chat";
+import Chatroom from "./routes/Chat";
 import Home from "./routes/Home";
 import Auth from "./routes/Auth";
 import { useMemo } from "react";
@@ -14,7 +14,7 @@ const Router = () => {
         },
         {
             path: "/chat",
-            element: <Chat />,
+            element: <Chatroom />,
             errorElement: <ErrorPage />
         },
         {
