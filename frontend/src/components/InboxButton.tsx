@@ -1,11 +1,11 @@
 import { headerBtnStylesWithColors } from "./Header";
 
-const ProfileButton = () => {
+const InboxButton = () => {
     return (
         <button css={headerBtnStylesWithColors}>
-            Profile
+            Inbox
         </button>
     );
 }
 
-export default ProfileButton;
+export default InboxButton;

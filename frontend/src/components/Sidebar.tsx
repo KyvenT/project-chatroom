@@ -1,10 +1,11 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import SidebarChatroomButton from "./SidebarChatroomButton";
+import NewChatButton from "./NewChatButton";
 
 const sidebarStyles = css({
     display: "flex",
     flexDirection: "column",
-    width: "10%",
+    width: "15%",
     minHeight: "100dvh",
 
     ul: {
@@ -28,6 +29,7 @@ const Sidebar = () => {
             <SidebarChatroomButton title="Chat 2" />
             <SidebarChatroomButton title="Chat 3" />
         </ul>
+        <NewChatButton />
     </div>
 }
 

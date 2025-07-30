@@ -4,14 +4,21 @@ const styles = css({
     minHeight: "100%",
     width: "100%",
     display: "flex",
-    borderRadius: "10px",
+    alignItems: "center",
+    padding: "0 20px",
+
+    form: {
+        width: "100%",
+        display: "flex",
+        justifyContent: "space-around",
+    },
 
     input: {
-        width: "80%",
+        width: "95%",
     },
 
     button: {
-        justifySelf: "flex-end",
+        
     },
 });
 
@@ -23,10 +30,17 @@ const colors = (theme: Theme) => ({
 const MessageInput = () => {
     const theme = useTheme();
 
+    const handleSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
+        // Handle message submission logic here
+    };
+
     return (
         <div css={[styles, colors(theme)]}>
-            <input type="text" placeholder="Type your message here..." />
-            <button type="submit">Send</button>
+            <form onSubmit={handleSubmit} id="message-form">
+                <input type="text" placeholder="Message chat #1" />
+            </form>
+            <button type="submit" form="message-form">Send</button>
         </div>
     );
 }

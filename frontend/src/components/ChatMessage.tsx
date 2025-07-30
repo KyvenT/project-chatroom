@@ -17,6 +17,7 @@ const styles = css({
 const colors = (theme: Theme) => css({
     backgroundColor: theme.colors.light_grey,
     color: theme.colors.dark_grey,
+    borderBottom: `1px solid ${theme.colors.dark_grey}`,
 });
 
 const ChatMessage = ({content, sender, timestamp}: ChatMessageProps) => {

@@ -7,7 +7,7 @@ const styles = css({
     minHeight: "100%",
     flexGrow: 1,
     display: "grid",
-    gridTemplateRows: "10% 85% 5%",
+    gridTemplateRows: "8% 87% 5%",
 });
 
 const colors = (theme: Theme) => ({
