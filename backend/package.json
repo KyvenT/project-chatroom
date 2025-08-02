@@ -1,5 +1,18 @@
 {
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
   "type": "module",
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts --exec \"npm run build && node dist/index.js\"",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Backend server for the project chatroom",
   "dependencies": {
     "@prisma/client": "^6.12.0",
     "bcryptjs": "^3.0.2",
@@ -7,6 +20,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3",
+    "ws": "^8.18.3",
     "zod": "^4.0.10"
   },
   "devDependencies": {
@@ -16,6 +30,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.1.0",
     "@types/pg": "^8.15.4",
+    "@types/ws": "^8.18.1",
     "eslint": "^9.32.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.12.0",
