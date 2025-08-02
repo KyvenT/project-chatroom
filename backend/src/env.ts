@@ -9,6 +9,8 @@ const ENVSchema = z.object({
     DB_USERNAME: z.string(),
     DB_PASSWORD: z.string(),
     DB_PORT: z.string().transform(Number),
+    DB_URL: z.string(),
+    JWT_EXPIRATION: z.string(),
     JWT_SECRET: z.string(),
     SERVER_PORT: z.string().transform(Number),
 });
