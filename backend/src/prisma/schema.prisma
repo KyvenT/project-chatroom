@@ -8,7 +8,7 @@ generator client {
 }
 
 model Chatroom {
-  id          Int         @id @default(autoincrement())
+  id          String         @id @default(uuid())
   title       String
   owner       User        @relation(fields: [ownerId], references: [id])
   ownerId     String
@@ -20,14 +20,14 @@ model Chatroom {
 }
 
 model Message {
-  id              Int         @id @default(autoincrement())
+  id              String      @id @default(uuid())
   content         String
   senderUser      User?       @relation(fields: [senderUserId], references: [id])
   senderUserId    String?
   senderGuest     Guest?      @relation(fields: [senderGuestId], references: [id])
   senderGuestId   String?
   chatroom        Chatroom    @relation(fields: [chatroomId], references: [id])
-  chatroomId      Int
+  chatroomId      String
   createdAt       DateTime    @default(now())
   editedAt        DateTime?
 }
@@ -53,30 +53,31 @@ model Guest {
   createdAt     DateTime    @default(now())
   sentMessages  Message[]
   chatroom      Chatroom    @relation(fields: [chatroomId], references: [id])
-  chatroomId    Int   
+  chatroomId    String   
 }
 
 model ChatroomMember {
   member      User        @relation(fields: [memberId], references: [id])
   memberId    String
   chatroom    Chatroom    @relation(fields: [chatroomId], references: [id])
-  chatroomId  Int
+  chatroomId  String
   joinedAt    DateTime    @default(now())
 
   @@id([chatroomId, memberId])
 }
 
 model Invite {
-  sender        User        @relation("SentInvite", fields: [senderId], references: [id])
+  id            String          @default(uuid())
+  sender        User            @relation("SentInvite", fields: [senderId], references: [id])
   senderId      String
-  receiver      User        @relation("ReceivedInvite", fields: [receiverId], references: [id])
+  receiver      User            @relation("ReceivedInvite", fields: [receiverId], references: [id])
   receiverId    String
-  chatroom      Chatroom    @relation(fields: [chatroomId], references: [id])
-  chatroomId    Int
-  status        InviteStatus
-  sentAt        DateTime    @default(now())
+  chatroom      Chatroom        @relation(fields: [chatroomId], references: [id])
+  chatroomId    String
+  status        InviteStatus    @default(PENDING)
+  sentAt        DateTime        @default(now())
 
-  @@id(name: "inviteId", [senderId, receiverId, chatroomId])
+  @@unique([senderId, receiverId, chatroomId])
 }
 
 enum Status {
