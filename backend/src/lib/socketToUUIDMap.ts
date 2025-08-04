@@ -1,0 +1,1 @@
+export const socketToUUIDMap = new Map<WebSocket, string>();
