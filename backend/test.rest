@@ -1,0 +1,38 @@
+### initial GET 
+GET http://localhost:3000
+
+### register new user 
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json 
+
+{
+    "username": "joe321", 
+    "password": "bob321"
+}
+
+### login user POST 
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "username": "joe123", 
+    "password": "bob321"
+}
+
+### create guest 
+POST http://localhost:3000/api/auth/create-guest 
+Content-Type: application/json
+
+{
+    "username": "guest123",
+    "chatroomId": 1
+}
+
+### create chatroom 
+POST http://localhost:3000/api/chatroom/create 
+Content-Type: application/json
+
+{
+    "title": "Test chatroom #1",
+    "userId": "284ea56a-c8e3-4c6b-8655-fd75a0835adb"
+}
