@@ -14,7 +14,7 @@
   "license": "ISC",
   "description": "Backend server for the project chatroom",
   "dependencies": {
-    "@prisma/client": "^6.12.0",
+    "@prisma/client": "^6.13.0",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
@@ -33,7 +33,7 @@
     "@types/ws": "^8.18.1",
     "eslint": "^9.32.0",
     "nodemon": "^3.1.10",
-    "prisma": "^6.12.0",
+    "prisma": "^6.13.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0"
