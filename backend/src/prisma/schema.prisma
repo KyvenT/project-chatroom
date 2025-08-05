@@ -8,25 +8,27 @@ generator client {
 }
 
 model Chatroom {
-  id          String         @id @default(uuid())
-  title       String
-  owner       User        @relation(fields: [ownerId], references: [id])
-  ownerId     String
-  createdAt   DateTime    @default(now())
-  messages    Message[]
-  members     ChatroomMember[]
-  invites     Invite[]
-  guests      Guest[]
+  id                  String                @id @default(uuid())
+  title               String
+  owner               User                  @relation(fields: [ownerId], references: [id])
+  ownerId             String
+  allowGuests         Boolean               @default(false)
+  allowJoinByLink     Boolean               @default(false)
+  createdAt           DateTime              @default(now())
+  messages            Message[]           
+  members             ChatroomMember[]      
+  invites             Invite[]             
+  guests              Guest[]               
 }
 
 model Message {
   id              String      @id @default(uuid())
   content         String
-  senderUser      User?       @relation(fields: [senderUserId], references: [id])
+  senderUser      User?       @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
   senderUserId    String?
-  senderGuest     Guest?      @relation(fields: [senderGuestId], references: [id])
+  senderGuest     Guest?      @relation(fields: [senderGuestId], references: [id], onDelete: SetNull)
   senderGuestId   String?
-  chatroom        Chatroom    @relation(fields: [chatroomId], references: [id])
+  chatroom        Chatroom    @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId      String
   createdAt       DateTime    @default(now())
   editedAt        DateTime?
@@ -52,14 +54,14 @@ model Guest {
   status        Status      @default(ONLINE)
   createdAt     DateTime    @default(now())
   sentMessages  Message[]
-  chatroom      Chatroom    @relation(fields: [chatroomId], references: [id])
+  chatroom      Chatroom    @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId    String   
 }
 
 model ChatroomMember {
   member      User        @relation(fields: [memberId], references: [id])
   memberId    String
-  chatroom    Chatroom    @relation(fields: [chatroomId], references: [id])
+  chatroom    Chatroom    @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId  String
   joinedAt    DateTime    @default(now())
 
@@ -67,17 +69,15 @@ model ChatroomMember {
 }
 
 model Invite {
-  id            String          @default(uuid())
-  sender        User            @relation("SentInvite", fields: [senderId], references: [id])
+  id            String          @id @default(uuid())
+  sender        User            @relation("SentInvite", fields: [senderId], references: [id], onDelete: Cascade)
   senderId      String
-  receiver      User            @relation("ReceivedInvite", fields: [receiverId], references: [id])
+  receiver      User            @relation("ReceivedInvite", fields: [receiverId], references: [id], onDelete: Cascade)
   receiverId    String
-  chatroom      Chatroom        @relation(fields: [chatroomId], references: [id])
+  chatroom      Chatroom        @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId    String
   status        InviteStatus    @default(PENDING)
   sentAt        DateTime        @default(now())
-
-  @@unique([senderId, receiverId, chatroomId])
 }
 
 enum Status {

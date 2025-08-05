@@ -26,7 +26,7 @@ authRouter.post("/register", async (req, res) => {
         return;
     } catch (error: any) {
         console.error("Signup error:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Server error occurred during signup" });
     }
 });
 
@@ -58,7 +58,7 @@ authRouter.post("/login", async (req, res) => {
         return;
     } catch (error: any) {
         console.error("Login error:", error);
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Server error occurred during login" });
     }
 
 });
@@ -80,7 +80,7 @@ authRouter.post("/create-guest", async (req, res) => {
         return;
     } catch (error: any) {
         console.error("Guest creation error:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Server error occurred during guest creation" });
     }
 });
 

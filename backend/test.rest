@@ -25,14 +25,70 @@ Content-Type: application/json
 
 {
     "username": "guest123",
-    "chatroomId": 1
+    "chatroomId": "8a0c0962-a48c-429e-a15c-b41ffc43e465"
 }
 
 ### create chatroom 
 POST http://localhost:3000/api/chatroom/create 
 Content-Type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1VzZXIiOnRydWUsInVzZXJJZCI6IjI4NGVhNTZhLWM4ZTMtNGM2Yi04NjU1LWZkNzVhMDgzNWFkYiIsImlhdCI6MTc1NDM2NDA1NywiZXhwIjoxNzU0MzY3NjU3fQ.cgrmh62RPuEBn7bplsIXcYVtrIX7vFiL-2zppzoY24A
 
 {
-    "title": "Test chatroom #1",
-    "userId": "284ea56a-c8e3-4c6b-8655-fd75a0835adb"
+    "title": "Test chatroom #2"
+}
+
+### join chatroom by link
+POST http://localhost:3000/api/chatroom/join
+Content-Type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1VzZXIiOnRydWUsInVzZXJJZCI6IjM2YTY4OGZhLWY2ODQtNGQwMC1hZjU3LTMzMjM4NzBkODkwYiIsImlhdCI6MTc1NDM2NzAxMCwiZXhwIjoxNzU0MzcwNjEwfQ.KCktl52sBK3WvaOGwcikRzItlNt7acVjufNzwCYbRD4
+
+{
+    "chatroomId": "8a0c0962-a48c-429e-a15c-b41ffc43e465"
+}
+
+### rename chatroom
+PATCH http://localhost:3000/api/chatroom/rename
+Content-Type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1VzZXIiOnRydWUsInVzZXJJZCI6IjI4NGVhNTZhLWM4ZTMtNGM2Yi04NjU1LWZkNzVhMDgzNWFkYiIsImlhdCI6MTc1NDM2NDA1NywiZXhwIjoxNzU0MzY3NjU3fQ.cgrmh62RPuEBn7bplsIXcYVtrIX7vFiL-2zppzoY24A
+
+{
+    "chatroomId": "8a0c0962-a48c-429e-a15c-b41ffc43e465",
+    "newTitle": "Test chatroom #3"
+}
+
+### delete chatroom
+DELETE http://localhost:3000/api/chatroom/delete
+Content-Type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1VzZXIiOnRydWUsInVzZXJJZCI6IjI4NGVhNTZhLWM4ZTMtNGM2Yi04NjU1LWZkNzVhMDgzNWFkYiIsImlhdCI6MTc1NDM2ODAwMCwiZXhwIjoxNzU0MzcxNjAwfQ.GgRBg10bGb_MEY1Lidm5lnIHKBmTwfHDPzLOzQO_Gas
+
+{
+    "chatroomId": "8a0c0962-a48c-429e-a15c-b41ffc43e465"
+}
+
+### send invite
+POST http://localhost:3000/api/invite/send
+Content-Type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1VzZXIiOnRydWUsInVzZXJJZCI6IjI4NGVhNTZhLWM4ZTMtNGM2Yi04NjU1LWZkNzVhMDgzNWFkYiIsImlhdCI6MTc1NDM2NDA1NywiZXhwIjoxNzU0MzY3NjU3fQ.cgrmh62RPuEBn7bplsIXcYVtrIX7vFiL-2zppzoY24A
+
+{
+    "receiverId": "36a688fa-f684-4d00-af57-3323870d890b",
+    "chatroomId": "8a0c0962-a48c-429e-a15c-b41ffc43e465"
+}
+
+### delete/reject invite
+DELETE http://localhost:3000/api/invite/delete
+Content-Type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1VzZXIiOnRydWUsInVzZXJJZCI6IjM2YTY4OGZhLWY2ODQtNGQwMC1hZjU3LTMzMjM4NzBkODkwYiIsImlhdCI6MTc1NDM2NzAxMCwiZXhwIjoxNzU0MzcwNjEwfQ.KCktl52sBK3WvaOGwcikRzItlNt7acVjufNzwCYbRD4
+
+{
+    "inviteId": "ff06c111-5dc8-47fd-abc7-299f167ba5fd"
+}
+
+### accept invite
+POST http://localhost:3000/api/invite/accept
+Content-Type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1VzZXIiOnRydWUsInVzZXJJZCI6IjM2YTY4OGZhLWY2ODQtNGQwMC1hZjU3LTMzMjM4NzBkODkwYiIsImlhdCI6MTc1NDM2NzAxMCwiZXhwIjoxNzU0MzcwNjEwfQ.KCktl52sBK3WvaOGwcikRzItlNt7acVjufNzwCYbRD4
+
+{
+    "inviteId": "e3a2fcb2-b30d-4465-8f78-6e013bfe8a21"
 }
