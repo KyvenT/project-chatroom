@@ -1,9 +1,11 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
 import Home from "./routes/Home";
-import Auth from "./routes/Auth";
+import AuthLayout from "./routes/auth/AuthLayout";
 import { useMemo } from "react";
 import ErrorPage from "./ErrorPage";
 import Chat from "./routes/Chat";
+import Login from "./routes/auth/Login";
+import Signup from "./routes/auth/Signup";
 
 const Router = () => { 
     const router = useMemo(() => { return createBrowserRouter([
@@ -21,8 +23,18 @@ const Router = () => {
         },
         {
             path: "/auth",
-            element: <Auth />,
-            errorElement: <ErrorPage />
+            element: <AuthLayout />,
+            errorElement: <ErrorPage />,
+            children: [
+                {
+                    path: "login",
+                    element: <Login />,
+                },
+                {
+                    path: "register",
+                    element: <Signup />,
+                }
+            ],
         },
         ])
     }, []);

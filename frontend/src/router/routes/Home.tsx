@@ -12,7 +12,7 @@ function Home() {
   return (
     <div css={styles}>
       <h1>Project Chatroom</h1>
-      <Link to="/auth" css={{ textDecoration: "none", color: "black" }}>
+      <Link to="/auth/login" css={{ textDecoration: "none", color: "black" }}>
         Go to Auth Page
       </Link>
       <Link to="/chat" css={{ textDecoration: "none", color: "black", marginLeft: "10px" }}>
