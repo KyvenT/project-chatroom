@@ -1,7 +1,4 @@
 import { css, useTheme, type Theme } from "@emotion/react";
-import ProfileButton from "./ProfileButton";
-import InboxButton from "./InboxButton";
-import { Link } from "react-router";
 
 const headerStyles = css({
     display: "flex",
@@ -34,7 +31,13 @@ const headerBtnColors = (theme: Theme) => ({
     }
 });
 
-export const headerBtnStylesWithColors = [headerBtnStyles, headerBtnColors];
+interface HeaderProps {
+    children: React.ReactNode;
+}
+
+export const headerBtnStylesWithColors = (theme: Theme) => {
+    return [headerBtnStyles, headerBtnColors(theme)];
+}
 
 const headerColors = (theme: Theme) => ({
     backgroundColor: theme.colors.dark_grey,
@@ -42,17 +45,12 @@ const headerColors = (theme: Theme) => ({
     borderBottom: `2px solid ${theme.colors.dark_grey}`, 
 });
 
-const Header = () => {
+const Header = ({children}: HeaderProps) => {
     const theme = useTheme();
 
     return (
         <header css={[headerStyles, headerColors(theme)]}>
-            <h1>Chatroom #1</h1>
-            <InboxButton />
-            <ProfileButton />
-            <Link to="/auth" css={headerBtnStylesWithColors}>
-                Sign In
-            </Link>
+            { children }
         </header>
     );
 }

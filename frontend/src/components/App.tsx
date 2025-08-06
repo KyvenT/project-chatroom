@@ -1,5 +1,6 @@
 import { css, Global, ThemeProvider } from "@emotion/react";
 import Router from "../router/router";
+import AuthContextProvider from "../contexts/AuthContextProvider";
 
 const theme = {
   colors: {
@@ -21,10 +22,12 @@ const globalStyles = css({
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <Global styles={globalStyles} />
-      <Router />
-    </ThemeProvider>
+    <AuthContextProvider>
+      <ThemeProvider theme={theme}>
+        <Global styles={globalStyles} />
+        <Router />
+      </ThemeProvider>
+    </AuthContextProvider>
   )
 }
 
