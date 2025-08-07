@@ -22,7 +22,7 @@ const Router = () => {
             errorElement: <ErrorPage />
         },
         {
-            path: "/auth",
+            path: "/",
             element: <AuthLayout />,
             errorElement: <ErrorPage />,
             children: [

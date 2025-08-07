@@ -4,7 +4,6 @@ import Header, { headerBtnStylesWithColors } from "../../components/Header";
 import ChatMessages from "../../components/ChatMessages";
 import MessageInput from "../../components/MessageInput";
 import DropdownButton from "../../components/DropdownButton";
-import ProfileButton from "../../components/ProfileButton";
 import { Link } from "react-router";
 import useAuthContext from "../../hooks/useAuthContext";
 
@@ -43,12 +42,13 @@ function Chat() {
                     <li>Message 3</li>
                 </ul>
               </DropdownButton>
+              {isLoggedIn ?
               <DropdownButton buttonText="Profile">
                 <a>Account</a>
-                <button>Log Out</button>
+                <button css={headerBtnStylesWithColors}>Log Out</button>
               </DropdownButton>
-              {isLoggedIn &&
-              <Link to="/auth/login" css={headerBtnStylesWithColors}>
+              :
+              <Link to="/login" css={headerBtnStylesWithColors}>
                   Sign In
               </Link>}
             </Header>
