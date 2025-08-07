@@ -21,7 +21,7 @@ authRouter.post("/register", async (req, res) => {
         });
 
         const token = jwt.sign({ isUser: true, userId: user.id }, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRATION as StringValue });
-        res.status(201).json({ token, userId: user.id });
+        res.status(201).json({ token, userId: user.id, username });
         console.log(`User registered: ${username}`);
         return;
     } catch (error: any) {
@@ -53,7 +53,7 @@ authRouter.post("/login", async (req, res) => {
         }
 
         const token = jwt.sign({ isUser: true, userId: user.id }, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRATION as StringValue });
-        res.status(200).json({ token, userId: user.id });
+        res.status(200).json({ token, userId: user.id, username });
         console.log(`User logged in: ${username}`);
         return;
     } catch (error: any) {
@@ -75,7 +75,7 @@ authRouter.post("/create-guest", async (req, res) => {
         });
 
         const token = jwt.sign({ isUser: false, userId: guest.id }, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRATION as StringValue });
-        res.status(201).json({ token, userId: guest.id });
+        res.status(201).json({ token, userId: guest.id, username });
         console.log(`Guest created: ${username}`);
         return;
     } catch (error: any) {

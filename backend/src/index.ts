@@ -4,8 +4,6 @@ import { fileURLToPath } from 'url';
 import env from './env.js';
 import apiRouter from './routes/routes.js';
 import { WebSocketServer } from 'ws';
-import http from 'http';
-import { authRouter } from './routes/auth/auth.js';
 
 const app = express();
 
