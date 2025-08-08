@@ -3,6 +3,38 @@ import Prisma from "../../prisma/prisma.js";
 
 export const chatroomRouter = Router();
 
+chatroomRouter.get("/me", async (req: Request, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(400).json({error: "Must be signed in to get chatrooms"});
+        return;
+    }
+
+    try {
+        const chatrooms = await Prisma.chatroomMember.findMany({
+            where: {
+                memberId: userId,
+            },
+            select: {
+                chatroomId: true,
+                chatroom: {
+                    select: {
+                        title: true
+                    }
+                }
+            }
+        })
+
+        res.status(201).json({chatrooms});
+        console.log("retrieved chatrooms");
+
+    } catch (err) {
+        console.error();
+        res.status(500).json({error: "Server error occurred while fetching chatrooms"});
+    }
+})
+
 chatroomRouter.post("/create", async (req: Request, res: Response) => {
     const { title } = req.body;
     const userId = req.userId;

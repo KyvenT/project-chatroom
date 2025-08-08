@@ -3,6 +3,37 @@ import { Request, Response, Router } from "express";
 
 export const invitesRouter = Router();
 
+invitesRouter.get("/me", async (req: Request, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(400).json({error: "Must be signed in to get invites"});
+        return;
+    }
+
+    try {
+        const invites = await Prisma.invite.findMany({
+            where: {
+                receiverId: userId, 
+                status: "PENDING"
+            },
+            include: {
+                chatroom: {
+                    select: {
+                        title: true
+                    }
+                }
+            }
+        })
+
+        res.status(201).json(invites);
+        return;
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Server error occurred during invites retrieval"});
+    }
+})
+
 invitesRouter.post("/send", async (req: Request, res: Response) => {
     const { receiverId, chatroomId } = req.body;
     const senderId = req.userId;
