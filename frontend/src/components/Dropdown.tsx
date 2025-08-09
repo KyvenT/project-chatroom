@@ -1,12 +1,9 @@
-import { css, useTheme, type SerializedStyles } from "@emotion/react";
-import useToggle from "../hooks/useToggle";
+import { css, useTheme, type Theme } from "@emotion/react";
 import React, { useEffect, useRef } from "react";
 
 interface DropdownProps {
     children: React.ReactNode;
-    dropdownStyles?: SerializedStyles;
     onClose: () => void;
-    isShowing: boolean;
     buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -20,7 +17,12 @@ const defaultDropdownStyles = css({
     borderRadius: "5px",
 })
 
-const Dropdown = ({ children, dropdownStyles, onClose, isShowing, buttonRef }: DropdownProps) => {
+const colors = (theme: Theme) => css({
+    backgroundColor: theme.colors.white,
+    color: theme.colors.dark_grey,
+})
+
+const Dropdown = ({ children, onClose, buttonRef }: DropdownProps) => {
     const theme = useTheme();
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +42,7 @@ const Dropdown = ({ children, dropdownStyles, onClose, isShowing, buttonRef }: D
     }, []);
 
     return (
-        <div ref={dropdownRef} css={[defaultDropdownStyles, dropdownStyles]}>
+        <div ref={dropdownRef} css={[defaultDropdownStyles, colors(theme)]}>
             {children}
         </div>
     );

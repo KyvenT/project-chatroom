@@ -20,7 +20,7 @@ const DropdownButton = ({buttonText, children}: DropdownButtonProps) => {
     return (
         <div css={containerStyles}>
             <button ref={buttonRef} onClick={() => setToggled(true)} css={headerBtnStylesWithColors}>{buttonText}</button>
-            {isToggled && <Dropdown buttonRef={buttonRef} isShowing={isToggled} onClose={() => setToggled(false)}>
+            {isToggled && <Dropdown buttonRef={buttonRef} onClose={() => setToggled(false)}>
                 {children}
             </Dropdown>} 
         </div>

@@ -15,9 +15,7 @@ const Router = () => {
             errorElement: <ErrorPage />
         },
         {
-            path: "/chat",
-            // path: "/chat/:chatId", 
-            // This would allow for dynamic chat room IDs, but for now we keep it static
+            path: "/chat/:chatroomId", 
             element: <Chat />,
             errorElement: <ErrorPage />
         },

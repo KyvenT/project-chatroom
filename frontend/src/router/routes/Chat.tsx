@@ -4,8 +4,11 @@ import Header, { headerBtnStylesWithColors } from "../../components/Header";
 import ChatMessages from "../../components/ChatMessages";
 import MessageInput from "../../components/MessageInput";
 import DropdownButton from "../../components/DropdownButton";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import useAuthContext from "../../hooks/useAuthContext";
+import useToggle from "../../hooks/useToggle";
+import { ChevronFirst, ChevronLast } from "lucide-react";
+import InboxButton from "../../components/InboxButton";
 
 const styles = css({
   minHeight: "100dvh",
@@ -28,25 +31,24 @@ const colors = (theme: Theme) => ({
 function Chat() {
   const theme = useTheme();
   const {isLoggedIn} = useAuthContext();
+  const [sidebarToggled, setSidebarToggled] = useToggle(false);
+  const {chatroomId} = useParams();
 
   return (
     <div css={styles}>
-      <Sidebar />
+      {sidebarToggled && <Sidebar />}
         <div css={[chatStyles, colors(theme)]}>
             <Header>
-              <h1>Chatroom #1</h1>
-              <DropdownButton buttonText="Inbox">
-                <ul>
-                    <li>Message 1</li>
-                    <li>Message 2</li>
-                    <li>Message 3</li>
-                </ul>
-              </DropdownButton>
+              <button onClick={() => setSidebarToggled()}>{sidebarToggled ? <ChevronFirst /> : <ChevronLast />}</button>
+              <h1>Chatroom {chatroomId}</h1>
               {isLoggedIn ?
-              <DropdownButton buttonText="Profile">
-                <a>Account</a>
-                <button css={headerBtnStylesWithColors}>Log Out</button>
-              </DropdownButton>
+              <>
+                <InboxButton />
+                <DropdownButton buttonText="Profile">
+                  <a>Account</a>
+                  <button css={headerBtnStylesWithColors}>Log Out</button>
+                </DropdownButton>
+              </>
               :
               <Link to="/login" css={headerBtnStylesWithColors}>
                   Sign In
