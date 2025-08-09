@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import Prisma from "../../prisma/prisma.js";
 
-const messagesRouter = Router();
+export const messagesRouter = Router();
 
 messagesRouter.get("/:chatroomId", async (req: Request, res: Response) => {
     const {chatroomId} = req.params;
@@ -14,7 +14,7 @@ messagesRouter.get("/:chatroomId", async (req: Request, res: Response) => {
     }
 
     try {
-        const verify = await Prisma.chatroomMember.findUnique({
+        const verifyPromise = Prisma.chatroomMember.findUnique({
             where: {
                 chatroomId_memberId: {
                     memberId: userId,
@@ -23,12 +23,7 @@ messagesRouter.get("/:chatroomId", async (req: Request, res: Response) => {
             }
         })
 
-        if (!verify) {
-            res.status(400).json({error: "Not detected as a member of that chatroom"});
-            return;
-        }
-
-        const chatroomMessages = await Prisma.message.findMany({
+        const chatroomMessagesPromise = Prisma.message.findMany({
             where: {
                 chatroomId,
                 createdAt: {
@@ -40,6 +35,13 @@ messagesRouter.get("/:chatroomId", async (req: Request, res: Response) => {
             }, 
             take: 25,
         })
+
+        const [verify, chatroomMessages] = await Promise.all([verifyPromise, chatroomMessagesPromise]);
+
+        if (!verify) {
+            res.status(400).json({error: "Not detected as a member of that chatroom"});
+            return;
+        }
 
         res.status(201).json({chatroomMessages});
         console.log("messages retrieved");
