@@ -3,9 +3,8 @@ import Prisma from "../../prisma/prisma.js";
 
 export const messagesRouter = Router();
 
-messagesRouter.get("/:chatroomId", async (req: Request, res: Response) => {
-    const {chatroomId} = req.params;
-    const {getBefore} = req.body;
+messagesRouter.get("/:chatroomId/:getBefore", async (req: Request, res: Response) => {
+    const {chatroomId, getBefore} = req.params;
     const userId = req.userId;
 
     if (!userId) {

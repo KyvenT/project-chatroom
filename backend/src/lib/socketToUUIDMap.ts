@@ -1,1 +1,1 @@
-export const socketToUUIDMap = new Map<WebSocket, string>();
+export const socketToUUIDMap = new Map<string, WebSocket>();
