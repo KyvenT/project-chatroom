@@ -5,8 +5,8 @@ import useAuthContext from "../../../hooks/useAuthContext";
 
 const Signup = () => {
     const navigate = useNavigate();
-    const [usernameInput, setUsernameInput] = useState<String>("");
-    const [passwordInput, setPasswordInput] = useState<String>("");
+    const [username, setUsernameInput] = useState<String>("");
+    const [password, setPasswordInput] = useState<String>("");
     const [error, setError] = useState<String>("");
     const {handleSignIn} = useAuthContext();
 
@@ -19,7 +19,7 @@ const Signup = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({usernameInput, passwordInput})
+                    body: JSON.stringify({username, password})
                 }
             );
 

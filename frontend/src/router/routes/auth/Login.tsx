@@ -5,8 +5,8 @@ import type { UserAuth } from "../../../types/User";
 
 const Login = () => {
     const navigate = useNavigate();
-    const [usernameInput, setUsernameInput] = useState<String>("");
-    const [passwordInput, setPasswordInput] = useState<String>("");
+    const [username, setUsernameInput] = useState<String>("");
+    const [password, setPasswordInput] = useState<String>("");
     const [error, setError] = useState<String>("");
     const {handleSignIn} = useAuthContext();
 
@@ -19,7 +19,7 @@ const Login = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({usernameInput, passwordInput})
+                    body: JSON.stringify({username, password})
                 }
             );
 
@@ -31,7 +31,7 @@ const Login = () => {
             console.log(data);
 
             handleSignIn(data)
-            navigate("/chat");
+            navigate("/chat/b42f337e-2950-4059-8205-077c73b45398");
         } catch (err: any) {
             setError(err.message);
             console.log(err);
