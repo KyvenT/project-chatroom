@@ -23,7 +23,7 @@ const ChatMessages = ({chatroomId}: ChatMessageProps) => {
     const {user} = useAuthContext();
     const getBefore = new Date();
     const { data } = useQuery({
-        queryKey: ["messages", chatroomId],
+        queryKey: ["messages", chatroomId, user.token],
         queryFn: async () => {
             console.log("fetching messages");
             const res = await fetch("http://localhost:3000/api/messages/" + chatroomId + "/" + getBefore.toISOString(), {
