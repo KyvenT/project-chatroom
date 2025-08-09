@@ -4,8 +4,21 @@ import { fileURLToPath } from 'url';
 import env from './env.js';
 import apiRouter from './routes/routes.js';
 import { WebSocketServer } from 'ws';
+import cors from 'cors';
+import { corsPreflightMiddleware } from './middleware/corsPreflightMiddleware.js';
+
+const corsOptions = {
+  origin: ['http://127.0.0.1:5173'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}
 
 const app = express();
+
+app.use(cors(corsOptions));
+
+
 
 // get file path from URL of current module
 const __filename = fileURLToPath(import.meta.url);
@@ -18,6 +31,7 @@ app.use(express.static(pathToStaticFiles));
 
 // middleware
 app.use(express.json());
+app.use(corsPreflightMiddleware);
 
 // routes
 app.use('/api', apiRouter);
