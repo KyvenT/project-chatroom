@@ -54,7 +54,7 @@ function Chat() {
                   Sign In
               </Link>}
             </Header>
-            <ChatMessages />
+            {chatroomId && <ChatMessages chatroomId={chatroomId} />}
             <MessageInput />
         </div>
     </div>

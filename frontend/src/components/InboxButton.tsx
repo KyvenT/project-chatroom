@@ -17,7 +17,7 @@ const InboxButton = () => {
                     "authorization": "Bearer " + user.token
                 }
             });
-            return res.json();
+            return await res.json();
         },
         refetchOnMount: false, 
         refetchOnWindowFocus: false

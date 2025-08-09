@@ -1,6 +1,7 @@
 import { css, Global, ThemeProvider } from "@emotion/react";
 import Router from "../router/router";
 import AuthContextProvider from "../contexts/AuthContextProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const theme = {
   colors: {
@@ -20,14 +21,18 @@ const globalStyles = css({
   },
 })
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <AuthContextProvider>
-      <ThemeProvider theme={theme}>
-        <Global styles={globalStyles} />
-        <Router />
-      </ThemeProvider>
-    </AuthContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthContextProvider>
+        <ThemeProvider theme={theme}>
+          <Global styles={globalStyles} />
+          <Router />
+        </ThemeProvider>
+      </AuthContextProvider>
+    </QueryClientProvider>
   )
 }
 

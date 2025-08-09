@@ -1,5 +1,11 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessage from "./ChatMessage";
+import { useQuery } from "@tanstack/react-query";
+import useAuthContext from "../hooks/useAuthContext";
+
+interface ChatMessageProps {
+    chatroomId: string;
+}
 
 const styles = css({
     minHeight: "100%",
@@ -12,8 +18,27 @@ const colors = (theme: Theme) => ({
     color: theme.colors.white,
 });
 
-const ChatMessages = () => {
+const ChatMessages = ({chatroomId}: ChatMessageProps) => {
     const theme = useTheme();
+    const {user} = useAuthContext();
+    const getBefore = new Date();
+    const { data } = useQuery({
+        queryKey: ["messages", chatroomId],
+        queryFn: async () => {
+            console.log("fetching messages");
+            const res = await fetch("http://localhost:3000/api/messages/" + chatroomId + "/" + getBefore.toISOString(), {
+                headers: {
+                    "Content-Type": "application/json",
+                    "authorization": "Bearer " + user.token,
+                },
+            });
+            console.log(res);
+            return await res.json();
+        }, 
+        refetchOnMount: false, 
+        refetchOnWindowFocus: false
+    })
+    console.log("messages: " + data);
 
     return (
         <div css={[styles, colors(theme)]}>
