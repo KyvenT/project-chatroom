@@ -1,26 +1,37 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
-import Home from "./routes/Home";
+import LandingPage from "./routes/Landing";
 import AuthLayout from "./routes/auth/AuthLayout";
 import { useMemo } from "react";
 import ErrorPage from "./ErrorPage";
-import Chat from "./routes/Chat";
+import Chat from "./routes/chat/Chat";
 import Login from "./routes/auth/Login";
 import Signup from "./routes/auth/Signup";
+import ChatLayout from "./routes/chat/ChatLayout";
+import ChatHome from "./routes/chat/ChatHome";
 
 const Router = () => { 
     const router = useMemo(() => { return createBrowserRouter([
         {
             path: "/",
-            element: <Home />,
+            element: <LandingPage />,
             errorElement: <ErrorPage />
         },
         {
-            path: "/chat/:chatroomId", 
-            element: <Chat />,
-            errorElement: <ErrorPage />
+            path: "/chat",
+            element: <ChatLayout />,
+            errorElement: <ErrorPage />,
+            children: [
+                {
+                    path: "",
+                    element: <ChatHome />
+                },
+                {
+                path: ":chatroomId",
+                element: <Chat />,
+                }
+            ]
         },
         {
-            path: "/",
             element: <AuthLayout />,
             errorElement: <ErrorPage />,
             children: [
