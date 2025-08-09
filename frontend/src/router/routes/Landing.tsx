@@ -7,7 +7,7 @@ const styles = css({
   backgroundColor: "yellow"
 })
 
-function Home() {
+function LandingPage() {
 
   return (
     <div css={styles}>
@@ -22,4 +22,4 @@ function Home() {
   )
 }
 
-export default Home;
+export default LandingPage;

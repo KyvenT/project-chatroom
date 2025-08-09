@@ -1,6 +1,10 @@
+import type React from "react";
+import { NavLink } from "react-router";
+
 interface SidebarChatroomButtonProps {
     isActive?: boolean;
-    title: string;
+    chatroomId: string
+    children: React.ReactNode;
 }
 
 const styles = {
@@ -14,9 +18,9 @@ const dynamicStyles = (isActive: boolean) => ({
     backgroundColor: isActive ? "blue" : "grey",
 });
 
-const SidebarChatroomButton = ({isActive=false, title} : SidebarChatroomButtonProps) => {
+const SidebarChatroomButton = ({isActive=false, children, chatroomId} : SidebarChatroomButtonProps) => {
     return <li>
-        <button css={[styles, dynamicStyles(isActive)]}>{title}</button>
+        <NavLink css={[styles, dynamicStyles(isActive)]} to={"/chat/" + chatroomId}>{children}</NavLink>
     </li>
 }
 
