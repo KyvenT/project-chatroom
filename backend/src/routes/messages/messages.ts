@@ -11,6 +11,7 @@ messagesRouter.get("/:chatroomId/:getBefore", async (req: Request, res: Response
         res.status(400).json({error: "Must be signed in to get messages"});
         return;
     }
+    console.log("get messages before " + getBefore + " for " + userId);
 
     try {
         const verifyPromise = Prisma.chatroomMember.findUnique({
@@ -22,12 +23,24 @@ messagesRouter.get("/:chatroomId/:getBefore", async (req: Request, res: Response
             }
         })
 
-        const chatroomMessagesPromise = Prisma.message.findMany({
+        const messagesPromise = Prisma.message.findMany({
             where: {
                 chatroomId,
                 createdAt: {
                     lte: getBefore
                 }
+            },
+            include: {
+                senderUser: {
+                    select: {
+                        username: true
+                    }
+                },
+                senderGuest: {
+                    select: {
+                        username: true
+                    }
+                },
             },
             orderBy: {
                 createdAt: 'asc'
@@ -35,14 +48,14 @@ messagesRouter.get("/:chatroomId/:getBefore", async (req: Request, res: Response
             take: 25,
         })
 
-        const [verify, chatroomMessages] = await Promise.all([verifyPromise, chatroomMessagesPromise]);
+        const [verify, messages] = await Promise.all([verifyPromise, messagesPromise]);
 
         if (!verify) {
             res.status(400).json({error: "Not detected as a member of that chatroom"});
             return;
         }
 
-        res.status(201).json({chatroomMessages});
+        res.status(201).json(messages);
         console.log("messages retrieved");
     } catch (err) {
         console.error(err);

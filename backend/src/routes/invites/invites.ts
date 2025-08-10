@@ -10,6 +10,7 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
         res.status(400).json({error: "Must be signed in to get invites"});
         return;
     }
+    console.log("get invites for " + userId);
 
     try {
         const invites = await Prisma.invite.findMany({
@@ -22,7 +23,15 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
                     select: {
                         title: true
                     }
+                },
+                sender: {
+                    select: {
+                        username: true
+                    }
                 }
+            },
+            omit: {
+                status: true
             }
         })
 

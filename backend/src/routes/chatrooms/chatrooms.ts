@@ -26,7 +26,7 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
             }
         })
 
-        res.status(201).json({chatrooms});
+        res.status(201).json(chatrooms);
         console.log("retrieved chatrooms");
 
     } catch (err) {
@@ -59,7 +59,7 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
             }
         });
 
-        res.status(201).json({ chatroom });
+        res.status(201).json(chatroom);
         console.log(`Chatroom created: ${title}`);
         return;
     } catch (error: any) {
