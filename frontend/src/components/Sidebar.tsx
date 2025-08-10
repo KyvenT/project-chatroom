@@ -4,6 +4,8 @@ import NewChatButton from "./NewChatButton";
 import useAuthContext from "../hooks/useAuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
+import type { Chatroom } from "../types/Chatroom";
+import { useMemo } from "react";
 
 const sidebarStyles = css({
     display: "flex",
@@ -31,12 +33,12 @@ const Sidebar = () => {
     const { isLoggedIn, user } = useAuthContext();
     const {chatroomId} = useParams();
     const { data } = useQuery({
-        queryKey: ["sidebar", user.token],
+        queryKey: ["sidebar", isLoggedIn],
         queryFn: async () => {
-            console.log("fetching chatrooms");
             if (!isLoggedIn) {
-                return;
+                return [];
             }
+            console.log("fetching chatrooms");
             const res = await fetch("http://localhost:3000/api/chatroom/me", {
                 headers: {
                     "Content-Type": "application/json",
@@ -45,24 +47,20 @@ const Sidebar = () => {
             });
             return await res.json();
         },
-        refetchOnMount: false, 
-        refetchOnWindowFocus: false,
+        staleTime: Infinity
     })
-    console.log("chatrooms: " + data);
-    const chatrooms = [
-        {title: "Chat 123", chatId: "chat123"},
-        {title: "Chat 2", chatId: "chat2"},
-        {title: "Chat 3", chatId: "chat3"}
-    ]
+    const chatrooms = useMemo(() => data ? data.chatrooms as Chatroom[] : [], data);
+    console.log("chatrooms: " + chatrooms);
 
     return <div css={[sidebarStyles, colors(theme)]}>
         <h3>Chats</h3>
         <ul>
-            {chatrooms.map((chatroom) => {
-                return (<SidebarChatroomButton 
-                    isActive={chatroomId === chatroom.chatId} 
-                    chatroomId={chatroom.chatId}>
-                        {chatroom.title} 
+            {chatrooms && chatrooms.map((chatroom) => {
+                return (
+                <SidebarChatroomButton key={chatroom.chatroomId}
+                    isActive={chatroomId === chatroom.chatroomId} 
+                    chatroomId={chatroom.chatroomId}>
+                        {chatroom.chatroom.title} 
                 </SidebarChatroomButton>)
             })}
         </ul>

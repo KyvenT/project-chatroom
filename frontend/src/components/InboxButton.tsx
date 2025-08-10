@@ -1,4 +1,5 @@
 import useAuthContext from "../hooks/useAuthContext";
+import type { Invite } from "../types/Invite";
 import DropdownButton from "./DropdownButton";
 import { useQuery } from "@tanstack/react-query";
 
@@ -9,7 +10,7 @@ const InboxButton = () => {
         queryFn: async () => {
             console.log("fetching invites");
             if (!isLoggedIn) {
-                return;
+                return [];
             }
             const res = await fetch("http://localhost:3000/api/invite/me", {
                 headers: {
@@ -17,19 +18,32 @@ const InboxButton = () => {
                     "authorization": "Bearer " + user.token
                 }
             });
-            return await res.json();
+            return await res.json() as Invite[];
         },
-        refetchOnMount: false, 
-        refetchOnWindowFocus: false
+        staleTime: Infinity,
     })
     console.log("invites: " + data);
+
+    const handleInviteResponse = (isAccepted: boolean) => {
+        if (!isAccepted) {
+
+        }
+
+    }
 
     return (
         <DropdownButton buttonText="Inbox">
             <ul>
-                <li>Message 1</li>
-                <li>Message 2</li>
-                <li>Message 3</li>
+                {data && data.map((invite) => {
+                    return <li key={invite.id}>
+                        <h5>{invite.chatroom.title}</h5>
+                        <p>Invited by: {invite.sender.username}</p>
+                        <form id={invite.id}>
+                            <button onClick={() => handleInviteResponse(true)}>Accept</button>
+                            <button onClick={() => handleInviteResponse(false)}>Reject</button>
+                        </form>
+                    </li>
+                })}
             </ul>
         </DropdownButton>
     )
