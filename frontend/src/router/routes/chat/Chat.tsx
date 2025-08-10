@@ -7,7 +7,8 @@ import { Link, useOutletContext, useParams } from "react-router";
 import useAuthContext from "../../../hooks/useAuthContext";
 import InboxButton from "../../../components/InboxButton";
 import type { SidebarContextType } from "./ChatLayout";
-import { ChevronFirst, ChevronLast } from "lucide-react";
+import { ChevronFirst, MenuIcon } from "lucide-react";
+import AuthGuard from "../../../components/AuthGuard";
 
 const chatStyles = css({
     minHeight: "100%",
@@ -29,8 +30,9 @@ function Chat() {
 
   return (
     <div css={[chatStyles, colors(theme)]}>
+        <AuthGuard />
         <Header>
-          <button onClick={() => setSidebarToggled()}>{sidebarToggled ? <ChevronFirst /> : <ChevronLast />}</button>
+          <button onClick={() => setSidebarToggled()}>{sidebarToggled ? <ChevronFirst /> : <MenuIcon />}</button>
 
           <h1>Chatroom {chatroomId}</h1>
           {isLoggedIn ?
