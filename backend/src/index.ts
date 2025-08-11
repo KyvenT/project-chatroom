@@ -6,6 +6,9 @@ import apiRouter from './routes/routes.js';
 import { WebSocketServer } from 'ws';
 import cors from 'cors';
 import { corsPreflightMiddleware } from './middleware/corsPreflightMiddleware.js';
+import jwt from "jsonwebtoken";
+import { userSocketMap, guestSocketMap } from './lib/socketMaps.js';
+import { startWSS } from './wss/wss.js';
 
 const corsOptions = {
   origin: ['http://127.0.0.1:5173'],
@@ -17,8 +20,6 @@ const corsOptions = {
 const app = express();
 
 app.use(cors(corsOptions));
-
-
 
 // get file path from URL of current module
 const __filename = fileURLToPath(import.meta.url);
@@ -46,16 +47,4 @@ const server = app.listen(env.SERVER_PORT, () => {
   console.log(`Express server running on http://localhost:${env.SERVER_PORT}`)
 });
 
-const wss = new WebSocketServer({ server });
-
-wss.on('connection', (ws) => {
-  console.log('New client connected');
-  
-  ws.on('message', (message) => {
-    console.log(`Received message: ${message}`);
-  });
-
-  ws.on('close', () => {
-    console.log('Client disconnected');
-  });
-});
+startWSS(server);
