@@ -1,8 +1,8 @@
 import type WebSocket from "ws";
 
 export class BidirectionalMap<T1, T2> {
-    keyToValue: Map<T1, T2>;
-    valueToKey: Map<T2, T1>;
+    readonly keyToValue: Map<T1, T2>;
+    readonly valueToKey: Map<T2, T1>;
 
     constructor() {
         this.keyToValue = new Map<T1, T2>();
@@ -47,5 +47,4 @@ export class BidirectionalMap<T1, T2> {
     }
 }
 
-export const userSocketMap = new BidirectionalMap<String, WebSocket>();
-export const guestSocketMap = new BidirectionalMap<String, WebSocket>();
+export const socketMap = new BidirectionalMap<{userId: string, isUser: boolean}, WebSocket>();

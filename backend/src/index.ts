@@ -3,11 +3,8 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import env from './env.js';
 import apiRouter from './routes/routes.js';
-import { WebSocketServer } from 'ws';
 import cors from 'cors';
 import { corsPreflightMiddleware } from './middleware/corsPreflightMiddleware.js';
-import jwt from "jsonwebtoken";
-import { userSocketMap, guestSocketMap } from './lib/socketMaps.js';
 import { startWSS } from './wss/wss.js';
 
 const corsOptions = {
