@@ -51,6 +51,7 @@ messagesRouter.get("/:chatroomId/:getBefore", async (req: Request, res: Response
         const [verify, messages] = await Promise.all([verifyPromise, messagesPromise]);
 
         if (!verify) {
+            console.error("attempted retrieving messages from a chatroom that user is not a member of");
             res.status(400).json({error: "Not detected as a member of that chatroom"});
             return;
         }

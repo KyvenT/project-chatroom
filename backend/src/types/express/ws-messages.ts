@@ -1,15 +1,15 @@
 enum WSMessageTypes {
-    "auth",
-    "message",
+    Auth = "auth",
+    Message = "message",
 }
 
 export interface AuthMessage {
-    type: "auth";
+    type: WSMessageTypes.Auth;
     token: string;
 }
 
 export interface ChatMessage {
-    type: "message";
+    type: WSMessageTypes.Message;
     content: string;
     chatroomId: string;
 }
