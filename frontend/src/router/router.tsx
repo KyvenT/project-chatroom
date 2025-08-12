@@ -8,6 +8,7 @@ import Login from "./routes/auth/Login";
 import Signup from "./routes/auth/Signup";
 import ChatLayout from "./routes/chat/ChatLayout";
 import ChatHome from "./routes/chat/ChatHome";
+import Logout from "./routes/auth/Logout";
 
 const Router = () => { 
     const router = useMemo(() => { return createBrowserRouter([
@@ -42,6 +43,10 @@ const Router = () => {
                 {
                     path: "register",
                     element: <Signup />,
+                },
+                {
+                    path: "logout",
+                    element: <Logout />
                 }
             ],
         },
