@@ -14,7 +14,7 @@ const chatStyles = css({
     minHeight: "100%",
     flexGrow: 1,
     display: "grid",
-    gridTemplateRows: "8% 87% 5%",
+    gridTemplateRows: "8% 85% 7%",
 });
 
 const colors = (theme: Theme) => ({

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router"
 import useAuthContext from "../../../hooks/useAuthContext";
 import type { UserAuth } from "../../../types/User";
+import useWebSocketContext from "../../../hooks/useWebSocketContext";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -9,6 +10,7 @@ const Login = () => {
     const [password, setPasswordInput] = useState<String>("");
     const [error, setError] = useState<String>("");
     const {handleSignIn} = useAuthContext();
+    const {handleWSAuth} = useWebSocketContext();
 
     const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -30,7 +32,8 @@ const Login = () => {
             const data = await res.json() as UserAuth;
             console.log(data);
 
-            handleSignIn(data)
+            handleSignIn(data);
+            handleWSAuth(data.token);
             navigate("/chat/b42f337e-2950-4059-8205-077c73b45398");
         } catch (err: any) {
             setError(err.message);
