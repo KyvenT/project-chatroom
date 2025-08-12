@@ -2,6 +2,7 @@ import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessage from "./ChatMessage";
 import { useQuery } from "@tanstack/react-query";
 import useAuthContext from "../hooks/useAuthContext";
+import type { Message } from "../types/Message";
 
 interface ChatMessageProps {
     chatroomId: string;
@@ -14,17 +15,18 @@ const styles = css({
 });
 
 const colors = (theme: Theme) => ({
-    backgroundColor: theme.colors.dark_grey,
+    backgroundColor: theme.colors.light_grey,
     color: theme.colors.white,
 });
 
 const ChatMessages = ({chatroomId}: ChatMessageProps) => {
     const theme = useTheme();
-    const {user} = useAuthContext();
+    const {user, isLoggedIn} = useAuthContext();
     const getBefore = new Date();
     const { data } = useQuery({
-        queryKey: ["messages", chatroomId, user.token],
+        queryKey: ["messages", chatroomId, isLoggedIn],
         queryFn: async () => {
+            if (!isLoggedIn) return [];
             console.log("fetching messages");
             const res = await fetch("http://localhost:3000/api/messages/" + chatroomId + "/" + getBefore.toISOString(), {
                 headers: {
@@ -32,35 +34,28 @@ const ChatMessages = ({chatroomId}: ChatMessageProps) => {
                     "authorization": "Bearer " + user.token,
                 },
             });
+            if (!res.ok) {
+                console.error(res);
+                return [];
+            }
             console.log(res);
-            return await res.json();
+            return await res.json() as Message[];
         }, 
-        refetchOnMount: false, 
-        refetchOnWindowFocus: false
+        staleTime: Infinity
     })
     console.log("messages: " + data);
 
     return (
         <div css={[styles, colors(theme)]}>
-            <ChatMessage
-                content="Hello, how are you?"
-                sender="User1"
-                timestamp={new Date()}
-            />
-            <ChatMessage
-                content="I'm good, thanks! How about you?"
-                sender="User2"
-                timestamp={new Date()}
-            />
-            <ChatMessage
-                content="lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-                sender="User1"
-                timestamp={new Date()}
-            />
+            {data && data.map((message) => {
+                return (
+                    <ChatMessage 
+                        key={message.id}
+                        content={message.content}
+                        sender={message.senderUser?.username || message.senderGuest?.username || "Unnamed User"}
+                        timestamp={new Date(message.createdAt)}/>
+                )
+            })}
         </div>
     );
 }

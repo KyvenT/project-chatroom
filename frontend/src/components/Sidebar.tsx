@@ -3,9 +3,8 @@ import SidebarChatroomButton from "./SidebarChatroomButton";
 import NewChatButton from "./NewChatButton";
 import useAuthContext from "../hooks/useAuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import type { Chatroom } from "../types/Chatroom";
-import { useMemo } from "react";
 
 const sidebarStyles = css({
     display: "flex",
@@ -45,17 +44,21 @@ const Sidebar = () => {
                     "authorization": "Bearer " + user.token
                 }
             });
-            return await res.json();
+            if (!res.ok) {
+                console.error(res);
+                return [];
+            }
+            return await res.json() as Chatroom[];
         },
         staleTime: Infinity
     })
-    const chatrooms = useMemo(() => data ? data.chatrooms as Chatroom[] : [], data);
-    console.log("chatrooms: " + chatrooms);
+
 
     return <div css={[sidebarStyles, colors(theme)]}>
+        <Link to="/chat">Home</Link>
         <h3>Chats</h3>
         <ul>
-            {chatrooms && chatrooms.map((chatroom) => {
+            {data && data.map((chatroom) => {
                 return (
                 <SidebarChatroomButton key={chatroom.chatroomId}
                     isActive={chatroomId === chatroom.chatroomId} 

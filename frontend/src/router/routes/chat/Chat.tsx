@@ -3,7 +3,7 @@ import Header, { headerBtnStylesWithColors } from "../../../components/Header";
 import ChatMessages from "../../../components/ChatMessages";
 import MessageInput from "../../../components/MessageInput";
 import DropdownButton from "../../../components/DropdownButton";
-import { Link, useOutletContext, useParams } from "react-router";
+import { Link, useNavigate, useOutletContext, useParams } from "react-router";
 import useAuthContext from "../../../hooks/useAuthContext";
 import InboxButton from "../../../components/InboxButton";
 import type { SidebarContextType } from "./ChatLayout";
@@ -27,13 +27,13 @@ function Chat() {
   const {isLoggedIn, user} = useAuthContext();
   const {chatroomId} = useParams();
   const {setSidebarToggled, sidebarToggled} = useOutletContext<SidebarContextType>();
+  const navigate = useNavigate();
 
   return (
     <div css={[chatStyles, colors(theme)]}>
         <AuthGuard />
         <Header>
           <button onClick={() => setSidebarToggled()}>{sidebarToggled ? <ChevronFirst /> : <MenuIcon />}</button>
-
           <h1>Chatroom {chatroomId}</h1>
           {isLoggedIn ?
           <>
@@ -41,7 +41,7 @@ function Chat() {
             <DropdownButton buttonText="Profile">
               <h3>{user.username}</h3>
               <Link to="">Account Settings</Link>
-              <button css={headerBtnStylesWithColors}>Log Out</button>
+              <button onClick={() => navigate("/logout")} css={headerBtnStylesWithColors}>Log Out</button>
             </DropdownButton>
           </>
           :

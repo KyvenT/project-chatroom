@@ -18,6 +18,10 @@ const InboxButton = () => {
                     "authorization": "Bearer " + user.token
                 }
             });
+            if (!res.ok) {
+                console.error(res);
+                return [];
+            }
             return await res.json() as Invite[];
         },
         staleTime: Infinity,
