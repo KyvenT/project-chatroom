@@ -34,7 +34,7 @@ const Login = () => {
 
             handleSignIn(data);
             handleWSAuth(data.token);
-            navigate("/chat/b42f337e-2950-4059-8205-077c73b45398");
+            navigate("/chat");
         } catch (err: any) {
             setError(err.message);
             console.log(err);

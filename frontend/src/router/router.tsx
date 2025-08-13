@@ -12,42 +12,18 @@ import Logout from "./routes/auth/Logout";
 
 const Router = () => { 
     const router = useMemo(() => { return createBrowserRouter([
-        {
-            path: "/",
-            element: <LandingPage />,
-            errorElement: <ErrorPage />
-        },
-        {
-            path: "/chat",
-            element: <ChatLayout />,
-            errorElement: <ErrorPage />,
+        {path: "/", element: <LandingPage />, errorElement: <ErrorPage />},
+        {path: "/chat", element: <ChatLayout />, errorElement: <ErrorPage />,
             children: [
-                {
-                    path: "",
-                    element: <ChatHome />
-                },
-                {
-                path: ":chatroomId",
-                element: <Chat />,
-                }
+                {path: "", element: <ChatHome />},
+                {path: ":chatroomId", element: <Chat />}
             ]
         },
-        {
-            element: <AuthLayout />,
-            errorElement: <ErrorPage />,
+        {element: <AuthLayout />, errorElement: <ErrorPage />,
             children: [
-                {
-                    path: "login",
-                    element: <Login />,
-                },
-                {
-                    path: "register",
-                    element: <Signup />,
-                },
-                {
-                    path: "logout",
-                    element: <Logout />
-                }
+                {path: "login", element: <Login />},
+                {path: "register", element: <Signup />},
+                {path: "logout", element: <Logout />}
             ],
         },
         ])
