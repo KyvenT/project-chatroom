@@ -21,7 +21,7 @@ const headerBtnStyles = css({
     textDecoration: "none",
 })
 
-const headerBtnColors = (theme: Theme) => ({
+const headerBtnColors = (theme: Theme) => css({
     backgroundColor: theme.colors.dark_grey,
     color: theme.colors.white,
     border: `1px solid ${theme.colors.white}`,

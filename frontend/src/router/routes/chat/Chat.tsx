@@ -1,7 +1,7 @@
 import { css, useTheme, type Theme } from "@emotion/react";
-import Header, { headerBtnStylesWithColors } from "../../../components/Header";
 import ChatMessages from "../../../components/ChatMessages";
 import MessageInput from "../../../components/MessageInput";
+import { useParams } from "react-router";
 import DropdownButton from "../../../components/DropdownButton";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router";
 import useAuthContext from "../../../hooks/useAuthContext";
@@ -14,7 +14,8 @@ const chatStyles = css({
     minHeight: "100%",
     flexGrow: 1,
     display: "grid",
-    gridTemplateRows: "8% 85% 7%",
+    gridTemplateRows: "90% 10%",
+    gridTemplateColumns: "85% 15%",
 });
 
 const colors = (theme: Theme) => ({
@@ -24,10 +25,7 @@ const colors = (theme: Theme) => ({
 
 function Chat() {
   const theme = useTheme();
-  const {isLoggedIn, user} = useAuthContext();
   const {chatroomId} = useParams();
-  const {setSidebarToggled, sidebarToggled} = useOutletContext<SidebarContextType>();
-  const navigate = useNavigate();
 
   return (
     <div css={[chatStyles, colors(theme)]}>
@@ -50,6 +48,7 @@ function Chat() {
           </Link>}
         </Header>
         {chatroomId && <ChatMessages chatroomId={chatroomId} />}
+        {chatroomId && <div>Chatroom Members</div>}
         <MessageInput />
     </div>
   )
