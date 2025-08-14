@@ -2,19 +2,20 @@ import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessages from "../../../components/ChatMessages";
 import MessageInput from "../../../components/MessageInput";
 import { useParams } from "react-router";
+import MemberList from "../../../components/MemberList";
 import AuthGuard from "../../../components/AuthGuard";
 
 const chatStyles = css({
-    minHeight: "100%",
-    flexGrow: 1,
-    display: "grid",
-    gridTemplateRows: "90% 10%",
-    gridTemplateColumns: "85% 15%",
+  minHeight: "100%",
+  flexGrow: 1,
+  display: "grid",
+  gridTemplateRows: "90% 10%",
+  gridTemplateColumns: "85% 15%",
 });
 
-const colors = (theme: Theme) => ({
-    backgroundColor: theme.colors.brown,
-    color: theme.colors.dark_grey,
+const colors = (theme: Theme) => css({
+  backgroundColor: theme.colors.brown,
+  color: theme.colors.dark_grey,
 });
 
 function Chat() {
@@ -24,9 +25,9 @@ function Chat() {
   return (
     <div css={[chatStyles, colors(theme)]}>
         <AuthGuard />
-        {chatroomId && <ChatMessages chatroomId={chatroomId} />}
-        {chatroomId && <div>Chatroom Members</div>}
-        <MessageInput />
+      {chatroomId && <ChatMessages chatroomId={chatroomId} />}
+      {chatroomId && <MemberList />}
+      <MessageInput />
     </div>
   )
 }
