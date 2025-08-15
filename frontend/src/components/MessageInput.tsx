@@ -1,20 +1,18 @@
 import { css, useTheme, type Theme } from "@emotion/react";
-import useAuthContext from "../hooks/useAuthContext";
-import useWebSocketContext from "../hooks/useWebSocketContext";
-import { useRef } from "react";
-import { useParams } from "react-router";
+import React from "react";
 
 const styles = css({
     minHeight: "100%",
     width: "100%",
     display: "flex",
+    justifyContent: "center",
     alignItems: "center",
-    padding: "0 20px",
 
     form: {
-        width: "100%",
+        width: "97%",
+        maxHeight: "75%",
         display: "flex",
-        justifyContent: "space-around",
+        justifyContent: "space-between",
         alignItems: "center",
         border: 0,
         padding: "6px",
@@ -23,7 +21,7 @@ const styles = css({
 
     input: {
         width: "95%",
-        padding: "8px 16px",
+        maxHeight: "100%",
         backgroundColor: "inherit",
         border: 0, 
         outlineStyle: "none",
@@ -35,7 +33,8 @@ const styles = css({
         borderRadius: "4px",
         padding: "4px",
         backgroundColor: "inherit",
-        border: 0
+        border: 0,
+        transition: "background-color 0.1s ease",
     },
 
     'button:hover': {
@@ -67,29 +66,18 @@ const colors = (theme: Theme) => css({
     }
 });
 
-const MessageInput = () => {
+interface MessageInputProps {
+    handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+    messageInputRef: React.RefObject<HTMLInputElement | null>;
+}
+
+const MessageInput = ({handleSubmit, messageInputRef}: MessageInputProps) => {
     const theme = useTheme();
-    const {isLoggedIn} = useAuthContext();
-    const {ws} = useWebSocketContext();
-    const messageInput = useRef<HTMLInputElement>(null);
-    const {chatroomId} = useParams();
-    
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-
-        if (!isLoggedIn || !messageInput.current || !chatroomId) return;
-
-        ws?.send(JSON.stringify({
-            type: "message", 
-            content: messageInput.current.value,
-            chatroomId,
-        }));
-    };
 
     return (
         <div css={[styles, colors(theme)]}>
-            <form onSubmit={handleSubmit} id="message-form">
-                <input ref={messageInput} type="text" placeholder="Message..." />
+            <form onSubmit={(event) => handleSubmit(event)} id="message-form">
+                <input ref={messageInputRef} type="text" placeholder="Message..." />
                 <button type="submit" form="message-form">Send</button>
             </form>
         </div>
