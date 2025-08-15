@@ -18,9 +18,9 @@ export const startWSS = (server: Server<typeof IncomingMessage, typeof ServerRes
         ws.on('close', () => {
             console.log('Client disconnected');
             if (socketMap.hasValue(ws)) {
-                const user = socketMap.getByValue(ws);
+                const userId = socketMap.getByValue(ws);
                 socketMap.deleteByValue(ws);
-                console.log('socket logged out: ' + user?.userId + ', isGuest: ' + user?.isUser);
+                console.log('socket logged out: ' + userId);
             }
         });
     });

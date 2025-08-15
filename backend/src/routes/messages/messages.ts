@@ -36,11 +36,6 @@ messagesRouter.get("/:chatroomId/:getBefore", async (req: Request, res: Response
                         username: true
                     }
                 },
-                senderGuest: {
-                    select: {
-                        username: true
-                    }
-                },
             },
             orderBy: {
                 createdAt: 'asc'

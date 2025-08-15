@@ -47,4 +47,4 @@ export class BidirectionalMap<T1, T2> {
     }
 }
 
-export const socketMap = new BidirectionalMap<{userId: string, isUser: boolean}, WebSocket>();
+export const socketMap = new BidirectionalMap<string, WebSocket>();

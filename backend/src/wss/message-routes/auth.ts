@@ -19,14 +19,14 @@ export const authenticateSocket = (message: any, ws: WebSocket) => {
             return;
         }
 
-        if (!decoded.userId || !decoded.isUser) {
+        if (!decoded.userId) {
             ws.send(JSON.stringify({error: "Error decrypting token"}));
             return;
         }
 
-        const {userId, isUser} = decoded;
+        const {userId} = decoded;
 
-        console.log("websocket jwt verified: " + userId + ", isUser: " + isUser);
-        socketMap.set({userId, isUser}, ws);
+        console.log("websocket jwt verified: " + userId);
+        socketMap.set(userId, ws);
     })
 }

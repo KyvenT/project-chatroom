@@ -17,17 +17,14 @@ model Chatroom {
   createdAt           DateTime              @default(now())
   messages            Message[]           
   members             ChatroomMember[]      
-  invites             Invite[]             
-  guests              Guest[]               
+  invites             Invite[]                          
 }
 
 model Message {
   id              String      @id @default(uuid())
   content         String
-  senderUser      User?       @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
-  senderUserId    String?
-  senderGuest     Guest?      @relation(fields: [senderGuestId], references: [id], onDelete: SetNull)
-  senderGuestId   String?
+  senderUser      User        @relation(fields: [senderUserId], references: [id], onDelete: SetDefault)
+  senderUserId    String      @default("b532df46-e953-415c-b9c0-5489ce777e70") // deleted user ID
   chatroom        Chatroom    @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId      String
   createdAt       DateTime    @default(now())
@@ -41,21 +38,12 @@ model User {
   passwordHash      String
   status            Status      @default(ONLINE)
   createdAt         DateTime    @default(now())
+  isGuest           Boolean     @default(false)
   sentMessages      Message[]
   joinedChatrooms   ChatroomMember[]
   ownedChatrooms    Chatroom[]
   sentInvites       Invite[]    @relation("SentInvite")
   receivedInvites   Invite[]    @relation("ReceivedInvite")
-}
-
-model Guest {
-  id            String      @id @default(uuid())
-  username      String      @unique 
-  status        Status      @default(ONLINE)
-  createdAt     DateTime    @default(now())
-  sentMessages  Message[]
-  chatroom      Chatroom    @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
-  chatroomId    String   
 }
 
 model ChatroomMember {
