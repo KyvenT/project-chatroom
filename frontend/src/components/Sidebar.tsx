@@ -5,6 +5,7 @@ import useAuthContext from "../hooks/useAuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 import type { Chatroom } from "../types/Chatroom";
+import { HomeIcon } from "lucide-react";
 
 const sidebarStyles = css({
     display: "flex",
@@ -14,17 +15,43 @@ const sidebarStyles = css({
 
     ul: {
         listStyle: "none",
-        height: "100%",
-        padding: 0,
+        flex: 1,
+        padding: "20px 10px",
         display: "flex",
         flexDirection: "column",
         gap: "8px",
+    },
+
+    ".homeBtnContainer": {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "",
+    }, 
+
+    ".homeBtn": {
+    },
+
+    ".homeIcon": {
+        width: "3rem",
+        height: "3rem",
     }
 })
 
-const colors = (theme: Theme) => ({
+const colors = (theme: Theme) => css({
     backgroundColor: theme.colors.brown,
     color: theme.colors.white,
+
+    ".homeBtnContainer": {
+
+    }, 
+
+    ".homeBtn": {
+        color: theme.colors.dark_grey,
+    },
+
+    ".homeBtn:hover": {
+        color: theme.colors.light_grey,
+    }
 });
 
 const Sidebar = () => {
@@ -55,8 +82,10 @@ const Sidebar = () => {
 
 
     return <div css={[sidebarStyles, colors(theme)]}>
-        <Link to="/chat">Home</Link>
-        <h3>Chats</h3>
+        <div className="homeBtnContainer">
+            <Link to="/chat" className="homeBtn"><HomeIcon className="homeIcon" /></Link>
+        </div>
+        <h2>Chats</h2>
         <ul>
             {data && data.map((chatroom) => {
                 return (
