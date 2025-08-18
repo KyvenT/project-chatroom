@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import useAuthContext from "../hooks/useAuthContext";
 import type { ChatroomMember } from "../types/ChatroomMember";
 import { useParams } from "react-router";
@@ -17,7 +16,7 @@ const MemberList = () => {
 
     const { data } = useCustomQuery<ChatroomMember>(
         [user.token, chatroomId], "member", chatroomId);
-        
+
     const memberStatusMap = useMemo(() => {
             const map = new BidirectionalGroupedMap<{userId: string, username: string}, string>()
             data?.forEach((chatMember) => 

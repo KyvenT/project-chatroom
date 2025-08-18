@@ -1,6 +1,5 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessage from "./ChatMessage";
-import { useQuery } from "@tanstack/react-query";
 import useAuthContext from "../hooks/useAuthContext";
 import type { Message } from "../types/Message";
 import { useCustomQuery } from "../hooks/useCustomQuery";

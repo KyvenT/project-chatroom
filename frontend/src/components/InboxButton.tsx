@@ -2,10 +2,9 @@ import useAuthContext from "../hooks/useAuthContext";
 import { useCustomQuery } from "../hooks/useCustomQuery";
 import type { Invite } from "../types/Invite";
 import DropdownButton from "./DropdownButton";
-import { useQuery } from "@tanstack/react-query";
 
 const InboxButton = () => {
-    const { isLoggedIn, user } = useAuthContext();
+    const { user } = useAuthContext();
     const { data } = useCustomQuery<Invite>(["inbox", user.token], "invite");
 
     const handleInviteResponse = (isAccepted: boolean) => {

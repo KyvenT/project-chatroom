@@ -2,7 +2,6 @@ import { css, useTheme, type Theme } from "@emotion/react";
 import SidebarChatroomButton from "./SidebarChatroomButton";
 import NewChatButton from "./NewChatButton";
 import useAuthContext from "../hooks/useAuthContext";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 import type { Chatroom } from "../types/Chatroom";
 import { HomeIcon } from "lucide-react";

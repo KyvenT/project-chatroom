@@ -1,4 +1,4 @@
-import { useQuery, type UndefinedInitialDataOptions } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import useAuthContext from "./useAuthContext";
 
 export const ResourceType = {
@@ -9,7 +9,7 @@ export const ResourceType = {
     MEMBER: "member",
 } as const;
 
-export const useCustomQuery = <T>(queryKeys: string[], resource: string, chatroomId?: string, getBefore?: Date, queryOptions?: string[]) => {
+export const useCustomQuery = <T>(queryKeys: string[], resource: string, chatroomId?: string, getBefore?: Date, queryOptions?: {}) => {
     const { isLoggedIn, user } = useAuthContext();
 
     let fetchUrl = "";
@@ -56,5 +56,6 @@ export const useCustomQuery = <T>(queryKeys: string[], resource: string, chatroo
             return await res.json() as T[];
         },
         staleTime: Infinity,
+        ...queryOptions,
     })
 }
