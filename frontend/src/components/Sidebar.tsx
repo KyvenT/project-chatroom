@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 import type { Chatroom } from "../types/Chatroom";
 import { HomeIcon } from "lucide-react";
+import { useCustomQuery } from "../hooks/useCustomQuery";
 
 const sidebarStyles = css({
     display: "flex",
@@ -58,28 +59,9 @@ const Sidebar = () => {
     const theme = useTheme();
     const { isLoggedIn, user } = useAuthContext();
     const {chatroomId} = useParams();
-    const { data } = useQuery({
-        queryKey: ["sidebar", isLoggedIn],
-        queryFn: async () => {
-            if (!isLoggedIn) {
-                return [];
-            }
-            console.log("fetching chatrooms");
-            const res = await fetch("http://localhost:3000/api/chatroom/me", {
-                headers: {
-                    "Content-Type": "application/json",
-                    "authorization": "Bearer " + user.token
-                }
-            });
-            if (!res.ok) {
-                console.error(res);
-                return [];
-            }
-            return await res.json() as Chatroom[];
-        },
-        staleTime: Infinity
-    })
-
+    const { data } = useCustomQuery<Chatroom>(
+        ["chatrooms", isLoggedIn ? user.userId : "not logged in"],
+        "chatroom");
 
     return <div css={[sidebarStyles, colors(theme)]}>
         <div className="homeBtnContainer">

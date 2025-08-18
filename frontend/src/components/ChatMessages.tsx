@@ -3,6 +3,7 @@ import ChatMessage from "./ChatMessage";
 import { useQuery } from "@tanstack/react-query";
 import useAuthContext from "../hooks/useAuthContext";
 import type { Message } from "../types/Message";
+import { useCustomQuery } from "../hooks/useCustomQuery";
 
 interface ChatMessageProps {
     chatroomId: string;
@@ -23,26 +24,11 @@ const ChatMessages = ({chatroomId}: ChatMessageProps) => {
     const theme = useTheme();
     const {user, isLoggedIn} = useAuthContext();
     const getBefore = new Date();
-    const { data } = useQuery({
-        queryKey: ["messages", chatroomId, isLoggedIn],
-        queryFn: async () => {
-            if (!isLoggedIn) return [];
-            console.log("fetching messages");
-            const res = await fetch("http://localhost:3000/api/messages/" + chatroomId + "/" + getBefore.toISOString(), {
-                headers: {
-                    "Content-Type": "application/json",
-                    "authorization": "Bearer " + user.token,
-                },
-            });
-            if (!res.ok) {
-                console.error(res);
-                return [];
-            }
-            console.log(res);
-            return await res.json() as Message[];
-        }, 
-        staleTime: Infinity
-    })
+    const { data } = useCustomQuery<Message>(
+        ["messages", chatroomId, isLoggedIn ? user.userId : "not logged in"],
+        "message",
+        chatroomId,
+        getBefore);
     console.log("messages: " + data);
 
     return (

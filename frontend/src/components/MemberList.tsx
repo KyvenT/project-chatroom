@@ -5,31 +5,19 @@ import { useParams } from "react-router";
 import { useMemo } from "react";
 import { BidirectionalGroupedMap } from "../lib/bidirectionGroupedMap";
 import MemberStatusList from "./MemberStatusList";
+import { useCustomQuery } from "../hooks/useCustomQuery";
 
 const MemberList = () => {
     const {user, isLoggedIn} = useAuthContext();
     const {chatroomId} = useParams();
-    const { data } = useQuery({
-        queryKey: ["inbox", user.token, chatroomId],
-        queryFn: async () => {
-            console.log("fetching invites");
-            if (!isLoggedIn || !chatroomId) {
-                return [];
-            }
-            const res = await fetch("http://localhost:3000/api/members/" + chatroomId, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "authorization": "Bearer " + user.token
-                }
-            });
-            if (!res.ok) {
-                console.error(res);
-                return [];
-            }
-            return await res.json() as ChatroomMember[];
-        },
-        staleTime: Infinity,
-    })
+
+    if (!isLoggedIn || !chatroomId) {
+        return <p>Please log in to see the member list.</p>;
+    }
+
+    const { data } = useCustomQuery<ChatroomMember>(
+        [user.token, chatroomId], "member", chatroomId);
+        
     const memberStatusMap = useMemo(() => {
             const map = new BidirectionalGroupedMap<{userId: string, username: string}, string>()
             data?.forEach((chatMember) => 
