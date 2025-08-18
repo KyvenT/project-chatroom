@@ -15,7 +15,7 @@ const MemberList = () => {
     }
 
     const { data } = useCustomQuery<ChatroomMember>(
-        [user.token, chatroomId], "member", chatroomId);
+        [user.token, chatroomId], "member", {chatroomId});
 
     const memberStatusMap = useMemo(() => {
             const map = new BidirectionalGroupedMap<{userId: string, username: string}, string>()

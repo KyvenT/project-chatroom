@@ -11,3 +11,9 @@ export interface Invite {
     chatroomId: string;
     sentAt: Date;
 }
+
+export interface InviteResponse {
+    chatroomId: string;
+    joinedAt: Date;
+    memberId: string;
+}

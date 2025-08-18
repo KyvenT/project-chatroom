@@ -25,9 +25,7 @@ const ChatMessages = ({chatroomId}: ChatMessageProps) => {
     const getBefore = new Date();
     const { data } = useCustomQuery<Message>(
         ["messages", chatroomId, isLoggedIn ? user.userId : "not logged in"],
-        "message",
-        chatroomId,
-        getBefore);
+        "message", { chatroomId, getBefore });
     console.log("messages: " + data);
 
     return (

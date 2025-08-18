@@ -69,7 +69,7 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
     }
 })
 
-invitesRouter.post("/accept", async (req: Request, res: Response) => {
+invitesRouter.patch("/accept", async (req: Request, res: Response) => {
     const { inviteId } = req.body;
     const userId = req.userId;
 
