@@ -30,9 +30,6 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
                     }
                 }
             },
-            omit: {
-                status: true
-            }
         })
 
         res.status(201).json(invites);
@@ -96,7 +93,7 @@ invitesRouter.patch("/accept", async (req: Request, res: Response) => {
             }
         });
 
-        res.status(200).json({message: "Invite accepted", join});
+        res.status(200).json({message: "Invite accepted", ...join});
         console.log("invite accepted");
         return;
     } catch (err: any) {
