@@ -3,13 +3,9 @@ export interface Message {
     createdAt: string;
     chatroomId: string;
     content: string;
-    senderUserId: string | null;
-    senderGuestId: string | null;
+    senderUserId: string;
     senderUser: {
         username: string;
-    } | null;
-    senderGuest: {
-        username: string;
-    } | null;
+    };
     editedAt: Date | null;
 }

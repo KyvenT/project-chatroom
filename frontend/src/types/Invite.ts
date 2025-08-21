@@ -10,6 +10,7 @@ export interface Invite {
     receiverId: string;
     chatroomId: string;
     sentAt: Date;
+    status: "PENDING" | "ACCEPTED";
 }
 
 export interface InviteResponse {
