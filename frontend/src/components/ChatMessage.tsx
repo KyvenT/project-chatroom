@@ -1,6 +1,7 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 
 interface ChatMessageProps {
+    id: string;
     content: string;
     sender: string;
     timestamp: Date;
@@ -20,11 +21,11 @@ const colors = (theme: Theme) => css({
     borderBottom: `1px solid ${theme.colors.dark_grey}`,
 });
 
-const ChatMessage = ({content, sender, timestamp}: ChatMessageProps) => {
+const ChatMessage = ({id, content, sender, timestamp}: ChatMessageProps) => {
     const theme = useTheme();
 
     return (
-        <div css={[styles, colors(theme)]}>
+        <div key={id} css={[styles, colors(theme)]}>
             <div>
                 <strong>{sender}</strong> 
                 <span>{new Intl.DateTimeFormat('en-US', {

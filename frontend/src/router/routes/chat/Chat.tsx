@@ -1,12 +1,13 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessages from "../../../components/ChatMessages";
 import MessageInput from "../../../components/MessageInput";
-import { useParams } from "react-router";
+import { useOutletContext, useParams } from "react-router";
 import MemberList from "../../../components/MemberList";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useRef } from "react";
-import AuthGuard from "../../../components/AuthGuard";
+import type { ChatLayoutContext } from "./ChatLayout";
+// import AuthGuard from "../../../components/AuthGuard";
 
 const chatStyles = css({
   minHeight: "100%",
@@ -28,7 +29,6 @@ function Chat() {
   const {ws} = useWebSocketContext();
   const messageInput = useRef<HTMLInputElement>(null);
 
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
@@ -43,7 +43,7 @@ function Chat() {
 
   return (
     <div css={[chatStyles, colors(theme)]}>
-        <AuthGuard />
+      {/*<AuthGuard />*/}
       {chatroomId && <ChatMessages chatroomId={chatroomId} />}
       {chatroomId && <MemberList />}
       <MessageInput messageInputRef={messageInput} handleSubmit={handleSubmit} />
