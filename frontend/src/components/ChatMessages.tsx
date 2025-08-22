@@ -3,9 +3,7 @@ import ChatMessage from "./ChatMessage";
 import useAuthContext from "../hooks/useAuthContext";
 import type { Message } from "../types/Message";
 import { useCustomQuery } from "../hooks/useCustomQuery";
-import type { ChatLayoutContext } from "../router/routes/chat/ChatLayout";
-import { useOutletContext } from "react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import useWebSocketContext from "../hooks/useWebSocketContext";
 
 interface ChatMessageProps {
@@ -31,7 +29,7 @@ const ChatMessages = ({chatroomId}: ChatMessageProps) => {
     const { data } = useCustomQuery<Message>(
         ["messages", chatroomId, isLoggedIn ? user.userId : "not logged in"],
         "message", { chatroomId, getBefore, queryOptions: { refetchOnMount: false } });
-    const {wsEventQueues, setWsEventQueues, clearMessageQueue} = useWebSocketContext();
+    const {wsEventQueues, clearMessageQueue} = useWebSocketContext();
     const [messages, setMessages] = useState<Message[]>([]);
 
     useEffect(() => {

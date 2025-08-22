@@ -1,12 +1,11 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessages from "../../../components/ChatMessages";
 import MessageInput from "../../../components/MessageInput";
-import { useOutletContext, useParams } from "react-router";
+import { useParams } from "react-router";
 import MemberList from "../../../components/MemberList";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useRef } from "react";
-import type { ChatLayoutContext } from "./ChatLayout";
 // import AuthGuard from "../../../components/AuthGuard";
 
 const chatStyles = css({

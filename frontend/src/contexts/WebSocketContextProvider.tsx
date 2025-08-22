@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import type { Message } from "../types/Message";
 import type { wsEventQueuesType } from "../ws-router/ws-message-router";
+import type { Invite } from "../types/Invite";
 
 interface WebSockContextProviderProps {
     children: React.ReactNode;
@@ -21,6 +22,7 @@ export default function WebSocketContextProvider({ children }: WebSockContextPro
     const [ws, setWs] = useState<WebSocket | null>(null);
     const [wsEventQueues, setWsEventQueues] = useState<wsEventQueuesType>({
         messageQueue: [] as Message[],
+        inviteQueue: [] as Invite[],
     });
 
     useEffect(() => {
@@ -37,8 +39,8 @@ export default function WebSocketContextProvider({ children }: WebSockContextPro
         }
         return () => {
             if (ws) {
-            ws.close();
-            console.log('WebSocket connection closed');
+                ws.close();
+                console.log('WebSocket connection closed');
             }
         };
     }, [ws]);
@@ -64,6 +66,7 @@ export default function WebSocketContextProvider({ children }: WebSockContextPro
     }
 
     const clearMessageQueue = () => {
+        console.log("Clearing message queue");
         setWsEventQueues((prev) => ({...prev, messageQueue: [] as Message[]}));
     }
 

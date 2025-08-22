@@ -1,34 +1,41 @@
+import type { Invite } from "../types/Invite";
 import type { Message } from "../types/Message";
+import { handleChatMessage } from "./ws-routes/chat-message";
 
 export interface wsEventQueuesType {
-  messageQueue: Message[],
+    messageQueue: Message[],
+    inviteQueue: Invite[],
 }
 
 export const wsMessageRouter = (eventQueues: wsEventQueuesType, 
             setEventQueues: React.Dispatch<React.SetStateAction<wsEventQueuesType>>,
             message: any) => {
-
+          
     switch (message.type) {
         case "auth":
             console.log("Authentication message received");
             break;
         case "chat-message":
-            const newMessage: Message = {
-                id: message.message.id,
-                content: message.message.content,
-                chatroomId: message.message.chatroomId,
-                senderUserId: message.message.senderUserId,
-                createdAt: message.message.createdAt,
-                senderUser: {
-                    username: message.message.senderUser.username,
+            handleChatMessage(setEventQueues, message.message);
+            break;
+        case "invite":
+            const newInvite: Invite = {
+                id: message.invite.id,
+                chatroomId: message.invite.chatroomId,
+                senderId: message.invite.senderUserId,
+                receiverId: message.invite.recipientUserId,
+                sentAt: message.invite.createdAt,
+                sender: {
+                    username: message.invite.senderUser.username,
                 },
-                editedAt: message.message.editedAt,
+                chatroom: {
+                    title: message.invite.chatroom.title,
+                },
+                status: message.invite.status,
             };
-            const queue = eventQueues.messageQueue;
-            queue.push(newMessage);
             setEventQueues((prevEventQueues) => ({
                 ...prevEventQueues,
-                messageQueue: queue
+                inviteQueue: [...prevEventQueues.inviteQueue, newInvite]
             }));
             break;
         default:

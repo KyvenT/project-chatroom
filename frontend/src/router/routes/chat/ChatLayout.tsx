@@ -9,8 +9,7 @@ import InboxButton from "../../../components/InboxButton";
 import { ChevronFirst, MenuIcon } from "lucide-react";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
-import { useEffect, useState } from "react";
-import type { Message } from "../../../types/Message";
+import { useEffect } from "react";
 import {wsMessageRouter, type wsEventQueuesType} from "../../../ws-router/ws-message-router"
 
 
@@ -41,17 +40,14 @@ function ChatLayout() {
   const navigate = useNavigate();
   const {isLoggedIn, user} = useAuthContext();
   const {chatroomId} = useParams();
-  const {ws} = useWebSocketContext();
-  const {wsEventQueues, setWsEventQueues} = useWebSocketContext();
+  const {wsEventQueues, setWsEventQueues, ws} = useWebSocketContext();
   
   useEffect(() => {
     if (ws) {
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
         console.log("Message from server: ", message);
-        console.log("Event Queues before: ", wsEventQueues);
         wsMessageRouter(wsEventQueues, setWsEventQueues, message);
-        console.log("Event Queues after: ", wsEventQueues);
       }
     }
 
@@ -81,8 +77,7 @@ function ChatLayout() {
             </Link>}
           </Header>
           <div className="outletWrapper">
-            <Outlet context={
-              {wsEventQueues, setWsEventQueues} satisfies ChatLayoutContext} />
+            <Outlet />
           </div>
         </div>
     </div>
