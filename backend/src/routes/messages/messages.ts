@@ -38,7 +38,7 @@ messagesRouter.get("/:chatroomId/:getBefore", async (req: Request, res: Response
                 },
             },
             orderBy: {
-                createdAt: 'asc'
+                createdAt: 'desc'
             }, 
             take: 25,
         })

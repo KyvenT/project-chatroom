@@ -3,17 +3,14 @@ import ChatMessage from "./ChatMessage";
 import useAuthContext from "../hooks/useAuthContext";
 import type { Message } from "../types/Message";
 import { useCustomQuery } from "../hooks/useCustomQuery";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useWebSocketContext from "../hooks/useWebSocketContext";
-
-interface ChatMessageProps {
-    chatroomId: string;
-}
+import { useParams } from "react-router";
 
 const styles = css({
     minHeight: "100%",
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column-reverse",
     overflowY: "auto",
 });
 
@@ -22,30 +19,42 @@ const colors = (theme: Theme) => ({
     color: theme.colors.white,
 });
 
-const ChatMessages = ({chatroomId}: ChatMessageProps) => {
+const ChatMessages = () => {
     const theme = useTheme();
     const {user, isLoggedIn} = useAuthContext();
-    const getBefore = new Date();
-    const { data } = useCustomQuery<Message>(
-        ["messages", chatroomId, isLoggedIn ? user.userId : "not logged in"],
-        "message", { chatroomId, getBefore, queryOptions: { refetchOnMount: false } });
+    const {chatroomId} = useParams();
+    if (!chatroomId) {
+        console.error("Chatroom ID is not defined");
+        return null;
+    }
+    const getBefore = useMemo(() => new Date(), [chatroomId]);
+    const { data, refetch } = useCustomQuery<Message>(
+        [chatroomId, isLoggedIn ? user.userId : "", getBefore.toISOString()],
+        "message", { chatroomId, getBefore, queryOptions: { enabled: false } });
     const {wsEventQueues, clearMessageQueue} = useWebSocketContext();
     const [messages, setMessages] = useState<Message[]>([]);
 
     useEffect(() => {
-        const wsMessages = wsEventQueues.messageQueue
+        if (data) {
+            setMessages(data);
+        } else {
+            refetch();
+        }
+    }, [data]);
+
+    useEffect(() => {
+        const wsMessages = wsEventQueues.messageQueue.filter(
+            (msg) => msg.chatroomId === chatroomId
+        )
         console.log(wsEventQueues.messageQueue.forEach(m => console.log(m)));
         console.log("wsMessages: ", wsMessages);
         if (wsMessages.length === 0) {
-            if (data && messages.length === 0) {
-                setMessages(data);
-            }
             console.log("No new ws messages");
             return;
         };
-        setMessages((prevMessages) => [...prevMessages, ...wsMessages]);
+        setMessages((prevMessages) => [...wsMessages, ...prevMessages]);
         clearMessageQueue();
-    }, [data, wsEventQueues]);
+    }, [wsEventQueues.messageQueue]);
 
     return (
         <div css={[styles, colors(theme)]}>
