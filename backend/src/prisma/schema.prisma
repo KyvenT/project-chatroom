@@ -24,9 +24,10 @@ model Message {
   id              String      @id @default(uuid())
   content         String
   senderUser      User        @relation(fields: [senderUserId], references: [id], onDelete: SetDefault)
-  senderUserId    String      @default("b532df46-e953-415c-b9c0-5489ce777e70") // deleted user ID
+  senderUserId    String      @default("b532df46-e953-415c-b9c0-5489ce777e70") // user ID to represent deleted users
   chatroom        Chatroom    @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId      String
+  notifications   Notification[]
   createdAt       DateTime    @default(now())
   editedAt        DateTime?
 }
@@ -44,6 +45,7 @@ model User {
   ownedChatrooms    Chatroom[]
   sentInvites       Invite[]    @relation("SentInvite")
   receivedInvites   Invite[]    @relation("ReceivedInvite")
+  notifications     Notification[]
 }
 
 model ChatroomMember {
@@ -57,15 +59,34 @@ model ChatroomMember {
 }
 
 model Invite {
-  id            String          @id @default(uuid())
-  sender        User            @relation("SentInvite", fields: [senderId], references: [id], onDelete: Cascade)
-  senderId      String
-  receiver      User            @relation("ReceivedInvite", fields: [receiverId], references: [id], onDelete: Cascade)
-  receiverId    String
-  chatroom      Chatroom        @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
-  chatroomId    String
-  status        InviteStatus    @default(PENDING)
-  sentAt        DateTime        @default(now())
+  id              String          @id @default(uuid())
+  sender          User            @relation("SentInvite", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId        String
+  receiver        User            @relation("ReceivedInvite", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId      String
+  chatroom        Chatroom        @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  chatroomId      String
+  notification    Notification    @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  notificationId  String          @unique
+  status          InviteStatus    @default(PENDING)
+  sentAt          DateTime        @default(now())
+}
+
+model Notification {
+  id          String      @id @default(uuid())
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  isRead      Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  type        NotificationType
+  invite      Invite?
+  message     Message?    @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId   String?
+}
+
+enum NotificationType {
+  MESSAGE
+  INVITE
 }
 
 enum Status {
