@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import { socketMap } from '../lib/socketMaps.js';
+import { socketMap, userActiveChatroomMap } from '../lib/socketMaps.js';
 import { IncomingMessage, Server, ServerResponse } from 'http';
 import { wsMessageRouter } from './router.js';
 
@@ -17,8 +17,12 @@ export const startWSS = (server: Server<typeof IncomingMessage, typeof ServerRes
         
         ws.on('close', () => {
             console.log('Client disconnected');
-            if (socketMap.hasValue(ws)) {
-                const userId = socketMap.getByValue(ws);
+            const userId = socketMap.getByValue(ws);
+
+            if (userId) {
+                if (userActiveChatroomMap.hasKey(userId)) {
+                    userActiveChatroomMap.deleteByKey(userId);
+                }
                 socketMap.deleteByValue(ws);
                 console.log('socket logged out: ' + userId);
             }

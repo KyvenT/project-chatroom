@@ -1,6 +1,7 @@
 enum WSMessageTypes {
     Auth = "auth",
     Message = "message",
+    UpdateActiveChatroom = "update-active-chatroom",
 }
 
 export interface AuthMessage {
@@ -11,5 +12,10 @@ export interface AuthMessage {
 export interface ChatMessage {
     type: WSMessageTypes.Message;
     content: string;
+    chatroomId: string;
+}
+
+export interface UpdateActiveChatroomMessage {
+    type: "update-active-chatroom";
     chatroomId: string;
 }

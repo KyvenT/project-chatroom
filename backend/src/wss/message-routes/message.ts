@@ -1,7 +1,7 @@
 import Prisma from "../../prisma/prisma.js";
 import WebSocket from "ws";
 import { ChatMessage } from "../../types/ws-messages.js";
-import { socketMap } from "../../lib/socketMaps.js";
+import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
 import type { Message } from "@prisma/client";
 
 const createMessage = async (userId: string, 
@@ -20,7 +20,7 @@ const createMessage = async (userId: string,
                     }
                 },
             },
-        }) as Message & {senderUser :{ username: string}};
+        }) as Message & {senderUser: { username: string}};
 
         ws.send(JSON.stringify({
             type: "feedback", 
@@ -39,15 +39,12 @@ const createMessage = async (userId: string,
 const sendToRecipients = async (userId: string,
         message: Message & {senderUser :{ username: string}}, ws: WebSocket) => {
     try {
-        const recipients = await Prisma.chatroomMember.findMany({
-            where: {
-                chatroomId: message.chatroomId
-            }
-        })
+        const activeRecipients = userActiveChatroomMap.getByValue(message.chatroomId);
 
-        recipients.forEach((recipient) => {
-            const recipientSocket = socketMap.getByKey(recipient.memberId);
+        activeRecipients?.forEach((activeUserId) => {
+            const recipientSocket = socketMap.getByKey(activeUserId);
             if (recipientSocket) {
+                console.log("Active user in chatroom " + message.chatroomId + ": " + activeUserId);
                 recipientSocket.send(JSON.stringify({
                     type: "chat-message",
                     message: {
@@ -62,7 +59,7 @@ const sendToRecipients = async (userId: string,
                         editedAt: message.editedAt,
                     }
                 }));
-            }
+            } 
         })
 
 
