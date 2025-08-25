@@ -8,10 +8,10 @@ import { corsPreflightMiddleware } from './middleware/corsPreflightMiddleware.js
 import { startWSS } from './wss/wss.js';
 
 const corsOptions = {
-  origin: ['http://127.0.0.1:5173'],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+    origin: ['http://127.0.0.1:5173'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }
 
 const app = express();
@@ -36,12 +36,12 @@ app.use('/api', apiRouter);
 
 // initial send of index.html
 app.get('/', (req, res) => {
-  console.log('Serving index.html');
-  res.sendFile(path.join(pathToStaticFiles, 'index.html'));
+    console.log('Serving index.html');
+    res.sendFile(path.join(pathToStaticFiles, 'index.html'));
 })
 
 const server = app.listen(env.SERVER_PORT, () => {
-  console.log(`Express server running on http://localhost:${env.SERVER_PORT}`)
+    console.log(`Express server running on http://localhost:${env.SERVER_PORT}`)
 });
 
 startWSS(server);

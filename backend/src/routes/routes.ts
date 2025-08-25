@@ -10,10 +10,10 @@ import { membersRouter } from "./members/members.js";
 const apiRouter = Router()
 
 apiRouter.use("/auth", authRouter)
-        .use("/chatroom", authMiddleware, chatroomRouter)
-        .use("/users", authMiddleware, usersRouter)
-        .use("/invite", authMiddleware, invitesRouter)
-        .use("/messages", authMiddleware, messagesRouter)
-        .use("/members", authMiddleware, membersRouter);
+    .use("/chatroom", authMiddleware, chatroomRouter)
+    .use("/users", authMiddleware, usersRouter)
+    .use("/invite", authMiddleware, invitesRouter)
+    .use("/messages", authMiddleware, messagesRouter)
+    .use("/members", authMiddleware, membersRouter);
 
 export default apiRouter;

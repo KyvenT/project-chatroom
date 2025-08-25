@@ -2,8 +2,9 @@ import jwt from "jsonwebtoken";
 import { socketMap } from "../../lib/socketMaps.js";
 import env from "../../env.js";
 import WebSocket from "ws";
+import { AuthMessage } from "../../types/ws-messages.js";
 
-export const authenticateSocket = (message: any, ws: WebSocket) => {
+export const authenticateSocket = (message: AuthMessage, ws: WebSocket) => {
     console.log("currently authenticated websockets: ");
     socketMap.forEach((value, key) => {
         console.log(key + ": " + value);

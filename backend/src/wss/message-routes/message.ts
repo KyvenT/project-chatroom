@@ -3,6 +3,7 @@ import WebSocket from "ws";
 import { ChatMessage } from "../../types/ws-messages.js";
 import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
 import type { Message } from "@prisma/client";
+import { handleNewNotification } from "../notification.js";
 
 const createMessage = async (userId: string, 
     message: ChatMessage, ws: WebSocket): Promise<Message & {senderUser :{ username: string}} | undefined> => {
@@ -62,6 +63,22 @@ const sendToRecipients = async (userId: string,
             } 
         })
 
+        const recipients = await Prisma.chatroomMember.findMany({
+            where: {
+                chatroomId: message.chatroomId,
+            },
+            select: { memberId: true },
+        });
+        const nonActiveRecipients = new Set(recipients);
+        nonActiveRecipients.forEach((activeUserId) => {
+            if (activeRecipients?.has(activeUserId.memberId)) {
+                nonActiveRecipients.delete(activeUserId);
+            }
+        })
+
+        nonActiveRecipients.forEach((recipient) => {
+            handleNewNotification("MESSAGE", recipient.memberId, {message});
+        })
 
     } catch (err) {
         console.error(err);

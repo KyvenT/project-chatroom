@@ -1,5 +1,6 @@
 import Prisma from "../../prisma/prisma.js";
 import { Request, Response, Router } from "express";
+import { createNotification, sendNotification } from "../../wss/notification.js";
 
 export const invitesRouter = Router();
 
@@ -50,13 +51,17 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
     }
 
     try {
+        const notification = await createNotification("INVITE", receiverId);
+        if (!notification) throw new Error("Failed to create notification for invite");
         const invite = await Prisma.invite.create({
             data: {
                 senderId,
                 receiverId,
-                chatroomId
+                chatroomId,
+                notificationId: notification.id,
             }
         })
+        sendNotification(notification);
 
         res.status(201).json(invite);
         return;
