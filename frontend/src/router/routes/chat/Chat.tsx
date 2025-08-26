@@ -5,7 +5,7 @@ import { useParams } from "react-router";
 import MemberList from "../../../components/MemberList";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 // import AuthGuard from "../../../components/AuthGuard";
 
 const chatStyles = css({
@@ -27,6 +27,15 @@ function Chat() {
     const {isLoggedIn} = useAuthContext();
     const {ws} = useWebSocketContext();
     const messageInput = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isLoggedIn && ws && chatroomId) {
+            ws.send(JSON.stringify({
+                type: "update-active-chatroom",
+                chatroomId,
+            }))
+        }
+    }, [isLoggedIn, ws, chatroomId]);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
