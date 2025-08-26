@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import useAuthContext from "./useAuthContext";
 import type { UserAuth } from "../types/User";
 
@@ -34,18 +34,15 @@ const fetchWithBody = (fetchUrl: string, method: string, user: UserAuth, reqBody
 
 const query = <T>(fetchUrl: string, method: string, 
     user: UserAuth, isLoggedIn: boolean, body: {} = {}, queryKeys: string[], queryOptions?: {}) => {
-    return useQuery({
+    if (method === "GET") {
+        return useQuery({
             queryKey: ["customQuery", ...queryKeys],
             queryFn: async () => {
                 if (!isLoggedIn) {
                     return [];
                 }
-                let res: Response;
-                if (Object.keys(body).length === 0) {
-                    res = await fetchNoBody(fetchUrl, method, user);
-                } else {
-                    res = await fetchWithBody(fetchUrl, method, user, body);
-                }
+                let res = await fetchNoBody(fetchUrl, method, user);
+                
                 if (!res.ok) {
                     console.error(res);
                     return [];
@@ -55,7 +52,25 @@ const query = <T>(fetchUrl: string, method: string,
             staleTime: Infinity,
             ...queryOptions,
         })
+    } else {
+        return useMutation({
+            mutationKey: ["customQuery", ...queryKeys],
+            mutationFn: async () => {
+                if (!isLoggedIn) {
+                    return [];
+                }
+                let res = await fetchWithBody(fetchUrl, method, user, body);
+                
+                if (!res.ok) {
+                    console.error(res);
+                    return [];
+                }
+                return await res.json() as T[];
+            },
+            ...queryOptions,
+        })
     }
+}
 
 export const useCustomQuery = <T>(queryKeys: string[], 
     resource: string, 
@@ -69,9 +84,11 @@ export const useCustomQuery = <T>(queryKeys: string[],
     let fetchUrl = "";
     console.log("fetching " + resource);
     switch (resource) {
+        // fetch invites for the logged in user
         case ResourceType.INVITE:
             fetchUrl = "http://localhost:3000/api/invite/me";
             break;
+        // respond to an invite (accept or reject)
         case ResourceType.INVITE_RESPONSE:
             if (!inviteAccepted || !inviteId) {
                 console.error("need id and response to respond to invites");
@@ -82,18 +99,22 @@ export const useCustomQuery = <T>(queryKeys: string[],
                 "http://localhost:3000/api/invite/delete";
             reqBody = { inviteId };
             break;
+        // get joined chatrooms for the logged in user
         case ResourceType.CHATROOM:
             fetchUrl = "http://localhost:3000/api/chatroom/me";
             break;
+        // get info for the logged in user
         case ResourceType.USER:
             fetchUrl = "http://localhost:3000/api/user/me";
             break;
+        // get message history for a chatroom before date time
         case ResourceType.MESSAGE:
             if (!chatroomId || !getBefore) {
                 console.error("Chatroom ID and getBefore date are required to fetch messages");
             }
             fetchUrl = "http://localhost:3000/api/messages/" + chatroomId + "/" + getBefore?.toISOString();
             break;
+        // get members of a chatroom
         case ResourceType.MEMBER:
             if (!chatroomId) {
                 console.error("Chatroom ID is required to fetch chatroom members");
