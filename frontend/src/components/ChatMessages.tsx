@@ -3,7 +3,7 @@ import ChatMessage from "./ChatMessage";
 import useAuthContext from "../hooks/useAuthContext";
 import type { Message } from "../types/Message";
 import { useCustomQuery } from "../hooks/useCustomQuery";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useWebSocketContext from "../hooks/useWebSocketContext";
 import { useParams } from "react-router";
 
@@ -12,6 +12,7 @@ const styles = css({
     display: "flex",
     flexDirection: "column-reverse",
     overflowY: "auto",
+    scrollBehavior: "smooth",
 });
 
 const colors = (theme: Theme) => ({
@@ -33,6 +34,12 @@ const ChatMessages = () => {
         "message", { chatroomId, getBefore, queryOptions: { enabled: false } });
     const {wsEventQueues, clearMessageQueue} = useWebSocketContext();
     const [messages, setMessages] = useState<Message[]>([]);
+    const chatRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!chatRef.current) return;
+        chatRef.current.scrollTop = chatRef.current?.scrollHeight;
+    }, [])
 
     useEffect(() => {
         if (data) {
@@ -57,7 +64,7 @@ const ChatMessages = () => {
     }, [wsEventQueues.messageQueue]);
 
     return (
-        <div css={[styles, colors(theme)]}>
+        <div ref={chatRef} css={[styles, colors(theme)]}>
             {messages && messages.map((message) => {
                 return (
                     <ChatMessage 
