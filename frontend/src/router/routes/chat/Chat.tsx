@@ -17,7 +17,7 @@ const chatStyles = css({
 });
 
 const colors = (theme: Theme) => css({
-    backgroundColor: theme.colors.brown,
+    backgroundColor: theme.colors.black,
     color: theme.colors.dark_grey,
 });
 
@@ -54,10 +54,10 @@ function Chat() {
 
     return (
         <div css={[chatStyles, colors(theme)]}>
-        {/*<AuthGuard />*/}
-        {chatroomId && <ChatMessages />}
-        {chatroomId && <MemberList />}
-        <MessageInput messageInputRef={messageInput} handleSubmit={handleSubmit} />
+            {/*<AuthGuard />*/}
+            {chatroomId && <ChatMessages />}
+            {chatroomId && <MemberList />}
+            <MessageInput messageInputRef={messageInput} handleSubmit={handleSubmit} />
         </div>
     )
 }

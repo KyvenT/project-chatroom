@@ -5,10 +5,23 @@ import { useMemo } from "react";
 import { BidirectionalGroupedMap } from "../lib/bidirectionGroupedMap";
 import MemberStatusList from "./MemberStatusList";
 import { useCustomQuery } from "../hooks/useCustomQuery";
+import { css, useTheme } from "@emotion/react";
+import type { Theme } from "@emotion/react";
+
+const styles = css({
+    
+})
+
+const colors = (theme: Theme) => css({
+    backgroundColor: theme.colors.black,
+    borderLeft: `1px solid ${theme.colors.dark_grey}`,
+    borderBottom: `1px solid ${theme.colors.dark_grey}`,
+})
 
 const MemberList = () => {
     const {user, isLoggedIn} = useAuthContext();
     const {chatroomId} = useParams();
+    const theme = useTheme();
 
     if (!isLoggedIn || !chatroomId) {
         return <p>Please log in to see the member list.</p>;
@@ -24,20 +37,14 @@ const MemberList = () => {
                     username: chatMember.member.username}, 
                     chatMember.member.status));
             return map;
-        }
-    , [data]);
+        }, [data]);
     console.log("members: " + data);
 
     return (
-        <div>
-            <ul>
-                <p>Online</p>
-                <MemberStatusList memberStatusMap={memberStatusMap} status="ONLINE" />
-                <p>Away</p>
-                <MemberStatusList memberStatusMap={memberStatusMap} status="AWAY" />
-                <p>Offline</p>
-                <MemberStatusList memberStatusMap={memberStatusMap} status="OFFLINE" />
-            </ul>
+        <div css={[styles, colors(theme)]}>
+            <MemberStatusList memberStatusMap={memberStatusMap} status="ONLINE" />
+            <MemberStatusList memberStatusMap={memberStatusMap} status="AWAY" />
+            <MemberStatusList memberStatusMap={memberStatusMap} status="OFFLINE" />
         </div>
     )
 }

@@ -13,12 +13,27 @@ const styles = css({
     width: "100%",
     height: "auto",
     padding: "10px",
+    borderRadius: "8px",
+    border: 0,
+    backgroundClip: "padding-box"
 });
 
 const colors = (theme: Theme) => css({
-    backgroundColor: theme.colors.light_grey,
-    color: theme.colors.dark_grey,
-    borderBottom: `1px solid ${theme.colors.dark_grey}`,
+    backgroundColor: "inherit",
+    color: theme.colors.white,
+
+    "&:hover": {
+        backgroundColor: theme.colors.dark_grey,
+    },
+
+    ".timeStamp": {
+        color: theme.colors.grey,
+    },
+
+    ".messageHeader": {
+        display: "flex",
+        gap: "4px",
+    }
 });
 
 const ChatMessage = ({id, content, sender, timestamp}: ChatMessageProps) => {
@@ -26,13 +41,9 @@ const ChatMessage = ({id, content, sender, timestamp}: ChatMessageProps) => {
 
     return (
         <div key={id} css={[styles, colors(theme)]}>
-            <div>
+            <div className="messageHeader">
                 <strong>{sender}</strong> 
-                <span>{new Intl.DateTimeFormat('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    }).format(timestamp)}
-                </span>
+                <span className="timeStamp">{timestamp.toLocaleString()}</span>
             </div>
             <p>{content}</p>
         </div>

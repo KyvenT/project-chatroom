@@ -12,11 +12,7 @@ const styles = css({
     width: "100%",
 
     ".chatroomLink": {
-        backgroundColor: "white",
         width: "100%",
-        padding: "10px",
-        borderRadius: "5px",
-
     }
 })
 
@@ -28,8 +24,10 @@ const dynamicStyles = (isActive: boolean) => css({
 
 const SidebarChatroomButton = ({isActive=false, children, chatroomId} : SidebarChatroomButtonProps) => {
     return <li css={[styles, dynamicStyles(isActive)]}>
-        <NavLink className="chatroomLink" to={"/chat/" + chatroomId}>{children}</NavLink>
-    </li>
+            <div>
+                <NavLink className="chatroomLink" to={"/chat/" + chatroomId}>{children}</NavLink>
+            </div>
+        </li>
 }
 
 export default SidebarChatroomButton;

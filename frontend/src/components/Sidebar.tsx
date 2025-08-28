@@ -19,7 +19,7 @@ const sidebarStyles = css({
         padding: "20px 10px",
         display: "flex",
         flexDirection: "column",
-        gap: "8px",
+        gap: "",
     },
 
     ".homeBtnContainer": {
@@ -38,7 +38,7 @@ const sidebarStyles = css({
 })
 
 const colors = (theme: Theme) => css({
-    backgroundColor: theme.colors.brown,
+    backgroundColor: theme.colors.dark_grey,
     color: theme.colors.white,
 
     ".homeBtnContainer": {
@@ -46,7 +46,7 @@ const colors = (theme: Theme) => css({
     }, 
 
     ".homeBtn": {
-        color: theme.colors.dark_grey,
+        color: theme.colors.white,
     },
 
     ".homeBtn:hover": {

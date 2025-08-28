@@ -13,11 +13,14 @@ const styles = css({
     flexDirection: "column-reverse",
     overflowY: "auto",
     scrollBehavior: "smooth",
+    gap: "10px",
+    border: 0,
 });
 
-const colors = (theme: Theme) => ({
-    backgroundColor: theme.colors.light_grey,
+const colors = (theme: Theme) => css({
+    backgroundColor: theme.colors.black,
     color: theme.colors.white,
+    scrollbarColor: `${theme.colors.dark_grey} ${theme.colors.black}`,
 });
 
 const ChatMessages = () => {
@@ -38,8 +41,8 @@ const ChatMessages = () => {
 
     useEffect(() => {
         if (!chatRef.current) return;
-        chatRef.current.scrollTop = chatRef.current?.scrollHeight;
-    }, [])
+        chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }, [chatroomId])
 
     useEffect(() => {
         if (data) {

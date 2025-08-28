@@ -44,7 +44,7 @@ const styles = css({
 });
 
 const colors = (theme: Theme) => css({
-    backgroundColor: theme.colors.light_grey,
+    backgroundColor: theme.colors.black,
     color: theme.colors.white,
     
     form: {
@@ -57,12 +57,16 @@ const colors = (theme: Theme) => css({
 
     button: {
         color: theme.colors.white
-
     },
 
     'button:hover': {
-        backgroundColor: theme.colors.light_grey,
-        color: theme.colors.dark_grey
+        backgroundColor: theme.colors.white,
+        color: theme.colors.dark_grey,
+        fontWeight: 550,
+    },
+
+    "input::placeholder": {
+        color: theme.colors.light_grey,
     }
 });
 
