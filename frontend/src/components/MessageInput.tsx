@@ -62,7 +62,7 @@ const colors = (theme: Theme) => css({
     'button:hover': {
         backgroundColor: theme.colors.white,
         color: theme.colors.dark_grey,
-        fontWeight: 550,
+        fontWeight: 500,
     },
 
     "input::placeholder": {

@@ -8,77 +8,98 @@ import { HomeIcon } from "lucide-react";
 import { useCustomQuery } from "../hooks/useCustomQuery";
 
 const sidebarStyles = css({
+  display: "flex",
+  flexDirection: "column",
+  width: "15%",
+  minHeight: "100dvh",
+
+  ul: {
+    listStyle: "none",
+    flex: 1,
+    padding: "20px 10px",
     display: "flex",
     flexDirection: "column",
-    width: "15%",
-    minHeight: "100dvh",
+    gap: "4px",
+  },
 
-    ul: {
-        listStyle: "none",
-        flex: 1,
-        padding: "20px 10px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "",
+  ".chatsHeader": {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    margin: "0 4px",
+
+    h2: {
+      userSelect: "none",
     },
+  },
 
-    ".homeBtnContainer": {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "",
-    }, 
+  ".homeBtnContainer": {
+    display: "flex",
+    alignItems: "center",
+    padding: "4px",
+  },
 
-    ".homeBtn": {
-    },
+  ".homeBtn": {},
 
-    ".homeIcon": {
-        width: "3rem",
-        height: "3rem",
-    }
-})
+  ".homeIcon": {
+    width: "2rem",
+    height: "2rem",
+  },
+});
 
-const colors = (theme: Theme) => css({
+const colors = (theme: Theme) =>
+  css({
     backgroundColor: theme.colors.dark_grey,
     color: theme.colors.white,
 
-    ".homeBtnContainer": {
-
-    }, 
+    ".homeBtnContainer": {},
 
     ".homeBtn": {
-        color: theme.colors.white,
+      color: theme.colors.white,
     },
 
     ".homeBtn:hover": {
-        color: theme.colors.light_grey,
-    }
-});
+      color: theme.colors.light_grey,
+    },
+  });
 
 const Sidebar = () => {
-    const theme = useTheme();
-    const { isLoggedIn, user } = useAuthContext();
-    const {chatroomId} = useParams();
-    const { data } = useCustomQuery<Chatroom>(
-        ["chatrooms", isLoggedIn ? user.userId : "not logged in"],
-        "chatroom");
+  const theme = useTheme();
+  const { isLoggedIn, user } = useAuthContext();
+  const { chatroomId } = useParams();
+  const { data } = useCustomQuery<Chatroom>(
+    ["chatrooms", isLoggedIn ? user.userId : "not logged in"],
+    "chatroom",
+  );
 
-    return <div css={[sidebarStyles, colors(theme)]}>
-        <div className="homeBtnContainer">
-            <Link to="/chat" className="homeBtn"><HomeIcon className="homeIcon" /></Link>
-        </div>
+  return (
+    <div css={[sidebarStyles, colors(theme)]}>
+      <div className="homeBtnContainer">
+        <Link to="/chat" className="homeBtn">
+          <HomeIcon className="homeIcon" />
+        </Link>
+      </div>
+      <div className="chatsHeader">
         <h2>Chats</h2>
-        <ul>
-            {data && data.map((chatroom) => {
-                return (
-                <SidebarChatroomButton key={chatroom.chatroomId}
-                    isActive={chatroomId === chatroom.chatroomId} 
-                    chatroomId={chatroom.chatroomId}>
-                        {chatroom.chatroom.title} 
-                </SidebarChatroomButton>)
-            })}
-        </ul>
         <NewChatButton />
+      </div>
+      <ul>
+        {data &&
+          data.map((chatroom) => {
+            return (
+              <SidebarChatroomButton
+                key={chatroom.chatroomId}
+                isActive={chatroomId === chatroom.chatroomId}
+                chatroomId={chatroom.chatroomId}
+              >
+                {chatroom.chatroom.title}
+              </SidebarChatroomButton>
+            );
+          })}
+      </ul>
     </div>
-}
+  );
+};
 
 export default Sidebar;
