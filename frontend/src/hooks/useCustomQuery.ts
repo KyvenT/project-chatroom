@@ -1,13 +1,5 @@
 import type { UserAuth } from "../types/User";
 
-export const QueryResourceType = {
-  INVITE: "invite",
-  CHATROOM: "chatroom",
-  USER: "user",
-  MESSAGE: "message",
-  MEMBER: "member",
-} as const;
-
 export interface QueryArgs {
   fetchUrl: string;
   method?: string;

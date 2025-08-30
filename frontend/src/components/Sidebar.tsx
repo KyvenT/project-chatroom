@@ -70,8 +70,9 @@ const Sidebar = () => {
   const { isLoggedIn, user } = useAuthContext();
   const { chatroomId } = useParams();
   const { data } = useQuery<Chatroom[]>({
-    queryKey: ["chatrooms", isLoggedIn ? user.userId : "not logged in"],
-    queryFn: () => queryFunction<Chatroom[]>({fetchUrl: "http://localhost:3000/api/chatroom/me", user})
+    queryKey: ["chatrooms", isLoggedIn],
+    queryFn: () => queryFunction<Chatroom[]>({fetchUrl: "http://localhost:3000/api/chatroom/me", user}),
+    staleTime: Infinity
   });
 
   return (

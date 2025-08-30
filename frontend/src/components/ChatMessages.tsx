@@ -34,9 +34,12 @@ const ChatMessages = () => {
     }
     const getBefore = useMemo(() => new Date(), [chatroomId]);
     const { data, refetch } = useQuery<Message[]>({
-        queryKey: [chatroomId, isLoggedIn ? user.userId : "", getBefore.toISOString()],
+        queryKey: [chatroomId, isLoggedIn, getBefore.toISOString()],
         queryFn: () => queryFunction({fetchUrl: `http://localhost:3000/api/messages/${chatroomId}/${getBefore?.toISOString()}`, 
-        user})});
+        user}),
+        enabled: false, 
+        staleTime: Infinity
+    });
     const {wsEventQueues, clearMessageQueue} = useWebSocketContext();
     const [messages, setMessages] = useState<Message[]>([]);
     const chatRef = useRef<HTMLDivElement>(null);
@@ -44,7 +47,7 @@ const ChatMessages = () => {
     useEffect(() => {
         if (!chatRef.current) return;
         chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }, [chatroomId])
+    }, [chatroomId, messages])
 
     useEffect(() => {
         if (data) {

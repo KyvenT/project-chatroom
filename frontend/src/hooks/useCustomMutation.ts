@@ -1,10 +1,5 @@
 import type { UserAuth } from "../types/User";
 
-export const MutationResourceType = {
-  INVITE_RESPONSE: "invite-response",
-  CREATE_CHATROOM: "create-chatroom",
-} as const;
-
 export interface MutationArgs {
   fetchUrl: string;
   method: string;

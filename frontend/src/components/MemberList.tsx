@@ -36,6 +36,7 @@ const MemberList = () => {
     queryKey: [user.token, chatroomId],
     queryFn: () => queryFunction<ChatroomMember[]>(
       {fetchUrl: "http://localhost:3000/api/members/" + chatroomId, user}),
+    staleTime: Infinity
   });
 
   const memberStatusMap = useMemo(() => {

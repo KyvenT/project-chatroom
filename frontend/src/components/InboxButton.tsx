@@ -11,6 +11,7 @@ const InboxButton = () => {
   const { data: invitesData } = useQuery<Invite[]>({
     queryKey: ["inbox", user.token],
     queryFn: () => queryFunction<Invite[]>({fetchUrl: "http://localhost:3000/api/invite/me", user}),
+    staleTime: Infinity
   });
   const mutation = useMutation<InviteResponse, Error, MutationArgs>({
       mutationFn: mutationFunction<InviteResponse>});
