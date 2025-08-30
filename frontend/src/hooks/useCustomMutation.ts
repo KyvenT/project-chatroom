@@ -1,4 +1,3 @@
-import { useMutation } from "@tanstack/react-query";
 import type { UserAuth } from "../types/User";
 
 export const MutationResourceType = {
@@ -36,19 +35,4 @@ export const mutationFunction = async <T>({
   }
 
   return await res.json() as Promise<T>;
-};
-
-const query = <T>(
-  fetchUrl: string,
-  method: string,
-  user: UserAuth,
-  body: {} = {},
-  queryKeys: string[],
-  queryOptions?: {},
-) => {
-  return useMutation({
-    mutationKey: ["customQuery", ...queryKeys],
-    mutationFn: () => mutationFunction<T>({fetchUrl, method, user, reqBody: body}),
-    ...queryOptions,
-  });
 };

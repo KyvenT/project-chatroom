@@ -2,10 +2,11 @@ import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessage from "./ChatMessage";
 import useAuthContext from "../hooks/useAuthContext";
 import type { Message } from "../types/Message";
-import { useCustomQuery } from "../hooks/useCustomQuery";
+import { queryFunction } from "../hooks/useCustomQuery";
 import { useEffect, useMemo, useRef, useState } from "react";
 import useWebSocketContext from "../hooks/useWebSocketContext";
 import { useParams } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 
 const styles = css({
     minHeight: "100%",
@@ -32,9 +33,10 @@ const ChatMessages = () => {
         return null;
     }
     const getBefore = useMemo(() => new Date(), [chatroomId]);
-    const { data, refetch } = useCustomQuery<Message>(
-        [chatroomId, isLoggedIn ? user.userId : "", getBefore.toISOString()],
-        "message", { chatroomId, getBefore, queryOptions: { enabled: false } });
+    const { data, refetch } = useQuery<Message[]>({
+        queryKey: [chatroomId, isLoggedIn ? user.userId : "", getBefore.toISOString()],
+        queryFn: () => queryFunction({fetchUrl: `http://localhost:3000/api/messages/${chatroomId}/${getBefore?.toISOString()}`, 
+        user})});
     const {wsEventQueues, clearMessageQueue} = useWebSocketContext();
     const [messages, setMessages] = useState<Message[]>([]);
     const chatRef = useRef<HTMLDivElement>(null);

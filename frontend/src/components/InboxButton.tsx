@@ -1,17 +1,17 @@
 import React from "react";
 import useAuthContext from "../hooks/useAuthContext";
-import { useCustomQuery } from "../hooks/useCustomQuery";
+import { queryFunction } from "../hooks/useCustomQuery";
 import type { Invite, InviteResponse } from "../types/Invite";
 import DropdownButton from "./DropdownButton";
 import { mutationFunction, type MutationArgs } from "../hooks/useCustomMutation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 const InboxButton = () => {
   const { user } = useAuthContext();
-  const { data: invitesData } = useCustomQuery<Invite>(
-    ["inbox", user.token],
-    "invite",
-  );
+  const { data: invitesData } = useQuery<Invite[]>({
+    queryKey: ["inbox", user.token],
+    queryFn: () => queryFunction<Invite[]>({fetchUrl: "http://localhost:3000/api/invite/me", user}),
+  });
   const mutation = useMutation<InviteResponse, Error, MutationArgs>({
       mutationFn: mutationFunction<InviteResponse>});
 

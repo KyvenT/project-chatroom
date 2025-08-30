@@ -1,7 +1,6 @@
 import { css, useTheme } from "@emotion/react";
 import useToggle from "../hooks/useToggle";
 import type { Theme } from "@emotion/react";
-import { useCustomMutation } from "../hooks/useCustomMutation";
 
 const buttonStyles = css({
   fontSize: "1.5rem",

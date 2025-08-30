@@ -4,10 +4,11 @@ import { useParams } from "react-router";
 import { useMemo } from "react";
 import { BidirectionalGroupedMap } from "../lib/bidirectionGroupedMap";
 import MemberStatusList from "./MemberStatusList";
-import { useCustomQuery } from "../hooks/useCustomQuery";
+import { queryFunction } from "../hooks/useCustomQuery";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import ProfileStatus from "./ProfileStatus";
+import { useQuery } from "@tanstack/react-query";
 
 const styles = css({
   display: "flex",
@@ -31,11 +32,11 @@ const MemberList = () => {
     return <p>Please log in to see the member list.</p>;
   }
 
-  const { data } = useCustomQuery<ChatroomMember>(
-    [user.token, chatroomId],
-    "member",
-    { chatroomId },
-  );
+  const { data } = useQuery<ChatroomMember[]>({
+    queryKey: [user.token, chatroomId],
+    queryFn: () => queryFunction<ChatroomMember[]>(
+      {fetchUrl: "http://localhost:3000/api/members/" + chatroomId, user}),
+  });
 
   const memberStatusMap = useMemo(() => {
     const map = new BidirectionalGroupedMap<string, string>();
@@ -53,7 +54,7 @@ const MemberList = () => {
         <MemberStatusList memberStatusMap={memberStatusMap} status="AWAY" />
         <MemberStatusList memberStatusMap={memberStatusMap} status="OFFLINE" />
       </div>
-      <ProfileStatus status={memberStatusMap.getByKey(user.username)} />
+      <ProfileStatus status={memberStatusMap.getByKey(user.username) || ""} />
     </div>
   );
 };

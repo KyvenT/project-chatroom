@@ -5,7 +5,8 @@ import useAuthContext from "../hooks/useAuthContext";
 import { Link, useParams } from "react-router";
 import type { Chatroom } from "../types/Chatroom";
 import { HomeIcon } from "lucide-react";
-import { useCustomQuery } from "../hooks/useCustomQuery";
+import { queryFunction } from "../hooks/useCustomQuery";
+import { useQuery } from "@tanstack/react-query";
 
 const sidebarStyles = css({
   display: "flex",
@@ -68,10 +69,10 @@ const Sidebar = () => {
   const theme = useTheme();
   const { isLoggedIn, user } = useAuthContext();
   const { chatroomId } = useParams();
-  const { data } = useCustomQuery<Chatroom>(
-    ["chatrooms", isLoggedIn ? user.userId : "not logged in"],
-    "chatroom",
-  );
+  const { data } = useQuery<Chatroom[]>({
+    queryKey: ["chatrooms", isLoggedIn ? user.userId : "not logged in"],
+    queryFn: () => queryFunction<Chatroom[]>({fetchUrl: "http://localhost:3000/api/chatroom/me", user})
+  });
 
   return (
     <div css={[sidebarStyles, colors(theme)]}>
