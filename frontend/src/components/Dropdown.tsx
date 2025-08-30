@@ -10,9 +10,8 @@ interface DropdownProps {
 const defaultDropdownStyles = css({
     position: "absolute",
     top: "55px",
-    backgroundColor: "white",
-    border: "2px solid black",
-    color: "black",
+    right: 0,
+    border: "1px solid black",
     padding: "10px",
     borderRadius: "5px",
 })

@@ -2,11 +2,11 @@ import { css, useTheme } from "@emotion/react";
 import Sidebar from "../../../components/Sidebar";
 import { Outlet } from "react-router";
 import useToggle from "../../../hooks/useToggle";
-import Header, { headerBtnStylesWithColors } from "../../../components/Header";
+import Header from "../../../components/Header";
 import DropdownButton from "../../../components/DropdownButton";
 import { Link, useNavigate, useParams } from "react-router";
 import InboxButton from "../../../components/InboxButton";
-import { ChevronFirst, MenuIcon } from "lucide-react";
+import { ArrowLeftToLine, MenuIcon, User } from "lucide-react";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useEffect } from "react";
@@ -15,6 +15,7 @@ import {
   type wsEventQueuesType,
 } from "../../../ws-router/ws-message-router";
 import type { Theme } from "@emotion/react";
+import Button, { iconBtnStyles } from "../../../components/Button";
 
 const styles = css({
   minHeight: "100dvh",
@@ -34,25 +35,12 @@ const styles = css({
     backgroundColor: "red",
     overflow: "hidden",
   },
-
-  ".sidebarToggleBtn": {
-    backgroundColor: "inherit",
-    border: 0,
-  },
 });
 
 const colors = (theme: Theme) =>
   css({
     ".outletWrapper": {
       backgroundColor: theme.colors.black,
-    },
-
-    ".sidebarToggleBtn": {
-      color: theme.colors.white,
-    },
-
-    ".sidebarToggleBtn:hover": {
-      color: theme.colors.grey,
     },
   });
 
@@ -84,29 +72,30 @@ function ChatLayout() {
       {sidebarToggled && <Sidebar />}
       <div className="container">
         <Header>
-          <button
+          <Button
+            variant="icon"
             className="sidebarToggleBtn"
             onClick={() => setSidebarToggled()}
           >
-            {sidebarToggled ? <ChevronFirst /> : <MenuIcon />}
-          </button>
+            {sidebarToggled ? <ArrowLeftToLine /> : <MenuIcon />}
+          </Button>
           <h1>{chatroomId || "Welcome"}</h1>
           {isLoggedIn ? (
             <>
               <InboxButton />
-              <DropdownButton buttonText="Profile">
+              <DropdownButton buttonText={<User />} buttonStyles={iconBtnStyles(theme)}>
                 <h3>{user.username}</h3>
                 <Link to="">Account Settings</Link>
-                <button
+                <Button
                   onClick={() => navigate("/logout")}
-                  css={headerBtnStylesWithColors}
+                  css={iconBtnStyles(theme)}
                 >
                   Log Out
-                </button>
+                </Button>
               </DropdownButton>
             </>
           ) : (
-            <Link to="/login" css={headerBtnStylesWithColors}>
+            <Link to="/login" css={iconBtnStyles(theme)}>
               Sign In
             </Link>
           )}

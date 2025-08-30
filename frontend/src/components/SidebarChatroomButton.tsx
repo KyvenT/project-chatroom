@@ -21,6 +21,7 @@ const styles = css({
   ".chatroomLink": {
     display: "block",
     textDecoration: "none",
+    userSelect: "none"
   },
 });
 

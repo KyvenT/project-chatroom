@@ -7,6 +7,7 @@ import type { Chatroom } from "../types/Chatroom";
 import { HomeIcon } from "lucide-react";
 import { queryFunction } from "../hooks/useCustomQuery";
 import { useQuery } from "@tanstack/react-query";
+import { iconBtnStyles } from "./Button";
 
 const sidebarStyles = css({
   display: "flex",
@@ -55,14 +56,6 @@ const colors = (theme: Theme) =>
     color: theme.colors.white,
 
     ".homeBtnContainer": {},
-
-    ".homeBtn": {
-      color: theme.colors.white,
-    },
-
-    ".homeBtn:hover": {
-      color: theme.colors.light_grey,
-    },
   });
 
 const Sidebar = () => {
@@ -78,7 +71,7 @@ const Sidebar = () => {
   return (
     <div css={[sidebarStyles, colors(theme)]}>
       <div className="homeBtnContainer">
-        <Link to="/chat" className="homeBtn">
+        <Link to="/chat" className="homeBtn" css={iconBtnStyles(theme)}>
           <HomeIcon className="homeIcon" />
         </Link>
       </div>

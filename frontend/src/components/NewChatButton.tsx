@@ -1,14 +1,11 @@
-import { css, useTheme } from "@emotion/react";
+import { css } from "@emotion/react";
 import useToggle from "../hooks/useToggle";
-import type { Theme } from "@emotion/react";
+import Button from "./Button";
 
 const buttonStyles = css({
   fontSize: "1.5rem",
-  borderRadius: "5px",
   width: "fit-content",
   aspectRatio: "1",
-  border: 0,
-  backgroundColor: "inherit",
 });
 
 const dialogStyles = css({
@@ -33,19 +30,8 @@ const dialogStyles = css({
   },
 });
 
-const buttonColors = (theme: Theme) =>
-  css({
-    color: theme.colors.white,
-
-    "&:hover": {
-      color: theme.colors.black,
-      backgroundColor: theme.colors.light_grey,
-    },
-  });
-
 const NewChatButton = () => {
   const [isToggled, setToggle] = useToggle(false);
-  const theme = useTheme();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -55,12 +41,13 @@ const NewChatButton = () => {
 
   return (
     <>
-      <button
+      <Button
         onClick={() => setToggle(true)}
-        css={[buttonStyles, buttonColors(theme)]}
+        variant="icon"
+        css={buttonStyles}
       >
         +
-      </button>
+      </Button>
       <dialog
         css={dialogStyles}
         open={isToggled}

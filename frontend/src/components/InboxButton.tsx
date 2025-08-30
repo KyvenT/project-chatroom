@@ -5,9 +5,14 @@ import type { Invite, InviteResponse } from "../types/Invite";
 import DropdownButton from "./DropdownButton";
 import { mutationFunction, type MutationArgs } from "../hooks/useCustomMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Mail } from "lucide-react";
+import { useTheme } from "@emotion/react";
+import type { Theme } from "@emotion/react";
+import { iconBtnStyles } from "./Button";
 
 const InboxButton = () => {
   const { user } = useAuthContext();
+  const theme = useTheme();
   const { data: invitesData } = useQuery<Invite[]>({
     queryKey: ["inbox", user.token],
     queryFn: () => queryFunction<Invite[]>({fetchUrl: "http://localhost:3000/api/invite/me", user}),
@@ -35,7 +40,7 @@ const InboxButton = () => {
   };
 
   return (
-    <DropdownButton buttonText="Inbox">
+    <DropdownButton buttonText={<Mail />} buttonStyles={iconBtnStyles(theme)}>
       <ul>
         {invitesData &&
           invitesData.map((invite) => {

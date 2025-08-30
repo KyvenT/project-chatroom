@@ -6,7 +6,6 @@ import MemberList from "../../../components/MemberList";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useEffect, useRef } from "react";
-import ProfileStatus from "../../../components/ProfileStatus";
 // import AuthGuard from "../../../components/AuthGuard";
 
 const chatStyles = css({

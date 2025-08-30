@@ -11,39 +11,15 @@ const headerStyles = css({
     }
 });
 
-const headerBtnStyles = css({
-    borderRadius: "20px",
-    width: "fit-content",
-    height: "fit-content",
-    padding: "10px 20px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    textDecoration: "none",
-})
-
-const headerBtnColors = (theme: Theme) => css({
-    backgroundColor: theme.colors.dark_grey,
-    color: theme.colors.white,
-    border: `1px solid ${theme.colors.white}`,
-
-    "&:hover": {
-        backgroundColor: theme.colors.light_grey,
-    }
-});
-
-interface HeaderProps {
-    children: React.ReactNode;
-}
-
-export const headerBtnStylesWithColors = (theme: Theme) => {
-    return [headerBtnStyles, headerBtnColors(theme)];
-}
-
 const headerColors = (theme: Theme) => ({
     backgroundColor: theme.colors.dark_grey,
     color: theme.colors.white,
     borderBottom: `2px solid ${theme.colors.dark_grey}`, 
 });
+
+interface HeaderProps {
+    children: React.ReactNode;
+}
 
 const Header = ({children}: HeaderProps) => {
     const theme = useTheme();
