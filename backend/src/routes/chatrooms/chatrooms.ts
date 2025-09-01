@@ -36,7 +36,7 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
 })
 
 chatroomRouter.post("/create", async (req: Request, res: Response) => {
-    const { title } = req.body;
+    const { title, allowJoinByLink, allowGuests, allowMembersToInvite } = req.body;
     const userId = req.userId;
 
     if (!userId) {
@@ -49,6 +49,9 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
             data: {
                 title,
                 ownerId: userId,
+                allowJoinByLink, 
+                allowGuests,
+                allowMembersToInvite,
             }
         });
 

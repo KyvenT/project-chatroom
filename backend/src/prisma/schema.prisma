@@ -8,16 +8,17 @@ generator client {
 }
 
 model Chatroom {
-  id                  String                @id @default(uuid())
-  title               String
-  owner               User                  @relation(fields: [ownerId], references: [id])
-  ownerId             String
-  allowGuests         Boolean               @default(false)
-  allowJoinByLink     Boolean               @default(false)
-  createdAt           DateTime              @default(now())
-  messages            Message[]           
-  members             ChatroomMember[]      
-  invites             Invite[]                          
+  id                      String                @id @default(uuid())
+  title                   String
+  owner                   User                  @relation(fields: [ownerId], references: [id])
+  ownerId                 String
+  allowGuests             Boolean               @default(false)
+  allowJoinByLink         Boolean               @default(false)
+  allowMembersToInvite    Boolean               @default(false)
+  createdAt               DateTime              @default(now())
+  messages                Message[]           
+  members                 ChatroomMember[]      
+  invites                 Invite[]                          
 }
 
 model Message {
