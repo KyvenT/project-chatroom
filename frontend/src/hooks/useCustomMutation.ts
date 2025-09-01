@@ -4,14 +4,14 @@ export interface MutationArgs {
   fetchUrl: string;
   method: string;
   user: UserAuth;
-  reqBody: {};
+  reqBody?: {};
 };
 
 export const mutationFunction = async <T>({
   fetchUrl,
   method,
   user,
-  reqBody,
+  reqBody = {},
 }: MutationArgs) => {
   if (!user.userId) {
     throw new Error("not authenticated");
