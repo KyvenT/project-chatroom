@@ -59,10 +59,17 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
             data: {
                 memberId: userId,
                 chatroomId: chatroom.id
+            },
+            include: {
+                chatroom: {
+                    select: {
+                        title: true,
+                    }
+                }
             }
         });
 
-        res.status(201).json(chatroom);
+        res.status(201).json({...ownerJoin});
         console.log(`Chatroom created: ${title}`);
         return;
     } catch (error: any) {
@@ -101,11 +108,18 @@ chatroomRouter.post("/join", async (req: Request, res: Response) => {
         const join = await Prisma.chatroomMember.create({
             data: {
                 memberId: userId,
-                chatroomId
+                chatroomId,
+            },
+            include: {
+                chatroom: {
+                    select: {
+                        title: true,
+                    }
+                }
             }
         });
 
-        res.status(201).json({ join });
+        res.status(200).json({...join});
         console.log(`Chatroom joined: ${join}`);
         return;
     } catch (error: any) {
@@ -129,7 +143,7 @@ chatroomRouter.patch("/rename", async (req: Request, res: Response) => {
             }
         })
 
-        res.status(200).json({message: "Chatroom renamed"});
+        res.status(200).json({title: newTitle, id: chatroom.id});
         console.log("Chatroom renamed");
         return;
     } catch (err: any) {

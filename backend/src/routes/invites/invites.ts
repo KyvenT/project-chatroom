@@ -95,10 +95,17 @@ invitesRouter.patch("/accept", async (req: Request, res: Response) => {
             data: {
                 memberId: userId,
                 chatroomId: invite.chatroomId
+            },
+            include: {
+                chatroom: {
+                    select: {
+                        title: true,
+                    }
+                }
             }
         });
 
-        res.status(200).json({message: "Invite accepted", ...join});
+        res.status(200).json({...join});
         console.log("invite accepted");
         return;
     } catch (err: any) {
