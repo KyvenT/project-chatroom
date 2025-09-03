@@ -32,19 +32,20 @@ const ChatMessages = () => {
   const messages = useMessagesStore((state) => state.messages);
   const setMessages = useMessagesStore((state) => state.setMessages);
   const chatRef = useRef<HTMLDivElement>(null);
-  const [getBefore, setBefore] = useState<Date>(new Date);
+  const [getBefore, setBefore] = useState<Date | null>(null);
 
   if (!chatroomId) {
     console.error("Chatroom ID is not defined");
     throw new Error("tried to render chat messages of undefined chatroom id");
   }
   const { data } = useQuery<Message[]>({
-    queryKey: [chatroomId, isLoggedIn, getBefore.toISOString()],
+    queryKey: [chatroomId, isLoggedIn, getBefore?.toISOString()],
     queryFn: () =>
       queryFunction({
         fetchUrl: `http://localhost:3000/api/messages/${chatroomId}/${getBefore?.toISOString()}`,
         user,
       }),
+    enabled: !!getBefore,
     staleTime: Infinity,
   });
 
