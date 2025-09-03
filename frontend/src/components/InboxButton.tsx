@@ -1,25 +1,42 @@
-import React from "react";
+import React, { useEffect } from "react";
 import useAuthContext from "../hooks/useAuthContext";
 import { queryFunction } from "../hooks/useCustomQuery";
 import type { Invite, InviteResponse } from "../types/Invite";
 import DropdownButton from "./DropdownButton";
-import { mutationFunction, type MutationArgs } from "../hooks/useCustomMutation";
+import {
+  mutationFunction,
+  type MutationArgs,
+} from "../hooks/useCustomMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Mail } from "lucide-react";
 import { useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import { iconBtnStyles } from "./Button";
+import { useInvitesStore } from "../hooks/useStores";
 
 const InboxButton = () => {
-  const { user } = useAuthContext();
+  const { user, isLoggedIn } = useAuthContext();
   const theme = useTheme();
   const { data: invitesData } = useQuery<Invite[]>({
     queryKey: ["inbox", user.token],
-    queryFn: () => queryFunction<Invite[]>({fetchUrl: "http://localhost:3000/api/invite/me", user}),
-    staleTime: Infinity
+    queryFn: () =>
+      queryFunction<Invite[]>({
+        fetchUrl: "http://localhost:3000/api/invite/me",
+        user,
+      }),
+    staleTime: Infinity,
   });
   const mutation = useMutation<InviteResponse, Error, MutationArgs>({
-      mutationFn: mutationFunction<InviteResponse>});
+    mutationFn: mutationFunction<InviteResponse>,
+  });
+  const invites = useInvitesStore((state) => (state.invites));
+  const setInvites = useInvitesStore((state) => (state.setInvites));
+
+  useEffect(() => {
+    if (invitesData) {
+      setInvites(invitesData);
+    }
+  }, [isLoggedIn])
 
   const handleInviteResponse = (
     event: React.FormEvent,
@@ -27,13 +44,23 @@ const InboxButton = () => {
   ) => {
     event.preventDefault();
     const inviteId = (event.target as HTMLButtonElement).form?.id;
-      
+
     if (userAccepted) {
       console.log("Invite accepted");
-      mutation.mutate({fetchUrl: "http://localhost:3000/api/invite/accept", user, method: "PATCH", reqBody: {inviteId}});
+      mutation.mutate({
+        fetchUrl: "http://localhost:3000/api/invite/accept",
+        user,
+        method: "PATCH",
+        reqBody: { inviteId },
+      });
     } else {
       console.log("Invite rejected");
-      mutation.mutate({fetchUrl: "http://localhost:3000/api/invite/delete", user, method: "DELETE", reqBody: {inviteId}});
+      mutation.mutate({
+        fetchUrl: "http://localhost:3000/api/invite/delete",
+        user,
+        method: "DELETE",
+        reqBody: { inviteId },
+      });
     }
     const responseData = mutation.data;
     console.log(responseData);
@@ -42,8 +69,8 @@ const InboxButton = () => {
   return (
     <DropdownButton buttonText={<Mail />} buttonStyles={iconBtnStyles(theme)}>
       <ul>
-        {invitesData &&
-          invitesData.map((invite) => {
+        {invites &&
+          invites.map((invite) => {
             return (
               <li key={invite.id}>
                 <h5>{invite.chatroom.title}</h5>

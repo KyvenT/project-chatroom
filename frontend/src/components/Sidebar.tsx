@@ -1,12 +1,9 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import SidebarChatroomButton from "./SidebarChatroomButton";
 import NewChatButton from "./NewChatButton";
-import useAuthContext from "../hooks/useAuthContext";
 import { Link, useParams } from "react-router";
 import type { Chatroom } from "../types/Chatroom";
 import { HomeIcon } from "lucide-react";
-import { queryFunction } from "../hooks/useCustomQuery";
-import { useQuery } from "@tanstack/react-query";
 import { iconBtnStyles } from "./Button";
 
 const sidebarStyles = css({
@@ -58,15 +55,13 @@ const colors = (theme: Theme) =>
     ".homeBtnContainer": {},
   });
 
-const Sidebar = () => {
+type SidebarProps = {
+  chatrooms: Chatroom[] | undefined,
+}
+
+const Sidebar = ({chatrooms}: SidebarProps) => {
   const theme = useTheme();
-  const { isLoggedIn, user } = useAuthContext();
   const { chatroomId } = useParams();
-  const { data } = useQuery<Chatroom[]>({
-    queryKey: ["chatrooms", isLoggedIn],
-    queryFn: () => queryFunction<Chatroom[]>({fetchUrl: "http://localhost:3000/api/chatroom/me", user}),
-    staleTime: Infinity
-  });
 
   return (
     <div css={[sidebarStyles, colors(theme)]}>
@@ -80,8 +75,8 @@ const Sidebar = () => {
         <NewChatButton />
       </div>
       <ul>
-        {data &&
-          data.map((chatroom) => {
+        {chatrooms &&
+          chatrooms.map((chatroom) => {
             return (
               <SidebarChatroomButton
                 key={chatroom.chatroomId}

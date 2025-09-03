@@ -10,12 +10,12 @@ import { ArrowLeftToLine, MenuIcon, User } from "lucide-react";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useEffect } from "react";
-import {
-  wsMessageRouter,
-  type wsEventQueuesType,
-} from "../../../ws-router/ws-message-router";
 import type { Theme } from "@emotion/react";
 import Button, { iconBtnStyles } from "../../../components/Button";
+import type { Message } from "../../../types/Message";
+import { useQuery } from "@tanstack/react-query";
+import type { Chatroom } from "../../../types/Chatroom";
+import { queryFunction } from "../../../hooks/useCustomQuery";
 
 const styles = css({
   minHeight: "100dvh",
@@ -44,32 +44,36 @@ const colors = (theme: Theme) =>
     },
   });
 
-export interface ChatLayoutContext {
-  wsEventQueues: wsEventQueuesType;
-  setWsEventQueues: React.Dispatch<React.SetStateAction<wsEventQueuesType>>;
-}
-
 function ChatLayout() {
   const [sidebarToggled, setSidebarToggled] = useToggle(false);
   const navigate = useNavigate();
   const { isLoggedIn, user } = useAuthContext();
   const { chatroomId } = useParams();
-  const { wsEventQueues, setWsEventQueues, ws } = useWebSocketContext();
+  const { ws } = useWebSocketContext();
   const theme = useTheme();
+
+  const { data } = useQuery<Chatroom[]>({
+    queryKey: ["chatrooms", isLoggedIn],
+    queryFn: () =>
+      queryFunction<Chatroom[]>({
+        fetchUrl: "http://localhost:3000/api/chatroom/me",
+        user,
+      }),
+    staleTime: Infinity,
+  });
 
   useEffect(() => {
     if (ws) {
       ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
+        const message = JSON.parse(event.data) as Message;
         console.log("Message from server: ", message);
-        wsMessageRouter(wsEventQueues, setWsEventQueues, message);
       };
     }
   }, [ws]);
 
   return (
     <div css={[styles, colors(theme)]}>
-      {sidebarToggled && <Sidebar />}
+      {sidebarToggled && <Sidebar chatrooms={data} />}
       <div className="container">
         <Header>
           <Button
@@ -83,7 +87,10 @@ function ChatLayout() {
           {isLoggedIn ? (
             <>
               <InboxButton />
-              <DropdownButton buttonText={<User />} buttonStyles={iconBtnStyles(theme)}>
+              <DropdownButton
+                buttonText={<User />}
+                buttonStyles={iconBtnStyles(theme)}
+              >
                 <h3>{user.username}</h3>
                 <Link to="">Account Settings</Link>
                 <Button
