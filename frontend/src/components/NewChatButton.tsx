@@ -6,11 +6,12 @@ import {
   mutationFunction,
   type MutationArgs,
 } from "../hooks/useCustomMutation";
-import type { CreateChatroom } from "../types/Chatroom";
+import type { JoinChatroom } from "../types/Chatroom";
 import useAuthContext from "../hooks/useAuthContext";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
+import Modal from "./Modal";
 
 const buttonStyles = css({
   fontSize: "1.5rem",
@@ -19,10 +20,6 @@ const buttonStyles = css({
 });
 
 const dialogStyles = css({
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
   gap: "10px",
   backgroundColor: "white",
   borderRadius: "10px",
@@ -52,8 +49,8 @@ const NewChatButton = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const { user } = useAuthContext();
   const { register, handleSubmit } = useForm<CreateChatroomFormInput>();
-  const mutation = useMutation<CreateChatroom, Error, MutationArgs>({
-    mutationFn: mutationFunction<CreateChatroom>,
+  const mutation = useMutation<JoinChatroom, Error, MutationArgs>({
+    mutationFn: mutationFunction<JoinChatroom>,
   });
 
   const onSubmit: SubmitHandler<CreateChatroomFormInput> = (data) => {
@@ -67,7 +64,7 @@ const NewChatButton = () => {
         title,
         linkPrivacy,
         guestPrivacy,
-        allowMembersToInvite
+        allowMembersToInvite,
       },
     });
   };
@@ -77,13 +74,17 @@ const NewChatButton = () => {
       <Button onClick={() => setToggle(true)} variant="icon" css={buttonStyles}>
         +
       </Button>
-      <dialog
-        css={dialogStyles}
+      <Modal
+        modalStyles={dialogStyles}
         open={isToggled}
         onClose={() => setToggle(false)}
       >
         <h2>Create a Chatroom</h2>
-        <form ref={formRef} id="new-chat-form" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          ref={formRef}
+          id="new-chat-form"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <label htmlFor="chatroomName">Chatroom name: </label>
           <input
             {...register("title")}
@@ -93,11 +94,19 @@ const NewChatButton = () => {
             required
           />
           <div>
-            <input {...register("linkPrivacy")} type="checkbox" id="linkPrivacy" />
+            <input
+              {...register("linkPrivacy")}
+              type="checkbox"
+              id="linkPrivacy"
+            />
             <label htmlFor="linkPrivacy">Shareable link</label>
           </div>
           <div>
-            <input {...register("guestPrivacy")} type="checkbox" id="guestPrivacy" />
+            <input
+              {...register("guestPrivacy")}
+              type="checkbox"
+              id="guestPrivacy"
+            />
             <label htmlFor="guestPrivacy">Guests can join</label>
           </div>
           <div>
@@ -115,7 +124,7 @@ const NewChatButton = () => {
         <button className="close-btn" onClick={() => setToggle(false)}>
           X
         </button>
-      </dialog>
+      </Modal>
     </>
   );
 };
