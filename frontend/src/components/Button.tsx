@@ -1,33 +1,48 @@
-import { css, useTheme, type SerializedStyles, type Theme } from "@emotion/react"
-import type React from "react"
+import {
+  css,
+  useTheme,
+  type SerializedStyles,
+  type Theme,
+} from "@emotion/react";
+import type React from "react";
 
+export const iconBtnStyles = (theme: Theme) =>
+  css({
+    border: 0,
+    backgroundColor: "inherit",
+    color: theme.colors.white,
+    display: "grid",
+    placeItems: "center",
+    borderRadius: "5px",
+    cursor: "pointer",
+    userSelect: "none",
 
-export const iconBtnStyles = (theme: Theme) => css({
-  border: 0,
-  backgroundColor: "inherit",
-  color: theme.colors.white,
-  display: "grid",
-  placeItems: "center",
-  borderRadius: "5px",
-  cursor: "pointer",
-  userSelect: "none",
-
-  "&:hover": {
-    color: theme.colors.grey,
-  },
-})
+    "&:hover": {
+      color: theme.colors.grey,
+    },
+  });
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: "default" | "icon";
+  variant?: "default" | "icon";
+  otherStyles?: SerializedStyles;
 }
 
-const Button = ({variant="default", children, ...props}: ButtonProps) => {
-    const theme = useTheme();
+const Button = ({
+  variant = "default",
+  otherStyles,
+  children,
+  ...props
+}: ButtonProps) => {
+  const theme = useTheme();
 
-    let styles: SerializedStyles = css({})
-    if (variant === "icon") styles = iconBtnStyles(theme);
+  let styles: SerializedStyles = css({});
+  if (variant === "icon") styles = iconBtnStyles(theme);
 
-    return <button css={styles} {...props}>{children}</button>
-}
+  return (
+    <button css={[styles, otherStyles]} {...props}>
+      {children}
+    </button>
+  );
+};
 
 export default Button;

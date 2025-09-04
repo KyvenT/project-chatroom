@@ -8,10 +8,9 @@ import {
 } from "../hooks/useCustomMutation";
 import type { JoinChatroom } from "../types/Chatroom";
 import useAuthContext from "../hooks/useAuthContext";
-import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
-import Modal from "./Modal";
+import Modal, { closeButtonStyles } from "./Modal";
 
 const buttonStyles = css({
   fontSize: "1.5rem",
@@ -25,16 +24,6 @@ const dialogStyles = css({
   borderRadius: "10px",
   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
   padding: "30px",
-
-  ".close-btn": {
-    position: "absolute",
-    top: "10px",
-    right: "10px",
-    backgroundColor: "transparent",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "16px",
-  },
 });
 
 interface CreateChatroomFormInput {
@@ -46,7 +35,6 @@ interface CreateChatroomFormInput {
 
 const NewChatButton = () => {
   const [isToggled, setToggle] = useToggle(false);
-  const formRef = useRef<HTMLFormElement>(null);
   const { user } = useAuthContext();
   const { register, handleSubmit } = useForm<CreateChatroomFormInput>();
   const mutation = useMutation<JoinChatroom, Error, MutationArgs>({
@@ -81,7 +69,6 @@ const NewChatButton = () => {
       >
         <h2>Create a Chatroom</h2>
         <form
-          ref={formRef}
           id="new-chat-form"
           onSubmit={handleSubmit(onSubmit)}
         >
@@ -121,7 +108,7 @@ const NewChatButton = () => {
           </div>
           <button type="submit">Create</button>
         </form>
-        <button className="close-btn" onClick={() => setToggle(false)}>
+        <button css={closeButtonStyles} onClick={() => setToggle(false)}>
           X
         </button>
       </Modal>
