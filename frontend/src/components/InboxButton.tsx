@@ -15,8 +15,11 @@ import { iconBtnStyles } from "./Button";
 import { useInvitesStore } from "../hooks/useStores";
 
 const InboxButton = () => {
-  const { user, isLoggedIn } = useAuthContext();
+  const { user } = useAuthContext();
   const theme = useTheme();
+  const invites = useInvitesStore((state) => (state.invites));
+  const setInvites = useInvitesStore((state) => (state.setInvites));
+
   const { data: invitesData } = useQuery<Invite[]>({
     queryKey: ["inbox", user.token],
     queryFn: () =>
@@ -26,17 +29,16 @@ const InboxButton = () => {
       }),
     staleTime: Infinity,
   });
+
   const mutation = useMutation<InviteResponse, Error, MutationArgs>({
     mutationFn: mutationFunction<InviteResponse>,
   });
-  const invites = useInvitesStore((state) => (state.invites));
-  const setInvites = useInvitesStore((state) => (state.setInvites));
 
   useEffect(() => {
     if (invitesData) {
       setInvites(invitesData);
     }
-  }, [isLoggedIn])
+  }, [invitesData])
 
   const handleInviteResponse = (
     event: React.FormEvent,

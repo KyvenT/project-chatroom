@@ -4,7 +4,12 @@ import { NavLink } from "react-router";
 import useToggle from "../hooks/useToggle";
 import Button from "./Button";
 import { UserRoundPlus } from "lucide-react";
-import Modal from "./Modal";
+import Modal, { closeButtonStyles } from "./Modal";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import type { Invite } from "../types/Invite";
+import { useMutation } from "@tanstack/react-query";
+import { mutationFunction, type MutationArgs } from "../hooks/useCustomMutation";
+import useAuthContext from "../hooks/useAuthContext";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
@@ -57,14 +62,44 @@ const inviteBtnStyles = (theme: Theme) =>
     },
   });
 
+const dialogStyles = css({
+  gap: "10px",
+  backgroundColor: "white",
+  borderRadius: "10px",
+  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+  padding: "30px",
+});
+
+interface inviteFormInput {
+  username: string;
+}
+
 const SidebarChatroomButton = ({
   isActive = false,
   children,
   chatroomId,
 }: SidebarChatroomButtonProps) => {
   const theme = useTheme();
+  const { user } = useAuthContext();
   const [isHovered, setHovered] = useToggle(false);
   const [inviteModalOpen, setInviteModalOpen] = useToggle();
+  const { register, handleSubmit } = useForm<inviteFormInput>();
+  const mutation = useMutation<Invite, Error, MutationArgs>({
+    mutationFn: mutationFunction<Invite>,
+  });
+  
+  const onSubmit: SubmitHandler<inviteFormInput> = (data) => {
+    const { username } = data;
+    mutation.mutate({
+      fetchUrl: "http://localhost:3000/api/invite/send",
+      method: "POST",
+      user,
+      reqBody: {
+        receiverUsername: username,
+        chatroomId
+      },
+    });
+  }
 
   return (
     <>
@@ -87,9 +122,13 @@ const SidebarChatroomButton = ({
           )}
         </div>
       </li>
-      <Modal open={inviteModalOpen} onClose={() => setInviteModalOpen(false)}>
+      <Modal modalStyles={dialogStyles} open={inviteModalOpen} onClose={() => setInviteModalOpen(false)}>
         <h3>Invite to {children}</h3>
-        <button className="close-btn" onClick={() => setInviteModalOpen(false)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <input {...register("username")} />
+          <button type="submit">Invite</button>
+        </form>
+        <button css={closeButtonStyles} onClick={() => setInviteModalOpen(false)}>
           X
         </button>
       </Modal>
