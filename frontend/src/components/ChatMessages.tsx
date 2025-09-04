@@ -39,14 +39,14 @@ const ChatMessages = () => {
     throw new Error("tried to render chat messages of undefined chatroom id");
   }
   const { data } = useQuery<Message[]>({
-    queryKey: [chatroomId, isLoggedIn, getBefore?.toISOString()],
+    queryKey: [isLoggedIn, getBefore?.toISOString()],
     queryFn: () =>
       queryFunction({
         fetchUrl: `http://localhost:3000/api/messages/${chatroomId}/${getBefore?.toISOString()}`,
         user,
       }),
     enabled: !!getBefore,
-    staleTime: Infinity,
+    staleTime: Infinity
   });
 
   useEffect(() => {
@@ -55,10 +55,9 @@ const ChatMessages = () => {
 
   useEffect(() => {
     if (data) {
-      console.log(data);
       setMessages(data);
       if (!chatRef.current) return;
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+      chatRef.current.scrollTop = 0;
     }
   }, [data, setMessages]);
 
