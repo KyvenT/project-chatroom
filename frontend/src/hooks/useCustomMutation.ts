@@ -5,7 +5,7 @@ export interface MutationArgs {
   method: string;
   user: UserAuth;
   reqBody?: {};
-};
+}
 
 export const mutationFunction = async <T>({
   fetchUrl,
@@ -29,5 +29,5 @@ export const mutationFunction = async <T>({
     throw new Error("mutation error");
   }
 
-  return await res.json() as Promise<T>;
+  return (await res.json()) as Promise<T>;
 };

@@ -4,7 +4,7 @@ export interface QueryArgs {
   fetchUrl: string;
   method?: string;
   user: UserAuth;
-};
+}
 
 export const queryFunction = async <T>({
   fetchUrl,

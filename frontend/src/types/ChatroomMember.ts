@@ -1,7 +1,7 @@
 export interface ChatroomMember {
-    member: {
-        username: string;
-        status: string;
-    },
-    memberId: string;
+  member: {
+    username: string;
+    status: string;
+  };
+  memberId: string;
 }
