@@ -12,10 +12,10 @@ import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useEffect } from "react";
 import type { Theme } from "@emotion/react";
 import Button, { iconBtnStyles } from "../../../components/Button";
-import type { Message } from "../../../types/Message";
 import { useQuery } from "@tanstack/react-query";
 import type { Chatroom } from "../../../types/Chatroom";
 import { queryFunction } from "../../../hooks/useCustomQuery";
+import { wsMessageRouter } from "../../../ws-router/ws-message-router";
 
 const styles = css({
   minHeight: "100dvh",
@@ -65,8 +65,9 @@ function ChatLayout() {
   useEffect(() => {
     if (ws) {
       ws.onmessage = (event) => {
-        const message = JSON.parse(event.data) as Message;
+        const message = JSON.parse(event.data);
         console.log("Message from server: ", message);
+        wsMessageRouter(message);
       };
     }
   }, [ws]);
