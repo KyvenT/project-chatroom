@@ -8,81 +8,81 @@ generator client {
 }
 
 model Chatroom {
-  id                      String                @id @default(uuid())
-  title                   String
-  owner                   User                  @relation(fields: [ownerId], references: [id])
-  ownerId                 String
-  allowGuests             Boolean               @default(false)
-  allowJoinByLink         Boolean               @default(false)
-  allowMembersToInvite    Boolean               @default(false)
-  createdAt               DateTime              @default(now())
-  messages                Message[]           
-  members                 ChatroomMember[]      
-  invites                 Invite[]                          
+  id                   String           @id @default(uuid())
+  title                String
+  owner                User             @relation(fields: [ownerId], references: [id])
+  ownerId              String
+  allowGuests          Boolean          @default(false)
+  allowJoinByLink      Boolean          @default(false)
+  allowMembersToInvite Boolean          @default(false)
+  createdAt            DateTime         @default(now())
+  messages             Message[]
+  members              ChatroomMember[]
+  invites              Invite[]
 }
 
 model Message {
-  id              String      @id @default(uuid())
-  content         String
-  senderUser      User        @relation(fields: [senderUserId], references: [id], onDelete: SetDefault)
-  senderUserId    String      @default("b532df46-e953-415c-b9c0-5489ce777e70") // user ID to represent deleted users
-  chatroom        Chatroom    @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
-  chatroomId      String
-  notifications   Notification[]
-  createdAt       DateTime    @default(now())
-  editedAt        DateTime?
+  id            String         @id @default(uuid())
+  content       String
+  senderUser    User           @relation(fields: [senderUserId], references: [id], onDelete: SetDefault)
+  senderUserId  String         @default("b532df46-e953-415c-b9c0-5489ce777e70") // user ID to represent deleted users
+  chatroom      Chatroom       @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  chatroomId    String
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+  editedAt      DateTime?
 }
 
 model User {
-  id                String      @id @default(uuid())
-  email             String?     @unique
-  username          String      @unique 
-  passwordHash      String
-  status            Status      @default(ONLINE)
-  createdAt         DateTime    @default(now())
-  isGuest           Boolean     @default(false)
-  sentMessages      Message[]
-  joinedChatrooms   ChatroomMember[]
-  ownedChatrooms    Chatroom[]
-  sentInvites       Invite[]    @relation("SentInvite")
-  receivedInvites   Invite[]    @relation("ReceivedInvite")
-  notifications     Notification[]
+  id              String           @id @default(uuid())
+  email           String?          @unique
+  username        String           @unique
+  passwordHash    String
+  status          Status           @default(ONLINE)
+  createdAt       DateTime         @default(now())
+  isGuest         Boolean          @default(false)
+  sentMessages    Message[]
+  joinedChatrooms ChatroomMember[]
+  ownedChatrooms  Chatroom[]
+  sentInvites     Invite[]         @relation("SentInvite")
+  receivedInvites Invite[]         @relation("ReceivedInvite")
+  notifications   Notification[]
 }
 
 model ChatroomMember {
-  member      User        @relation(fields: [memberId], references: [id])
-  memberId    String
-  chatroom    Chatroom    @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
-  chatroomId  String
-  joinedAt    DateTime    @default(now())
+  member     User     @relation(fields: [memberId], references: [id])
+  memberId   String
+  chatroom   Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  chatroomId String
+  joinedAt   DateTime @default(now())
 
   @@id([chatroomId, memberId])
 }
 
 model Invite {
-  id              String          @id @default(uuid())
-  sender          User            @relation("SentInvite", fields: [senderId], references: [id], onDelete: Cascade)
-  senderId        String
-  receiver        User            @relation("ReceivedInvite", fields: [receiverId], references: [id], onDelete: Cascade)
-  receiverId      String
-  chatroom        Chatroom        @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
-  chatroomId      String
-  notification    Notification    @relation(fields: [notificationId], references: [id], onDelete: Cascade)
-  notificationId  String          @unique
-  status          InviteStatus    @default(PENDING)
-  sentAt          DateTime        @default(now())
+  id           String        @id @default(uuid())
+  sender       User          @relation("SentInvite", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId     String
+  receiver     User          @relation("ReceivedInvite", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId   String
+  chatroom     Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  chatroomId   String
+  status       InviteStatus  @default(PENDING)
+  sentAt       DateTime      @default(now())
+  notification Notification?
 }
 
 model Notification {
-  id          String      @id @default(uuid())
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  isRead      Boolean     @default(false)
-  createdAt   DateTime    @default(now())
-  type        NotificationType
-  invite      Invite?
-  message     Message?    @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  messageId   String?
+  id        String           @id @default(uuid())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  type      NotificationType
+  invite    Invite?          @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  inviteId  String?          @unique
+  message   Message?         @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String?
 }
 
 enum NotificationType {

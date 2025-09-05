@@ -1,9 +1,6 @@
 import Prisma from "../../prisma/prisma.js";
 import { Request, Response, Router } from "express";
-import {
-  createNotification,
-  sendNotification,
-} from "../../wss/notification.js";
+import { handleNewNotification } from "../../wss/notification.js";
 
 export const invitesRouter = Router();
 
@@ -70,22 +67,31 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
       return;
     }
 
-    const receiverId = receiver.id;
-    const notification = await createNotification("INVITE", receiverId);
-    if (!notification)
-      throw new Error("Failed to create notification for invite");
     const invite = await Prisma.invite.create({
       data: {
         senderId,
-        receiverId,
+        receiverId: receiver.id,
         chatroomId,
-        notificationId: notification.id,
+      },
+      include: {
+        chatroom: {
+          select: {
+            title: true,
+          },
+        },
+        sender: {
+          select: {
+            username: true,
+          },
+        },
       },
     });
-    sendNotification(notification);
 
-    res.status(201).json(invite);
-    return;
+    handleNewNotification("INVITE", receiver.id, {
+      invite,
+    });
+
+    res.status(201).json({ message: "Invite sent successfully" });
   } catch (err: any) {
     console.error(err);
     res
@@ -171,13 +177,13 @@ invitesRouter.delete("/delete", async (req: Request, res: Response) => {
       return;
     }
 
-    const inviteDelete = await Prisma.invite.delete({
+    await Prisma.invite.delete({
       where: {
         id: inviteId,
       },
     });
 
-    res.status(200).json({ message: "Invite deleted" });
+    res.status(200).json({ message: "Invite deleted", inviteId });
     console.log("Invite deleted");
     return;
   } catch (err: any) {
