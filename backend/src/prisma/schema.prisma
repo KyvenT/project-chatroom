@@ -50,11 +50,13 @@ model User {
 }
 
 model ChatroomMember {
-  member     User     @relation(fields: [memberId], references: [id])
-  memberId   String
-  chatroom   Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
-  chatroomId String
-  joinedAt   DateTime @default(now())
+  member       User          @relation(fields: [memberId], references: [id])
+  memberId     String
+  chatroom     Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  chatroomId   String
+  role         ChatroomRoles @default(MEMBER)
+  joinedAt     DateTime      @default(now())
+  lastViewedAt DateTime      @default(now())
 
   @@id([chatroomId, memberId])
 }
@@ -99,4 +101,10 @@ enum Status {
 enum InviteStatus {
   ACCEPTED
   PENDING
+}
+
+enum ChatroomRoles {
+  OWNER
+  ADMIN
+  MEMBER
 }

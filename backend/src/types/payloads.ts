@@ -37,3 +37,15 @@ export interface MembersPayload {
   };
   memberId: string;
 }
+
+export interface MessagePayload {
+  senderUser: {
+    username: string;
+  };
+  id: string;
+  chatroomId: string;
+  createdAt: Date;
+  content: string;
+  senderUserId: string;
+  editedAt: Date | null;
+}

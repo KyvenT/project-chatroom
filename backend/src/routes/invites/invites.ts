@@ -1,6 +1,7 @@
 import Prisma from "../../prisma/prisma.js";
 import { Request, Response, Router } from "express";
 import { handleNewNotification } from "../../wss/notification.js";
+import { InvitePayload, JoinChatroomPayload } from "../../types/payloads.js";
 
 export const invitesRouter = Router();
 
@@ -14,7 +15,7 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
   console.log("get invites for " + userId);
 
   try {
-    const invites = await Prisma.invite.findMany({
+    const invites = (await Prisma.invite.findMany({
       where: {
         receiverId: userId,
         status: "PENDING",
@@ -31,7 +32,7 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
           },
         },
       },
-    });
+    })) as InvitePayload[];
 
     res.status(201).json(invites);
     return;
@@ -67,7 +68,7 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
       return;
     }
 
-    const invite = await Prisma.invite.create({
+    const invite = (await Prisma.invite.create({
       data: {
         senderId,
         receiverId: receiver.id,
@@ -85,7 +86,7 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
           },
         },
       },
-    });
+    })) as InvitePayload;
 
     handleNewNotification("INVITE", receiver.id, {
       invite,
@@ -120,7 +121,7 @@ invitesRouter.patch("/accept", async (req: Request, res: Response) => {
       },
     });
 
-    const join = await Prisma.chatroomMember.create({
+    const join = (await Prisma.chatroomMember.create({
       data: {
         memberId: userId,
         chatroomId: invite.chatroomId,
@@ -132,7 +133,7 @@ invitesRouter.patch("/accept", async (req: Request, res: Response) => {
           },
         },
       },
-    });
+    })) as JoinChatroomPayload;
 
     res.status(200).json({ ...join });
     console.log("invite accepted");
