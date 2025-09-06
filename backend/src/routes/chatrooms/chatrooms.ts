@@ -2,6 +2,7 @@ import { Request, Response, Router } from "express";
 import Prisma from "../../prisma/prisma.js";
 import { ChatroomPayload, JoinChatroomPayload } from "../../types/payloads.js";
 import { $Enums } from "@prisma/client";
+import { sendJoinChatroomEvent } from "../../wss/chatroom-join.js";
 
 export const chatroomRouter = Router();
 
@@ -14,7 +15,7 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
   }
 
   try {
-    const chatroomsData = (await Prisma.chatroomMember.findMany({
+    const chatroomsData = await Prisma.chatroomMember.findMany({
       where: {
         memberId: userId,
       },
@@ -27,19 +28,21 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
           },
         },
       },
-    })) as ChatroomPayload[];
-
-    const chatroomPromises = chatroomsData.map(async (chatroom) => {
-      const unreadMessages = await Prisma.message.count({
-        where: {
-          chatroomId: chatroom.chatroomId,
-          createdAt: {
-            gt: chatroom.lastViewedAt,
-          },
-        },
-      });
-      return { ...chatroom, unreadMessages };
     });
+
+    const chatroomPromises: Promise<ChatroomPayload>[] = chatroomsData.map(
+      async (chatroom) => {
+        const unreadMessages = await Prisma.message.count({
+          where: {
+            chatroomId: chatroom.chatroomId,
+            createdAt: {
+              gt: chatroom.lastViewedAt,
+            },
+          },
+        });
+        return { ...chatroom, unreadMessages };
+      }
+    );
 
     const chatrooms = await Promise.all(chatroomPromises);
 
@@ -80,16 +83,14 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
         chatroomId: chatroom.id,
         role: $Enums.ChatroomRoles.OWNER,
       },
-      include: {
-        chatroom: {
-          select: {
-            title: true,
-          },
-        },
+      omit: {
+        lastViewedAt: true,
       },
     })) as JoinChatroomPayload;
 
-    res.status(201).json({ ...ownerJoin });
+    sendJoinChatroomEvent(chatroom.id, userId);
+
+    res.status(201).json(ownerJoin);
     console.log(`Chatroom created: ${title}`);
     return;
   } catch (error: any) {
@@ -134,16 +135,15 @@ chatroomRouter.post("/join", async (req: Request, res: Response) => {
         memberId: userId,
         chatroomId,
       },
-      include: {
-        chatroom: {
-          select: {
-            title: true,
-          },
-        },
+      omit: {
+        lastViewedAt: true,
+        role: true,
       },
     })) as JoinChatroomPayload;
 
-    res.status(200).json({ ...join });
+    sendJoinChatroomEvent(chatroom.id, userId);
+
+    res.status(200).json(join);
     console.log(`Chatroom joined: ${join}`);
     return;
   } catch (error: any) {

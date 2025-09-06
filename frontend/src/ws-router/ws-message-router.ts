@@ -1,7 +1,11 @@
-import type { JoinChatroom } from "../types/REST-types/Chatroom";
+import type { Chatroom, JoinChatroom } from "../types/REST-types/Chatroom";
 import type { Invite } from "../types/REST-types/Invite";
 import type { Message } from "../types/REST-types/Message";
-import { useInvitesStore, useMessagesStore } from "../hooks/useStores";
+import {
+  useChatroomsStore,
+  useInvitesStore,
+  useMessagesStore,
+} from "../hooks/useStores";
 
 export const wsMessageRouter = (message: any) => {
   switch (message.type) {
@@ -23,6 +27,10 @@ export const wsMessageRouter = (message: any) => {
       break;
     case "join-chatroom":
       console.log("join chatroom received");
+      useChatroomsStore.getState().addChatroom(message.chatroom as Chatroom);
+      break;
+    case "new-member":
+      console.log("new member joined");
       break;
     default:
       console.log("Unknown message type: " + message.type);

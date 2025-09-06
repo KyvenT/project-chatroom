@@ -39,7 +39,8 @@ const MemberList = () => {
         fetchUrl: "http://localhost:3000/api/members/" + chatroomId,
         user,
       }),
-    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    staleTime: 0,
   });
 
   const memberStatusMap = useMemo(() => {
@@ -49,7 +50,6 @@ const MemberList = () => {
     );
     return map;
   }, [data]);
-  console.log("members: " + data);
 
   return (
     <div css={[styles, colors(theme)]}>

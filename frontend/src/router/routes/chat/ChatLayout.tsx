@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Chatroom } from "../../../types/REST-types/Chatroom";
 import { queryFunction } from "../../../hooks/useCustomQuery";
 import { wsMessageRouter } from "../../../ws-router/ws-message-router";
+import { useChatroomsStore } from "../../../hooks/useStores";
 
 const styles = css({
   minHeight: "100dvh",
@@ -51,8 +52,10 @@ function ChatLayout() {
   const { chatroomId } = useParams();
   const { ws } = useWebSocketContext();
   const theme = useTheme();
+  const setChatroomList = useChatroomsStore((state) => (state.setChatroomList));
+  const chatrooms = useChatroomsStore((state) => (state.chatrooms));
 
-  const { data } = useQuery<Chatroom[]>({
+  const { data: chatroomsData } = useQuery<Chatroom[]>({
     queryKey: ["chatrooms", isLoggedIn],
     queryFn: () =>
       queryFunction<Chatroom[]>({
@@ -61,6 +64,10 @@ function ChatLayout() {
       }),
     staleTime: Infinity,
   });
+
+  useEffect(() => {
+    if (chatroomsData) setChatroomList(chatroomsData);
+  }, [chatroomsData])
 
   useEffect(() => {
     if (ws) {
@@ -74,7 +81,7 @@ function ChatLayout() {
 
   return (
     <div css={[styles, colors(theme)]}>
-      {sidebarToggled && <Sidebar chatrooms={data} />}
+      {sidebarToggled && <Sidebar chatrooms={chatrooms} />}
       <div className="container">
         <Header>
           <Button

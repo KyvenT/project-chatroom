@@ -1,17 +1,14 @@
 import { create } from "zustand";
-import type { Chatroom } from "../types/Chatroom";
-import type { Message } from "../types/Message";
-import type { Invite } from "../types/Invite";
-
-interface ChatroomState extends Chatroom {
-  unreadMessages: number;
-  lastViewedAt: string;
-}
+import type { Chatroom } from "../types/REST-types/Chatroom";
+import type { Message } from "../types/REST-types/Message";
+import type { Invite } from "../types/REST-types/Invite";
+import type { ChatroomMember } from "../types/REST-types/ChatroomMember";
 
 interface ChatroomListState {
-  chatrooms: ChatroomState[];
-  addChatroom: (newChatroom: ChatroomState) => void;
+  chatrooms: Chatroom[];
+  addChatroom: (newChatroom: Chatroom) => void;
   emptyChatroomList: () => void;
+  setChatroomList: (chatrooms: Chatroom[]) => void;
 }
 
 export const useChatroomsStore = create<ChatroomListState>((set) => ({
@@ -19,6 +16,7 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
   addChatroom: (newChatroom) =>
     set((state) => ({ chatrooms: [...state.chatrooms, newChatroom] })),
   emptyChatroomList: () => set({ chatrooms: [] }),
+  setChatroomList: (chatrooms) => set({ chatrooms }),
 }));
 
 interface MessageListState {

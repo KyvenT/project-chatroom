@@ -2,6 +2,7 @@ import Prisma from "../../prisma/prisma.js";
 import { Request, Response, Router } from "express";
 import { handleNewNotification } from "../../wss/notification.js";
 import { InvitePayload, JoinChatroomPayload } from "../../types/payloads.js";
+import { sendJoinChatroomEvent } from "../../wss/chatroom-join.js";
 
 export const invitesRouter = Router();
 
@@ -126,16 +127,15 @@ invitesRouter.patch("/accept", async (req: Request, res: Response) => {
         memberId: userId,
         chatroomId: invite.chatroomId,
       },
-      include: {
-        chatroom: {
-          select: {
-            title: true,
-          },
-        },
+      omit: {
+        lastViewedAt: true,
+        role: true,
       },
     })) as JoinChatroomPayload;
 
-    res.status(200).json({ ...join });
+    sendJoinChatroomEvent(invite.chatroomId, userId);
+
+    res.status(200).json(join);
     console.log("invite accepted");
     return;
   } catch (err: any) {

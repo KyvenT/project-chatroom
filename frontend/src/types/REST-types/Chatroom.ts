@@ -8,8 +8,8 @@ export interface Chatroom {
 }
 
 export interface JoinChatroom {
-  title: string;
+  joinedAt: Date;
   chatroomId: string;
   memberId: string;
-  joinedAt: Date;
+  role?: string;
 }
