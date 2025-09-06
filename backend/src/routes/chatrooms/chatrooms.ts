@@ -14,12 +14,13 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
   }
 
   try {
-    const chatrooms = (await Prisma.chatroomMember.findMany({
+    const chatroomsData = (await Prisma.chatroomMember.findMany({
       where: {
         memberId: userId,
       },
       select: {
         chatroomId: true,
+        lastViewedAt: true,
         chatroom: {
           select: {
             title: true,
@@ -27,6 +28,20 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
         },
       },
     })) as ChatroomPayload[];
+
+    const chatroomPromises = chatroomsData.map(async (chatroom) => {
+      const unreadMessages = await Prisma.message.count({
+        where: {
+          chatroomId: chatroom.chatroomId,
+          createdAt: {
+            gt: chatroom.lastViewedAt,
+          },
+        },
+      });
+      return { ...chatroom, unreadMessages };
+    });
+
+    const chatrooms = await Promise.all(chatroomPromises);
 
     res.status(201).json(chatrooms);
     console.log("retrieved chatrooms");

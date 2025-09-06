@@ -19,6 +19,8 @@ export interface ChatroomPayload {
   chatroom: {
     title: string;
   };
+  lastViewedAt: Date;
+  unreadMessages: number;
 }
 
 export interface JoinChatroomPayload {

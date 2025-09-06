@@ -82,6 +82,7 @@ const Sidebar = ({chatrooms}: SidebarProps) => {
                 key={chatroom.chatroomId}
                 isActive={chatroomId === chatroom.chatroomId}
                 chatroomId={chatroom.chatroomId}
+                unreadMessages={chatroom.unreadMessages}
               >
                 {chatroom.chatroom.title}
               </SidebarChatroomButton>

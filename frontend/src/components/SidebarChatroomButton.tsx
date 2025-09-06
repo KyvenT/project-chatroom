@@ -14,10 +14,12 @@ import useAuthContext from "../hooks/useAuthContext";
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
   chatroomId: string;
+  unreadMessages: number;
   children: string;
 }
 
 const styles = css({
+  position: "relative",
   width: "100%",
 
   div: {
@@ -27,6 +29,7 @@ const styles = css({
     display: "flex",
     alignItems: "center",
     height: "2rem",
+    borderStyle: "solid"
   },
 
   ".chatroomLink": {
@@ -34,12 +37,25 @@ const styles = css({
     textDecoration: "none",
     userSelect: "none",
   },
+
+  ".unreadBadge": {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    aspectRatio: 1,
+    borderRadius: "50%",
+    fontSize: "1rem",
+    width: "1rem",
+    textAlign: "center",
+    userSelect: "none"
+  }
 });
 
 const dynamicStyles = (theme: Theme, isActive: boolean) =>
   css({
     div: {
       backgroundColor: isActive ? theme.colors.white : "inherit",
+      borderColor: isActive ? theme.colors.white : theme.colors.dark_grey,
     },
 
     "div:hover": {
@@ -49,6 +65,11 @@ const dynamicStyles = (theme: Theme, isActive: boolean) =>
     ".chatroomLink": {
       color: isActive ? theme.colors.black : theme.colors.white,
     },
+
+    ".unreadBadge": {
+      backgroundColor: "red",
+      color: theme.colors.white
+    }
   });
 
 const inviteBtnStyles = (theme: Theme) =>
@@ -56,6 +77,7 @@ const inviteBtnStyles = (theme: Theme) =>
     color: theme.colors.light_grey,
     aspectRatio: 1,
     height: "100%",
+    textAlign: "center",
 
     "&:hover": {
       color: theme.colors.black,
@@ -78,6 +100,7 @@ const SidebarChatroomButton = ({
   isActive = false,
   children,
   chatroomId,
+  unreadMessages
 }: SidebarChatroomButtonProps) => {
   const theme = useTheme();
   const { user } = useAuthContext();
@@ -111,13 +134,14 @@ const SidebarChatroomButton = ({
           <NavLink className="chatroomLink" to={"/chat/" + chatroomId}>
             {children}
           </NavLink>
+          {unreadMessages > 0 && <span className="unreadBadge">{unreadMessages}</span>}
           {isHovered && (
             <Button
               onClick={() => setInviteModalOpen()}
               variant="icon"
               otherStyles={inviteBtnStyles(theme)}
             >
-              {<UserRoundPlus />}
+              {<UserRoundPlus size={"1.25rem"} />}
             </Button>
           )}
         </div>
