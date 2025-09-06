@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import type { UserAuth } from "../types/User";
+import type { UserAuth } from "../types/REST-types/User";
 
 interface AuthContextProviderProps {
   children: React.ReactNode;

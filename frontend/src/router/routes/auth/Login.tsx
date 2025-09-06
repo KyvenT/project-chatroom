@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import useAuthContext from "../../../hooks/useAuthContext";
-import type { UserAuth } from "../../../types/User";
+import type { UserAuth } from "../../../types/REST-types/User";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 
 const Login = () => {

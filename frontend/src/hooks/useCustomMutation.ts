@@ -1,4 +1,4 @@
-import type { UserAuth } from "../types/User";
+import type { UserAuth } from "../types/REST-types/User";
 
 export interface MutationArgs {
   fetchUrl: string;

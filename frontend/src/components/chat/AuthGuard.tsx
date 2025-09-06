@@ -1,8 +1,8 @@
 import { css } from "@emotion/react";
 import { Link } from "react-router";
-import Modal from "./Modal";
-import useToggle from "../hooks/useToggle";
-import useAuthContext from "../hooks/useAuthContext";
+import Modal from "../Modal";
+import useToggle from "../../hooks/useToggle";
+import useAuthContext from "../../hooks/useAuthContext";
 import { ArrowLeftIcon } from "lucide-react";
 
 const styles = css({

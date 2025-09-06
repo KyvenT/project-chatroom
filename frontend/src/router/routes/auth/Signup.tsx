@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import type { UserAuth } from "../../../types/User";
+import type { UserAuth } from "../../../types/REST-types/User";
 import useAuthContext from "../../../hooks/useAuthContext";
 
 const Signup = () => {

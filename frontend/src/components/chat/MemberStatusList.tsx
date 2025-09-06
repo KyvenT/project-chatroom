@@ -1,5 +1,5 @@
 import { css, useTheme } from "@emotion/react";
-import type { BidirectionalGroupedMap } from "../lib/bidirectionGroupedMap";
+import type { BidirectionalGroupedMap } from "../../lib/bidirectionGroupedMap";
 import type { Theme } from "@emotion/react";
 
 interface MemberStatusList {

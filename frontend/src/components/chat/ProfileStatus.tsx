@@ -1,5 +1,5 @@
 import { css, useTheme } from "@emotion/react";
-import useAuthContext from "../hooks/useAuthContext";
+import useAuthContext from "../../hooks/useAuthContext";
 import type { Theme } from "@emotion/react";
 
 const STATUS_COLORS = {

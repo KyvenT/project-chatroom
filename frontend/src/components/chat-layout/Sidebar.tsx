@@ -2,9 +2,9 @@ import { css, useTheme, type Theme } from "@emotion/react";
 import SidebarChatroomButton from "./SidebarChatroomButton";
 import NewChatButton from "./NewChatButton";
 import { Link, useParams } from "react-router";
-import type { Chatroom } from "../types/Chatroom";
+import type { Chatroom } from "../../types/REST-types/Chatroom";
 import { HomeIcon } from "lucide-react";
-import { iconBtnStyles } from "./Button";
+import { iconBtnStyles } from "../Button";
 
 const sidebarStyles = css({
   display: "flex",

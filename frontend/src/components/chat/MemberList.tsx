@@ -1,10 +1,10 @@
-import useAuthContext from "../hooks/useAuthContext";
-import type { ChatroomMember } from "../types/ChatroomMember";
+import useAuthContext from "../../hooks/useAuthContext";
+import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
 import { useParams } from "react-router";
 import { useMemo } from "react";
-import { BidirectionalGroupedMap } from "../lib/bidirectionGroupedMap";
+import { BidirectionalGroupedMap } from "../../lib/bidirectionGroupedMap";
 import MemberStatusList from "./MemberStatusList";
-import { queryFunction } from "../hooks/useCustomQuery";
+import { queryFunction } from "../../hooks/useCustomQuery";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import ProfileStatus from "./ProfileStatus";

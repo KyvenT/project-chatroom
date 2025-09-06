@@ -1,8 +1,8 @@
 import { css, useTheme, type Theme } from "@emotion/react";
-import ChatMessages from "../../../components/ChatMessages";
-import MessageInput from "../../../components/MessageInput";
+import ChatMessages from "../../../components/chat/ChatMessages";
+import MessageInput from "../../../components/chat/MessageInput";
 import { useParams } from "react-router";
-import MemberList from "../../../components/MemberList";
+import MemberList from "../../../components/chat/MemberList";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useEffect, useRef } from "react";

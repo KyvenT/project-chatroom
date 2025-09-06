@@ -1,12 +1,12 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessage from "./ChatMessage";
-import useAuthContext from "../hooks/useAuthContext";
-import type { Message } from "../types/Message";
-import { queryFunction } from "../hooks/useCustomQuery";
+import useAuthContext from "../../hooks/useAuthContext";
+import type { Message } from "../../types/REST-types/Message";
+import { queryFunction } from "../../hooks/useCustomQuery";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMessagesStore } from "../hooks/useStores";
+import { useMessagesStore } from "../../hooks/useStores";
 
 const styles = css({
   minHeight: "100%",

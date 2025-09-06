@@ -1,11 +1,11 @@
 import { css, useTheme } from "@emotion/react";
-import Sidebar from "../../../components/Sidebar";
+import Sidebar from "../../../components/chat-layout/Sidebar";
 import { Outlet } from "react-router";
 import useToggle from "../../../hooks/useToggle";
-import Header from "../../../components/Header";
+import Header from "../../../components/chat-layout/Header";
 import DropdownButton from "../../../components/DropdownButton";
 import { Link, useNavigate, useParams } from "react-router";
-import InboxButton from "../../../components/InboxButton";
+import InboxButton from "../../../components/chat-layout/InboxButton";
 import { ArrowLeftToLine, MenuIcon, User } from "lucide-react";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
@@ -13,7 +13,7 @@ import { useEffect } from "react";
 import type { Theme } from "@emotion/react";
 import Button, { iconBtnStyles } from "../../../components/Button";
 import { useQuery } from "@tanstack/react-query";
-import type { Chatroom } from "../../../types/Chatroom";
+import type { Chatroom } from "../../../types/REST-types/Chatroom";
 import { queryFunction } from "../../../hooks/useCustomQuery";
 import { wsMessageRouter } from "../../../ws-router/ws-message-router";
 

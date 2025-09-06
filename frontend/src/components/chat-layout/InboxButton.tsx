@@ -1,18 +1,18 @@
 import React, { useEffect } from "react";
-import useAuthContext from "../hooks/useAuthContext";
-import { queryFunction } from "../hooks/useCustomQuery";
-import type { Invite, InviteResponse } from "../types/Invite";
-import DropdownButton from "./DropdownButton";
+import useAuthContext from "../../hooks/useAuthContext";
+import { queryFunction } from "../../hooks/useCustomQuery";
+import type { Invite, InviteResponse } from "../../types/REST-types/Invite";
+import DropdownButton from "../DropdownButton";
 import {
   mutationFunction,
   type MutationArgs,
-} from "../hooks/useCustomMutation";
+} from "../../hooks/useCustomMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Mail } from "lucide-react";
 import { useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
-import { iconBtnStyles } from "./Button";
-import { useInvitesStore } from "../hooks/useStores";
+import { iconBtnStyles } from "../Button";
+import { useInvitesStore } from "../../hooks/useStores";
 
 const InboxButton = () => {
   const { user } = useAuthContext();

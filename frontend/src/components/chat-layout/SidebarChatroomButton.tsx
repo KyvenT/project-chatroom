@@ -1,15 +1,15 @@
 import type { Theme } from "@emotion/react";
 import { css, useTheme } from "@emotion/react";
 import { NavLink } from "react-router";
-import useToggle from "../hooks/useToggle";
-import Button from "./Button";
+import useToggle from "../../hooks/useToggle";
+import Button from "../Button";
 import { UserRoundPlus } from "lucide-react";
-import Modal, { closeButtonStyles } from "./Modal";
+import Modal, { closeButtonStyles } from "../Modal";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import type { Invite } from "../types/Invite";
+import type { Invite } from "../../types/REST-types/Invite";
 import { useMutation } from "@tanstack/react-query";
-import { mutationFunction, type MutationArgs } from "../hooks/useCustomMutation";
-import useAuthContext from "../hooks/useAuthContext";
+import { mutationFunction, type MutationArgs } from "../../hooks/useCustomMutation";
+import useAuthContext from "../../hooks/useAuthContext";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;

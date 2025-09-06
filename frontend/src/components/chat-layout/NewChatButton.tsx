@@ -1,16 +1,16 @@
 import { css } from "@emotion/react";
-import useToggle from "../hooks/useToggle";
-import Button from "./Button";
+import useToggle from "../../hooks/useToggle";
+import Button from "../Button";
 import { useMutation } from "@tanstack/react-query";
 import {
   mutationFunction,
   type MutationArgs,
-} from "../hooks/useCustomMutation";
-import type { JoinChatroom } from "../types/Chatroom";
-import useAuthContext from "../hooks/useAuthContext";
+} from "../../hooks/useCustomMutation";
+import type { JoinChatroom } from "../../types/REST-types/Chatroom";
+import useAuthContext from "../../hooks/useAuthContext";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
-import Modal, { closeButtonStyles } from "./Modal";
+import Modal, { closeButtonStyles } from "../Modal";
 
 const buttonStyles = css({
   fontSize: "1.5rem",
