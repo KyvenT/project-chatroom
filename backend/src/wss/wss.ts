@@ -3,6 +3,7 @@ import { socketMap, userActiveChatroomMap } from "../lib/socketMaps.js";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { wsMessageRouter } from "./router.js";
 import Prisma from "../prisma/prisma.js";
+import { updateLastViewedAt } from "./update-unread-count.js";
 
 export const startWSS = (
   server: Server<typeof IncomingMessage, typeof ServerResponse>
@@ -23,7 +24,9 @@ export const startWSS = (
       const userId = socketMap.getByValue(ws);
 
       if (userId) {
-        if (userActiveChatroomMap.hasKey(userId)) {
+        const chatroom = userActiveChatroomMap.getByKey(userId);
+        if (chatroom) {
+          updateLastViewedAt(chatroom, userId);
           userActiveChatroomMap.deleteByKey(userId);
         }
         socketMap.deleteByValue(ws);

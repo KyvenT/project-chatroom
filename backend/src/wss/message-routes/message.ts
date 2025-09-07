@@ -2,8 +2,9 @@ import Prisma from "../../prisma/prisma.js";
 import WebSocket from "ws";
 import { ChatMessage } from "../../types/ws-messages.js";
 import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
-import type { Message } from "@prisma/client";
+import { NotificationType, type Message } from "@prisma/client";
 import { handleNewNotification } from "../notification.js";
+import { sendUpdateUnreadMessage } from "../update-unread-count.js";
 
 const createMessage = async (
   userId: string,
@@ -50,9 +51,7 @@ const createMessage = async (
 };
 
 const sendToRecipients = async (
-  userId: string,
-  message: Message & { senderUser: { username: string } },
-  ws: WebSocket
+  message: Message & { senderUser: { username: string } }
 ) => {
   try {
     const activeRecipients = userActiveChatroomMap.getByValue(
@@ -98,12 +97,52 @@ const sendToRecipients = async (
       }
     });
 
-    nonActiveRecipients.forEach((recipient) => {
-      handleNewNotification("MESSAGE", recipient.memberId, {
-        chatroomId: message.chatroomId,
-        senderId: message.senderUserId,
-        messageId: message.id,
+    nonActiveRecipients.forEach(async (recipient) => {
+      const member = await Prisma.chatroomMember.findUnique({
+        where: {
+          chatroomId_memberId: {
+            chatroomId: message.chatroomId,
+            memberId: recipient.memberId,
+          },
+        },
+        select: {
+          lastViewedAt: true,
+        },
       });
+
+      if (!member) {
+        console.error("member not found");
+        return;
+      }
+
+      // handle unread message count sends
+      const unreadMessages = await Prisma.message.count({
+        where: {
+          chatroomId: message.chatroomId,
+          senderUserId: {
+            not: recipient.memberId,
+          },
+          createdAt: {
+            gt: member.lastViewedAt,
+          },
+        },
+      });
+
+      sendUpdateUnreadMessage(
+        message.chatroomId,
+        recipient.memberId,
+        unreadMessages
+      );
+
+      /*
+      handleNewNotification(NotificationType.MENTION, recipient.memberId, {
+        mention: {
+          chatroomId: message.chatroomId,
+          senderId: message.senderUserId,
+          messageId: message.id,
+        },
+      });
+      */
     });
   } catch (err) {
     console.error(err);
@@ -126,5 +165,5 @@ export const handleChatMessage = async (
     console.error("message creation failed");
     return;
   }
-  sendToRecipients(user, createdMessage, ws);
+  sendToRecipients(createdMessage);
 };

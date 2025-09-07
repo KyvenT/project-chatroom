@@ -1,38 +1,40 @@
 import Prisma from "../prisma/prisma.js";
-import type {
-  Notification,
-  NotificationType,
-  Message,
-  Invite,
-} from "@prisma/client";
+import { Notification, NotificationType } from "@prisma/client";
 import { socketMap } from "../lib/socketMaps.js";
 import { InvitePayload } from "../types/payloads.js";
 
+// TODO: create unread messages notif type, change messages to send it
+// figure out mentions (use notifications array on each msg), need to add on frontend
+
+export interface MentionPayload {
+  chatroomId: string;
+  senderId: string;
+  messageId: string;
+}
+
 export interface NotificationOptions {
-  chatroomId?: string;
-  senderId?: string;
-  messageId?: string;
+  mention?: MentionPayload;
   invite?: InvitePayload;
 }
 
 export const createNotification = async (
   type: NotificationType,
   userId: string,
-  options: NotificationOptions = {}
+  options: NotificationOptions
 ) => {
   const queryOptions: any = {};
   switch (type) {
-    case "INVITE":
+    case NotificationType.INVITE:
       if (!options.invite) {
         console.error("Invite is required for INVITE notification");
       }
       queryOptions.inviteId = options.invite?.id;
       break;
-    case "MESSAGE":
-      if (!options.messageId) {
-        console.error("Message is required for MESSAGE notification");
+    case NotificationType.MENTION:
+      if (!options.mention?.messageId) {
+        console.error("Message is required for MENTION notification");
       }
-      queryOptions.messageId = options.messageId;
+      queryOptions.messageId = options.mention?.messageId;
       break;
     default:
       console.error("Invalid notification type");
@@ -51,7 +53,7 @@ export const createNotification = async (
 
 export const sendNotification = async (
   notification: Notification,
-  options: NotificationOptions = {}
+  options: NotificationOptions
 ) => {
   try {
     const recipientSocket = socketMap.getByKey(notification.userId);
@@ -64,9 +66,7 @@ export const sendNotification = async (
             type: notification.type,
             createdAt: notification.createdAt,
             payload: {
-              chatroom: options.chatroomId,
-              sender: options.senderId,
-              messageId: options.messageId,
+              mention: options.mention,
               invite: options.invite,
             },
           },
@@ -81,7 +81,7 @@ export const sendNotification = async (
 export const handleNewNotification = async (
   type: NotificationType,
   userId: string,
-  options: NotificationOptions = {}
+  options: NotificationOptions
 ) => {
   try {
     const notification = await createNotification(type, userId, options);

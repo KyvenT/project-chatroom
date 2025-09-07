@@ -9,6 +9,7 @@ interface ChatroomListState {
   addChatroom: (newChatroom: Chatroom) => void;
   emptyChatroomList: () => void;
   setChatroomList: (chatrooms: Chatroom[]) => void;
+  updateChatroomUnread: (newUnreadCount: number, chatroomId: string) => void;
 }
 
 export const useChatroomsStore = create<ChatroomListState>((set) => ({
@@ -17,6 +18,15 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
     set((state) => ({ chatrooms: [...state.chatrooms, newChatroom] })),
   emptyChatroomList: () => set({ chatrooms: [] }),
   setChatroomList: (chatrooms) => set({ chatrooms }),
+  updateChatroomUnread: (newUnreadCount, chatroomId) =>
+    set((state) => ({
+      chatrooms: state.chatrooms.map((chatroom) => {
+        if (chatroom.chatroomId === chatroomId) {
+          return { ...chatroom, unreadMessages: newUnreadCount };
+        }
+        return chatroom;
+      }),
+    })),
 }));
 
 interface MessageListState {
@@ -42,6 +52,7 @@ interface InviteListState {
   addNewInvite: (newInvite: Invite) => void;
   setInvites: (invites: Invite[]) => void;
   clearInvites: () => void;
+  removeInvite: (inviteId: string) => void;
 }
 
 export const useInvitesStore = create<InviteListState>((set) => ({
@@ -50,4 +61,24 @@ export const useInvitesStore = create<InviteListState>((set) => ({
     set((state) => ({ invites: [newInvite, ...state.invites] })),
   setInvites: (invites) => set({ invites }),
   clearInvites: () => set({ invites: [] }),
+  removeInvite: (inviteId) =>
+    set((state) => ({
+      invites: state.invites.filter((invite) => {
+        invite.id === inviteId;
+      }),
+    })),
+}));
+
+interface MembersListState {
+  members: ChatroomMember[];
+  addNewMember: (newMember: ChatroomMember) => void;
+  setMembers: (membersList: ChatroomMember[]) => void;
+}
+
+export const useMembersStore = create<MembersListState>((set) => ({
+  members: [],
+  addNewMember: (newMember) =>
+    set((state) => ({ members: [...state.members, newMember] })),
+  setMembers: (membersList) => set({ members: membersList }),
+  clearMembers: () => set({ members: [] }),
 }));

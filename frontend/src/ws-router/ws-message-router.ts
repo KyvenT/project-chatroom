@@ -1,4 +1,4 @@
-import type { Chatroom, JoinChatroom } from "../types/REST-types/Chatroom";
+import type { Chatroom } from "../types/REST-types/Chatroom";
 import type { Invite } from "../types/REST-types/Invite";
 import type { Message } from "../types/REST-types/Message";
 import {
@@ -6,6 +6,7 @@ import {
   useInvitesStore,
   useMessagesStore,
 } from "../hooks/useStores";
+import type { UpdateUnreadMessage } from "../types/ws-messages";
 
 export const wsMessageRouter = (message: any) => {
   switch (message.type) {
@@ -19,11 +20,26 @@ export const wsMessageRouter = (message: any) => {
     case "notification":
       console.log("notif received");
       console.log(message);
-      if (message.notification.type === "INVITE") {
-        useInvitesStore
-          .getState()
-          .addNewInvite(message.notification.payload.invite as Invite);
+      switch (message.notification.type) {
+        case "INVITE":
+          useInvitesStore
+            .getState()
+            .addNewInvite(message.notification.payload.invite as Invite);
+          break;
+        case "MENTION":
+          break;
+        case "NEW_MESSAGE":
+          break;
+        default:
+          console.log("Unknown notif type: " + message.notification.type);
       }
+      break;
+    case "unread-update":
+      console.log("unread update");
+      const { unreadMessages, chatroomId } = message as UpdateUnreadMessage;
+      useChatroomsStore
+        .getState()
+        .updateChatroomUnread(unreadMessages, chatroomId);
       break;
     case "join-chatroom":
       console.log("join chatroom received");
