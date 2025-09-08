@@ -78,7 +78,7 @@ function ChatLayout() {
     } else {
       setChatroomTitle(chatroomId);
     }
-  }, [chatroomId])
+  }, [chatroomId, chatrooms])
 
   useEffect(() => {
     if (chatroomsData) setChatroomList(chatroomsData);
