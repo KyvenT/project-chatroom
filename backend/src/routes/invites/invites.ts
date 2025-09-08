@@ -3,6 +3,7 @@ import { Request, Response, Router } from "express";
 import { handleNewNotification } from "../../wss/notification.js";
 import { InvitePayload, JoinChatroomPayload } from "../../types/payloads.js";
 import { sendJoinChatroomEvent } from "../../wss/chatroom-join.js";
+import { $Enums } from "@prisma/client";
 
 export const invitesRouter = Router();
 
@@ -28,6 +29,11 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
           },
         },
         sender: {
+          select: {
+            username: true,
+          },
+        },
+        receiver: {
           select: {
             username: true,
           },
@@ -86,6 +92,11 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
             username: true,
           },
         },
+        receiver: {
+          select: {
+            username: true,
+          },
+        },
       },
     })) as InvitePayload;
 
@@ -102,8 +113,8 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
   }
 });
 
-invitesRouter.patch("/accept", async (req: Request, res: Response) => {
-  const { inviteId } = req.body;
+invitesRouter.patch("/respond", async (req: Request, res: Response) => {
+  const { inviteId, status } = req.body;
   const userId = req.userId;
 
   if (!userId) {
@@ -118,9 +129,11 @@ invitesRouter.patch("/accept", async (req: Request, res: Response) => {
         receiverId: userId,
       },
       data: {
-        status: "ACCEPTED",
+        status,
       },
     });
+
+    if (status === $Enums.InviteStatus.REJECTED) return;
 
     const join = (await Prisma.chatroomMember.create({
       data: {
@@ -186,11 +199,50 @@ invitesRouter.delete("/delete", async (req: Request, res: Response) => {
 
     res.status(200).json({ message: "Invite deleted", inviteId });
     console.log("Invite deleted");
-    return;
   } catch (err: any) {
     console.error("Invite delete error");
     res
       .status(500)
       .json({ error: "Server error occurred during invite deletion" });
+  }
+});
+
+invitesRouter.get("/:chatroomId", async (req: Request, res: Response) => {
+  const { chatroomId } = req.params;
+
+  try {
+    const invites = (await Prisma.invite.findMany({
+      where: {
+        chatroomId,
+        status: {
+          not: $Enums.InviteStatus.ACCEPTED,
+        },
+      },
+      include: {
+        chatroom: {
+          select: {
+            title: true,
+          },
+        },
+        sender: {
+          select: {
+            username: true,
+          },
+        },
+        receiver: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    })) as InvitePayload[];
+
+    res.status(200).json(invites);
+    console.log("Invites retrieved for " + chatroomId);
+  } catch (err) {
+    console.error("invites fetch error for " + chatroomId);
+    res.status(500).json({
+      error: "Server error occurred during invites fetch of chatroom",
+    });
   }
 });

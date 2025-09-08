@@ -1,4 +1,7 @@
 export interface Invite {
+  receiver: {
+    username: string;
+  };
   sender: {
     username: string;
   };

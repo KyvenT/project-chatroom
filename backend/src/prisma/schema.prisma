@@ -101,6 +101,7 @@ enum Status {
 enum InviteStatus {
   ACCEPTED
   PENDING
+  REJECTED
 }
 
 enum ChatroomRoles {

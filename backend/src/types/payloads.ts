@@ -4,6 +4,9 @@ export interface InvitePayload {
   sender: {
     username: string;
   };
+  receiver: {
+    username: string;
+  };
   chatroom: {
     title: string;
   };

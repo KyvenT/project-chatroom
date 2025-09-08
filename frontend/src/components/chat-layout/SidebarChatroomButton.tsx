@@ -7,9 +7,10 @@ import { UserRoundPlus } from "lucide-react";
 import Modal, { closeButtonStyles } from "../Modal";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import type { Invite } from "../../types/REST-types/Invite";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { mutationFunction, type MutationArgs } from "../../hooks/useCustomMutation";
 import useAuthContext from "../../hooks/useAuthContext";
+import { queryFunction } from "../../hooks/useCustomQuery";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
@@ -110,9 +111,18 @@ const SidebarChatroomButton = ({
   const mutation = useMutation<Invite, Error, MutationArgs>({
     mutationFn: mutationFunction<Invite>,
   });
+  const {data: invitesData} = useQuery<Invite[]>({
+    queryKey: ["inviteList", chatroomId], 
+    queryFn: () => queryFunction({
+      fetchUrl: "http://localhost:3000/api/invite/" + chatroomId,
+      method: "GET",
+      user
+    }),
+    staleTime: Infinity
+  })
   
-  const onSubmit: SubmitHandler<inviteFormInput> = (data) => {
-    const { username } = data;
+  const onSubmit: SubmitHandler<inviteFormInput> = (formData) => {
+    const { username } = formData;
     mutation.mutate({
       fetchUrl: "http://localhost:3000/api/invite/send",
       method: "POST",
@@ -152,6 +162,16 @@ const SidebarChatroomButton = ({
           <input {...register("username")} />
           <button type="submit">Invite</button>
         </form>
+        <ul>
+          {invitesData?.map((invite) => 
+          <li key={invite.id}>
+            <div>
+              <h4>{invite.receiver.username}</h4>
+              <p>Status: {invite.status}</p>
+              <p>Invited at: {invite.sentAt.toLocaleString()}</p>
+            </div>
+          </li>)}
+        </ul>
         <button css={closeButtonStyles} onClick={() => setInviteModalOpen(false)}>
           X
         </button>

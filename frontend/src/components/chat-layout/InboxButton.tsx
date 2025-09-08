@@ -47,23 +47,21 @@ const InboxButton = () => {
     event.preventDefault();
     const inviteId = (event.target as HTMLButtonElement).form?.id;
 
+    let status;
     if (userAccepted) {
       console.log("Invite accepted");
-      mutation.mutate({
-        fetchUrl: "http://localhost:3000/api/invite/accept",
-        user,
-        method: "PATCH",
-        reqBody: { inviteId },
-      });
+      status = "ACCEPTED";
     } else {
       console.log("Invite rejected");
-      mutation.mutate({
-        fetchUrl: "http://localhost:3000/api/invite/delete",
-        user,
-        method: "DELETE",
-        reqBody: { inviteId },
-      });
+      status = "REJECTED";
     }
+
+    mutation.mutate({
+      fetchUrl: "http://localhost:3000/api/invite/respond",
+      user,
+      method: "PATCH",
+      reqBody: { inviteId, status },
+    });
     const responseData = mutation.data;
     console.log(responseData);
   };
