@@ -1,7 +1,6 @@
 import WebSocket from "ws";
 import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
 import { UpdateActiveChatroomMessage } from "../../types/ws-messages.js";
-import Prisma from "../../prisma/prisma.js";
 import {
   sendUpdateUnreadMessage,
   updateLastViewedAt,
@@ -24,8 +23,8 @@ export const updateActiveChatroom = async (
 
     if (!prevChatroom) return;
 
-    const updatePrev = updateLastViewedAt(prevChatroom, userId);
-    const updateCurrent = updateLastViewedAt(chatroomId, userId);
+    updateLastViewedAt(prevChatroom, userId);
+    updateLastViewedAt(chatroomId, userId);
     sendUpdateUnreadMessage(chatroomId, userId, 0);
 
     console.log(

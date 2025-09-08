@@ -5,7 +5,7 @@ export const updateLastViewedAt = async (
   chatroomId: string,
   userId: string
 ) => {
-  const update = await Prisma.chatroomMember.update({
+  await Prisma.chatroomMember.update({
     data: { lastViewedAt: new Date() },
     where: {
       chatroomId_memberId: {

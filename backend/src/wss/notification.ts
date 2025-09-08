@@ -3,7 +3,7 @@ import { Notification, NotificationType } from "@prisma/client";
 import { socketMap } from "../lib/socketMaps.js";
 import { InvitePayload } from "../types/payloads.js";
 
-// TODO: create unread messages notif type, change messages to send it
+// TODO:
 // figure out mentions (use notifications array on each msg), need to add on frontend
 
 export interface MentionPayload {

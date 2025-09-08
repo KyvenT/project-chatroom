@@ -9,7 +9,7 @@ import InboxButton from "../../../components/chat-layout/InboxButton";
 import { ArrowLeftToLine, MenuIcon, User } from "lucide-react";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Theme } from "@emotion/react";
 import Button, { iconBtnStyles } from "../../../components/Button";
 import { useQuery } from "@tanstack/react-query";
@@ -54,6 +54,7 @@ function ChatLayout() {
   const theme = useTheme();
   const setChatroomList = useChatroomsStore((state) => (state.setChatroomList));
   const chatrooms = useChatroomsStore((state) => (state.chatrooms));
+  const [chatroomTitle, setChatroomTitle] = useState<string>("Welcome");
 
   const { data: chatroomsData } = useQuery<Chatroom[]>({
     queryKey: ["chatrooms", isLoggedIn],
@@ -64,6 +65,20 @@ function ChatLayout() {
       }),
     staleTime: Infinity,
   });
+
+  useEffect(() => {
+    if (!chatroomId) {
+      setChatroomTitle("Welcome");
+      return;
+    }
+
+    const chatroom = chatrooms.find((chatroom) => chatroom.chatroomId === chatroomId);
+    if (chatroom?.chatroomId === chatroomId) {
+      setChatroomTitle(chatroom.chatroom.title);
+    } else {
+      setChatroomTitle(chatroomId);
+    }
+  }, [chatroomId])
 
   useEffect(() => {
     if (chatroomsData) setChatroomList(chatroomsData);
@@ -91,7 +106,7 @@ function ChatLayout() {
           >
             {sidebarToggled ? <ArrowLeftToLine /> : <MenuIcon />}
           </Button>
-          <h1>{chatroomId || "Welcome"}</h1>
+          <h1>{chatroomTitle}</h1>
           {isLoggedIn ? (
             <>
               <InboxButton />
