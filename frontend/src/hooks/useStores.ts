@@ -73,6 +73,7 @@ interface MembersListState {
   members: ChatroomMember[];
   addNewMember: (newMember: ChatroomMember) => void;
   setMembers: (membersList: ChatroomMember[]) => void;
+  updateMember: (member: ChatroomMember) => void;
 }
 
 export const useMembersStore = create<MembersListState>((set) => ({
@@ -81,4 +82,16 @@ export const useMembersStore = create<MembersListState>((set) => ({
     set((state) => ({ members: [...state.members, newMember] })),
   setMembers: (membersList) => set({ members: membersList }),
   clearMembers: () => set({ members: [] }),
+  updateMember: (member) =>
+    set((state) => ({
+      members: state.members.map((mem) => {
+        if (member.memberId === mem.memberId) {
+          return {
+            ...mem,
+            member: { ...mem.member, status: member.member.status },
+          };
+        }
+        return mem;
+      }),
+    })),
 }));

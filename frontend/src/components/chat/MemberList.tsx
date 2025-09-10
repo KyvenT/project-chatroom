@@ -1,14 +1,15 @@
 import useAuthContext from "../../hooks/useAuthContext";
 import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
 import { useParams } from "react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { BidirectionalGroupedMap } from "../../lib/bidirectionGroupedMap";
 import MemberStatusList from "./MemberStatusList";
 import { queryFunction } from "../../hooks/useCustomQuery";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
-import ProfileStatus from "./ProfileStatus";
+import ProfileStatus, { type Status } from "./ProfileStatus";
 import { useQuery } from "@tanstack/react-query";
+import { useMembersStore } from "../../hooks/useStores";
 
 const styles = css({
   display: "flex",
@@ -27,6 +28,8 @@ const MemberList = () => {
   const { user, isLoggedIn } = useAuthContext();
   const { chatroomId } = useParams();
   const theme = useTheme();
+  const members = useMembersStore((state) => state.members);
+  const setMembers = useMembersStore((state) => state.setMembers);
 
   if (!isLoggedIn || !chatroomId) {
     return <p>Please log in to see the member list.</p>;
@@ -43,22 +46,39 @@ const MemberList = () => {
     staleTime: 0,
   });
 
-  const memberStatusMap = useMemo(() => {
-    const map = new BidirectionalGroupedMap<string, string>();
-    data?.forEach((chatMember) =>
-      map.set(chatMember.member.username, chatMember.member.status),
-    );
-    return map;
+  useEffect(() => {
+    if (!data) return;
+    setMembers(data);
   }, [data]);
+
+  const { onlineList, awayList, offlineList, status } = useMemo(() => {
+    const memberStatusMap = new BidirectionalGroupedMap<string, Status>();
+    members.forEach((chatMember) =>
+      memberStatusMap.set(chatMember.member.username, chatMember.member.status),
+    );
+
+    console.log("recalc members status list");
+
+    const onlineList = [...(memberStatusMap?.getByValue("ONLINE") ?? [])];
+    const awayList = [...(memberStatusMap?.getByValue("AWAY") ?? [])];
+    const offlineList = [...(memberStatusMap?.getByValue("OFFLINE") ?? [])];
+    const status = memberStatusMap?.getByKey(user.username);
+
+    return { onlineList, awayList, offlineList, status };
+  }, [members, user.username]);
 
   return (
     <div css={[styles, colors(theme)]}>
       <div>
-        <MemberStatusList memberStatusMap={memberStatusMap} status="ONLINE" />
-        <MemberStatusList memberStatusMap={memberStatusMap} status="AWAY" />
-        <MemberStatusList memberStatusMap={memberStatusMap} status="OFFLINE" />
+        {onlineList && (
+          <MemberStatusList members={onlineList} status="ONLINE" />
+        )}
+        {awayList && <MemberStatusList members={awayList} status="AWAY" />}
+        {offlineList && (
+          <MemberStatusList members={offlineList} status="OFFLINE" />
+        )}
       </div>
-      <ProfileStatus status={memberStatusMap.getByKey(user.username) || ""} />
+      <ProfileStatus status={status || "OFFLINE"} />
     </div>
   );
 };

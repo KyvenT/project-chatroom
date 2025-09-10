@@ -4,9 +4,11 @@ import type { Message } from "../types/REST-types/Message";
 import {
   useChatroomsStore,
   useInvitesStore,
+  useMembersStore,
   useMessagesStore,
 } from "../hooks/useStores";
 import type { UpdateUnreadMessage } from "../types/ws-messages";
+import type { ChatroomMember } from "../types/REST-types/ChatroomMember";
 
 export const wsMessageRouter = (message: any) => {
   switch (message.type) {
@@ -47,6 +49,10 @@ export const wsMessageRouter = (message: any) => {
       break;
     case "new-member":
       console.log("new member joined");
+      break;
+    case "status-update":
+      console.log("received status update");
+      useMembersStore.getState().updateMember(message.member as ChatroomMember);
       break;
     default:
       console.log("Unknown message type: " + message.type);

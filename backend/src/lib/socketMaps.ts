@@ -50,6 +50,14 @@ export class BidirectionalMap<T1, T2> {
   forEachValue(callbackFn: (key: T1, value: T2, map: Map<T2, T1>) => void) {
     return this.valueToKey.forEach(callbackFn);
   }
+
+  keys() {
+    return this.keyToValue.keys;
+  }
+
+  values() {
+    return this.keyToValue.values;
+  }
 }
 
 export const socketMap = new BidirectionalMap<string, WebSocket>();
@@ -115,6 +123,14 @@ export class BidirectionalGroupedMap<T1, T2> {
 
   forEach(callbackFn: (value: T2, key: T1, map: Map<T1, T2>) => void) {
     return this.keyToValue.forEach(callbackFn);
+  }
+
+  keys() {
+    return this.keyToValue.keys;
+  }
+
+  values() {
+    return this.keyToValue.values;
   }
 }
 

@@ -1,9 +1,8 @@
 import { css, useTheme } from "@emotion/react";
-import type { BidirectionalGroupedMap } from "../../lib/bidirectionGroupedMap";
 import type { Theme } from "@emotion/react";
 
 interface MemberStatusList {
-  memberStatusMap: BidirectionalGroupedMap<string, string>;
+  members: string[];
   status: string;
 }
 
@@ -41,14 +40,14 @@ const colors = (theme: Theme) =>
     },
   });
 
-const MemberStatusList = ({ memberStatusMap, status }: MemberStatusList) => {
+const MemberStatusList = ({ members, status }: MemberStatusList) => {
   const theme = useTheme();
 
   return (
     <div css={[styles, colors(theme)]}>
       <h3>{status}</h3>
       <ul>
-        {memberStatusMap.getByValueAsArray(status)?.map((username) => (
+        {members.map((username) => (
           <li key={username}>
             <p>{username}</p>
           </li>
