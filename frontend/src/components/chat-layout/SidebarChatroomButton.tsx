@@ -124,15 +124,15 @@ const SidebarChatroomButton = ({
   const onSubmit: SubmitHandler<inviteFormInput> = (formData) => {
     const { username } = formData;
     mutation.mutate({
-      fetchUrl: "http://localhost:3000/api/invite/send",
+      fetchUrl: "http://localhost:3000/api/invites/send",
       method: "POST",
       user,
       reqBody: {
         receiverUsername: username,
-        chatroomId
+        chatroomId,
       },
     });
-  }
+  };
 
   return (
     <>

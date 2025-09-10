@@ -45,7 +45,7 @@ const NewChatButton = () => {
     const { title, linkPrivacy, guestPrivacy, allowMembersToInvite } = data;
     setToggle(false);
     mutation.mutate({
-      fetchUrl: "http://localhost:3000/api/chatroom/create",
+      fetchUrl: "http://localhost:3000/api/chatrooms/create",
       method: "POST",
       user,
       reqBody: {
@@ -68,10 +68,7 @@ const NewChatButton = () => {
         onClose={() => setToggle(false)}
       >
         <h2>Create a Chatroom</h2>
-        <form
-          id="new-chat-form"
-          onSubmit={handleSubmit(onSubmit)}
-        >
+        <form id="new-chat-form" onSubmit={handleSubmit(onSubmit)}>
           <label htmlFor="chatroomName">Chatroom name: </label>
           <input
             {...register("title")}

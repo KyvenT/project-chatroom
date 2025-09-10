@@ -60,7 +60,7 @@ function ChatLayout() {
     queryKey: ["chatrooms", isLoggedIn],
     queryFn: () =>
       queryFunction<Chatroom[]>({
-        fetchUrl: "http://localhost:3000/api/chatroom/me",
+        fetchUrl: "http://localhost:3000/api/chatrooms/me",
         user,
       }),
     staleTime: Infinity,

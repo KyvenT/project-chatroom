@@ -17,14 +17,14 @@ import { useInvitesStore } from "../../hooks/useStores";
 const InboxButton = () => {
   const { user } = useAuthContext();
   const theme = useTheme();
-  const invites = useInvitesStore((state) => (state.invites));
-  const setInvites = useInvitesStore((state) => (state.setInvites));
+  const invites = useInvitesStore((state) => state.invites);
+  const setInvites = useInvitesStore((state) => state.setInvites);
 
   const { data: invitesData } = useQuery<Invite[]>({
     queryKey: ["inbox", user.token],
     queryFn: () =>
       queryFunction<Invite[]>({
-        fetchUrl: "http://localhost:3000/api/invite/me",
+        fetchUrl: "http://localhost:3000/api/invites/me",
         user,
       }),
     staleTime: Infinity,
@@ -38,7 +38,7 @@ const InboxButton = () => {
     if (invitesData) {
       setInvites(invitesData);
     }
-  }, [invitesData])
+  }, [invitesData]);
 
   const handleInviteResponse = (
     event: React.FormEvent,
@@ -57,7 +57,7 @@ const InboxButton = () => {
     }
 
     mutation.mutate({
-      fetchUrl: "http://localhost:3000/api/invite/respond",
+      fetchUrl: "http://localhost:3000/api/invites/respond",
       user,
       method: "PATCH",
       reqBody: { inviteId, status },
