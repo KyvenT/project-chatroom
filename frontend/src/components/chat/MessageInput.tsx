@@ -83,7 +83,12 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
   return (
     <div css={[styles, colors(theme)]}>
       <form onSubmit={(event) => handleSubmit(event)} id="message-form">
-        <input ref={messageInputRef} type="text" placeholder="Message..." />
+        <input
+          ref={messageInputRef}
+          type="text"
+          placeholder="Message..."
+          autoFocus
+        />
         <button type="submit" form="message-form">
           <SendHorizonal size={"1.25rem"} />
         </button>

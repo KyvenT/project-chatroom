@@ -68,28 +68,24 @@ const InboxButton = () => {
 
   return (
     <DropdownButton buttonText={<Mail />} buttonStyles={iconBtnStyles(theme)}>
+      {invites.length === 0 && <p>No invites received</p>}
       <ul>
-        {invites &&
-          invites.map((invite) => {
-            return (
-              <li key={invite.id}>
-                <h5>{invite.chatroom.title}</h5>
-                <p>Invited by: {invite.sender.username}</p>
-                <form id={invite.id}>
-                  <button
-                    onClick={(event) => handleInviteResponse(event, true)}
-                  >
-                    Accept
-                  </button>
-                  <button
-                    onClick={(event) => handleInviteResponse(event, false)}
-                  >
-                    Reject
-                  </button>
-                </form>
-              </li>
-            );
-          })}
+        {invites.map((invite) => {
+          return (
+            <li key={invite.id}>
+              <h5>{invite.chatroom.title}</h5>
+              <p>Invited by: {invite.sender.username}</p>
+              <form id={invite.id}>
+                <button onClick={(event) => handleInviteResponse(event, true)}>
+                  Accept
+                </button>
+                <button onClick={(event) => handleInviteResponse(event, false)}>
+                  Reject
+                </button>
+              </form>
+            </li>
+          );
+        })}
       </ul>
     </DropdownButton>
   );

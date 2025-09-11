@@ -49,6 +49,7 @@ const Login = () => {
           placeholder="Username..."
           maxLength={20}
           required
+          autoFocus
         />
         <input
           type="password"

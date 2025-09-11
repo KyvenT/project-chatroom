@@ -5,6 +5,7 @@ import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
 import { NotificationType, type Message } from "@prisma/client";
 import { handleNewNotification } from "../notification.js";
 import { sendUpdateUnreadMessage } from "../update-unread-count.js";
+import { MessagePayload } from "../../types/payloads.js";
 
 const createMessage = async (
   userId: string,
@@ -50,9 +51,7 @@ const createMessage = async (
   }
 };
 
-const sendToRecipients = async (
-  message: Message & { senderUser: { username: string } }
-) => {
+const sendToRecipients = async (message: MessagePayload) => {
   try {
     const activeRecipients = userActiveChatroomMap.getByValue(
       message.chatroomId

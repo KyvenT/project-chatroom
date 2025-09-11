@@ -65,6 +65,8 @@ export const InviteModal = ({
         method: "GET",
         user,
       }),
+    enabled: inviteModalOpen,
+    refetchOnWindowFocus: false,
     staleTime: 0,
   });
   const mutation = useMutation<Invite, Error, MutationArgs>({

@@ -35,13 +35,15 @@ interface CreateChatroomFormInput {
 
 const NewChatButton = () => {
   const [isToggled, setToggle] = useToggle(false);
-  const { user } = useAuthContext();
+  const { user, isLoggedIn } = useAuthContext();
   const { register, handleSubmit } = useForm<CreateChatroomFormInput>();
   const mutation = useMutation<JoinChatroom, Error, MutationArgs>({
     mutationFn: mutationFunction<JoinChatroom>,
   });
 
   const onSubmit: SubmitHandler<CreateChatroomFormInput> = (data) => {
+    if (!isLoggedIn) return;
+
     const { title, linkPrivacy, guestPrivacy, allowMembersToInvite } = data;
     setToggle(false);
     mutation.mutate({
@@ -103,7 +105,9 @@ const NewChatButton = () => {
               Allow members to invite
             </label>
           </div>
-          <button type="submit">Create</button>
+          <button type="submit" disabled={!isLoggedIn}>
+            Create
+          </button>
         </form>
         <button css={closeButtonStyles} onClick={() => setToggle(false)}>
           X
