@@ -1,7 +1,8 @@
 import { css, type SerializedStyles } from "@emotion/react";
 import type React from "react";
 
-interface ModalProps extends React.DialogHTMLAttributes<HTMLDialogElement> {
+export interface ModalProps
+  extends React.DialogHTMLAttributes<HTMLDialogElement> {
   modalStyles?: SerializedStyles;
 }
 
@@ -13,7 +14,7 @@ export const closeButtonStyles = css({
   border: "none",
   cursor: "pointer",
   fontSize: "1rem",
-})
+});
 
 const dialogStyles = css({
   position: "absolute",

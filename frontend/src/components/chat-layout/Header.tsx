@@ -5,10 +5,6 @@ const headerStyles = css({
   alignItems: "center",
   padding: "0 10px",
   gap: "10px",
-
-  h1: {
-    flexGrow: 1,
-  },
 });
 
 const headerColors = (theme: Theme) => ({

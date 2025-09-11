@@ -10,7 +10,7 @@ import { useEffect, useRef } from "react";
 
 const chatStyles = css({
   minHeight: "100%",
-  flexGrow: 1,
+  flex: 1,
   display: "grid",
   gridTemplateRows: "90% 10%",
   gridTemplateColumns: "85% 15%",

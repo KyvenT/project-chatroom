@@ -17,6 +17,7 @@ import type { Chatroom } from "../../../types/REST-types/Chatroom";
 import { queryFunction } from "../../../hooks/useCustomQuery";
 import { wsMessageRouter } from "../../../ws-router/ws-message-router";
 import { useChatroomsStore } from "../../../hooks/useStores";
+import { ChatroomDetailsModal } from "../../../components/chat-layout/ChatroomDetailsModal";
 
 const styles = css({
   minHeight: "100dvh",
@@ -36,6 +37,16 @@ const styles = css({
     backgroundColor: "red",
     overflow: "hidden",
   },
+
+  ".blankSpace": {
+    flex: 1,
+  },
+
+  h1: {
+    userSelect: "none",
+    fontSize: "2rem",
+    fontWeight: "550",
+  },
 });
 
 const colors = (theme: Theme) =>
@@ -45,6 +56,14 @@ const colors = (theme: Theme) =>
     },
   });
 
+const titleStyles = (theme: Theme) =>
+  css({
+    fontSize: "2rem",
+    fontWeight: "550",
+    padding: 0,
+    color: theme.colors.white,
+  });
+
 function ChatLayout() {
   const [sidebarToggled, setSidebarToggled] = useToggle(false);
   const navigate = useNavigate();
@@ -52,9 +71,10 @@ function ChatLayout() {
   const { chatroomId } = useParams();
   const { ws } = useWebSocketContext();
   const theme = useTheme();
-  const setChatroomList = useChatroomsStore((state) => (state.setChatroomList));
-  const chatrooms = useChatroomsStore((state) => (state.chatrooms));
-  const [chatroomTitle, setChatroomTitle] = useState<string>("Welcome");
+  const setChatroomList = useChatroomsStore((state) => state.setChatroomList);
+  const chatrooms = useChatroomsStore((state) => state.chatrooms);
+  const [chatroomTitle, setChatroomTitle] = useState<string | null>(null);
+  const [openChatroomDetails, setOpenChatroomDetails] = useToggle(false);
 
   const { data: chatroomsData } = useQuery<Chatroom[]>({
     queryKey: ["chatrooms", isLoggedIn],
@@ -68,21 +88,23 @@ function ChatLayout() {
 
   useEffect(() => {
     if (!chatroomId) {
-      setChatroomTitle("Welcome");
+      setChatroomTitle(null);
       return;
     }
 
-    const chatroom = chatrooms.find((chatroom) => chatroom.chatroomId === chatroomId);
+    const chatroom = chatrooms.find(
+      (chatroom) => chatroom.chatroomId === chatroomId,
+    );
     if (chatroom?.chatroomId === chatroomId) {
       setChatroomTitle(chatroom.chatroom.title);
     } else {
       setChatroomTitle(chatroomId);
     }
-  }, [chatroomId, chatrooms])
+  }, [chatroomId, chatrooms]);
 
   useEffect(() => {
     if (chatroomsData) setChatroomList(chatroomsData);
-  }, [chatroomsData])
+  }, [chatroomsData]);
 
   useEffect(() => {
     if (ws) {
@@ -106,7 +128,26 @@ function ChatLayout() {
           >
             {sidebarToggled ? <ArrowLeftToLine /> : <MenuIcon />}
           </Button>
-          <h1>{chatroomTitle}</h1>
+          {chatroomTitle ? (
+            <Button
+              onClick={() => setOpenChatroomDetails(true)}
+              variant="icon"
+              otherStyles={titleStyles(theme)}
+            >
+              {chatroomTitle}
+            </Button>
+          ) : (
+            <h1>Welcome</h1>
+          )}
+          {chatroomId && (
+            <ChatroomDetailsModal
+              open={openChatroomDetails}
+              onClose={() => setOpenChatroomDetails(false)}
+              chatroomId={chatroomId}
+              user={user}
+            />
+          )}
+          <div className="blankSpace"></div>
           {isLoggedIn ? (
             <>
               <InboxButton />
