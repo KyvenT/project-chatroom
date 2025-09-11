@@ -56,10 +56,10 @@ const colors = (theme: Theme) =>
   });
 
 type SidebarProps = {
-  chatrooms: Chatroom[] | undefined,
-}
+  chatrooms: Chatroom[] | undefined;
+};
 
-const Sidebar = ({chatrooms}: SidebarProps) => {
+const Sidebar = ({ chatrooms }: SidebarProps) => {
   const theme = useTheme();
   const { chatroomId } = useParams();
 
@@ -83,6 +83,8 @@ const Sidebar = ({chatrooms}: SidebarProps) => {
                 isActive={chatroomId === chatroom.chatroomId}
                 chatroomId={chatroom.chatroomId}
                 unreadMessages={chatroom.unreadMessages}
+                allowMembersToInvite={chatroom.chatroom.allowMembersToInvite}
+                ownerId={chatroom.chatroom.ownerId}
               >
                 {chatroom.chatroom.title}
               </SidebarChatroomButton>

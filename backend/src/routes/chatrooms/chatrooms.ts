@@ -25,6 +25,8 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
         chatroom: {
           select: {
             title: true,
+            allowMembersToInvite: true,
+            ownerId: true,
           },
         },
       },
@@ -53,6 +55,62 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
     res
       .status(500)
       .json({ error: "Server error occurred while fetching chatrooms" });
+  }
+});
+
+chatroomRouter.get("/:chatroomId", async (req: Request, res: Response) => {
+  const { chatroomId } = req.params;
+  const userId = req.userId;
+
+  if (!userId) {
+    res
+      .status(400)
+      .json({ error: "Must be signed in to get chatroom details" });
+    return;
+  }
+
+  try {
+    const verifyMembership = await Prisma.chatroomMember.findUnique({
+      where: {
+        chatroomId_memberId: {
+          chatroomId,
+          memberId: userId,
+        },
+      },
+    });
+
+    if (!verifyMembership) {
+      res.status(400).json({ error: "Not detected as a member of chatroom" });
+      return;
+    }
+
+    const chatroomDetails = await Prisma.chatroom.findUnique({
+      select: {
+        id: true,
+        title: true,
+        allowJoinByLink: true,
+        allowGuests: true,
+        allowMembersToInvite: true,
+        ownerId: true,
+        createdAt: true,
+        owner: {
+          select: {
+            username: true,
+          },
+        },
+      },
+      where: {
+        id: chatroomId,
+      },
+    });
+
+    res.status(200).json(chatroomDetails);
+    console.log("fetched chatroom details");
+  } catch (err) {
+    console.error("could not fetch chatroom details", err);
+    res
+      .status(400)
+      .json({ error: "Server error occurred while fetching chatroom details" });
   }
 });
 
@@ -92,7 +150,6 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
 
     res.status(201).json(ownerJoin);
     console.log(`Chatroom created: ${title}`);
-    return;
   } catch (error: any) {
     console.error("Chatroom creation error:", error);
     res
@@ -102,60 +159,64 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
 });
 
 // chatroom join by link
-chatroomRouter.post("/join", async (req: Request, res: Response) => {
-  const { chatroomId } = req.body;
-  const userId = req.userId;
+chatroomRouter.post(
+  "/join/:chatroomId",
+  async (req: Request, res: Response) => {
+    const { chatroomId } = req.params;
+    const userId = req.userId;
 
-  if (!userId) {
-    res.status(400).json({ error: "Must be signed in to join" });
-    return;
-  }
-
-  try {
-    const chatroom = await Prisma.chatroom.findUnique({
-      where: {
-        id: chatroomId,
-      },
-    });
-
-    if (!chatroom) {
-      res.status(404).json({ error: "Chatroom not found" });
+    if (!userId) {
+      res.status(400).json({ error: "Must be signed in to join" });
       return;
     }
 
-    if (!chatroom.allowJoinByLink) {
+    try {
+      const chatroom = await Prisma.chatroom.findUnique({
+        where: {
+          id: chatroomId,
+        },
+      });
+
+      if (!chatroom) {
+        res.status(404).json({ error: "Chatroom not found" });
+        return;
+      }
+
+      if (!chatroom.allowJoinByLink) {
+        res
+          .status(400)
+          .json({ error: "Joining this chatroom requires an invite" });
+        return;
+      }
+
+      const join = (await Prisma.chatroomMember.create({
+        data: {
+          memberId: userId,
+          chatroomId,
+        },
+        omit: {
+          lastViewedAt: true,
+          role: true,
+        },
+      })) as JoinChatroomPayload;
+
+      sendJoinChatroomEvent(chatroom.id, userId);
+
+      res.status(200).json(join);
+      console.log(`Chatroom joined: ${join}`);
+      return;
+    } catch (error: any) {
+      console.error("Chatroom join error:", error);
       res
-        .status(400)
-        .json({ error: "Joining this chatroom requires an invite" });
-      return;
+        .status(500)
+        .json({ error: "Server error occurred during chatroom join" });
     }
-
-    const join = (await Prisma.chatroomMember.create({
-      data: {
-        memberId: userId,
-        chatroomId,
-      },
-      omit: {
-        lastViewedAt: true,
-        role: true,
-      },
-    })) as JoinChatroomPayload;
-
-    sendJoinChatroomEvent(chatroom.id, userId);
-
-    res.status(200).json(join);
-    console.log(`Chatroom joined: ${join}`);
-    return;
-  } catch (error: any) {
-    console.error("Chatroom join error:", error);
-    res
-      .status(500)
-      .json({ error: "Server error occurred during chatroom join" });
   }
-});
+);
 
-chatroomRouter.patch("/rename", async (req: Request, res: Response) => {
-  const { chatroomId, newTitle } = req.body;
+chatroomRouter.patch("/:chatroomId", async (req: Request, res: Response) => {
+  const { chatroomId } = req.params;
+  const { newTitle } = req.body;
   const userId = req.userId;
 
   try {
@@ -180,8 +241,8 @@ chatroomRouter.patch("/rename", async (req: Request, res: Response) => {
   }
 });
 
-chatroomRouter.delete("/delete", async (req: Request, res: Response) => {
-  const { chatroomId } = req.body;
+chatroomRouter.delete("/:chatroomId", async (req: Request, res: Response) => {
+  const { chatroomId } = req.params;
   const userId = req.userId;
 
   try {

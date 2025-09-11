@@ -4,19 +4,16 @@ import { NavLink } from "react-router";
 import useToggle from "../../hooks/useToggle";
 import Button from "../Button";
 import { UserRoundPlus } from "lucide-react";
-import Modal, { closeButtonStyles } from "../Modal";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import type { Invite } from "../../types/REST-types/Invite";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { mutationFunction, type MutationArgs } from "../../hooks/useCustomMutation";
 import useAuthContext from "../../hooks/useAuthContext";
-import { queryFunction } from "../../hooks/useCustomQuery";
+import { InviteModal } from "./InviteModal";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
   chatroomId: string;
   unreadMessages: number;
   children: string;
+  allowMembersToInvite: boolean;
+  ownerId: string;
 }
 
 const styles = css({
@@ -30,7 +27,7 @@ const styles = css({
     display: "flex",
     alignItems: "center",
     height: "2rem",
-    borderStyle: "solid"
+    borderStyle: "solid",
   },
 
   ".chatroomLink": {
@@ -48,8 +45,17 @@ const styles = css({
     fontSize: "1rem",
     width: "1rem",
     textAlign: "center",
-    userSelect: "none"
-  }
+    userSelect: "none",
+  },
+
+  "#inviteForm": {
+    display: "flex",
+    width: "100%",
+  },
+
+  "#inviteForm input": {
+    flex: 1,
+  },
 });
 
 const dynamicStyles = (theme: Theme, isActive: boolean) =>
@@ -69,8 +75,8 @@ const dynamicStyles = (theme: Theme, isActive: boolean) =>
 
     ".unreadBadge": {
       backgroundColor: "red",
-      color: theme.colors.white
-    }
+      color: theme.colors.white,
+    },
   });
 
 const inviteBtnStyles = (theme: Theme) =>
@@ -85,15 +91,7 @@ const inviteBtnStyles = (theme: Theme) =>
     },
   });
 
-const dialogStyles = css({
-  gap: "10px",
-  backgroundColor: "white",
-  borderRadius: "10px",
-  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-  padding: "30px",
-});
-
-interface inviteFormInput {
+export interface inviteFormInput {
   username: string;
 }
 
@@ -101,38 +99,18 @@ const SidebarChatroomButton = ({
   isActive = false,
   children,
   chatroomId,
-  unreadMessages
+  unreadMessages,
+  ownerId,
+  allowMembersToInvite,
 }: SidebarChatroomButtonProps) => {
   const theme = useTheme();
   const { user } = useAuthContext();
   const [isHovered, setHovered] = useToggle(false);
   const [inviteModalOpen, setInviteModalOpen] = useToggle();
-  const { register, handleSubmit } = useForm<inviteFormInput>();
-  const mutation = useMutation<Invite, Error, MutationArgs>({
-    mutationFn: mutationFunction<Invite>,
-  });
-  const {data: invitesData} = useQuery<Invite[]>({
-    queryKey: ["inviteList", chatroomId], 
-    queryFn: () => queryFunction({
-      fetchUrl: "http://localhost:3000/api/invite/" + chatroomId,
-      method: "GET",
-      user
-    }),
-    staleTime: Infinity
-  })
-  
-  const onSubmit: SubmitHandler<inviteFormInput> = (formData) => {
-    const { username } = formData;
-    mutation.mutate({
-      fetchUrl: "http://localhost:3000/api/invites/send",
-      method: "POST",
-      user,
-      reqBody: {
-        receiverUsername: username,
-        chatroomId,
-      },
-    });
-  };
+
+  const canInvite: boolean = allowMembersToInvite
+    ? true
+    : ownerId === user.userId;
 
   return (
     <>
@@ -144,8 +122,10 @@ const SidebarChatroomButton = ({
           <NavLink className="chatroomLink" to={"/chat/" + chatroomId}>
             {children}
           </NavLink>
-          {unreadMessages > 0 && <span className="unreadBadge">{unreadMessages}</span>}
-          {isHovered && (
+          {unreadMessages > 0 && (
+            <span className="unreadBadge">{unreadMessages}</span>
+          )}
+          {isHovered && canInvite && (
             <Button
               onClick={() => setInviteModalOpen()}
               variant="icon"
@@ -156,26 +136,14 @@ const SidebarChatroomButton = ({
           )}
         </div>
       </li>
-      <Modal modalStyles={dialogStyles} open={inviteModalOpen} onClose={() => setInviteModalOpen(false)}>
-        <h3>Invite to {children}</h3>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <input {...register("username")} />
-          <button type="submit">Invite</button>
-        </form>
-        <ul>
-          {invitesData?.map((invite) => 
-          <li key={invite.id}>
-            <div>
-              <h4>{invite.receiver.username}</h4>
-              <p>Status: {invite.status}</p>
-              <p>Invited at: {invite.sentAt.toLocaleString()}</p>
-            </div>
-          </li>)}
-        </ul>
-        <button css={closeButtonStyles} onClick={() => setInviteModalOpen(false)}>
-          X
-        </button>
-      </Modal>
+      <InviteModal
+        inviteModalOpen={inviteModalOpen}
+        chatroomId={chatroomId}
+        title={children}
+        onClose={() => setInviteModalOpen(false)}
+        user={user}
+        canInvite={canInvite}
+      />
     </>
   );
 };

@@ -15,12 +15,15 @@ export interface InvitePayload {
   receiverId: string;
   chatroomId: string;
   status: InviteStatus;
+  sentAt: Date;
 }
 
 export interface ChatroomPayload {
   chatroomId: string;
   chatroom: {
     title: string;
+    allowMembersToInvite: boolean;
+    ownerId: string;
   };
   lastViewedAt: Date;
   unreadMessages: number;

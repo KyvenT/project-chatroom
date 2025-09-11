@@ -2,6 +2,8 @@ export interface Chatroom {
   chatroomId: string;
   chatroom: {
     title: string;
+    allowMembersToInvite: boolean;
+    ownerId: string;
   };
   lastViewedAt: Date;
   unreadMessages: number;

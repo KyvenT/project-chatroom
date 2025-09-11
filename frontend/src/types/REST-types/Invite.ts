@@ -13,7 +13,7 @@ export interface Invite {
   receiverId: string;
   chatroomId: string;
   sentAt: Date;
-  status: "PENDING" | "ACCEPTED";
+  status: "PENDING" | "ACCEPTED" | "REJECTED";
 }
 
 export interface InviteResponse {
