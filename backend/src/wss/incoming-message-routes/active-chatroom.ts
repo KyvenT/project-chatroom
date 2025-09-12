@@ -4,7 +4,7 @@ import { UpdateActiveChatroomMessage } from "../../types/ws-messages.js";
 import {
   sendUpdateUnreadMessage,
   updateLastViewedAt,
-} from "../update-unread-count.js";
+} from "../outgoing-messages/update-unread-count.js";
 import Prisma from "../../prisma/prisma.js";
 
 export const updateActiveChatroom = async (

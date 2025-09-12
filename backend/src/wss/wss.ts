@@ -3,7 +3,7 @@ import { socketMap, userActiveChatroomMap } from "../lib/socketMaps.js";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { wsMessageRouter } from "./router.js";
 import Prisma from "../prisma/prisma.js";
-import { updateLastViewedAt } from "./update-unread-count.js";
+import { updateLastViewedAt } from "./outgoing-messages/update-unread-count.js";
 
 export const startWSS = (
   server: Server<typeof IncomingMessage, typeof ServerResponse>

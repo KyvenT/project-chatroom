@@ -1,7 +1,7 @@
-import Prisma from "../prisma/prisma.js";
+import Prisma from "../../prisma/prisma.js";
 import { Notification, NotificationType } from "@prisma/client";
-import { socketMap } from "../lib/socketMaps.js";
-import { InvitePayload } from "../types/payloads.js";
+import { socketMap } from "../../lib/socketMaps.js";
+import { InvitePayload } from "../../types/payloads.js";
 
 // TODO:
 // figure out mentions (use notifications array on each msg), need to add on frontend

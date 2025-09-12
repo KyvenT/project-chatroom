@@ -1,5 +1,5 @@
-import { socketMap } from "../lib/socketMaps.js";
-import Prisma from "../prisma/prisma.js";
+import { socketMap } from "../../lib/socketMaps.js";
+import Prisma from "../../prisma/prisma.js";
 
 export const updateLastViewedAt = async (
   chatroomId: string,

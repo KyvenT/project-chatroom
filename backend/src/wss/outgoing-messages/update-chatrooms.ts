@@ -1,6 +1,6 @@
-import { socketMap } from "../lib/socketMaps.js";
-import Prisma from "../prisma/prisma.js";
-import { ChatroomPayload } from "../types/payloads.js";
+import { socketMap } from "../../lib/socketMaps.js";
+import Prisma from "../../prisma/prisma.js";
+import { ChatroomPayload } from "../../types/payloads.js";
 
 export const sendUpdateChatrooms = async (
   chatroomId: string,

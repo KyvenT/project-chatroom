@@ -3,8 +3,8 @@ import WebSocket from "ws";
 import { ChatMessage } from "../../types/ws-messages.js";
 import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
 import { NotificationType, type Message } from "@prisma/client";
-import { handleNewNotification } from "../notification.js";
-import { sendUpdateUnreadMessage } from "../update-unread-count.js";
+import { handleNewNotification } from "../outgoing-messages/notification.js";
+import { sendUpdateUnreadMessage } from "../outgoing-messages/update-unread-count.js";
 import { MessagePayload } from "../../types/payloads.js";
 
 const createMessage = async (

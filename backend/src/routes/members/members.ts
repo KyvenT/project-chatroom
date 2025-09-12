@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import Prisma from "../../prisma/prisma.js";
 import { MembersPayload } from "../../types/payloads.js";
-import { sendUpdateChatrooms } from "../../wss/update-chatrooms.js";
+import { sendUpdateChatrooms } from "../../wss/outgoing-messages/update-chatrooms.js";
 
 export const membersRouter = Router();
 

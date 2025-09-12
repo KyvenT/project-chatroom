@@ -1,8 +1,8 @@
 import Prisma from "../../prisma/prisma.js";
 import { Request, Response, Router } from "express";
-import { handleNewNotification } from "../../wss/notification.js";
+import { handleNewNotification } from "../../wss/outgoing-messages/notification.js";
 import { InvitePayload, JoinChatroomPayload } from "../../types/payloads.js";
-import { sendUpdateChatrooms } from "../../wss/update-chatrooms.js";
+import { sendUpdateChatrooms } from "../../wss/outgoing-messages/update-chatrooms.js";
 import { $Enums } from "@prisma/client";
 
 export const invitesRouter = Router();
