@@ -71,6 +71,8 @@ export const wsMessageRouter = (
             navigate("/chat");
           }
           break;
+        default:
+          console.log("unknown action type for updating chatrooms");
       }
       break;
     case "update-members":

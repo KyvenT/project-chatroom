@@ -11,7 +11,7 @@ const createMessage = async (
   userId: string,
   message: ChatMessage,
   ws: WebSocket
-): Promise<(Message & { senderUser: { username: string } }) | undefined> => {
+): Promise<MessagePayload | undefined> => {
   try {
     const createdMessage = (await Prisma.message.create({
       data: {

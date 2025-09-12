@@ -36,7 +36,7 @@ export const updateActiveChatroom = async (
     const verifyNextPromise = Prisma.chatroomMember.findUnique({
       where: {
         chatroomId_memberId: {
-          chatroomId: prevChatroom,
+          chatroomId,
           memberId: userId,
         },
       },

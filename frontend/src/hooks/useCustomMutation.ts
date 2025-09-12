@@ -2,7 +2,7 @@ import type { UserAuth } from "../types/REST-types/User";
 
 export interface MutationArgs {
   fetchUrl: string;
-  method: string;
+  method: "GET" | "POST" | "UPDATE" | "PATCH" | "DELETE";
   user: UserAuth;
   reqBody?: {};
 }

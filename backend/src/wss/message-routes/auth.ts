@@ -5,29 +5,29 @@ import WebSocket from "ws";
 import { AuthMessage } from "../../types/ws-messages.js";
 
 export const authenticateSocket = (message: AuthMessage, ws: WebSocket) => {
-    console.log("currently authenticated websockets: ");
-    socketMap.forEach((value, key) => {
-        console.log(key + ": " + value);
-    })
-    console.log("authenticating websocket");
-    jwt.verify(message.token, env.JWT_SECRET, (err: any, decoded: any) => {
-        if (err) {
-            if (err.name === "TokenExpiredError") {
-                ws.send(JSON.stringify({error: "Expired token"}));
-                return;
-            }
-            ws.send(JSON.stringify({error: err}));
-            return;
-        }
+  console.log("currently authenticated websockets: ");
+  socketMap.forEach((value, key) => {
+    console.log(key + ": " + value);
+  });
+  console.log("authenticating websocket");
+  jwt.verify(message.token, env.JWT_SECRET, (err: any, decoded: any) => {
+    if (err) {
+      if (err.name === "TokenExpiredError") {
+        ws.send(JSON.stringify({ error: "Expired token" }));
+        return;
+      }
+      ws.send(JSON.stringify({ error: err }));
+      return;
+    }
 
-        if (!decoded.userId) {
-            ws.send(JSON.stringify({error: "Error decrypting token"}));
-            return;
-        }
+    if (!decoded.userId) {
+      ws.send(JSON.stringify({ error: "Error decrypting token" }));
+      return;
+    }
 
-        const {userId} = decoded;
+    const { userId } = decoded;
 
-        console.log("websocket jwt verified: " + userId);
-        socketMap.set(userId, ws);
-    })
-}
+    console.log("websocket jwt verified: " + userId);
+    socketMap.set(userId, ws);
+  });
+};
