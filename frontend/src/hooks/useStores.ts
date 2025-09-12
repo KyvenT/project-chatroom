@@ -7,6 +7,7 @@ import type { ChatroomMember } from "../types/REST-types/ChatroomMember";
 interface ChatroomListState {
   chatrooms: Chatroom[];
   addChatroom: (newChatroom: Chatroom) => void;
+  removeChatroom: (chatroomId: string) => void;
   emptyChatroomList: () => void;
   setChatroomList: (chatrooms: Chatroom[]) => void;
   updateChatroomUnread: (newUnreadCount: number, chatroomId: string) => void;
@@ -16,6 +17,12 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
   chatrooms: [],
   addChatroom: (newChatroom) =>
     set((state) => ({ chatrooms: [...state.chatrooms, newChatroom] })),
+  removeChatroom: (chatroomId: string) =>
+    set((state) => ({
+      chatrooms: state.chatrooms.filter(
+        (chatroom) => chatroom.chatroomId !== chatroomId,
+      ),
+    })),
   emptyChatroomList: () => set({ chatrooms: [] }),
   setChatroomList: (chatrooms) => set({ chatrooms }),
   updateChatroomUnread: (newUnreadCount, chatroomId) =>
@@ -32,7 +39,7 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
 interface MessageListState {
   messages: Message[];
   addNewMessage: (newMessage: Message) => void;
-  addExistingMessages: (existingMessages: Message[]) => void;
+  addPreviousMessages: (existingMessages: Message[]) => void;
   setMessages: (messages: Message[]) => void;
   clearMessages: () => void;
 }
@@ -41,7 +48,7 @@ export const useMessagesStore = create<MessageListState>((set) => ({
   messages: [],
   addNewMessage: (newMessage) =>
     set((state) => ({ messages: [newMessage, ...state.messages] })),
-  addExistingMessages: (existingMessages) =>
+  addPreviousMessages: (existingMessages) =>
     set((state) => ({ messages: [...state.messages, ...existingMessages] })),
   setMessages: (messages) => set({ messages }),
   clearMessages: () => set({ messages: [] }),

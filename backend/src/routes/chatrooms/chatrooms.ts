@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import Prisma from "../../prisma/prisma.js";
 import { ChatroomPayload, JoinChatroomPayload } from "../../types/payloads.js";
 import { $Enums } from "@prisma/client";
-import { sendJoinChatroomEvent } from "../../wss/chatroom-join.js";
+import { sendUpdateChatrooms } from "../../wss/update-chatrooms.js";
 
 export const chatroomRouter = Router();
 
@@ -146,7 +146,7 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
       },
     })) as JoinChatroomPayload;
 
-    sendJoinChatroomEvent(chatroom.id, userId);
+    sendUpdateChatrooms(chatroom.id, userId, "JOIN");
 
     res.status(201).json(ownerJoin);
     console.log(`Chatroom created: ${title}`);
@@ -200,7 +200,7 @@ chatroomRouter.post(
         },
       })) as JoinChatroomPayload;
 
-      sendJoinChatroomEvent(chatroom.id, userId);
+      sendUpdateChatrooms(chatroom.id, userId, "JOIN");
 
       res.status(200).json(join);
       console.log(`Chatroom joined: ${join}`);
@@ -246,11 +246,34 @@ chatroomRouter.delete("/:chatroomId", async (req: Request, res: Response) => {
   const userId = req.userId;
 
   try {
-    const chatroom = await Prisma.chatroom.delete({
+    const verify = await Prisma.chatroom.findUnique({
       where: {
         id: chatroomId,
-        ownerId: userId,
       },
+    });
+
+    if (verify?.ownerId !== userId) {
+      res.status(400).json({ error: "not owner of chatroom" });
+      return;
+    }
+
+    const members = await Prisma.chatroomMember.findMany({
+      where: {
+        chatroomId,
+      },
+      select: {
+        memberId: true,
+      },
+    });
+
+    await Prisma.chatroom.delete({
+      where: {
+        id: chatroomId,
+      },
+    });
+
+    members.forEach((member) => {
+      sendUpdateChatrooms(chatroomId, member.memberId, "LEAVE");
     });
 
     res.status(200).json({ message: "Chatroom deleted" });

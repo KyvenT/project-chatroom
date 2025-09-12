@@ -108,9 +108,9 @@ const SidebarChatroomButton = ({
   const [isHovered, setHovered] = useToggle(false);
   const [inviteModalOpen, setInviteModalOpen] = useToggle();
 
-  const canInvite: boolean = allowMembersToInvite
-    ? true
-    : ownerId === user.userId;
+  const canInvite: boolean = !!(
+    ownerId === user.userId || allowMembersToInvite
+  );
 
   return (
     <>

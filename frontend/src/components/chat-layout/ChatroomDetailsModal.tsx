@@ -1,10 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryFunction } from "../../hooks/useCustomQuery";
 import type { ChatroomDetails } from "../../types/REST-types/Chatroom";
 import type { UserAuth } from "../../types/REST-types/User";
 import Modal, { closeButtonStyles, type ModalProps } from "../Modal";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
+import Button from "../Button";
+import type { ConfirmationResponse } from "../../types/REST-types/Invite";
+import {
+  mutationFunction,
+  type MutationArgs,
+} from "../../hooks/useCustomMutation";
 
 const chatroomDetailsModalStyles = (theme: Theme) =>
   css({
@@ -38,6 +44,35 @@ export const ChatroomDetailsModal = ({
     staleTime: Infinity,
   });
 
+  const leaveMutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
+    mutationFn: mutationFunction<ConfirmationResponse>,
+  });
+
+  const deleteMutation = useMutation<ConfirmationResponse, Error, MutationArgs>(
+    {
+      mutationFn: mutationFunction<ConfirmationResponse>,
+    },
+  );
+
+  const handleLeave = () => {
+    leaveMutation.mutate({
+      fetchUrl: "http://localhost:3000/api/members/" + chatroomId,
+      method: "DELETE",
+      user,
+    });
+    onClose();
+  };
+
+  const handleDelete = () => {
+    if (chatroomDetails?.ownerId !== user.userId) return;
+    deleteMutation.mutate({
+      fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
+      method: "DELETE",
+      user,
+    });
+    onClose();
+  };
+
   return (
     <>
       {chatroomDetails && (
@@ -48,6 +83,11 @@ export const ChatroomDetailsModal = ({
             Created at:
             {new Date(chatroomDetails.createdAt).toLocaleString()}
           </p>
+          {chatroomDetails.ownerId !== user.userId ? (
+            <Button onClick={handleLeave}>Leave Chatroom</Button>
+          ) : (
+            <Button onClick={handleDelete}>Delete Chatroom</Button>
+          )}
           <button css={closeButtonStyles} onClick={onClose}>
             X
           </button>

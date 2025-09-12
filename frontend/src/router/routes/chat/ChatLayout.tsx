@@ -111,10 +111,10 @@ function ChatLayout() {
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
         console.log("Message from server: ", message);
-        wsMessageRouter(message);
+        wsMessageRouter(message, chatroomId, navigate);
       };
     }
-  }, [ws]);
+  }, [ws, chatroomId, navigate]);
 
   return (
     <div css={[styles, colors(theme)]}>

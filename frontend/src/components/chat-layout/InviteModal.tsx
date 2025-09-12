@@ -1,7 +1,10 @@
 import Modal, { closeButtonStyles } from "../Modal";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { Invite } from "../../types/REST-types/Invite";
+import type {
+  ConfirmationResponse,
+  Invite,
+} from "../../types/REST-types/Invite";
 import {
   mutationFunction,
   type MutationArgs,
@@ -69,8 +72,8 @@ export const InviteModal = ({
     refetchOnWindowFocus: false,
     staleTime: 0,
   });
-  const mutation = useMutation<Invite, Error, MutationArgs>({
-    mutationFn: mutationFunction<Invite>,
+  const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
+    mutationFn: mutationFunction<ConfirmationResponse>,
   });
 
   useEffect(() => {

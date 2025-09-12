@@ -2,7 +2,7 @@ import Prisma from "../../prisma/prisma.js";
 import { Request, Response, Router } from "express";
 import { handleNewNotification } from "../../wss/notification.js";
 import { InvitePayload, JoinChatroomPayload } from "../../types/payloads.js";
-import { sendJoinChatroomEvent } from "../../wss/chatroom-join.js";
+import { sendUpdateChatrooms } from "../../wss/update-chatrooms.js";
 import { $Enums } from "@prisma/client";
 
 export const invitesRouter = Router();
@@ -123,10 +123,22 @@ invitesRouter.patch("/respond", async (req: Request, res: Response) => {
   }
 
   try {
-    const invite = await Prisma.invite.update({
+    const verify = await Prisma.invite.findUnique({
       where: {
         id: inviteId,
         receiverId: userId,
+        status: "PENDING",
+      },
+    });
+
+    if (!verify) {
+      res.status(400).json({ error: "invite not found" });
+      return;
+    }
+
+    const invite = await Prisma.invite.update({
+      where: {
+        id: inviteId,
       },
       data: {
         status,
@@ -146,7 +158,7 @@ invitesRouter.patch("/respond", async (req: Request, res: Response) => {
       },
     })) as JoinChatroomPayload;
 
-    sendJoinChatroomEvent(invite.chatroomId, userId);
+    sendUpdateChatrooms(invite.chatroomId, userId, "JOIN");
 
     res.status(200).json(join);
     console.log("invite accepted");

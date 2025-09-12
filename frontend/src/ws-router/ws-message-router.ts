@@ -9,8 +9,13 @@ import {
 } from "../hooks/useStores";
 import type { UpdateUnreadMessage } from "../types/ws-messages";
 import type { ChatroomMember } from "../types/REST-types/ChatroomMember";
+import type { NavigateFunction } from "react-router";
 
-export const wsMessageRouter = (message: any) => {
+export const wsMessageRouter = (
+  message: any,
+  chatroomId: string | undefined,
+  navigate: NavigateFunction,
+) => {
   switch (message.type) {
     case "auth":
       console.log("Authentication message received");
@@ -38,16 +43,37 @@ export const wsMessageRouter = (message: any) => {
       break;
     case "unread-update":
       console.log("unread update");
-      const { unreadMessages, chatroomId } = message as UpdateUnreadMessage;
+      const { unreadMessages, chatroomId: affectedChatroom } =
+        message as UpdateUnreadMessage;
       useChatroomsStore
         .getState()
-        .updateChatroomUnread(unreadMessages, chatroomId);
+        .updateChatroomUnread(unreadMessages, affectedChatroom);
       break;
-    case "join-chatroom":
-      console.log("join chatroom received");
-      useChatroomsStore.getState().addChatroom(message.chatroom as Chatroom);
+    case "update-chatrooms":
+      switch (message.action) {
+        case "join-chatroom":
+          console.log("join chatroom received");
+          useChatroomsStore
+            .getState()
+            .addChatroom(message.chatroom as Chatroom);
+          navigate("/chat/" + message.chatroom.chatroomId);
+          break;
+        case "leave-chatroom":
+          console.log(
+            "leave chatroom received: current " +
+              chatroomId +
+              ", msg " +
+              message.chatroomId,
+          );
+          console.log("chatroomid ", chatroomId);
+          useChatroomsStore.getState().removeChatroom(message.chatroomId);
+          if (chatroomId === message.chatroomId) {
+            navigate("/chat");
+          }
+          break;
+      }
       break;
-    case "new-member":
+    case "update-members":
       console.log("new member joined");
       break;
     case "status-update":

@@ -21,3 +21,7 @@ export interface InviteResponse {
   joinedAt: Date;
   memberId: string;
 }
+
+export interface ConfirmationResponse {
+  message: string;
+}

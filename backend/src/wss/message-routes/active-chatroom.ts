@@ -5,6 +5,7 @@ import {
   sendUpdateUnreadMessage,
   updateLastViewedAt,
 } from "../update-unread-count.js";
+import Prisma from "../../prisma/prisma.js";
 
 export const updateActiveChatroom = async (
   message: UpdateActiveChatroomMessage,
@@ -23,8 +24,35 @@ export const updateActiveChatroom = async (
 
     if (!prevChatroom) return;
 
-    updateLastViewedAt(prevChatroom, userId);
-    updateLastViewedAt(chatroomId, userId);
+    const verifyPrevPromise = Prisma.chatroomMember.findUnique({
+      where: {
+        chatroomId_memberId: {
+          chatroomId: prevChatroom,
+          memberId: userId,
+        },
+      },
+    });
+
+    const verifyNextPromise = Prisma.chatroomMember.findUnique({
+      where: {
+        chatroomId_memberId: {
+          chatroomId: prevChatroom,
+          memberId: userId,
+        },
+      },
+    });
+
+    const [verifyPrev, verifyNext] = await Promise.all([
+      verifyPrevPromise,
+      verifyNextPromise,
+    ]);
+
+    if (verifyPrev) {
+      updateLastViewedAt(prevChatroom, userId);
+    }
+    if (verifyNext) {
+      updateLastViewedAt(chatroomId, userId);
+    }
     sendUpdateUnreadMessage(chatroomId, userId, 0);
 
     console.log(
