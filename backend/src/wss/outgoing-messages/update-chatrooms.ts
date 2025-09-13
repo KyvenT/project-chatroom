@@ -1,6 +1,7 @@
 import { socketMap } from "../../lib/socketMaps.js";
 import Prisma from "../../prisma/prisma.js";
 import { ChatroomPayload } from "../../types/payloads.js";
+import { sendUpdateMembers } from "./update-members.js";
 
 export const sendUpdateChatrooms = async (
   chatroomId: string,
@@ -34,17 +35,16 @@ export const sendUpdateChatrooms = async (
         console.error("chatroom not found for sending join event");
         return;
       }
-
-      messageOptions.action = "join-chatroom";
       messageOptions.chatroom = chatroom;
       break;
     case "LEAVE":
-      messageOptions.action = "leave-chatroom";
       messageOptions.chatroomId = chatroomId;
       break;
     default:
       return;
   }
+
+  messageOptions.action = actionType;
 
   const recipientSocket = socketMap.getByKey(memberId);
   try {
@@ -57,4 +57,6 @@ export const sendUpdateChatrooms = async (
   } catch (err) {
     console.error("failed to send join event" + err);
   }
+
+  sendUpdateMembers(chatroomId, memberId, actionType);
 };

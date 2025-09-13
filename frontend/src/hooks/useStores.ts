@@ -71,7 +71,7 @@ export const useInvitesStore = create<InviteListState>((set) => ({
   removeInvite: (inviteId) =>
     set((state) => ({
       invites: state.invites.filter((invite) => {
-        invite.id === inviteId;
+        invite.id !== inviteId;
       }),
     })),
 }));
@@ -79,6 +79,7 @@ export const useInvitesStore = create<InviteListState>((set) => ({
 interface MembersListState {
   members: ChatroomMember[];
   addNewMember: (newMember: ChatroomMember) => void;
+  removeMember: (memberId: string) => void;
   setMembers: (membersList: ChatroomMember[]) => void;
   updateMember: (member: ChatroomMember) => void;
 }
@@ -87,6 +88,10 @@ export const useMembersStore = create<MembersListState>((set) => ({
   members: [],
   addNewMember: (newMember) =>
     set((state) => ({ members: [...state.members, newMember] })),
+  removeMember: (memberId) =>
+    set((state) => ({
+      members: state.members.filter((member) => member.memberId !== memberId),
+    })),
   setMembers: (membersList) => set({ members: membersList }),
   clearMembers: () => set({ members: [] }),
   updateMember: (member) =>

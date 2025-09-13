@@ -42,7 +42,6 @@ export const wsMessageRouter = (
       }
       break;
     case "unread-update":
-      console.log("unread update");
       const { unreadMessages, chatroomId: affectedChatroom } =
         message as UpdateUnreadMessage;
       useChatroomsStore
@@ -51,21 +50,13 @@ export const wsMessageRouter = (
       break;
     case "update-chatrooms":
       switch (message.action) {
-        case "join-chatroom":
-          console.log("join chatroom received");
+        case "JOIN":
           useChatroomsStore
             .getState()
             .addChatroom(message.chatroom as Chatroom);
           navigate("/chat/" + message.chatroom.chatroomId);
           break;
-        case "leave-chatroom":
-          console.log(
-            "leave chatroom received: current " +
-              chatroomId +
-              ", msg " +
-              message.chatroomId,
-          );
-          console.log("chatroomid ", chatroomId);
+        case "LEAVE":
           useChatroomsStore.getState().removeChatroom(message.chatroomId);
           if (chatroomId === message.chatroomId) {
             navigate("/chat");
@@ -76,10 +67,18 @@ export const wsMessageRouter = (
       }
       break;
     case "update-members":
-      console.log("new member joined");
+      switch (message.action) {
+        case "JOIN":
+          useMembersStore.getState().addNewMember(message.member);
+          break;
+        case "LEAVE":
+          useMembersStore.getState().removeMember(message.memberId);
+          break;
+        default:
+          console.log("unknown action type for updating members");
+      }
       break;
     case "status-update":
-      console.log("received status update");
       useMembersStore.getState().updateMember(message.member as ChatroomMember);
       break;
     default:

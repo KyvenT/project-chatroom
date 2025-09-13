@@ -57,8 +57,6 @@ const MemberList = () => {
       memberStatusMap.set(chatMember.member.username, chatMember.member.status),
     );
 
-    console.log("recalc members status list");
-
     const onlineList = [...(memberStatusMap?.getByValue("ONLINE") ?? [])];
     const awayList = [...(memberStatusMap?.getByValue("AWAY") ?? [])];
     const offlineList = [...(memberStatusMap?.getByValue("OFFLINE") ?? [])];
