@@ -30,7 +30,7 @@ messagesRouter.get(
         where: {
           chatroomId,
           createdAt: {
-            lte: getBefore,
+            lt: getBefore,
           },
         },
         include: {

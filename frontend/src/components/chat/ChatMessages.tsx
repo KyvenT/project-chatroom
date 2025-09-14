@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMessagesStore } from "../../hooks/useStores";
 
 const styles = css({
-  minHeight: "100%",
+  height: "100%",
   display: "flex",
   flexDirection: "column-reverse",
   overflowY: "auto",
@@ -31,38 +31,60 @@ const ChatMessages = () => {
   const { chatroomId } = useParams();
   const messages = useMessagesStore((state) => state.messages);
   const setMessages = useMessagesStore((state) => state.setMessages);
+  const addPrevMessages = useMessagesStore(
+    (state) => state.addPreviousMessages,
+  );
+  const clearMessages = useMessagesStore((state) => state.clearMessages);
   const chatRef = useRef<HTMLDivElement>(null);
   const [getBefore, setBefore] = useState<Date | null>(null);
 
-  if (!chatroomId) {
-    console.error("Chatroom ID is not defined");
-    throw new Error("tried to render chat messages of undefined chatroom id");
-  }
   const { data } = useQuery<Message[]>({
-    queryKey: [isLoggedIn, getBefore?.toISOString()],
+    queryKey: [chatroomId, isLoggedIn, getBefore?.toISOString()],
     queryFn: () =>
       queryFunction({
         fetchUrl: `http://localhost:3000/api/messages/${chatroomId}/${getBefore?.toISOString()}`,
         user,
       }),
     enabled: !!getBefore,
-    staleTime: Infinity
+    staleTime: Infinity,
   });
 
   useEffect(() => {
-    setBefore(new Date);
-  }, [chatroomId])
+    setBefore(new Date());
+    clearMessages();
+    if (!chatRef.current) return;
+    chatRef.current.scrollTop = 0;
+  }, [chatroomId]);
 
   useEffect(() => {
-    if (data) {
+    if (!data || !getBefore) return;
+    if (data.length === 0) return;
+    const { createdAt } = data[0];
+    if (new Date(createdAt) > getBefore) {
       setMessages(data);
-      if (!chatRef.current) return;
-      chatRef.current.scrollTop = 0;
+    } else {
+      addPrevMessages(data);
     }
-  }, [data, setMessages]);
+  }, [data, setMessages, addPrevMessages, getBefore]);
+
+  const getHistoricalMessages = () => {
+    const el = chatRef.current;
+    if (!el || !data) return;
+    if (el.scrollHeight + el.scrollTop - el.clientHeight <= 1) {
+      console.log("end reached");
+      if (data.length === 0) return;
+
+      const { createdAt } = data[data.length - 1];
+      setBefore(new Date(createdAt));
+    }
+  };
 
   return (
-    <div ref={chatRef} css={[styles, colors(theme)]}>
+    <div
+      ref={chatRef}
+      css={[styles, colors(theme)]}
+      onScroll={getHistoricalMessages}
+    >
       {messages &&
         messages.map((message) => {
           return (
