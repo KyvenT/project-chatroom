@@ -51,7 +51,7 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
   }
 });
 
-invitesRouter.post("/send", async (req: Request, res: Response) => {
+invitesRouter.post("/", async (req: Request, res: Response) => {
   const { receiverUsername, chatroomId } = req.body;
   const senderId = req.userId;
 
@@ -61,7 +61,7 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
   }
 
   try {
-    const receiver = await Prisma.user.findUnique({
+    const receiverPromise = Prisma.user.findUnique({
       where: {
         username: receiverUsername,
       },
@@ -70,9 +70,34 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
       },
     });
 
+    const checkExistingPromise = Prisma.invite.findMany({
+      where: {
+        receiver: {
+          username: receiverUsername,
+        },
+        chatroomId,
+      },
+    });
+
+    const [receiver, checkExisting] = await Promise.all([
+      receiverPromise,
+      checkExistingPromise,
+    ]);
+
     if (!receiver) {
       res.status(404).json({ error: "User not found" });
       return;
+    }
+
+    if (checkExisting) {
+      const deletePrevious = await Prisma.invite.deleteMany({
+        where: {
+          receiver: {
+            username: receiverUsername,
+          },
+          chatroomId,
+        },
+      });
     }
 
     const invite = (await Prisma.invite.create({
@@ -113,7 +138,7 @@ invitesRouter.post("/send", async (req: Request, res: Response) => {
   }
 });
 
-invitesRouter.patch("/respond", async (req: Request, res: Response) => {
+invitesRouter.patch("/", async (req: Request, res: Response) => {
   const { inviteId, status } = req.body;
   const userId = req.userId;
 
@@ -171,7 +196,7 @@ invitesRouter.patch("/respond", async (req: Request, res: Response) => {
   }
 });
 
-invitesRouter.delete("/delete", async (req: Request, res: Response) => {
+invitesRouter.delete("/", async (req: Request, res: Response) => {
   const { inviteId } = req.body;
   const userId = req.userId;
 

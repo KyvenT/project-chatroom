@@ -57,7 +57,7 @@ const InboxButton = () => {
     }
 
     mutation.mutate({
-      fetchUrl: "http://localhost:3000/api/invites/respond",
+      fetchUrl: "http://localhost:3000/api/invites/",
       user,
       method: "PATCH",
       reqBody: { inviteId, status },

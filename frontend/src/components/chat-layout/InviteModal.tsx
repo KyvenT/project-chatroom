@@ -86,7 +86,7 @@ export const InviteModal = ({
     }
     const { username } = formData;
     mutation.mutate({
-      fetchUrl: "http://localhost:3000/api/invites/send",
+      fetchUrl: "http://localhost:3000/api/invites/",
       method: "POST",
       user,
       reqBody: {
