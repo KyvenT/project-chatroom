@@ -1,4 +1,4 @@
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import useToggle from "../../hooks/useToggle";
 import Button from "../Button";
 import { useMutation } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import useAuthContext from "../../hooks/useAuthContext";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import Modal, { closeButtonStyles } from "../Modal";
+import type { Theme } from "@emotion/react";
 
 const buttonStyles = css({
   fontSize: "1.5rem",
@@ -18,13 +19,66 @@ const buttonStyles = css({
   aspectRatio: "1",
 });
 
-const dialogStyles = css({
-  gap: "10px",
-  backgroundColor: "white",
-  borderRadius: "10px",
-  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-  padding: "30px",
-});
+const dialogStyles = (theme: Theme) =>
+  css({
+    gap: "10px",
+    backgroundColor: theme.colors.dark_grey,
+    color: theme.colors.white,
+    border: `2px solid ${theme.colors.light_grey}`,
+    borderRadius: "10px",
+    padding: "30px",
+
+    h2: {
+      fontWeight: "550",
+    },
+
+    "#new-chat-form": {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: "5px",
+    },
+
+    "#title": {
+      fontSize: "1rem",
+      borderRadius: "5px",
+      padding: "4px",
+    },
+
+    ".chatroom-title-group": {
+      display: "flex",
+      justifyContent: "space-between",
+    },
+
+    ".form-group": {
+      width: "100%",
+      fontSize: "1rem",
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+    },
+
+    ".submit-btn": {
+      fontSize: "1rem",
+      borderRadius: "5px",
+      width: "fit-content",
+      padding: "4px 8px",
+      backgroundColor: theme.colors.white,
+    },
+
+    ".submit-btn:hover": {
+      backgroundColor: theme.colors.light_grey,
+    },
+  });
+
+const closeButtonColors = (theme: Theme) =>
+  css({
+    color: theme.colors.white,
+    "&:hover": {
+      color: theme.colors.light_grey,
+    },
+  });
 
 interface CreateChatroomFormInput {
   title: string;
@@ -40,6 +94,7 @@ const NewChatButton = () => {
   const mutation = useMutation<JoinChatroom, Error, MutationArgs>({
     mutationFn: mutationFunction<JoinChatroom>,
   });
+  const theme = useTheme();
 
   const onSubmit: SubmitHandler<CreateChatroomFormInput> = (data) => {
     if (!isLoggedIn) return;
@@ -65,21 +120,24 @@ const NewChatButton = () => {
         +
       </Button>
       <Modal
-        modalStyles={dialogStyles}
+        modalStyles={dialogStyles(theme)}
         open={isToggled}
         onClose={() => setToggle(false)}
       >
-        <h2>Create a Chatroom</h2>
         <form id="new-chat-form" onSubmit={handleSubmit(onSubmit)}>
-          <label htmlFor="chatroomName">Chatroom name: </label>
-          <input
-            {...register("title")}
-            id="title"
-            type="text"
-            placeholder="Title..."
-            required
-          />
-          <div>
+          <h2>Create a Chatroom</h2>
+          <div className="form-group chatroom-title-group">
+            <label htmlFor="chatroomName">Chatroom name: </label>
+            <input
+              {...register("title")}
+              id="title"
+              type="text"
+              placeholder="Title..."
+              maxLength={30}
+              required
+            />
+          </div>
+          <div className="form-group">
             <input
               {...register("linkPrivacy")}
               type="checkbox"
@@ -87,7 +145,7 @@ const NewChatButton = () => {
             />
             <label htmlFor="linkPrivacy">Shareable link</label>
           </div>
-          <div>
+          <div className="form-group">
             <input
               {...register("guestPrivacy")}
               type="checkbox"
@@ -95,7 +153,7 @@ const NewChatButton = () => {
             />
             <label htmlFor="guestPrivacy">Guests can join</label>
           </div>
-          <div>
+          <div className="form-group">
             <input
               {...register("allowMembersToInvite")}
               type="checkbox"
@@ -105,11 +163,14 @@ const NewChatButton = () => {
               Allow members to invite
             </label>
           </div>
-          <button type="submit" disabled={!isLoggedIn}>
+          <button className="submit-btn" type="submit" disabled={!isLoggedIn}>
             Create
           </button>
         </form>
-        <button css={closeButtonStyles} onClick={() => setToggle(false)}>
+        <button
+          css={[closeButtonStyles, closeButtonColors(theme)]}
+          onClick={() => setToggle(false)}
+        >
           X
         </button>
       </Modal>

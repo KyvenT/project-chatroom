@@ -90,7 +90,7 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
           autoFocus
         />
         <button type="submit" form="message-form">
-          <SendHorizonal size={"1.25rem"} />
+          <SendHorizonal size="1.25rem" />
         </button>
       </form>
     </div>

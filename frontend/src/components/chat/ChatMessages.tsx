@@ -30,7 +30,6 @@ const ChatMessages = () => {
   const { user, isLoggedIn } = useAuthContext();
   const { chatroomId } = useParams();
   const messages = useMessagesStore((state) => state.messages);
-  const setMessages = useMessagesStore((state) => state.setMessages);
   const addPrevMessages = useMessagesStore(
     (state) => state.addPreviousMessages,
   );
@@ -58,14 +57,9 @@ const ChatMessages = () => {
 
   useEffect(() => {
     if (!data || !getBefore) return;
-    if (data.length === 0) return;
-    const { createdAt } = data[0];
-    if (new Date(createdAt) > getBefore) {
-      setMessages(data);
-    } else {
-      addPrevMessages(data);
-    }
-  }, [data, setMessages, addPrevMessages, getBefore]);
+
+    addPrevMessages(data);
+  }, [data, addPrevMessages, getBefore]);
 
   const getHistoricalMessages = () => {
     const el = chatRef.current;
@@ -92,7 +86,7 @@ const ChatMessages = () => {
               key={message.id}
               id={message.id}
               content={message.content}
-              sender={message.senderUser?.username || "Unnamed User"}
+              sender={message.senderUser.username || "Unnamed User"}
               timestamp={new Date(message.createdAt)}
             />
           );
