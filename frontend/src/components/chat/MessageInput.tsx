@@ -1,13 +1,13 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import { SendHorizonal } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
 const styles = css({
-  minHeight: "100%",
   width: "100%",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
+  margin: "10px 0",
 
   form: {
     width: "97%",
@@ -19,13 +19,15 @@ const styles = css({
     borderRadius: "4px",
   },
 
-  input: {
+  textarea: {
     width: "95%",
-    maxHeight: "100%",
+    height: "fit-content",
     backgroundColor: "inherit",
     border: 0,
     outlineStyle: "none",
     fontSize: "1rem",
+    wordBreak: "break-all",
+    resize: "none",
   },
 
   button: {
@@ -35,7 +37,6 @@ const styles = css({
     borderRadius: "4px",
     padding: "4px",
     backgroundColor: "inherit",
-    border: 0,
     transition: "background-color 0.1s ease",
   },
 
@@ -53,12 +54,13 @@ const colors = (theme: Theme) =>
       backgroundColor: theme.colors.dark_grey,
     },
 
-    input: {
+    textarea: {
       color: theme.colors.white,
     },
 
     button: {
       color: theme.colors.white,
+      border: `1px solid ${theme.colors.dark_grey}`,
     },
 
     "button:hover": {
@@ -67,26 +69,43 @@ const colors = (theme: Theme) =>
       fontWeight: 500,
     },
 
-    "input::placeholder": {
+    "textarea::placeholder": {
       color: theme.colors.light_grey,
     },
   });
 
 interface MessageInputProps {
   handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
-  messageInputRef: React.RefObject<HTMLInputElement | null>;
+  messageInputRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
   const theme = useTheme();
+  const [height, setHeight] = useState(1);
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!messageInputRef.current) return;
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      if (messageInputRef.current.value === "") return;
+      handleSubmit(event as unknown as React.FormEvent<HTMLFormElement>);
+      setHeight(1);
+    } else if (event.key === "Enter" && event.shiftKey) {
+      setHeight((prevHeight) => prevHeight + 1);
+      //messageInputRef.current.value += "\n";
+      messageInputRef.current.style.overflowY = "hidden";
+    }
+  };
 
   return (
     <div css={[styles, colors(theme)]}>
       <form onSubmit={(event) => handleSubmit(event)} id="message-form">
-        <input
+        <textarea
           ref={messageInputRef}
-          type="text"
           placeholder="Message..."
+          rows={height}
+          onKeyDown={handleKeyPress}
+          required
           autoFocus
         />
         <button type="submit" form="message-form">
