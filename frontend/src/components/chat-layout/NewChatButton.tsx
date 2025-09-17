@@ -13,23 +13,31 @@ import type { SubmitHandler } from "react-hook-form";
 import Modal, { closeButtonStyles } from "../Modal";
 import type { Theme } from "@emotion/react";
 
-const buttonStyles = css({
-  fontSize: "1.5rem",
-  width: "fit-content",
-  aspectRatio: "1",
-});
+const buttonStyles = (theme: Theme) =>
+  css({
+    fontSize: "1.5rem",
+    width: "fit-content",
+    aspectRatio: "1",
+    color: theme.colors.light_grey,
+
+    "&:hover": {
+      color: theme.colors.white,
+      backgroundColor: theme.colors.grey,
+    },
+  });
 
 const dialogStyles = (theme: Theme) =>
   css({
     gap: "10px",
     backgroundColor: theme.colors.dark_grey,
     color: theme.colors.white,
-    border: `2px solid ${theme.colors.light_grey}`,
+    border: `1px solid ${theme.colors.light_grey}`,
     borderRadius: "10px",
     padding: "30px",
 
     h2: {
-      fontWeight: "550",
+      fontWeight: "500",
+      color: theme.colors.white,
     },
 
     "#new-chat-form": {
@@ -44,6 +52,12 @@ const dialogStyles = (theme: Theme) =>
       fontSize: "1rem",
       borderRadius: "5px",
       padding: "4px",
+      border: "1px solid transparent",
+    },
+
+    "#title:focus": {
+      border: "1px solid black",
+      outline: "none",
     },
 
     ".chatroom-title-group": {
@@ -65,10 +79,23 @@ const dialogStyles = (theme: Theme) =>
       width: "fit-content",
       padding: "4px 8px",
       backgroundColor: theme.colors.white,
+      border: "0",
     },
 
     ".submit-btn:hover": {
       backgroundColor: theme.colors.light_grey,
+    },
+
+    "input[type='checkbox']": {
+      cursor: "pointer",
+      width: "1rem",
+      aspectRatio: "1",
+      accentColor: theme.colors.black,
+      boxShadow: "0 0 0 1px white inset",
+    },
+
+    "input[type='checkbox']:checked": {
+      boxShadow: "1px 1px 0 0 black inset",
     },
   });
 
@@ -116,7 +143,11 @@ const NewChatButton = () => {
 
   return (
     <>
-      <Button onClick={() => setToggle(true)} variant="icon" css={buttonStyles}>
+      <Button
+        onClick={() => setToggle(true)}
+        variant="icon"
+        css={buttonStyles(theme)}
+      >
         +
       </Button>
       <Modal

@@ -22,9 +22,17 @@ const dialogStyles = css({
   borderRadius: "10px",
   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
   padding: "30px",
+
+  "#inviteForm": {
+    display: "flex",
+
+    input: {
+      flex: 1,
+    },
+  },
 });
 
-const styles = css({
+const inviteListStyles = css({
   border: "1px solid black",
   overflowY: "scroll",
   maxHeight: "200px",
@@ -35,7 +43,7 @@ const styles = css({
   },
 });
 
-const colors = (theme: Theme) => css({});
+const inviteListColors = (theme: Theme) => css({});
 
 export interface inviteFormInput {
   username: string;
@@ -108,7 +116,7 @@ export const InviteModal = ({
       {inviteModalOpen && (
         <>
           <h5>Invited users: </h5>
-          <ul css={[styles, colors(theme)]}>
+          <ul css={[inviteListStyles, inviteListColors(theme)]}>
             {invitesData?.map((invite) => (
               <li key={invite.id}>
                 <div>

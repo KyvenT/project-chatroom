@@ -30,16 +30,20 @@ const sidebarStyles = css({
 
     h2: {
       userSelect: "none",
+      fontSize: "1.25rem",
+      fontWeight: "400",
     },
   },
 
-  ".homeBtnContainer": {
+  ".topSection": {
     display: "flex",
     alignItems: "center",
     padding: "4px",
   },
 
-  ".homeBtn": {},
+  ".homeBtn": {
+    padding: "2px",
+  },
 
   ".homeIcon": {
     width: "2rem",
@@ -49,10 +53,18 @@ const sidebarStyles = css({
 
 const colors = (theme: Theme) =>
   css({
-    backgroundColor: theme.colors.dark_grey,
+    backgroundColor: theme.colors.black,
     color: theme.colors.white,
+    borderRight: `2px solid ${theme.colors.dark_grey}`,
 
-    ".homeBtnContainer": {},
+    ".homeBtn": {
+      color: theme.colors.light_grey,
+
+      "&:hover": {
+        color: theme.colors.white,
+        backgroundColor: theme.colors.grey,
+      },
+    },
   });
 
 type SidebarProps = {
@@ -65,7 +77,7 @@ const Sidebar = ({ chatrooms }: SidebarProps) => {
 
   return (
     <div css={[sidebarStyles, colors(theme)]}>
-      <div className="homeBtnContainer">
+      <div className="topSection">
         <Link to="/chat" className="homeBtn" css={iconBtnStyles(theme)}>
           <HomeIcon className="homeIcon" />
         </Link>

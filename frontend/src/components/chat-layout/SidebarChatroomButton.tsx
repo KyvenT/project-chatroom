@@ -28,6 +28,7 @@ const styles = css({
     alignItems: "center",
     height: "2rem",
     borderStyle: "solid",
+    borderWidth: "3px",
   },
 
   ".chatroomLink": {
@@ -62,15 +63,18 @@ const dynamicStyles = (theme: Theme, isActive: boolean) =>
   css({
     div: {
       backgroundColor: isActive ? theme.colors.white : "inherit",
-      borderColor: isActive ? theme.colors.white : theme.colors.dark_grey,
+      borderColor: isActive ? theme.colors.white : "transparent",
     },
 
     "div:hover": {
-      backgroundColor: theme.colors.grey,
+      backgroundColor: isActive ? theme.colors.light_grey : theme.colors.grey,
     },
 
     ".chatroomLink": {
-      color: isActive ? theme.colors.black : theme.colors.white,
+      color: isActive ? theme.colors.black : theme.colors.light_grey,
+      "&:hover": {
+        color: isActive ? theme.colors.black : theme.colors.white,
+      },
     },
 
     ".unreadBadge": {
@@ -79,15 +83,15 @@ const dynamicStyles = (theme: Theme, isActive: boolean) =>
     },
   });
 
-const inviteBtnStyles = (theme: Theme) =>
+const inviteBtnStyles = (theme: Theme, isActive: boolean) =>
   css({
-    color: theme.colors.light_grey,
+    color: isActive ? theme.colors.grey : theme.colors.dark_grey,
     aspectRatio: 1,
     height: "100%",
     textAlign: "center",
 
     "&:hover": {
-      color: theme.colors.black,
+      color: isActive ? theme.colors.black : theme.colors.white,
     },
   });
 
@@ -129,7 +133,7 @@ const SidebarChatroomButton = ({
             <Button
               onClick={() => setInviteModalOpen()}
               variant="icon"
-              otherStyles={inviteBtnStyles(theme)}
+              otherStyles={inviteBtnStyles(theme, isActive)}
             >
               {<UserRoundPlus size={"1.25rem"} />}
             </Button>

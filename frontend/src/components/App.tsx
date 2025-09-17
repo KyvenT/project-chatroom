@@ -6,11 +6,11 @@ import WebSocketContextProvider from "../contexts/WebSocketContextProvider";
 
 const theme = {
   colors: {
-    dark_grey: "#424242",
-    light_grey: "#C9C9C9",
-    white: "#FEFFEA",
-    black: "#181F1C",
-    grey: "#A3A3A3",
+    dark_grey: "#2f2f2f",
+    light_grey: "#bcbcbc",
+    white: "#f1f1f1",
+    black: "#0a0a0a",
+    grey: "#525252",
   },
 };
 
@@ -18,7 +18,11 @@ const globalStyles = css({
   "*": {
     boxSizing: "border-box",
     margin: 0,
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "Inter, sans-serif",
+  },
+
+  "*::before, *::after": {
+    boxSizing: "border-box",
   },
 });
 

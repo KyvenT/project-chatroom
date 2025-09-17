@@ -15,8 +15,17 @@ const styles = css({
   padding: "10px",
   borderRadius: "8px",
   backgroundClip: "padding-box",
-  borderWidth: "1px", 
+  borderWidth: "1px",
   borderStyle: "solid",
+
+  strong: {
+    fontWeight: "500",
+  },
+
+  ".content": {
+    width: "100%",
+    overflowWrap: "break-word",
+  },
 });
 
 const colors = (theme: Theme) =>
@@ -30,7 +39,7 @@ const colors = (theme: Theme) =>
     },
 
     ".timeStamp": {
-      color: theme.colors.grey,
+      color: theme.colors.light_grey,
     },
 
     ".messageHeader": {
@@ -45,10 +54,12 @@ const ChatMessage = ({ id, content, sender, timestamp }: ChatMessageProps) => {
   return (
     <div key={id} css={[styles, colors(theme)]}>
       <div className="messageHeader">
-        <strong>{sender}</strong>
+        <p>
+          <strong>{sender}</strong>
+        </p>
         <span className="timeStamp">{timestamp.toLocaleString()}</span>
       </div>
-      <p>{content}</p>
+      <p className="content">{content}</p>
     </div>
   );
 };

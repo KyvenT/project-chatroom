@@ -9,10 +9,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useMessagesStore } from "../../hooks/useStores";
 
 const styles = css({
-  height: "100%",
+  width: "100%",
+  flex: 1,
+  minHeight: 0,
   display: "flex",
   flexDirection: "column-reverse",
-  overflowY: "auto",
+  overflowY: "scroll",
   scrollBehavior: "smooth",
   gap: "10px",
   border: 0,

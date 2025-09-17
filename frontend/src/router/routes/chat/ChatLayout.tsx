@@ -20,22 +20,22 @@ import { useChatroomsStore } from "../../../hooks/useStores";
 import { ChatroomDetailsModal } from "../../../components/chat-layout/ChatroomDetailsModal";
 
 const styles = css({
-  minHeight: "100dvh",
-  width: "100%",
+  height: "100dvh",
+  width: "100dvw",
   display: "flex",
+  backgroundColor: "red",
 
   ".container": {
+    height: "100%",
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    maxHeight: "100dvh",
+    minWidth: 0,
   },
 
   ".outletWrapper": {
     flex: 1,
-    display: "flex",
-    backgroundColor: "red",
-    overflow: "hidden",
+    minHeight: 0,
   },
 
   ".blankSpace": {
@@ -45,7 +45,7 @@ const styles = css({
   h1: {
     userSelect: "none",
     fontSize: "2rem",
-    fontWeight: "550",
+    fontWeight: "450",
   },
 });
 
@@ -54,14 +54,25 @@ const colors = (theme: Theme) =>
     ".outletWrapper": {
       backgroundColor: theme.colors.black,
     },
+
+    ".sidebarToggleBtn": {
+      color: theme.colors.light_grey,
+      "&:hover": {
+        color: theme.colors.white,
+      },
+    },
   });
 
 const titleStyles = (theme: Theme) =>
   css({
     fontSize: "2rem",
-    fontWeight: "550",
+    fontWeight: "450",
     padding: 0,
     color: theme.colors.white,
+
+    "&:hover": {
+      color: theme.colors.light_grey,
+    },
   });
 
 function ChatLayout() {
@@ -157,12 +168,7 @@ function ChatLayout() {
               >
                 <h3>{user.username}</h3>
                 <Link to="">Account Settings</Link>
-                <Button
-                  onClick={() => navigate("/logout")}
-                  css={iconBtnStyles(theme)}
-                >
-                  Log Out
-                </Button>
+                <Button onClick={() => navigate("/logout")}>Log Out</Button>
               </DropdownButton>
             </>
           ) : (

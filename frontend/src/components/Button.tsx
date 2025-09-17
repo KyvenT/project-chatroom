@@ -10,7 +10,7 @@ export const iconBtnStyles = (theme: Theme) =>
   css({
     border: 0,
     backgroundColor: "inherit",
-    color: theme.colors.white,
+    color: theme.colors.light_grey,
     display: "grid",
     placeItems: "center",
     borderRadius: "5px",
@@ -18,7 +18,7 @@ export const iconBtnStyles = (theme: Theme) =>
     userSelect: "none",
 
     "&:hover": {
-      color: theme.colors.grey,
+      color: theme.colors.white,
     },
   });
 

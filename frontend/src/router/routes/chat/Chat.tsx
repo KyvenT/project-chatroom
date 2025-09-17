@@ -9,16 +9,20 @@ import { useEffect, useRef } from "react";
 // import AuthGuard from "../../../components/AuthGuard";
 
 const chatStyles = css({
-  minHeight: "100%",
-  flex: 1,
-  display: "grid",
-  gridTemplateRows: "90% 10%",
-  gridTemplateColumns: "85% 15%",
+  height: "100%",
+  width: "100%",
+  display: "flex",
+
+  ".chatContainer": {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+  },
 });
 
 const colors = (theme: Theme) =>
   css({
-    backgroundColor: theme.colors.black,
     color: theme.colors.dark_grey,
   });
 
@@ -27,7 +31,7 @@ function Chat() {
   const { chatroomId } = useParams();
   const { isLoggedIn } = useAuthContext();
   const { ws } = useWebSocketContext();
-  const messageInput = useRef<HTMLInputElement>(null);
+  const messageInput = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (isLoggedIn && ws && chatroomId) {
@@ -60,12 +64,16 @@ function Chat() {
   return (
     <div css={[chatStyles, colors(theme)]}>
       {/*<AuthGuard />*/}
-      {chatroomId && <ChatMessages />}
+      {chatroomId && (
+        <div className="chatContainer">
+          <ChatMessages />
+          <MessageInput
+            messageInputRef={messageInput}
+            handleSubmit={handleSubmit}
+          />
+        </div>
+      )}
       {chatroomId && <MemberList />}
-      <MessageInput
-        messageInputRef={messageInput}
-        handleSubmit={handleSubmit}
-      />
     </div>
   );
 }

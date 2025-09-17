@@ -15,6 +15,7 @@ const styles = css({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
+  width: "15%",
 });
 
 const colors = (theme: Theme) =>
