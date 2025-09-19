@@ -43,7 +43,7 @@ export const ChatroomDetailsModal = ({
   user,
 }: ChatroomDetailsProps) => {
   const theme = useTheme();
-  const { data: chatroomDetails } = useQuery<ChatroomDetails>({
+  const { data: chatroomDetails, refetch } = useQuery<ChatroomDetails>({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
       queryFunction({
@@ -54,18 +54,20 @@ export const ChatroomDetailsModal = ({
     staleTime: Infinity,
   });
 
-  const leaveMutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
+  const removeChatroomMutation = useMutation<
+    ConfirmationResponse,
+    Error,
+    MutationArgs
+  >({
     mutationFn: mutationFunction<ConfirmationResponse>,
   });
 
-  const deleteMutation = useMutation<ConfirmationResponse, Error, MutationArgs>(
-    {
-      mutationFn: mutationFunction<ConfirmationResponse>,
-    },
-  );
+  const updateMutation = useMutation<ChatroomDetails, Error, MutationArgs>({
+    mutationFn: mutationFunction<ChatroomDetails>,
+  });
 
   const handleLeave = () => {
-    leaveMutation.mutate({
+    removeChatroomMutation.mutate({
       fetchUrl: "http://localhost:3000/api/members/" + chatroomId,
       method: "DELETE",
       user,
@@ -75,12 +77,23 @@ export const ChatroomDetailsModal = ({
 
   const handleDelete = () => {
     if (chatroomDetails?.ownerId !== user.userId) return;
-    deleteMutation.mutate({
+    removeChatroomMutation.mutate({
       fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
       method: "DELETE",
       user,
     });
     onClose();
+  };
+
+  const handleUpdate = () => {
+    if (chatroomDetails?.ownerId !== user.userId) return;
+    updateMutation.mutate({
+      fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
+      method: "PATCH",
+      user,
+      reqBody: { title: "New Title" },
+    });
+    refetch();
   };
 
   return (
@@ -97,6 +110,18 @@ export const ChatroomDetailsModal = ({
             <Button onClick={handleLeave}>Leave Chatroom</Button>
           ) : (
             <Button onClick={handleDelete}>Delete Chatroom</Button>
+          )}
+          {chatroomDetails.ownerId === user.userId && (
+            <>
+              <br />
+              <label htmlFor="privacy">Privacy:</label>
+              <select id="privacy">
+                <option value="INVITE">Only owner can invite</option>
+                <option value="INVITE+">Members can invite</option>
+                <option value="USERS">Any user can join by link</option>
+                <option value="PUBLIC">Guests can join by link</option>
+              </select>
+            </>
           )}
           <button
             css={[closeButtonStyles, closeButtonColors(theme)]}
