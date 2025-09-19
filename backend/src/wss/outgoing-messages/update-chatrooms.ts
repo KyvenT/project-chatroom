@@ -25,7 +25,7 @@ export const sendUpdateChatrooms = async (
             select: {
               title: true,
               ownerId: true,
-              allowMembersToInvite: true,
+              privacy: true,
             },
           },
         },

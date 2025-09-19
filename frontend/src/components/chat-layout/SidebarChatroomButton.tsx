@@ -6,13 +6,14 @@ import Button from "../Button";
 import { UserRoundPlus } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
 import { InviteModal } from "./InviteModal";
+import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
   chatroomId: string;
   unreadMessages: number;
   children: string;
-  allowMembersToInvite: boolean;
+  privacy: ChatroomPrivacy;
   ownerId: string;
 }
 
@@ -105,7 +106,7 @@ const SidebarChatroomButton = ({
   chatroomId,
   unreadMessages,
   ownerId,
-  allowMembersToInvite,
+  privacy,
 }: SidebarChatroomButtonProps) => {
   const theme = useTheme();
   const { user } = useAuthContext();
@@ -113,7 +114,7 @@ const SidebarChatroomButton = ({
   const [inviteModalOpen, setInviteModalOpen] = useToggle();
 
   const canInvite: boolean = !!(
-    ownerId === user.userId || allowMembersToInvite
+    ownerId === user.userId || privacy === "INVITE_PLUS"
   );
 
   return (

@@ -2,12 +2,14 @@ export interface Chatroom {
   chatroomId: string;
   chatroom: {
     title: string;
-    allowMembersToInvite: boolean;
+    privacy: ChatroomPrivacy;
     ownerId: string;
   };
   lastViewedAt: Date;
   unreadMessages: number;
 }
+
+export type ChatroomPrivacy = "INVITE_ONLY" | "INVITE_PLUS" | "JOINABLE" | "PUBLIC"
 
 export interface JoinChatroom {
   joinedAt: Date;
@@ -20,9 +22,7 @@ export interface ChatroomDetails {
   id: string;
   title: string;
   ownerId: string;
-  allowGuests: boolean;
-  allowJoinByLink: boolean;
-  allowMembersToInvite: boolean;
+  privacy: ChatroomPrivacy;
   createdAt: Date;
   owner: {
     username: string;

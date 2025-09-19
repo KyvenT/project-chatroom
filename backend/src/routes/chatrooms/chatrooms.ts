@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import Prisma from "../../prisma/prisma.js";
 import { ChatroomPayload, JoinChatroomPayload } from "../../types/payloads.js";
-import { $Enums } from "@prisma/client";
+import { $Enums, ChatroomPrivacy } from "@prisma/client";
 import { sendUpdateChatrooms } from "../../wss/outgoing-messages/update-chatrooms.js";
 
 export const chatroomRouter = Router();
@@ -25,7 +25,7 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
         chatroom: {
           select: {
             title: true,
-            allowMembersToInvite: true,
+            privacy: true,
             ownerId: true,
           },
         },
@@ -88,9 +88,7 @@ chatroomRouter.get("/:chatroomId", async (req: Request, res: Response) => {
       select: {
         id: true,
         title: true,
-        allowJoinByLink: true,
-        allowGuests: true,
-        allowMembersToInvite: true,
+        privacy: true,
         ownerId: true,
         createdAt: true,
         owner: {
@@ -115,8 +113,7 @@ chatroomRouter.get("/:chatroomId", async (req: Request, res: Response) => {
 });
 
 chatroomRouter.post("/create", async (req: Request, res: Response) => {
-  const { title, allowJoinByLink, allowGuests, allowMembersToInvite } =
-    req.body;
+  const { title, privacy } = req.body;
   const userId = req.userId;
 
   if (!userId) {
@@ -129,9 +126,7 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
       data: {
         title,
         ownerId: userId,
-        allowJoinByLink,
-        allowGuests,
-        allowMembersToInvite,
+        privacy,
       },
     });
 
@@ -182,7 +177,10 @@ chatroomRouter.post(
         return;
       }
 
-      if (!chatroom.allowJoinByLink) {
+      if (
+        chatroom.privacy !==
+        (ChatroomPrivacy.JOINABLE || ChatroomPrivacy.PUBLIC)
+      ) {
         res
           .status(400)
           .json({ error: "Joining this chatroom requires an invite" });
@@ -216,21 +214,32 @@ chatroomRouter.post(
 
 chatroomRouter.patch("/:chatroomId", async (req: Request, res: Response) => {
   const { chatroomId } = req.params;
-  const { newTitle } = req.body;
+  const { title, privacy } = req.body;
   const userId = req.userId;
 
   try {
-    const chatroom = await Prisma.chatroom.update({
+    const verify = await Prisma.chatroom.findUnique({
       where: {
         id: chatroomId,
-        ownerId: userId,
-      },
-      data: {
-        title: newTitle,
       },
     });
 
-    res.status(200).json({ title: newTitle, id: chatroom.id });
+    if (verify?.ownerId !== userId) {
+      res.status(500).json({ message: "not owner of chatroom" });
+      return;
+    }
+
+    const chatroom = await Prisma.chatroom.update({
+      where: {
+        id: chatroomId,
+      },
+      data: {
+        title,
+        privacy,
+      },
+    });
+
+    res.status(200).json({ title, privacy, id: chatroom.id });
     console.log("Chatroom renamed");
     return;
   } catch (err: any) {

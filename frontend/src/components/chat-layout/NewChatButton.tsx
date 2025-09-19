@@ -6,7 +6,10 @@ import {
   mutationFunction,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
-import type { JoinChatroom } from "../../types/REST-types/Chatroom";
+import type {
+  ChatroomPrivacy,
+  JoinChatroom,
+} from "../../types/REST-types/Chatroom";
 import useAuthContext from "../../hooks/useAuthContext";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
@@ -109,9 +112,7 @@ const closeButtonColors = (theme: Theme) =>
 
 interface CreateChatroomFormInput {
   title: string;
-  linkPrivacy: boolean;
-  guestPrivacy: boolean;
-  allowMembersToInvite: boolean;
+  privacy: ChatroomPrivacy;
 }
 
 const NewChatButton = () => {
@@ -126,7 +127,7 @@ const NewChatButton = () => {
   const onSubmit: SubmitHandler<CreateChatroomFormInput> = (data) => {
     if (!isLoggedIn) return;
 
-    const { title, linkPrivacy, guestPrivacy, allowMembersToInvite } = data;
+    const { title, privacy } = data;
     setToggle(false);
     mutation.mutate({
       fetchUrl: "http://localhost:3000/api/chatrooms/create",
@@ -134,9 +135,7 @@ const NewChatButton = () => {
       user,
       reqBody: {
         title,
-        linkPrivacy,
-        guestPrivacy,
-        allowMembersToInvite,
+        privacy,
       },
     });
   };
@@ -158,7 +157,7 @@ const NewChatButton = () => {
         <form id="new-chat-form" onSubmit={handleSubmit(onSubmit)}>
           <h2>Create a Chatroom</h2>
           <div className="form-group chatroom-title-group">
-            <label htmlFor="chatroomName">Chatroom name: </label>
+            <label htmlFor="title">Chatroom name: </label>
             <input
               {...register("title")}
               id="title"
@@ -169,30 +168,13 @@ const NewChatButton = () => {
             />
           </div>
           <div className="form-group">
-            <input
-              {...register("linkPrivacy")}
-              type="checkbox"
-              id="linkPrivacy"
-            />
-            <label htmlFor="linkPrivacy">Shareable link</label>
-          </div>
-          <div className="form-group">
-            <input
-              {...register("guestPrivacy")}
-              type="checkbox"
-              id="guestPrivacy"
-            />
-            <label htmlFor="guestPrivacy">Guests can join</label>
-          </div>
-          <div className="form-group">
-            <input
-              {...register("allowMembersToInvite")}
-              type="checkbox"
-              id="allowMembersToInvite"
-            />
-            <label htmlFor="allowMembersToInvite">
-              Allow members to invite
-            </label>
+            <label htmlFor="privacy">Privacy:</label>
+            <select {...register("privacy")} id="privacy">
+              <option value="INVITE_ONLY">Only owner can invite</option>
+              <option value="INVITE_PLUS">Members can invite</option>
+              <option value="JOINABLE">Any user can join by link</option>
+              <option value="PUBLIC">Guests can join by link</option>
+            </select>
           </div>
           <button className="submit-btn" type="submit" disabled={!isLoggedIn}>
             Create

@@ -1,4 +1,9 @@
-import type { $Enums, InviteStatus, Status } from "@prisma/client";
+import type {
+  InviteStatus,
+  Status,
+  ChatroomPrivacy,
+  ChatroomRoles,
+} from "@prisma/client";
 
 export interface InvitePayload {
   sender: {
@@ -22,7 +27,7 @@ export interface ChatroomPayload {
   chatroomId: string;
   chatroom: {
     title: string;
-    allowMembersToInvite: boolean;
+    privacy: ChatroomPrivacy;
     ownerId: string;
   };
   lastViewedAt: Date;
@@ -33,7 +38,7 @@ export interface JoinChatroomPayload {
   joinedAt: Date;
   chatroomId: string;
   memberId: string;
-  role?: $Enums.ChatroomRoles;
+  role?: ChatroomRoles;
 }
 
 export interface MembersPayload {
