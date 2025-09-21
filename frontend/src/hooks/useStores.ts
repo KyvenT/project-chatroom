@@ -11,6 +11,7 @@ interface ChatroomListState {
   emptyChatroomList: () => void;
   setChatroomList: (chatrooms: Chatroom[]) => void;
   updateChatroomUnread: (newUnreadCount: number, chatroomId: string) => void;
+  updateChatroom: (updatedChatroom: Chatroom) => void;
 }
 
 export const useChatroomsStore = create<ChatroomListState>((set) => ({
@@ -30,6 +31,15 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
       chatrooms: state.chatrooms.map((chatroom) => {
         if (chatroom.chatroomId === chatroomId) {
           return { ...chatroom, unreadMessages: newUnreadCount };
+        }
+        return chatroom;
+      }),
+    })),
+  updateChatroom: (updatedChatroom) =>
+    set((state) => ({
+      chatrooms: state.chatrooms.map((chatroom) => {
+        if (chatroom.chatroomId === updatedChatroom.chatroomId) {
+          return updatedChatroom;
         }
         return chatroom;
       }),

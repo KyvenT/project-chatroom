@@ -2,10 +2,12 @@ import Prisma from "../../prisma/prisma.js";
 import { MembersPayload } from "../../types/payloads.js";
 import { socketMap } from "../../lib/socketMaps.js";
 
+export type updateMembersActions = "JOIN" | "LEAVE";
+
 export const sendUpdateMembers = async (
   chatroomId: string,
   memberId: string,
-  actionType: "JOIN" | "LEAVE"
+  actionType: updateMembersActions
 ) => {
   const messageOptions: any = {};
   switch (actionType) {

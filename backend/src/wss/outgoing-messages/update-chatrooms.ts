@@ -1,17 +1,19 @@
 import { socketMap } from "../../lib/socketMaps.js";
 import Prisma from "../../prisma/prisma.js";
-import { ChatroomPayload } from "../../types/payloads.js";
 import { sendUpdateMembers } from "./update-members.js";
+
+export type chatroomUpdateActions = "JOIN" | "LEAVE" | "UPDATE";
 
 export const sendUpdateChatrooms = async (
   chatroomId: string,
   memberId: string,
-  actionType: "JOIN" | "LEAVE"
+  actionType: chatroomUpdateActions
 ) => {
   const messageOptions: any = {};
   switch (actionType) {
     case "JOIN":
-      const chatroom = (await Prisma.chatroomMember.findUnique({
+    case "UPDATE":
+      const chatroom = await Prisma.chatroomMember.findUnique({
         where: {
           chatroomId_memberId: {
             chatroomId,
@@ -29,12 +31,8 @@ export const sendUpdateChatrooms = async (
             },
           },
         },
-      })) as ChatroomPayload;
+      });
 
-      if (!chatroom) {
-        console.error("chatroom not found for sending join event");
-        return;
-      }
       messageOptions.chatroom = chatroom;
       break;
     case "LEAVE":
@@ -57,6 +55,8 @@ export const sendUpdateChatrooms = async (
   } catch (err) {
     console.error("failed to send join event" + err);
   }
+
+  if (actionType === "UPDATE") return;
 
   sendUpdateMembers(chatroomId, memberId, actionType);
 };
