@@ -239,8 +239,21 @@ chatroomRouter.patch("/:chatroomId", async (req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json({ title, privacy, id: chatroom.id });
-    console.log("Chatroom renamed");
+    const members = await Prisma.chatroomMember.findMany({
+      where: {
+        chatroomId,
+      },
+      select: {
+        memberId: true,
+      },
+    });
+
+    members.forEach((member) => {
+      sendUpdateChatrooms(chatroomId, member.memberId, "UPDATE");
+    });
+
+    res.status(200).json({ message: "Chatroom updated" });
+    console.log("Chatroom renamed", title, privacy, chatroomId);
     return;
   } catch (err: any) {
     console.error("Chatroom rename error");

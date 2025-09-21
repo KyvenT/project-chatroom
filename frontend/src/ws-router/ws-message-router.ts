@@ -62,6 +62,11 @@ export const wsMessageRouter = (
             navigate("/chat");
           }
           break;
+        case "UPDATE":
+          useChatroomsStore
+            .getState()
+            .updateChatroom(message.chatroom as Chatroom);
+          break;
         default:
           console.log("unknown action type for updating chatrooms");
       }
