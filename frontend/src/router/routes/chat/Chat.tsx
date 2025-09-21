@@ -33,17 +33,6 @@ function Chat() {
   const { ws } = useWebSocketContext();
   const messageInput = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (isLoggedIn && ws && chatroomId) {
-      ws.send(
-        JSON.stringify({
-          type: "update-active-chatroom",
-          chatroomId,
-        }),
-      );
-    }
-  }, [isLoggedIn, ws, chatroomId]);
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 

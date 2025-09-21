@@ -32,7 +32,7 @@ const MemberList = () => {
   const members = useMembersStore((state) => state.members);
   const setMembers = useMembersStore((state) => state.setMembers);
 
-  if (!isLoggedIn || !chatroomId) {
+  if (!isLoggedIn) {
     return <p>Please log in to see the member list.</p>;
   }
 
@@ -69,11 +69,13 @@ const MemberList = () => {
   return (
     <div css={[styles, colors(theme)]}>
       <div>
-        {onlineList && (
+        {onlineList.length !== 0 && (
           <MemberStatusList members={onlineList} status="ONLINE" />
         )}
-        {awayList && <MemberStatusList members={awayList} status="AWAY" />}
-        {offlineList && (
+        {awayList.length !== 0 && (
+          <MemberStatusList members={awayList} status="AWAY" />
+        )}
+        {offlineList.length !== 0 && (
           <MemberStatusList members={offlineList} status="OFFLINE" />
         )}
       </div>

@@ -108,7 +108,11 @@ export const InviteModal = ({
     <Modal modalStyles={dialogStyles} open={inviteModalOpen} onClose={onClose}>
       <h3>Invite to {title}</h3>
       <form id="inviteForm" onSubmit={handleSubmit(onSubmit)}>
-        <input {...register("username")} placeholder="Invite user..." />
+        <input
+          {...register("username")}
+          id="username"
+          placeholder="Invite user..."
+        />
         <button type="submit" disabled={!canInvite}>
           Invite
         </button>

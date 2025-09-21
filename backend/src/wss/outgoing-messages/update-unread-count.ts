@@ -25,9 +25,14 @@ export const sendUpdateUnreadMessage = (
   if (recipientSocket) {
     recipientSocket.send(
       JSON.stringify({
-        type: "unread-update",
-        chatroomId,
-        unreadMessages: unreadMessageCount,
+        type: "notification",
+        notification: {
+          type: "NEW_MESSAGE",
+          payload: {
+            chatroomId,
+            unreadMessages: unreadMessageCount,
+          },
+        },
       })
     );
   }

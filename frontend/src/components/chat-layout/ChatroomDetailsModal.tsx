@@ -104,7 +104,6 @@ export const ChatroomDetailsModal = ({
     if (!isLoggedIn || !isOwner) return;
 
     const { title, privacy } = data;
-    console.log(title, privacy);
     chatroomMutation.mutate({
       fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
       method: "PATCH",

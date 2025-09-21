@@ -105,6 +105,7 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
           placeholder="Message..."
           rows={height}
           onKeyDown={handleKeyPress}
+          id="message"
           required
           autoFocus
         />
