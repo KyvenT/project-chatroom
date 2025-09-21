@@ -20,6 +20,8 @@ const STATUS_COLORS = {
 const styles = (status: Status) =>
   css({
     display: "flex",
+    alignItems: "center",
+    gap: "8px",
 
     ".status": {
       borderRadius: "50%",
@@ -27,6 +29,11 @@ const styles = (status: Status) =>
       width: "1.2rem",
       appearance: "none",
       backgroundColor: STATUS_COLORS[status],
+
+      option: {
+        fontSize: "1rem",
+        padding: "4px",
+      },
     },
   });
 
@@ -35,8 +42,11 @@ const colors = (theme: Theme) =>
     color: theme.colors.white,
 
     ".status": {
+      fontSize: 0,
+
       option: {
-        backgroundColor: "red",
+        backgroundColor: theme.colors.dark_grey,
+        color: theme.colors.white,
       },
 
       "option:hover": {
@@ -74,16 +84,20 @@ const ProfileStatus = ({ status }: ProfileStatusProps) => {
         ref={statusRef}
         className="status"
         onChange={handleSubmit}
-        value={status}
+        defaultValue={status}
       >
-        <option className="statusOption" value={"ONLINE"}>
-          ONLINE
+        <option
+          className="statusOption"
+          onMouseOver={() => {}}
+          value={"ONLINE"}
+        >
+          Online
         </option>
         <option className="statusOption" value={"AWAY"}>
-          AWAY
+          Away
         </option>
         <option className="statusOption" value={"OFFLINE"}>
-          OFFLINE
+          Offline
         </option>
       </select>
       <p>{user.username}</p>
