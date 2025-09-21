@@ -35,9 +35,8 @@ const InboxButton = () => {
   });
 
   useEffect(() => {
-    if (invitesData) {
-      setInvites(invitesData);
-    }
+    if (!invitesData) return;
+    setInvites(invitesData);
   }, [invitesData]);
 
   const handleInviteResponse = (
@@ -49,10 +48,8 @@ const InboxButton = () => {
 
     let status;
     if (userAccepted) {
-      console.log("Invite accepted");
       status = "ACCEPTED";
     } else {
-      console.log("Invite rejected");
       status = "REJECTED";
     }
 
@@ -76,10 +73,16 @@ const InboxButton = () => {
               <h5>{invite.chatroom.title}</h5>
               <p>Invited by: {invite.sender.username}</p>
               <form id={invite.id}>
-                <button onClick={(event) => handleInviteResponse(event, true)}>
+                <button
+                  id="accept"
+                  onClick={(event) => handleInviteResponse(event, true)}
+                >
                   Accept
                 </button>
-                <button onClick={(event) => handleInviteResponse(event, false)}>
+                <button
+                  id="reject"
+                  onClick={(event) => handleInviteResponse(event, false)}
+                >
                   Reject
                 </button>
               </form>

@@ -48,6 +48,7 @@ const Login = () => {
           onChange={(e) => setUsernameInput(e.target.value)}
           placeholder="Username..."
           maxLength={20}
+          id="username"
           required
           autoFocus
         />
@@ -56,6 +57,7 @@ const Login = () => {
           onChange={(e) => setPasswordInput(e.target.value)}
           placeholder="Password..."
           maxLength={20}
+          id="password"
           required
         />
         <button type="submit">Login</button>

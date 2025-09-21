@@ -45,6 +45,7 @@ const Signup = () => {
           onChange={(e) => setUsernameInput(e.target.value)}
           placeholder="Username..."
           maxLength={20}
+          id="username"
           required
         />
         <input
@@ -52,6 +53,7 @@ const Signup = () => {
           onChange={(e) => setPasswordInput(e.target.value)}
           placeholder="Password..."
           maxLength={20}
+          id="password"
           required
         />
         <button type="submit">Register</button>

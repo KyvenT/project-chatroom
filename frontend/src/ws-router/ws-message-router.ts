@@ -26,7 +26,6 @@ export const wsMessageRouter = (
       break;
     case "notification":
       console.log("notif received");
-      console.log(message);
       switch (message.notification.type) {
         case "INVITE":
           useInvitesStore
@@ -36,17 +35,15 @@ export const wsMessageRouter = (
         case "MENTION":
           break;
         case "NEW_MESSAGE":
+          const { unreadMessages, chatroomId: affectedChatroom } = message
+            .notification.payload as UpdateUnreadMessage;
+          useChatroomsStore
+            .getState()
+            .updateChatroomUnread(unreadMessages, affectedChatroom);
           break;
         default:
           console.log("Unknown notif type: " + message.notification.type);
       }
-      break;
-    case "unread-update":
-      const { unreadMessages, chatroomId: affectedChatroom } =
-        message as UpdateUnreadMessage;
-      useChatroomsStore
-        .getState()
-        .updateChatroomUnread(unreadMessages, affectedChatroom);
       break;
     case "update-chatrooms":
       switch (message.action) {

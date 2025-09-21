@@ -98,6 +98,17 @@ function ChatLayout() {
   });
 
   useEffect(() => {
+    if (isLoggedIn && ws && chatroomId) {
+      ws.send(
+        JSON.stringify({
+          type: "update-active-chatroom",
+          chatroomId,
+        }),
+      );
+    }
+  }, [isLoggedIn, ws, chatroomId]);
+
+  useEffect(() => {
     if (!chatroomId) {
       setChatroomTitle(null);
       return;
