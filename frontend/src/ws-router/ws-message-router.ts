@@ -26,7 +26,6 @@ export const wsMessageRouter = (
       break;
     case "notification":
       console.log("notif received");
-      console.log(message);
       switch (message.notification.type) {
         case "INVITE":
           useInvitesStore

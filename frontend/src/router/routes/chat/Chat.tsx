@@ -5,7 +5,7 @@ import { useParams } from "react-router";
 import MemberList from "../../../components/chat/MemberList";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 // import AuthGuard from "../../../components/AuthGuard";
 
 const chatStyles = css({
