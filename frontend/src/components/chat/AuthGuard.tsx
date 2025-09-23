@@ -104,7 +104,11 @@ const AuthGuard = () => {
   };
 
   return (
-    <Modal open={!isLoggedIn} modalStyles={modalStyles}>
+    <Modal
+      open={!isLoggedIn}
+      modalStyles={modalStyles}
+      variant="requiredInteraction"
+    >
       <div css={styles}>
         {toggleContinueAsGuest ? (
           <div className="subpageContainer">
