@@ -1,9 +1,11 @@
 import { css } from "@emotion/react";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import Modal from "../Modal";
 import useToggle from "../../hooks/useToggle";
 import useAuthContext from "../../hooks/useAuthContext";
 import { ArrowLeftIcon } from "lucide-react";
+import type { UserAuth } from "../../types/REST-types/User";
+import React, { useRef } from "react";
 
 const styles = css({
   position: "relative",
@@ -39,7 +41,34 @@ const modalStyles = css({
 
 const AuthGuard = () => {
   const [toggleContinueAsGuest, setToggleContinueAsGuest] = useToggle(false);
-  const { isLoggedIn } = useAuthContext();
+  const { isLoggedIn, handleSignIn } = useAuthContext();
+  const { chatroomId } = useParams();
+  const guestNameRef = useRef<HTMLInputElement>(null);
+
+  const handleGuestCreation = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const username = guestNameRef.current?.value;
+
+    if (!username) return;
+
+    const res = await fetch("http://localhost:3000/api/auth/create-guest", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, chatroomId }),
+    });
+
+    if (!res.ok) {
+      console.error(res.status);
+    }
+
+    const data = (await res.json()) as UserAuth;
+    console.log(data);
+
+    handleSignIn(data);
+  };
 
   return (
     <Modal open={!isLoggedIn} modalStyles={modalStyles}>
@@ -53,10 +82,14 @@ const AuthGuard = () => {
               <ArrowLeftIcon />
             </a>
             <h3>Create a Guest User</h3>
-            <form id="createGuest">
+            <form id="createGuest" onSubmit={handleGuestCreation}>
               <div>
                 <label htmlFor="usernameInput">Username: </label>
-                <input id="usernameInput" placeholder="Bob..."></input>
+                <input
+                  id="usernameInput"
+                  placeholder="Bob..."
+                  ref={guestNameRef}
+                ></input>
               </div>
               <button type="submit">Join as Guest</button>
             </form>
