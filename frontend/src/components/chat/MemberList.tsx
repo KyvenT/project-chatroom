@@ -32,10 +32,6 @@ const MemberList = () => {
   const members = useMembersStore((state) => state.members);
   const setMembers = useMembersStore((state) => state.setMembers);
 
-  if (!isLoggedIn) {
-    return <p>Please log in to see the member list.</p>;
-  }
-
   const { data } = useQuery<ChatroomMember[]>({
     queryKey: [user.token, chatroomId],
     queryFn: () =>
@@ -65,6 +61,10 @@ const MemberList = () => {
 
     return { onlineList, awayList, offlineList, status };
   }, [members, user.username]);
+
+  if (!isLoggedIn) {
+    return <p>Please log in to see the member list.</p>;
+  }
 
   return (
     <div css={[styles, colors(theme)]}>

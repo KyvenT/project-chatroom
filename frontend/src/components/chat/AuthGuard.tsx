@@ -6,6 +6,7 @@ import useAuthContext from "../../hooks/useAuthContext";
 import { ArrowLeftIcon } from "lucide-react";
 import type { UserAuth } from "../../types/REST-types/User";
 import React, { useRef } from "react";
+import useWebSocketContext from "../../hooks/useWebSocketContext";
 
 const styles = css({
   position: "relative",
@@ -42,6 +43,7 @@ const modalStyles = css({
 const AuthGuard = () => {
   const [toggleContinueAsGuest, setToggleContinueAsGuest] = useToggle(false);
   const { isLoggedIn, handleSignIn } = useAuthContext();
+  const { handleWSAuth } = useWebSocketContext();
   const { chatroomId } = useParams();
   const guestNameRef = useRef<HTMLInputElement>(null);
 
@@ -68,6 +70,7 @@ const AuthGuard = () => {
     console.log(data);
 
     handleSignIn(data);
+    handleWSAuth(data.token);
   };
 
   return (
