@@ -6,7 +6,6 @@ import MemberList from "../../../components/chat/MemberList";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useRef } from "react";
-import AuthGuard from "../../../components/chat/AuthGuard";
 
 const chatStyles = css({
   height: "100%",
@@ -52,7 +51,6 @@ function Chat() {
 
   return (
     <div css={[chatStyles, colors(theme)]}>
-      {<AuthGuard />}
       {chatroomId && (
         <div className="chatContainer">
           <ChatMessages />

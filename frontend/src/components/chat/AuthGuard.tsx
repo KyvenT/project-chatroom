@@ -5,8 +5,15 @@ import useToggle from "../../hooks/useToggle";
 import useAuthContext from "../../hooks/useAuthContext";
 import { ArrowLeftIcon } from "lucide-react";
 import type { UserAuth } from "../../types/REST-types/User";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useWebSocketContext from "../../hooks/useWebSocketContext";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
+import { nonVerifiedQuery } from "../../hooks/useCustomQuery";
+import {
+  nonVerifiedMutation,
+  type MutationArgs,
+} from "../../hooks/useCustomMutation";
 
 const styles = css({
   position: "relative",
@@ -40,37 +47,60 @@ const modalStyles = css({
   border: "2px solid black",
 });
 
+interface privacyDataType {
+  privacy: ChatroomPrivacy;
+}
+
 const AuthGuard = () => {
   const [toggleContinueAsGuest, setToggleContinueAsGuest] = useToggle(false);
   const { isLoggedIn, handleSignIn } = useAuthContext();
   const { handleWSAuth } = useWebSocketContext();
   const { chatroomId } = useParams();
   const guestNameRef = useRef<HTMLInputElement>(null);
+  const [chatroomJoinable, setChatroomJoinable] = useState<boolean>(false);
+
+  const { data: privacyData } = useQuery<privacyDataType>({
+    queryKey: ["active-chatroom", chatroomId],
+    queryFn: () =>
+      nonVerifiedQuery({
+        fetchUrl: "http://localhost:3000/api/chatroomsPublic/" + chatroomId,
+      }),
+    enabled: !!chatroomId,
+    staleTime: Infinity,
+  });
+
+  const { data: guestAuthData, mutate } = useMutation<
+    UserAuth,
+    Error,
+    MutationArgs
+  >({
+    mutationFn: nonVerifiedMutation<UserAuth>,
+    onSuccess: () => {
+      if (!guestAuthData) return;
+      handleSignIn(guestAuthData);
+      handleWSAuth(guestAuthData.token);
+    },
+  });
+
+  useEffect(() => {
+    if (privacyData?.privacy === "PUBLIC") {
+      setChatroomJoinable(true);
+    } else {
+      setChatroomJoinable(false);
+    }
+  }, [privacyData]);
 
   const handleGuestCreation = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (privacyData?.privacy !== "PUBLIC") return;
 
     const username = guestNameRef.current?.value;
-
     if (!username) return;
-
-    const res = await fetch("http://localhost:3000/api/auth/create-guest", {
+    mutate({
+      fetchUrl: "http://localhost:3000/api/auth/create-guest",
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, chatroomId }),
+      reqBody: JSON.stringify({ username, chatroomId }),
     });
-
-    if (!res.ok) {
-      console.error(res.status);
-    }
-
-    const data = (await res.json()) as UserAuth;
-    console.log(data);
-
-    handleSignIn(data);
-    handleWSAuth(data.token);
   };
 
   return (
@@ -101,10 +131,14 @@ const AuthGuard = () => {
           <div className="subpageContainer">
             <h3>You are currently not logged in</h3>
             <Link to="/login">Sign in to chat</Link>
-            <p>or</p>
-            <a onClick={() => setToggleContinueAsGuest(true)}>
-              Join chatroom as Guest
-            </a>
+            {chatroomJoinable && (
+              <>
+                <p>or</p>
+                <a onClick={() => setToggleContinueAsGuest(true)}>
+                  Join chatroom as Guest
+                </a>
+              </>
+            )}
           </div>
         )}
       </div>

@@ -4,7 +4,7 @@ import { useParams } from "react-router";
 import { useEffect, useMemo } from "react";
 import { BidirectionalGroupedMap } from "../../lib/bidirectionGroupedMap";
 import MemberStatusList from "./MemberStatusList";
-import { queryFunction } from "../../hooks/useCustomQuery";
+import { verifiedQuery } from "../../hooks/useCustomQuery";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import ProfileStatus, { type Status } from "./ProfileStatus";
@@ -35,7 +35,7 @@ const MemberList = () => {
   const { data } = useQuery<ChatroomMember[]>({
     queryKey: [user.token, chatroomId],
     queryFn: () =>
-      queryFunction<ChatroomMember[]>({
+      verifiedQuery<ChatroomMember[]>({
         fetchUrl: "http://localhost:3000/api/members/" + chatroomId,
         user,
       }),

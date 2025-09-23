@@ -3,17 +3,37 @@ import type { UserAuth } from "../types/REST-types/User";
 export interface MutationArgs {
   fetchUrl: string;
   method: "GET" | "POST" | "UPDATE" | "PATCH" | "DELETE";
-  user: UserAuth;
+  user?: UserAuth;
   reqBody?: {};
 }
 
-export const mutationFunction = async <T>({
+export const nonVerifiedMutation = async <T>({
+  fetchUrl,
+  method,
+  reqBody = {},
+}: MutationArgs) => {
+  const res = await fetch(fetchUrl, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(reqBody),
+  });
+
+  if (!res.ok) {
+    throw new Error("mutation error");
+  }
+
+  return (await res.json()) as Promise<T>;
+};
+
+export const verifiedMutation = async <T>({
   fetchUrl,
   method,
   user,
   reqBody = {},
 }: MutationArgs) => {
-  if (!user.userId) {
+  if (!user || !user.userId) {
     throw new Error("not authenticated");
   }
   const res = await fetch(fetchUrl, {
