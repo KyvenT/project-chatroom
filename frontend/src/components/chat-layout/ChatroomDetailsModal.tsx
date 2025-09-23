@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { queryFunction } from "../../hooks/useCustomQuery";
+import { verifiedQuery } from "../../hooks/useCustomQuery";
 import type {
   ChatroomDetails,
   ChatroomPrivacy,
@@ -11,10 +11,10 @@ import type { Theme } from "@emotion/react";
 import Button from "../Button";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import {
-  mutationFunction,
+  verifiedMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { SquarePen } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
@@ -133,12 +133,12 @@ export const ChatroomDetailsModal = ({
   const theme = useTheme();
   const titleInputRef = useRef<HTMLInputElement>(null);
   const [enableTitleEdit, setEnableTitleEdit] = useState<boolean>(false);
-  const { register, handleSubmit } = useForm<ChatroomFormInput>();
+
   const { isLoggedIn } = useAuthContext();
   const { data: chatroomDetails } = useQuery<ChatroomDetails>({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
-      queryFunction({
+      verifiedQuery({
         fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
         user,
       }),
@@ -146,13 +146,21 @@ export const ChatroomDetailsModal = ({
     staleTime: Infinity,
   });
 
+  const { register, handleSubmit, reset } = useForm<ChatroomFormInput>({
+    defaultValues: { privacy: chatroomDetails?.privacy },
+  });
+
   const chatroomMutation = useMutation<
     ConfirmationResponse,
     Error,
     MutationArgs
   >({
-    mutationFn: mutationFunction<ConfirmationResponse>,
+    mutationFn: verifiedMutation<ConfirmationResponse>,
   });
+
+  useEffect(() => {
+    reset({ privacy: chatroomDetails?.privacy });
+  }, [chatroomDetails, reset]);
 
   const handleLeave = () => {
     chatroomMutation.mutate({
@@ -221,7 +229,7 @@ export const ChatroomDetailsModal = ({
                 )}
               </div>
               <h5>
-                Owned by: <span>{chatroomDetails.owner.username}</span>
+                Owned by: <span>{chatroomDetails.owner?.username}</span>
               </h5>
               <p>
                 Created at:
@@ -234,11 +242,7 @@ export const ChatroomDetailsModal = ({
               <>
                 <div className="privacySection">
                   <label htmlFor="privacy">Privacy:</label>
-                  <select
-                    {...register("privacy")}
-                    defaultValue={chatroomDetails.privacy}
-                    id="privacy"
-                  >
+                  <select {...register("privacy")} id="privacy">
                     <option value="INVITE_ONLY">Only owner can invite</option>
                     <option value="INVITE_PLUS">Members can invite</option>
                     <option value="JOINABLE">Any user can join by link</option>

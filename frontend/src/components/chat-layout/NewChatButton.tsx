@@ -3,7 +3,7 @@ import useToggle from "../../hooks/useToggle";
 import Button from "../Button";
 import { useMutation } from "@tanstack/react-query";
 import {
-  mutationFunction,
+  verifiedMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type {
@@ -120,7 +120,7 @@ const NewChatButton = () => {
   const { user, isLoggedIn } = useAuthContext();
   const { register, handleSubmit } = useForm<CreateChatroomFormInput>();
   const mutation = useMutation<JoinChatroom, Error, MutationArgs>({
-    mutationFn: mutationFunction<JoinChatroom>,
+    mutationFn: verifiedMutation<JoinChatroom>,
   });
   const theme = useTheme();
 

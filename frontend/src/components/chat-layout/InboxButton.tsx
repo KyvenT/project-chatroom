@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import useAuthContext from "../../hooks/useAuthContext";
-import { queryFunction } from "../../hooks/useCustomQuery";
+import { verifiedQuery } from "../../hooks/useCustomQuery";
 import type { Invite, InviteResponse } from "../../types/REST-types/Invite";
 import DropdownButton from "../DropdownButton";
 import {
-  mutationFunction,
+  verifiedMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -23,7 +23,7 @@ const InboxButton = () => {
   const { data: invitesData } = useQuery<Invite[]>({
     queryKey: ["inbox", user.token],
     queryFn: () =>
-      queryFunction<Invite[]>({
+      verifiedQuery<Invite[]>({
         fetchUrl: "http://localhost:3000/api/invites/me",
         user,
       }),
@@ -31,7 +31,7 @@ const InboxButton = () => {
   });
 
   const mutation = useMutation<InviteResponse, Error, MutationArgs>({
-    mutationFn: mutationFunction<InviteResponse>,
+    mutationFn: verifiedMutation<InviteResponse>,
   });
 
   useEffect(() => {

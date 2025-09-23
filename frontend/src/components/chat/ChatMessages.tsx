@@ -2,7 +2,7 @@ import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessage from "./ChatMessage";
 import useAuthContext from "../../hooks/useAuthContext";
 import type { Message } from "../../types/REST-types/Message";
-import { queryFunction } from "../../hooks/useCustomQuery";
+import { verifiedQuery } from "../../hooks/useCustomQuery";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -42,7 +42,7 @@ const ChatMessages = () => {
   const { data } = useQuery<Message[]>({
     queryKey: [chatroomId, isLoggedIn, getBefore?.toISOString()],
     queryFn: () =>
-      queryFunction({
+      verifiedQuery({
         fetchUrl: `http://localhost:3000/api/messages/${chatroomId}/${getBefore?.toISOString()}`,
         user,
       }),

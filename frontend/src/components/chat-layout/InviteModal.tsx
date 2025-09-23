@@ -6,13 +6,13 @@ import type {
   Invite,
 } from "../../types/REST-types/Invite";
 import {
-  mutationFunction,
+  verifiedMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import { css, useTheme } from "@emotion/react";
 import type { UserAuth } from "../../types/REST-types/User";
 import type { Theme } from "@emotion/react";
-import { queryFunction } from "../../hooks/useCustomQuery";
+import { verifiedQuery } from "../../hooks/useCustomQuery";
 import Button from "../Button";
 import { useEffect } from "react";
 
@@ -71,7 +71,7 @@ export const InviteModal = ({
   const { data: invitesData, refetch } = useQuery<Invite[]>({
     queryKey: ["inviteList", chatroomId],
     queryFn: () =>
-      queryFunction({
+      verifiedQuery({
         fetchUrl: "http://localhost:3000/api/invites/" + chatroomId,
         method: "GET",
         user,
@@ -81,7 +81,7 @@ export const InviteModal = ({
     staleTime: 0,
   });
   const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: mutationFunction<ConfirmationResponse>,
+    mutationFn: verifiedMutation<ConfirmationResponse>,
   });
 
   useEffect(() => {
