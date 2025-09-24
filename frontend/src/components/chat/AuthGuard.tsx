@@ -60,7 +60,7 @@ const AuthGuard = () => {
   const [chatroomJoinable, setChatroomJoinable] = useState<boolean>(false);
 
   const { data: privacyData } = useQuery<privacyDataType>({
-    queryKey: ["active-chatroom", chatroomId],
+    queryKey: ["chatroom-privacy", chatroomId],
     queryFn: () =>
       nonVerifiedQuery({
         fetchUrl: "http://localhost:3000/api/chatroomsPublic/" + chatroomId,
