@@ -122,6 +122,17 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
   }
 
   try {
+    const verifyUser = await Prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (verifyUser?.isGuest === true) {
+      res.status(400).json({ message: "Only users can create chatrooms" });
+      return;
+    }
+
     const chatroom = await Prisma.chatroom.create({
       data: {
         title,
@@ -166,6 +177,12 @@ chatroomRouter.post(
     }
 
     try {
+      const verifyUser = await Prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+
       const chatroom = await Prisma.chatroom.findUnique({
         where: {
           id: chatroomId,
@@ -177,14 +194,23 @@ chatroomRouter.post(
         return;
       }
 
-      if (
-        chatroom.privacy !==
-        (ChatroomPrivacy.JOINABLE || ChatroomPrivacy.PUBLIC)
-      ) {
-        res
-          .status(400)
-          .json({ error: "Joining this chatroom requires an invite" });
-        return;
+      if (verifyUser?.isGuest === true) {
+        if (chatroom.privacy !== ChatroomPrivacy.PUBLIC) {
+          res
+            .status(400)
+            .json({ message: "Only users can join this chatroom" });
+          return;
+        }
+      } else {
+        if (
+          chatroom.privacy !==
+          (ChatroomPrivacy.JOINABLE || ChatroomPrivacy.PUBLIC)
+        ) {
+          res
+            .status(400)
+            .json({ error: "Joining this chatroom requires an invite" });
+          return;
+        }
       }
 
       const join = (await Prisma.chatroomMember.create({

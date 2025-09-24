@@ -24,7 +24,7 @@ authRouter.post("/register", async (req, res) => {
     const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
       expiresIn: env.JWT_EXPIRATION as StringValue,
     });
-    res.status(201).json({ token, userId: user.id, username });
+    res.status(201).json({ token, userId: user.id, username, isGuest: false });
     console.log(`User registered: ${username}`);
     return;
   } catch (error: any) {
@@ -58,7 +58,9 @@ authRouter.post("/login", async (req, res) => {
     const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
       expiresIn: env.JWT_EXPIRATION as StringValue,
     });
-    res.status(200).json({ token, userId: user.id, username });
+    res
+      .status(200)
+      .json({ token, userId: user.id, username, isGuest: user.isGuest });
     console.log(`User logged in: ${username}`);
     return;
   } catch (error: any) {
@@ -74,6 +76,19 @@ authRouter.post("/create-guest", async (req, res) => {
   const randomlyGeneratedPassword = crypto.randomBytes(16).toString("hex");
 
   try {
+    const verifyPrivacy = await Prisma.chatroom.findUnique({
+      where: {
+        id: chatroomId,
+      },
+    });
+
+    if (verifyPrivacy?.privacy !== "PUBLIC") {
+      res
+        .status(500)
+        .json({ message: "Guests are not allowed to join this chatroom" });
+      return;
+    }
+
     const guest = await Prisma.user.create({
       data: {
         username,
@@ -92,7 +107,7 @@ authRouter.post("/create-guest", async (req, res) => {
     const token = jwt.sign({ userId: guest.id }, env.JWT_SECRET, {
       expiresIn: env.JWT_EXPIRATION as StringValue,
     });
-    res.status(201).json({ token, userId: guest.id, username });
+    res.status(201).json({ token, userId: guest.id, username, isGuest: true });
     console.log(`Guest created: ${username}`);
     return;
   } catch (error: any) {
