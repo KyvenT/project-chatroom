@@ -21,8 +21,9 @@ export default function AuthContextProvider({
     userId: "",
     username: "",
     token: "",
+    isGuest: true,
   });
-  const isLoggedIn = user.token !== "";
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const handleSignIn = (newUser: UserAuth) => {
     if (!newUser.userId || !newUser.username || !newUser.token) {
@@ -32,11 +33,14 @@ export default function AuthContextProvider({
       userId: newUser.userId,
       username: newUser.username,
       token: newUser.token,
+      isGuest: newUser.isGuest,
     });
+    setIsLoggedIn(true);
   };
 
   const handleLogOut = () => {
-    setUser({ userId: "", username: "", token: "" });
+    setUser({ userId: "", username: "", token: "", isGuest: true });
+    setIsLoggedIn(false);
   };
 
   return (

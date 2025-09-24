@@ -141,7 +141,7 @@ function ChatLayout() {
 
   return (
     <div css={[styles, colors(theme)]}>
-      <AuthGuard />
+      {!isLoggedIn && <AuthGuard />}
       {sidebarToggled && <Sidebar chatrooms={chatrooms} />}
       <div className="container">
         <Header>

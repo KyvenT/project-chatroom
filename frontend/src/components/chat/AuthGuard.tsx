@@ -69,13 +69,9 @@ const AuthGuard = () => {
     staleTime: Infinity,
   });
 
-  const { data: guestAuthData, mutate } = useMutation<
-    UserAuth,
-    Error,
-    MutationArgs
-  >({
+  const { mutate } = useMutation<UserAuth, Error, MutationArgs>({
     mutationFn: nonVerifiedMutation<UserAuth>,
-    onSuccess: () => {
+    onSuccess: (guestAuthData) => {
       if (!guestAuthData) return;
       handleSignIn(guestAuthData);
       handleWSAuth(guestAuthData.token);
@@ -99,7 +95,7 @@ const AuthGuard = () => {
     mutate({
       fetchUrl: "http://localhost:3000/api/auth/create-guest",
       method: "POST",
-      reqBody: JSON.stringify({ username, chatroomId }),
+      reqBody: { username, chatroomId },
     });
   };
 
