@@ -74,6 +74,19 @@ authRouter.post("/create-guest", async (req, res) => {
   const randomlyGeneratedPassword = crypto.randomBytes(16).toString("hex");
 
   try {
+    const verifyPrivacy = await Prisma.chatroom.findUnique({
+      where: {
+        id: chatroomId,
+      },
+    });
+
+    if (verifyPrivacy?.privacy !== "PUBLIC") {
+      res
+        .status(500)
+        .json({ message: "Guests are not allowed to join this chatroom" });
+      return;
+    }
+
     const guest = await Prisma.user.create({
       data: {
         username,

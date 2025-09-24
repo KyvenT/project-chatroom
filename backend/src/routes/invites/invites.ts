@@ -61,6 +61,17 @@ invitesRouter.post("/", async (req: Request, res: Response) => {
   }
 
   try {
+    const verifyUser = await Prisma.user.findUnique({
+      where: {
+        id: senderId,
+      },
+    });
+
+    if (verifyUser?.isGuest === true) {
+      res.status(400).json({ message: "Only users can send invites" });
+      return;
+    }
+
     const receiverPromise = Prisma.user.findUnique({
       where: {
         username: receiverUsername,
@@ -151,13 +162,18 @@ invitesRouter.patch("/", async (req: Request, res: Response) => {
     const verify = await Prisma.invite.findUnique({
       where: {
         id: inviteId,
-        receiverId: userId,
-        status: "PENDING",
       },
     });
 
     if (!verify) {
       res.status(400).json({ error: "invite not found" });
+      return;
+    }
+
+    if (verify.receiverId !== userId) {
+      res
+        .status(400)
+        .json({ message: "not detected as receiver of this invite" });
       return;
     }
 
@@ -218,9 +234,19 @@ invitesRouter.delete("/", async (req: Request, res: Response) => {
       return;
     }
 
-    if (invite.receiverId !== userId && invite.senderId !== userId) {
+    const chatroom = await Prisma.chatroom.findUnique({
+      where: {
+        id: invite.chatroomId,
+      },
+    });
+
+    if (
+      invite.receiverId !== userId &&
+      invite.senderId !== userId &&
+      userId !== chatroom?.ownerId
+    ) {
       console.error(
-        "Tried to delete invite but user is not receiver nor sender of invite"
+        "Tried to delete invite but user is not receiver, sender, or owner of chatroom"
       );
       res
         .status(400)
