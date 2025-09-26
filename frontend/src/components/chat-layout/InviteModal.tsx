@@ -144,7 +144,11 @@ export const InviteModal = ({
           </ul>
         </>
       )}
-      <button css={closeButtonStyles} onClick={onClose}>
+      <button
+        css={closeButtonStyles}
+        onClick={onClose}
+        aria-label="Close invite modal"
+      >
         X
       </button>
     </Modal>

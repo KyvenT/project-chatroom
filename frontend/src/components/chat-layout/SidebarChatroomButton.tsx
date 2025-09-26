@@ -111,7 +111,7 @@ const SidebarChatroomButton = ({
   const theme = useTheme();
   const { user } = useAuthContext();
   const [isHovered, setHovered] = useToggle(false);
-  const [inviteModalOpen, setInviteModalOpen] = useToggle();
+  const [inviteModalOpen, setInviteModalOpen] = useToggle(false);
 
   const canInvite: boolean = !!(
     (ownerId === user.userId || privacy !== "INVITE_ONLY") &&
@@ -136,6 +136,7 @@ const SidebarChatroomButton = ({
               onClick={() => setInviteModalOpen()}
               variant="icon"
               otherStyles={inviteBtnStyles(theme, isActive)}
+              aria-label="Open member invite modal"
             >
               {<UserRoundPlus size={"1.25rem"} />}
             </Button>

@@ -149,6 +149,7 @@ function ChatLayout() {
             variant="icon"
             className="sidebarToggleBtn"
             onClick={() => setSidebarToggled()}
+            aria-label="Toggle sidebar"
           >
             {sidebarToggled ? <ArrowLeftToLine /> : <MenuIcon />}
           </Button>
@@ -157,6 +158,7 @@ function ChatLayout() {
               onClick={() => setOpenChatroomDetails(true)}
               variant="icon"
               otherStyles={titleStyles(theme)}
+              aria-label="Open chatroom details"
             >
               {chatroomTitle}
             </Button>

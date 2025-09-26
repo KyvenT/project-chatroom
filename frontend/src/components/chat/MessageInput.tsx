@@ -109,7 +109,7 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
           required
           autoFocus
         />
-        <button type="submit" form="message-form">
+        <button type="submit" form="message-form" aria-label="Send message">
           <SendHorizonal size="1.25rem" />
         </button>
       </form>
