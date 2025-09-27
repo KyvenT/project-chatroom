@@ -138,7 +138,7 @@ const SidebarChatroomButton = ({
               otherStyles={inviteBtnStyles(theme, isActive)}
               aria-label="Open member invite modal"
             >
-              {<UserRoundPlus size={"1.25rem"} />}
+              {<UserRoundPlus size="1.25rem" />}
             </Button>
           )}
         </div>
