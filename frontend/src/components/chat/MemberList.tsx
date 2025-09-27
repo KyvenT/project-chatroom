@@ -25,6 +25,12 @@ const colors = (theme: Theme) =>
     borderBottom: `1px solid ${theme.colors.dark_grey}`,
   });
 
+const membersListStyles = css({
+  display: "flex",
+  flexDirection: "column",
+  overflowY: "auto",
+});
+
 const MemberList = () => {
   const { user, isLoggedIn } = useAuthContext();
   const { chatroomId } = useParams();
@@ -68,7 +74,7 @@ const MemberList = () => {
 
   return (
     <div css={[styles, colors(theme)]}>
-      <div>
+      <div css={membersListStyles}>
         {onlineList.length !== 0 && (
           <MemberStatusList members={onlineList} status="ONLINE" />
         )}

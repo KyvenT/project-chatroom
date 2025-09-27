@@ -59,14 +59,16 @@ const styles = (theme: Theme) =>
       width: "fit-content",
     },
 
-    a: {
+    ".toggleCreateGuestBtn, a": {
       textDecoration: "none",
       fontSize: "1rem",
       cursor: "pointer",
       color: theme.colors.light_grey,
+      backgroundColor: "transparent",
+      border: 0,
     },
 
-    "a:hover": {
+    ".toggleCreateGuestBtn:hover, a:hover": {
       color: theme.colors.white,
     },
 
@@ -180,9 +182,12 @@ const AuthGuard = () => {
             {chatroomJoinable && (
               <>
                 <p>or</p>
-                <a onClick={() => setToggleContinueAsGuest(true)}>
+                <button
+                  className="toggleCreateGuestBtn"
+                  onClick={() => setToggleContinueAsGuest(true)}
+                >
                   Join chatroom as Guest
-                </a>
+                </button>
               </>
             )}
           </div>
