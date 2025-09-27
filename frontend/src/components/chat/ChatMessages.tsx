@@ -24,7 +24,7 @@ const colors = (theme: Theme) =>
   css({
     backgroundColor: theme.colors.black,
     color: theme.colors.white,
-    scrollbarColor: `${theme.colors.dark_grey} ${theme.colors.black}`,
+    scrollbarColor: `${theme.colors.dark_grey} transparent`,
   });
 
 const ChatMessages = () => {

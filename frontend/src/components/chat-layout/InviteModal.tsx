@@ -14,28 +14,67 @@ import type { UserAuth } from "../../types/REST-types/User";
 import type { Theme } from "@emotion/react";
 import { verifiedQuery } from "../../hooks/useCustomQuery";
 import Button from "../Button";
-import { useEffect } from "react";
+import { useState } from "react";
+import { Send } from "lucide-react";
 
-const dialogStyles = css({
-  gap: "10px",
-  backgroundColor: "white",
-  borderRadius: "10px",
-  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-  padding: "30px",
-
-  "#inviteForm": {
+const dialogStyles = (theme: Theme) =>
+  css({
     display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    backgroundColor: theme.colors.dark_grey,
+    borderRadius: "10px",
+    padding: "30px",
+    border: `1px solid ${theme.colors.white}`,
 
-    input: {
-      flex: 1,
+    "h3, h5": {
+      color: theme.colors.white,
+      userSelect: "none",
+      fontWeight: 400,
     },
-  },
-});
+
+    h3: {
+      fontSize: "1.2rem",
+    },
+
+    h5: {
+      fontSize: "1.05rem",
+    },
+
+    "#inviteForm": {
+      display: "flex",
+      border: `1px solid ${theme.colors.white}`,
+      padding: "4px",
+      borderRadius: "8px",
+
+      input: {
+        flex: 1,
+        backgroundColor: "transparent",
+        color: theme.colors.white,
+        fontSize: "1rem",
+        border: 0,
+      },
+
+      "input:focus": {
+        outline: 0,
+      },
+
+      ".inviteBtn": {},
+    },
+
+    ".inviteErrorMessage": {
+      color: "red",
+    },
+  });
 
 const inviteListStyles = css({
-  border: "1px solid black",
-  overflowY: "scroll",
-  maxHeight: "200px",
+  ul: {
+    overflowY: "scroll",
+    minHeight: "100px",
+    maxHeight: "200px",
+    padding: "8px",
+    borderRadius: "8px",
+  },
 
   ".inviteStatus": {
     display: "flex",
@@ -43,7 +82,20 @@ const inviteListStyles = css({
   },
 });
 
-const inviteListColors = (theme: Theme) => css({});
+const inviteListColors = (theme: Theme) =>
+  css({
+    ul: {
+      border: `1px solid ${theme.colors.white}`,
+      color: theme.colors.light_grey,
+      scrollbarColor: `${theme.colors.white} transparent`,
+
+      li: {},
+
+      "li:hover": {
+        color: theme.colors.white,
+      },
+    },
+  });
 
 export interface inviteFormInput {
   username: string;
@@ -67,6 +119,7 @@ export const InviteModal = ({
   chatroomId,
 }: InviteModalProps) => {
   const { register, handleSubmit } = useForm<inviteFormInput>();
+  const [inviteError, setInviteError] = useState<string>("");
   const theme = useTheme();
   const { data: invitesData, refetch } = useQuery<Invite[]>({
     queryKey: ["inviteList", chatroomId],
@@ -76,24 +129,26 @@ export const InviteModal = ({
         method: "GET",
         user,
       }),
-    enabled: inviteModalOpen,
+    enabled: !!inviteModalOpen,
     refetchOnWindowFocus: false,
     staleTime: 0,
   });
-  const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
+  const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
     mutationFn: verifiedMutation<ConfirmationResponse>,
+    onSuccess: () => {
+      refetch();
+    },
+    onError: (err) => {
+      setInviteError(err.message);
+    },
   });
-
-  useEffect(() => {
-    refetch();
-  }, [mutation.isSuccess]);
 
   const onSubmit: SubmitHandler<inviteFormInput> = (formData) => {
     if (!canInvite) {
       return;
     }
     const { username } = formData;
-    mutation.mutate({
+    mutate({
       fetchUrl: "http://localhost:3000/api/invites/",
       method: "POST",
       user,
@@ -105,7 +160,11 @@ export const InviteModal = ({
   };
 
   return (
-    <Modal modalStyles={dialogStyles} open={inviteModalOpen} onClose={onClose}>
+    <Modal
+      modalStyles={dialogStyles(theme)}
+      open={inviteModalOpen}
+      onClose={onClose}
+    >
       <h3>Invite to {title}</h3>
       <form id="inviteForm" onSubmit={handleSubmit(onSubmit)}>
         <input
@@ -113,40 +172,49 @@ export const InviteModal = ({
           id="username"
           placeholder="Invite user..."
         />
-        <button type="submit" disabled={!canInvite}>
-          Invite
-        </button>
+        <Button
+          type="submit"
+          disabled={!canInvite}
+          variant="icon"
+          className="inviteBtn"
+        >
+          <Send size="1rem" />
+        </Button>
       </form>
-      {inviteModalOpen && (
-        <>
-          <h5>Invited users: </h5>
-          <ul css={[inviteListStyles, inviteListColors(theme)]}>
-            {invitesData?.map((invite) => (
-              <li key={invite.id}>
-                <div>
-                  <h4>{invite.receiver.username}</h4>
-                  <div className="inviteStatus">
-                    <p>Status: {invite.status}</p>
-                    {invite.status === "REJECTED" && (
-                      <Button
-                        onClick={() =>
-                          onSubmit({ username: invite.receiver.username })
-                        }
-                      >
-                        Reinvite
-                      </Button>
-                    )}
-                  </div>
-                  <p>Invited at: {new Date(invite.sentAt).toLocaleString()}</p>
+      <span className="inviteErrorMessage">{inviteError}</span>
+      <div css={[inviteListStyles, inviteListColors(theme)]}>
+        <h5>Invited users: </h5>
+        <ul>
+          {invitesData?.map((invite) => (
+            <li key={invite.id} className="invitedUser">
+              <div>
+                <h4>{invite.receiver.username}</h4>
+                <div className="inviteStatus">
+                  <p>Status: {invite.status}</p>
+                  {invite.status === "REJECTED" && (
+                    <Button
+                      onClick={() =>
+                        onSubmit({ username: invite.receiver.username })
+                      }
+                    >
+                      Reinvite
+                    </Button>
+                  )}
                 </div>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      <button css={closeButtonStyles} onClick={onClose}>
+                <p>Invited at: {new Date(invite.sentAt).toLocaleString()}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <Button
+        css={closeButtonStyles}
+        variant="icon"
+        onClick={onClose}
+        aria-label="Close invite modal"
+      >
         X
-      </button>
+      </Button>
     </Modal>
   );
 };

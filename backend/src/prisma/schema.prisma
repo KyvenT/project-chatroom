@@ -16,6 +16,7 @@ model Chatroom {
   createdAt            DateTime         @default(now())
   messages             Message[]
   members              ChatroomMember[]
+  pinnedBy             PinnedChatrooms[]
   invites              Invite[]
 }
 
@@ -42,9 +43,19 @@ model User {
   sentMessages    Message[]
   joinedChatrooms ChatroomMember[]
   ownedChatrooms  Chatroom[]
+  pinnedChatrooms PinnedChatrooms[]
   sentInvites     Invite[]         @relation("SentInvite")
   receivedInvites Invite[]         @relation("ReceivedInvite")
   notifications   Notification[]
+}
+
+model PinnedChatrooms {
+  member    User      @relation(fields: [memberId], references: [id])
+  memberId  String
+  chatroom  Chatroom  @relation(fields: [chatroomId], references: [id])
+  chatroomId  String
+
+  @@id([chatroomId, memberId])
 }
 
 model ChatroomMember {

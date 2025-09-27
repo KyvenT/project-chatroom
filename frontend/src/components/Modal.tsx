@@ -6,6 +6,7 @@ export interface ModalProps
   extends React.DialogHTMLAttributes<HTMLDialogElement> {
   modalStyles?: SerializedStyles;
   variant?: "default" | "requiredInteraction";
+  onClose?: () => void;
 }
 
 export const closeButtonStyles = css({
@@ -31,6 +32,7 @@ const Modal = ({
   children,
   modalStyles,
   open,
+  onClose,
   variant = "default",
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -50,8 +52,8 @@ const Modal = ({
   const handleESCPress = (e: React.KeyboardEvent) => {
     if (variant === "requiredInteraction") return;
 
-    if (e.key === "Escape") {
-      dialogRef.current?.close();
+    if (e.key === "Escape" && onClose) {
+      onClose();
     }
   };
 

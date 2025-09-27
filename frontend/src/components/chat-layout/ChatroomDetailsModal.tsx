@@ -143,7 +143,7 @@ export const ChatroomDetailsModal = ({
         user,
       }),
     enabled: !!chatroomId,
-    staleTime: Infinity,
+    staleTime: 0,
   });
 
   const { register, handleSubmit, reset } = useForm<ChatroomFormInput>({
@@ -201,7 +201,11 @@ export const ChatroomDetailsModal = ({
   return (
     <>
       {chatroomDetails && (
-        <Modal open={open} modalStyles={chatroomDetailsModalStyles(theme)}>
+        <Modal
+          open={open}
+          onClose={onClose}
+          modalStyles={chatroomDetailsModalStyles(theme)}
+        >
           <form id="editChatroom" onSubmit={handleSubmit(handleUpdate)}>
             <div className="chatroomInfo">
               <div className="title">

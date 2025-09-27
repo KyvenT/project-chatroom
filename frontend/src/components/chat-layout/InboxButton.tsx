@@ -64,7 +64,11 @@ const InboxButton = () => {
   };
 
   return (
-    <DropdownButton buttonText={<Mail />} buttonStyles={iconBtnStyles(theme)}>
+    <DropdownButton
+      aria-label="Open invite inbox"
+      buttonText={<Mail />}
+      buttonStyles={iconBtnStyles(theme)}
+    >
       {invites.length === 0 && <p>No invites received</p>}
       <ul>
         {invites.map((invite) => {

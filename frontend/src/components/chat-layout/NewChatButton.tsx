@@ -146,6 +146,7 @@ const NewChatButton = () => {
         onClick={() => setToggle(true)}
         variant="icon"
         css={buttonStyles(theme)}
+        aria-label="Open create chatroom modal"
       >
         +
       </Button>
@@ -183,6 +184,7 @@ const NewChatButton = () => {
         <button
           css={[closeButtonStyles, closeButtonColors(theme)]}
           onClick={() => setToggle(false)}
+          aria-label="Close create chatroom modal"
         >
           X
         </button>
