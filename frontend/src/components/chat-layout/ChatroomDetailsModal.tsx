@@ -63,6 +63,7 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
       border: `1px solid ${theme.colors.white}`,
       padding: "6px 10px",
       borderRadius: "5px",
+      cursor: "pointer",
     },
 
     ".actionBtn:hover": {
@@ -81,6 +82,7 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
         padding: "6px",
         borderRadius: "4px",
         border: `1px solid ${theme.colors.white}`,
+        cursor: "pointer",
 
         option: {
           backgroundColor: theme.colors.dark_grey,
@@ -215,6 +217,7 @@ export const ChatroomDetailsModal = ({
                     type="text"
                     placeholder={chatroomDetails.title}
                     ref={titleInputRef}
+                    maxLength={20}
                   ></input>
                 ) : (
                   <h3>{chatroomDetails.title}</h3>
