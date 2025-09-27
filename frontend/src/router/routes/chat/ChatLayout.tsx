@@ -153,25 +153,27 @@ function ChatLayout() {
           >
             {sidebarToggled ? <ArrowLeftToLine /> : <MenuIcon />}
           </Button>
-          {chatroomTitle ? (
-            <Button
-              onClick={() => setOpenChatroomDetails(true)}
-              variant="icon"
-              otherStyles={titleStyles(theme)}
-              aria-label="Open chatroom details"
-            >
-              {chatroomTitle}
-            </Button>
+          {chatroomTitle && chatroomId ? (
+            <>
+              <Button
+                onClick={() => setOpenChatroomDetails(true)}
+                variant="icon"
+                otherStyles={titleStyles(theme)}
+                aria-label="Open chatroom details"
+              >
+                {chatroomTitle}
+              </Button>
+              {openChatroomDetails && (
+                <ChatroomDetailsModal
+                  open={openChatroomDetails}
+                  onClose={() => setOpenChatroomDetails(false)}
+                  chatroomId={chatroomId}
+                  user={user}
+                />
+              )}
+            </>
           ) : (
             <h1>Welcome</h1>
-          )}
-          {chatroomId && (
-            <ChatroomDetailsModal
-              open={openChatroomDetails}
-              onClose={() => setOpenChatroomDetails(false)}
-              chatroomId={chatroomId}
-              user={user}
-            />
           )}
           <div className="blankSpace"></div>
           {isLoggedIn ? (

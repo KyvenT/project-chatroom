@@ -143,14 +143,16 @@ const SidebarChatroomButton = ({
           )}
         </div>
       </li>
-      <InviteModal
-        inviteModalOpen={inviteModalOpen}
-        chatroomId={chatroomId}
-        title={children}
-        onClose={() => setInviteModalOpen(false)}
-        user={user}
-        canInvite={canInvite}
-      />
+      {inviteModalOpen && (
+        <InviteModal
+          inviteModalOpen={inviteModalOpen}
+          chatroomId={chatroomId}
+          title={children}
+          onClose={() => setInviteModalOpen(false)}
+          user={user}
+          canInvite={canInvite}
+        />
+      )}
     </>
   );
 };
