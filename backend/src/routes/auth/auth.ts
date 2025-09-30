@@ -101,6 +101,7 @@ authRouter.post("/create-guest", async (req, res) => {
       data: {
         memberId: guest.id,
         chatroomId,
+        chatroomIndex: 1,
       },
     });
 
