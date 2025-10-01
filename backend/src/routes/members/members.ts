@@ -68,6 +68,7 @@ membersRouter.get("/:chatroomId", async (req: Request, res: Response) => {
 membersRouter.delete("/:chatroomId", async (req: Request, res: Response) => {
   const userId = req.userId;
   const { chatroomId } = req.params;
+  const { memberId } = req.body;
 
   if (!userId) {
     res.status(400).json({ error: "Must be signed in to leave chatroom" });
@@ -78,14 +79,29 @@ membersRouter.delete("/:chatroomId", async (req: Request, res: Response) => {
     const verify = await Prisma.chatroomMember.findUnique({
       where: {
         chatroomId_memberId: {
-          memberId: userId,
+          memberId: memberId,
           chatroomId,
+        },
+      },
+      include: {
+        chatroom: {
+          select: {
+            ownerId: true,
+          },
         },
       },
     });
 
     if (!verify) {
       res.status(404).json({ message: "Chatroom not found" });
+      return;
+    }
+
+    if (memberId !== userId && userId !== verify.chatroom.ownerId) {
+      res.status(500).json({
+        message: `Not detected as the user that requested to leave, 
+            or is not owner of chatroom`,
+      });
       return;
     }
 
@@ -100,7 +116,7 @@ membersRouter.delete("/:chatroomId", async (req: Request, res: Response) => {
 
     sendUpdateChatrooms(chatroomId, userId, "LEAVE");
 
-    res.status(201).json({ message: "Chatroom left successfully" });
+    res.status(201).json({ message: "Member left successfully" });
     console.log("chatroom left");
   } catch (err) {
     console.error(err);
