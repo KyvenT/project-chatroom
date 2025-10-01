@@ -48,7 +48,7 @@ model User {
 }
 
 model ChatroomMember {
-  member          User          @relation(fields: [memberId], references: [id])
+  member          User          @relation(fields: [memberId], references: [id], onDelete: Cascade)
   memberId        String
   chatroom        Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId      String
