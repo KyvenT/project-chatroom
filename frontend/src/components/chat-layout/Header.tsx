@@ -1,6 +1,7 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 
 const headerStyles = css({
+  width: "100%",
   display: "flex",
   alignItems: "center",
   padding: "0 10px",

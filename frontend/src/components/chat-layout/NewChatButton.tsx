@@ -18,7 +18,7 @@ import type { Theme } from "@emotion/react";
 
 const buttonStyles = (theme: Theme) =>
   css({
-    fontSize: "1.5rem",
+    fontSize: "1.75rem",
     width: "fit-content",
     aspectRatio: "1",
     color: theme.colors.light_grey,
@@ -53,13 +53,14 @@ const dialogStyles = (theme: Theme) =>
 
     "#title": {
       fontSize: "1rem",
-      borderRadius: "5px",
+      borderRadius: "4px",
       padding: "4px",
-      border: "1px solid transparent",
+      border: `1px solid ${theme.colors.white}`,
+      backgroundColor: "transparent",
+      color: theme.colors.white,
     },
 
     "#title:focus": {
-      border: "1px solid black",
       outline: "none",
     },
 
@@ -73,7 +74,7 @@ const dialogStyles = (theme: Theme) =>
       fontSize: "1rem",
       display: "flex",
       alignItems: "center",
-      gap: "4px",
+      gap: "8px",
     },
 
     ".submit-btn": {
@@ -81,24 +82,32 @@ const dialogStyles = (theme: Theme) =>
       borderRadius: "5px",
       width: "fit-content",
       padding: "4px 8px",
-      backgroundColor: theme.colors.white,
-      border: "0",
+      backgroundColor: "transparent",
+      color: theme.colors.white,
+      border: `1px solid ${theme.colors.white}`,
+      cursor: "pointer",
     },
 
     ".submit-btn:hover": {
-      backgroundColor: theme.colors.light_grey,
+      backgroundColor: theme.colors.grey,
     },
 
-    "input[type='checkbox']": {
+    "#privacy": {
+      fontSize: "1rem",
+      backgroundColor: "transparent",
+      color: theme.colors.white,
+      border: `1px solid ${theme.colors.white}`,
+      padding: "4px",
+      borderRadius: "4px",
       cursor: "pointer",
-      width: "1rem",
-      aspectRatio: "1",
-      accentColor: theme.colors.black,
-      boxShadow: "0 0 0 1px white inset",
     },
 
-    "input[type='checkbox']:checked": {
-      boxShadow: "1px 1px 0 0 black inset",
+    "#privacy:hover": {
+      backgroundColor: theme.colors.grey,
+    },
+
+    "#privacy option": {
+      backgroundColor: theme.colors.dark_grey,
     },
   });
 
@@ -164,7 +173,7 @@ const NewChatButton = () => {
               id="title"
               type="text"
               placeholder="Title..."
-              maxLength={30}
+              maxLength={20}
               required
             />
           </div>

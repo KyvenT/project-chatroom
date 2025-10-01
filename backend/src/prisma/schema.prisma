@@ -16,7 +16,6 @@ model Chatroom {
   createdAt            DateTime         @default(now())
   messages             Message[]
   members              ChatroomMember[]
-  pinnedBy             PinnedChatrooms[]
   invites              Invite[]
 }
 
@@ -43,31 +42,24 @@ model User {
   sentMessages    Message[]
   joinedChatrooms ChatroomMember[]
   ownedChatrooms  Chatroom[]
-  pinnedChatrooms PinnedChatrooms[]
   sentInvites     Invite[]         @relation("SentInvite")
   receivedInvites Invite[]         @relation("ReceivedInvite")
   notifications   Notification[]
 }
 
-model PinnedChatrooms {
-  member    User      @relation(fields: [memberId], references: [id])
-  memberId  String
-  chatroom  Chatroom  @relation(fields: [chatroomId], references: [id])
-  chatroomId  String
-
-  @@id([chatroomId, memberId])
-}
-
 model ChatroomMember {
-  member       User          @relation(fields: [memberId], references: [id])
-  memberId     String
-  chatroom     Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
-  chatroomId   String
-  role         ChatroomRoles @default(MEMBER)
-  joinedAt     DateTime      @default(now())
-  lastViewedAt DateTime      @default(now())
+  member          User          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberId        String
+  chatroom        Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  chatroomId      String
+  chatroomIndex   Int           
+  pinned          Boolean       @default(false)
+  role            ChatroomRoles @default(MEMBER)
+  joinedAt        DateTime      @default(now())
+  lastViewedAt    DateTime      @default(now())
 
   @@id([chatroomId, memberId])
+  @@unique([memberId, chatroomIndex])
 }
 
 model Invite {

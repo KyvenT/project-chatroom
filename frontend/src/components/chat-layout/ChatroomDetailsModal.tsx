@@ -14,10 +14,11 @@ import {
   verifiedMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { SquarePen } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
+import useToggle from "../../hooks/useToggle";
 
 const chatroomDetailsModalStyles = (theme: Theme) =>
   css({
@@ -63,6 +64,7 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
       border: `1px solid ${theme.colors.white}`,
       padding: "6px 10px",
       borderRadius: "5px",
+      cursor: "pointer",
     },
 
     ".actionBtn:hover": {
@@ -81,6 +83,7 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
         padding: "6px",
         borderRadius: "4px",
         border: `1px solid ${theme.colors.white}`,
+        cursor: "pointer",
 
         option: {
           backgroundColor: theme.colors.dark_grey,
@@ -98,9 +101,9 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
 
     ".actionBtns": {
       display: "flex",
-      flexDirection: "column",
+      justifyContent: "center",
       alignItems: "center",
-      gap: "4px",
+      gap: "8px",
     },
   });
 
@@ -111,6 +114,15 @@ const closeButtonColors = (theme: Theme) =>
       color: theme.colors.light_grey,
       fontSize: "1.05rem",
     },
+  });
+
+const confirmDeleteModalStyles = (theme: Theme) =>
+  css({
+    padding: "30px",
+    borderRadius: "5px",
+    backgroundColor: theme.colors.dark_grey,
+    color: theme.colors.white,
+    border: `1px solid ${theme.colors.light_grey}`,
   });
 
 interface ChatroomDetailsProps extends ModalProps {
@@ -131,9 +143,8 @@ export const ChatroomDetailsModal = ({
   user,
 }: ChatroomDetailsProps) => {
   const theme = useTheme();
-  const titleInputRef = useRef<HTMLInputElement>(null);
-  const [enableTitleEdit, setEnableTitleEdit] = useState<boolean>(false);
-
+  const [enableTitleEdit, setEnableTitleEdit] = useToggle(false);
+  const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useToggle(false);
   const { isLoggedIn } = useAuthContext();
   const { data: chatroomDetails } = useQuery<ChatroomDetails>({
     queryKey: ["active-chatroom", chatroomId],
@@ -146,9 +157,10 @@ export const ChatroomDetailsModal = ({
     staleTime: 0,
   });
 
-  const { register, handleSubmit, reset } = useForm<ChatroomFormInput>({
-    defaultValues: { privacy: chatroomDetails?.privacy },
-  });
+  const { register, handleSubmit, reset, setFocus } =
+    useForm<ChatroomFormInput>({
+      defaultValues: { privacy: chatroomDetails?.privacy },
+    });
 
   const chatroomMutation = useMutation<
     ConfirmationResponse,
@@ -159,7 +171,7 @@ export const ChatroomDetailsModal = ({
   });
 
   useEffect(() => {
-    reset({ privacy: chatroomDetails?.privacy });
+    reset({ title: "", privacy: chatroomDetails?.privacy });
   }, [chatroomDetails, reset]);
 
   const handleLeave = () => {
@@ -167,6 +179,9 @@ export const ChatroomDetailsModal = ({
       fetchUrl: "http://localhost:3000/api/members/" + chatroomId,
       method: "DELETE",
       user,
+      reqBody: {
+        memberId: user.userId,
+      },
     });
     onClose();
   };
@@ -185,6 +200,8 @@ export const ChatroomDetailsModal = ({
     if (!isLoggedIn || !isOwner) return;
 
     const { title, privacy } = data;
+    console.log("update chatroom to: ", title, privacy);
+
     chatroomMutation.mutate({
       fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
       method: "PATCH",
@@ -214,7 +231,7 @@ export const ChatroomDetailsModal = ({
                     {...register("title")}
                     type="text"
                     placeholder={chatroomDetails.title}
-                    ref={titleInputRef}
+                    maxLength={20}
                   ></input>
                 ) : (
                   <h3>{chatroomDetails.title}</h3>
@@ -224,8 +241,8 @@ export const ChatroomDetailsModal = ({
                     variant="icon"
                     type="button"
                     onClick={() => {
-                      setEnableTitleEdit((prev) => !prev);
-                      titleInputRef.current?.focus();
+                      setEnableTitleEdit();
+                      setFocus("title");
                     }}
                   >
                     <SquarePen />
@@ -242,7 +259,12 @@ export const ChatroomDetailsModal = ({
                 </span>
               </p>
             </div>
-            {chatroomDetails.ownerId === user.userId && (
+
+            {!isOwner ? (
+              <Button type="button" className="actionBtn" onClick={handleLeave}>
+                Leave Chatroom
+              </Button>
+            ) : (
               <>
                 <div className="privacySection">
                   <label htmlFor="privacy">Privacy:</label>
@@ -257,16 +279,41 @@ export const ChatroomDetailsModal = ({
                   <Button className="actionBtn" type="submit">
                     Save
                   </Button>
-                  {!isOwner ? (
-                    <Button className="actionBtn" onClick={handleLeave}>
-                      Leave Chatroom
-                    </Button>
-                  ) : (
-                    <Button className="actionBtn" onClick={handleDelete}>
-                      Delete Chatroom
-                    </Button>
-                  )}
+                  <Button
+                    className="actionBtn"
+                    type="button"
+                    onClick={() => setConfirmDeleteModalOpen(true)}
+                  >
+                    Delete Chatroom
+                  </Button>
                 </div>
+                <Modal
+                  modalStyles={confirmDeleteModalStyles(theme)}
+                  open={confirmDeleteModalOpen}
+                  variant="requiredInteraction"
+                >
+                  <h3>
+                    Are you sure you want to delete "
+                    <span>{chatroomDetails.title}</span>"?
+                  </h3>
+                  <br />
+                  <div className="actionBtns">
+                    <Button
+                      className="actionBtn"
+                      type="button"
+                      onClick={handleDelete}
+                    >
+                      Confirm Delete
+                    </Button>
+                    <Button
+                      className="actionBtn"
+                      type="button"
+                      onClick={() => setConfirmDeleteModalOpen(false)}
+                    >
+                      Go back
+                    </Button>
+                  </div>
+                </Modal>
               </>
             )}
           </form>

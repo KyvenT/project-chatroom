@@ -10,13 +10,17 @@ import type { Theme } from "@emotion/react";
 import ProfileStatus, { type Status } from "./ProfileStatus";
 import { useQuery } from "@tanstack/react-query";
 import { useMembersStore } from "../../hooks/useStores";
+import { mq } from "../../styles/breakpoints";
 
-const styles = css({
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
-  width: "15%",
-});
+const styles = css(
+  mq({
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    width: ["100%", "100%", "25%", "15%"],
+    fontSize: ["2rem", "1rem"],
+  }),
+);
 
 const colors = (theme: Theme) =>
   css({
@@ -26,13 +30,14 @@ const colors = (theme: Theme) =>
   });
 
 const membersListStyles = css({
+  height: "100%",
   display: "flex",
   flexDirection: "column",
   overflowY: "auto",
 });
 
 const MemberList = () => {
-  const { user, isLoggedIn } = useAuthContext();
+  const { user } = useAuthContext();
   const { chatroomId } = useParams();
   const theme = useTheme();
   const members = useMembersStore((state) => state.members);
@@ -67,10 +72,6 @@ const MemberList = () => {
 
     return { onlineList, awayList, offlineList, status };
   }, [members, user.username]);
-
-  if (!isLoggedIn) {
-    return <p>Please log in to see the member list.</p>;
-  }
 
   return (
     <div css={[styles, colors(theme)]}>

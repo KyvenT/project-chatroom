@@ -9,14 +9,11 @@ import {
 } from "../../hooks/useCustomMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Mail } from "lucide-react";
-import { useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
-import { iconBtnStyles } from "../Button";
 import { useInvitesStore } from "../../hooks/useStores";
 
 const InboxButton = () => {
   const { user } = useAuthContext();
-  const theme = useTheme();
   const invites = useInvitesStore((state) => state.invites);
   const setInvites = useInvitesStore((state) => state.setInvites);
 
@@ -66,8 +63,8 @@ const InboxButton = () => {
   return (
     <DropdownButton
       aria-label="Open invite inbox"
-      buttonText={<Mail />}
-      buttonStyles={iconBtnStyles(theme)}
+      buttonText={<Mail size="2.5rem" />}
+      buttonVariant="icon"
     >
       {invites.length === 0 && <p>No invites received</p>}
       <ul>

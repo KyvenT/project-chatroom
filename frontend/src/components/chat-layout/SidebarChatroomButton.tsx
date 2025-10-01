@@ -36,6 +36,7 @@ const styles = css({
     flex: 1,
     textDecoration: "none",
     userSelect: "none",
+    fontSize: "1.25rem",
   },
 
   ".unreadBadge": {

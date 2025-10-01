@@ -11,7 +11,7 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
   const userId = req.userId;
 
   if (!userId) {
-    res.status(400).json({ error: "Must be signed in to get invites" });
+    res.status(400).json({ message: "Must be signed in to get invites" });
     return;
   }
   console.log("get invites for " + userId);
@@ -47,7 +47,7 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
     console.error(err);
     res
       .status(500)
-      .json({ error: "Server error occurred during invites retrieval" });
+      .json({ message: "Server error occurred during invites retrieval" });
   }
 });
 
@@ -56,7 +56,7 @@ invitesRouter.post("/", async (req: Request, res: Response) => {
   const senderId = req.userId;
 
   if (!senderId) {
-    res.status(400).json({ error: "Must be signed in to send invite" });
+    res.status(400).json({ message: "Must be signed in to send invite" });
     return;
   }
 
@@ -96,7 +96,7 @@ invitesRouter.post("/", async (req: Request, res: Response) => {
     ]);
 
     if (!receiver) {
-      res.status(404).json({ error: "User not found" });
+      res.status(404).json({ message: "User not found" });
       return;
     }
 
@@ -145,7 +145,7 @@ invitesRouter.post("/", async (req: Request, res: Response) => {
     console.error(err);
     res
       .status(500)
-      .json({ error: "Server error occurred during invite creation" });
+      .json({ message: "Server error occurred during invite creation" });
   }
 });
 
@@ -154,7 +154,7 @@ invitesRouter.patch("/", async (req: Request, res: Response) => {
   const userId = req.userId;
 
   if (!userId) {
-    res.status(400).json({ error: "Must be signed in to accept invite" });
+    res.status(400).json({ message: "Must be signed in to accept invite" });
     return;
   }
 
@@ -166,7 +166,7 @@ invitesRouter.patch("/", async (req: Request, res: Response) => {
     });
 
     if (!verify) {
-      res.status(400).json({ error: "invite not found" });
+      res.status(400).json({ message: "invite not found" });
       return;
     }
 
@@ -188,10 +188,23 @@ invitesRouter.patch("/", async (req: Request, res: Response) => {
 
     if (status === $Enums.InviteStatus.REJECTED) return;
 
+    const existingChatroomIndex = await Prisma.chatroomMember.findFirst({
+      select: {
+        chatroomIndex: true,
+      },
+      where: {
+        memberId: userId,
+      },
+      orderBy: {
+        chatroomIndex: "desc",
+      },
+    });
+
     const join = (await Prisma.chatroomMember.create({
       data: {
         memberId: userId,
         chatroomId: invite.chatroomId,
+        chatroomIndex: (existingChatroomIndex?.chatroomIndex || 15) + 1,
       },
       omit: {
         lastViewedAt: true,
@@ -208,7 +221,7 @@ invitesRouter.patch("/", async (req: Request, res: Response) => {
     console.error("invite accept error", err);
     res
       .status(500)
-      .json({ error: "Server error occurred during invite accept" });
+      .json({ message: "Server error occurred during invite accept" });
   }
 });
 
@@ -217,7 +230,7 @@ invitesRouter.delete("/", async (req: Request, res: Response) => {
   const userId = req.userId;
 
   if (!userId) {
-    res.status(400).json({ error: "Must be signed in to delete invite" });
+    res.status(400).json({ message: "Must be signed in to delete invite" });
     return;
   }
 
@@ -250,7 +263,7 @@ invitesRouter.delete("/", async (req: Request, res: Response) => {
       );
       res
         .status(400)
-        .json({ error: "Identified user is not associated with invite id" });
+        .json({ message: "Identified user is not associated with invite id" });
       return;
     }
 
@@ -266,7 +279,7 @@ invitesRouter.delete("/", async (req: Request, res: Response) => {
     console.error("Invite delete error");
     res
       .status(500)
-      .json({ error: "Server error occurred during invite deletion" });
+      .json({ message: "Server error occurred during invite deletion" });
   }
 });
 
@@ -305,7 +318,7 @@ invitesRouter.get("/:chatroomId", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("invites fetch error for " + chatroomId);
     res.status(500).json({
-      error: "Server error occurred during invites fetch of chatroom",
+      message: "Server error occurred during invites fetch of chatroom",
     });
   }
 });
