@@ -5,8 +5,10 @@ import { updateActiveChatroom } from "./incoming-message-routes/active-chatroom.
 import {
   AuthMessage,
   ChatMessage,
+  TypingPresenceMessage,
   UpdateActiveChatroomMessage,
 } from "../types/ws-messages.js";
+import { handleTypingPresence } from "./incoming-message-routes/typing-presence.js";
 
 export const wsMessageRouter = (message: any, ws: WebSocket) => {
   switch (message.type) {

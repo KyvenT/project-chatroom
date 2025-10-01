@@ -85,6 +85,10 @@ interface MessageInputProps {
 const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
   const theme = useTheme();
   const [height, setHeight] = useState(1);
+  const { ws } = useWebSocketContext();
+  const { chatroomId } = useParams();
+
+  const [hasTyped, setHasTyped] = useToggle(false);
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!messageInputRef.current) return;
@@ -98,7 +102,29 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
       //messageInputRef.current.value += "\n";
       messageInputRef.current.style.overflowY = "hidden";
     }
+
+    if (!hasTyped) {
+      setHasTyped(true);
+      ws?.send(
+        JSON.stringify({
+          type: "typing-presence",
+          chatroomId,
+        }),
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (!hasTyped) return;
+
+    const presenceTimeout = setTimeout(() => {
+      setHasTyped(false);
+    }, 1000);
+
+    return () => {
+      clearTimeout(presenceTimeout);
     };
+  }, [hasTyped]);
 
   return (
     <div css={[styles, colors(theme)]}>
