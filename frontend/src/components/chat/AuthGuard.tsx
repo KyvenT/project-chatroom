@@ -34,6 +34,7 @@ const styles = (theme: Theme) =>
     h3: {
       fontWeight: 400,
       fontSize: "1.2rem",
+      textAlign: "center",
     },
 
     form: {

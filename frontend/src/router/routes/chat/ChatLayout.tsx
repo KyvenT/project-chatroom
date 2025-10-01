@@ -6,7 +6,7 @@ import Header from "../../../components/chat-layout/Header";
 import DropdownButton from "../../../components/DropdownButton";
 import { Link, useNavigate, useParams } from "react-router";
 import InboxButton from "../../../components/chat-layout/InboxButton";
-import { ArrowLeftToLine, MenuIcon, User } from "lucide-react";
+import { ArrowLeftToLine, MenuIcon, User, Users } from "lucide-react";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useEffect, useState } from "react";
@@ -19,10 +19,11 @@ import { wsMessageRouter } from "../../../ws-router/ws-message-router";
 import { useChatroomsStore } from "../../../hooks/useStores";
 import { ChatroomDetailsModal } from "../../../components/chat-layout/ChatroomDetailsModal";
 import AuthGuard from "../../../components/chat/AuthGuard";
+import { mq } from "../../../styles/breakpoints";
 
 const styles = css({
-  height: "100dvh",
-  width: "100dvw",
+  height: "100%",
+  width: "100%",
   display: "flex",
   backgroundColor: "red",
 
@@ -36,7 +37,7 @@ const styles = css({
 
   ".outletWrapper": {
     flex: 1,
-    minHeight: 0,
+    overflow: "hidden",
   },
 
   ".blankSpace": {
@@ -45,8 +46,13 @@ const styles = css({
 
   h1: {
     userSelect: "none",
-    fontSize: "2rem",
+    fontSize: "2.5rem",
     fontWeight: "450",
+  },
+
+  ".headerIconBtn": {
+    width: "2.5rem",
+    height: "2.5rem",
   },
 });
 
@@ -56,7 +62,7 @@ const colors = (theme: Theme) =>
       backgroundColor: theme.colors.black,
     },
 
-    ".sidebarToggleBtn": {
+    ".headerIconBtn": {
       color: theme.colors.light_grey,
       "&:hover": {
         color: theme.colors.white,
@@ -65,16 +71,23 @@ const colors = (theme: Theme) =>
   });
 
 const titleStyles = (theme: Theme) =>
-  css({
-    fontSize: "2rem",
-    fontWeight: "450",
-    padding: 0,
-    color: theme.colors.white,
+  css(
+    mq({
+      fontSize: ["1.25rem", "2.5rem"],
+      fontWeight: "450",
+      padding: 0,
+      color: theme.colors.white,
+      textWrap: "nowrap",
 
-    "&:hover": {
-      color: theme.colors.light_grey,
-    },
-  });
+      "&:hover": {
+        color: theme.colors.light_grey,
+      },
+    }),
+  );
+
+export type OutletContextType = {
+  showMembersList: boolean;
+};
 
 function ChatLayout() {
   const [sidebarToggled, setSidebarToggled] = useToggle(false);
@@ -87,9 +100,10 @@ function ChatLayout() {
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
   const [chatroomTitle, setChatroomTitle] = useState<string | null>(null);
   const [openChatroomDetails, setOpenChatroomDetails] = useToggle(false);
+  const [showMembersList, setShowMembersList] = useToggle(true);
 
-  const { data: chatroomsData } = useQuery<Chatroom[]>({
-    queryKey: ["chatrooms", isLoggedIn],
+  const { data: chatroomsData } = useQuery<Chatroom[], Error>({
+    queryKey: ["chatrooms", !!isLoggedIn],
     queryFn: () =>
       verifiedQuery<Chatroom[]>({
         fetchUrl: "http://localhost:3000/api/chatrooms/me",
@@ -139,6 +153,10 @@ function ChatLayout() {
     }
   }, [ws, chatroomId, navigate]);
 
+  const outletContext = {
+    showMembersList,
+  };
+
   return (
     <div css={[styles, colors(theme)]}>
       {!isLoggedIn && <AuthGuard />}
@@ -151,7 +169,11 @@ function ChatLayout() {
             onClick={() => setSidebarToggled()}
             aria-label="Toggle sidebar"
           >
-            {sidebarToggled ? <ArrowLeftToLine /> : <MenuIcon />}
+            {sidebarToggled ? (
+              <ArrowLeftToLine className="headerIconBtn" />
+            ) : (
+              <MenuIcon className="headerIconBtn" />
+            )}
           </Button>
           {chatroomTitle && chatroomId ? (
             <>
@@ -180,13 +202,18 @@ function ChatLayout() {
             <>
               <InboxButton />
               <DropdownButton
-                buttonText={<User />}
-                buttonStyles={iconBtnStyles(theme)}
+                buttonText={<User className="headerIconBtn" />}
+                buttonVariant="icon"
               >
                 <h3>{user.username}</h3>
                 <Link to="">Account Settings</Link>
                 <Button onClick={() => navigate("/logout")}>Log Out</Button>
               </DropdownButton>
+              {chatroomId && (
+                <Button onClick={() => setShowMembersList()} variant="icon">
+                  <Users className="headerIconBtn" />
+                </Button>
+              )}
             </>
           ) : (
             <Link to="/login" css={iconBtnStyles(theme)}>
@@ -195,7 +222,7 @@ function ChatLayout() {
           )}
         </Header>
         <div className="outletWrapper">
-          <Outlet />
+          <Outlet context={outletContext} />
         </div>
       </div>
     </div>

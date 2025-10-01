@@ -18,7 +18,7 @@ import type { Theme } from "@emotion/react";
 
 const buttonStyles = (theme: Theme) =>
   css({
-    fontSize: "1.5rem",
+    fontSize: "1.75rem",
     width: "fit-content",
     aspectRatio: "1",
     color: theme.colors.light_grey,

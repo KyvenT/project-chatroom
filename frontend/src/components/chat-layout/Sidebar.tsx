@@ -5,51 +5,50 @@ import { Link, useParams } from "react-router";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
 import { HomeIcon } from "lucide-react";
 import { iconBtnStyles } from "../Button";
+import { mq } from "../../styles/breakpoints";
 
-const sidebarStyles = css({
-  display: "flex",
-  flexDirection: "column",
-  width: "15%",
-  minHeight: "100dvh",
-
-  ul: {
-    listStyle: "none",
-    flex: 1,
-    padding: "20px 10px",
+const sidebarStyles = css(
+  mq({
+    height: "100%",
     display: "flex",
     flexDirection: "column",
-    gap: "4px",
-  },
+    flex: "0 0 auto",
+    width: ["80%", "50%", "25%", "20%", "15%"],
 
-  ".chatsHeader": {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    margin: "0 4px",
-
-    h2: {
-      userSelect: "none",
-      fontSize: "1.25rem",
-      fontWeight: "400",
+    ul: {
+      listStyle: "none",
+      flex: 1,
+      padding: "20px 10px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "4px",
     },
-  },
 
-  ".topSection": {
-    display: "flex",
-    alignItems: "center",
-    padding: "4px",
-  },
+    ".chatsHeader": {
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      margin: "0 4px",
 
-  ".homeBtn": {
-    padding: "2px",
-  },
+      h2: {
+        userSelect: "none",
+        fontSize: "1.75rem",
+        fontWeight: "400",
+      },
+    },
 
-  ".homeIcon": {
-    width: "2rem",
-    height: "2rem",
-  },
-});
+    ".topSection": {
+      display: "flex",
+      alignItems: "center",
+      padding: "4px",
+    },
+
+    ".homeBtn": {
+      padding: "2px",
+    },
+  }),
+);
 
 const colors = (theme: Theme) =>
   css({
@@ -79,7 +78,7 @@ const Sidebar = ({ chatrooms }: SidebarProps) => {
     <div css={[sidebarStyles, colors(theme)]}>
       <div className="topSection">
         <Link to="/chat" className="homeBtn" css={iconBtnStyles(theme)}>
-          <HomeIcon className="homeIcon" />
+          <HomeIcon className="homeIcon" size="2.25rem" />
         </Link>
       </div>
       <div className="chatsHeader">
