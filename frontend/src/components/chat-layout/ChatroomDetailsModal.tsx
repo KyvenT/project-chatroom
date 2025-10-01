@@ -179,6 +179,9 @@ export const ChatroomDetailsModal = ({
       fetchUrl: "http://localhost:3000/api/members/" + chatroomId,
       method: "DELETE",
       user,
+      reqBody: {
+        memberId: user.userId,
+      },
     });
     onClose();
   };
@@ -256,7 +259,12 @@ export const ChatroomDetailsModal = ({
                 </span>
               </p>
             </div>
-            {chatroomDetails.ownerId === user.userId && (
+
+            {!isOwner ? (
+              <Button type="button" className="actionBtn" onClick={handleLeave}>
+                Leave Chatroom
+              </Button>
+            ) : (
               <>
                 <div className="privacySection">
                   <label htmlFor="privacy">Privacy:</label>
@@ -271,49 +279,41 @@ export const ChatroomDetailsModal = ({
                   <Button className="actionBtn" type="submit">
                     Save
                   </Button>
-                  {!isOwner ? (
-                    <Button className="actionBtn" onClick={handleLeave}>
-                      Leave Chatroom
-                    </Button>
-                  ) : (
-                    <>
-                      <Button
-                        className="actionBtn"
-                        type="button"
-                        onClick={() => setConfirmDeleteModalOpen(true)}
-                      >
-                        Delete Chatroom
-                      </Button>
-                      <Modal
-                        modalStyles={confirmDeleteModalStyles(theme)}
-                        open={confirmDeleteModalOpen}
-                        variant="requiredInteraction"
-                      >
-                        <h3>
-                          Are you sure you want to delete "
-                          <span>{chatroomDetails.title}</span>"?
-                        </h3>
-                        <br />
-                        <div className="actionBtns">
-                          <Button
-                            className="actionBtn"
-                            type="button"
-                            onClick={handleDelete}
-                          >
-                            Confirm Delete
-                          </Button>
-                          <Button
-                            className="actionBtn"
-                            type="button"
-                            onClick={() => setConfirmDeleteModalOpen(false)}
-                          >
-                            Go back
-                          </Button>
-                        </div>
-                      </Modal>
-                    </>
-                  )}
+                  <Button
+                    className="actionBtn"
+                    type="button"
+                    onClick={() => setConfirmDeleteModalOpen(true)}
+                  >
+                    Delete Chatroom
+                  </Button>
                 </div>
+                <Modal
+                  modalStyles={confirmDeleteModalStyles(theme)}
+                  open={confirmDeleteModalOpen}
+                  variant="requiredInteraction"
+                >
+                  <h3>
+                    Are you sure you want to delete "
+                    <span>{chatroomDetails.title}</span>"?
+                  </h3>
+                  <br />
+                  <div className="actionBtns">
+                    <Button
+                      className="actionBtn"
+                      type="button"
+                      onClick={handleDelete}
+                    >
+                      Confirm Delete
+                    </Button>
+                    <Button
+                      className="actionBtn"
+                      type="button"
+                      onClick={() => setConfirmDeleteModalOpen(false)}
+                    >
+                      Go back
+                    </Button>
+                  </div>
+                </Modal>
               </>
             )}
           </form>

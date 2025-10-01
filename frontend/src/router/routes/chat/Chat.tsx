@@ -33,9 +33,7 @@ function Chat() {
   const messageInput = useRef<HTMLTextAreaElement>(null);
   const { showMembersList } = useOutletContext<OutletContextType>();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleSubmit = () => {
     if (!isLoggedIn || !messageInput.current || !chatroomId) return;
 
     ws?.send(

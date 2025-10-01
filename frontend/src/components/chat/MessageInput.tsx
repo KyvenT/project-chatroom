@@ -1,6 +1,9 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import { SendHorizonal } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import useWebSocketContext from "../../hooks/useWebSocketContext";
+import { useParams } from "react-router";
+import useToggle from "../../hooks/useToggle";
 
 const styles = css({
   width: "100%",
@@ -75,7 +78,7 @@ const colors = (theme: Theme) =>
   });
 
 interface MessageInputProps {
-  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  handleSubmit: () => void;
   messageInputRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
@@ -88,18 +91,18 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (messageInputRef.current.value === "") return;
-      handleSubmit(event as unknown as React.FormEvent<HTMLFormElement>);
+      handleSubmit();
       setHeight(1);
     } else if (event.key === "Enter" && event.shiftKey) {
       setHeight((prevHeight) => prevHeight + 1);
       //messageInputRef.current.value += "\n";
       messageInputRef.current.style.overflowY = "hidden";
     }
-  };
+    };
 
   return (
     <div css={[styles, colors(theme)]}>
-      <form onSubmit={(event) => handleSubmit(event)} id="message-form">
+      <form onSubmit={handleSubmit} id="message-form">
         <textarea
           ref={messageInputRef}
           placeholder="Message..."
