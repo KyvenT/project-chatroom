@@ -15,7 +15,7 @@ import Button, { iconBtnStyles } from "../../../components/Button";
 import { useQuery } from "@tanstack/react-query";
 import type { Chatroom } from "../../../types/REST-types/Chatroom";
 import { verifiedQuery } from "../../../hooks/useCustomQuery";
-import { wsMessageRouter } from "../../../ws-router/ws-message-router";
+import { wsMessageRouter } from "../../../ws-router/router";
 import { useChatroomsStore } from "../../../hooks/useStores";
 import { ChatroomDetailsModal } from "../../../components/chat-layout/ChatroomDetailsModal";
 import AuthGuard from "../../../components/chat/AuthGuard";

@@ -23,6 +23,7 @@ export const sendStatusUpdate = async (user: {
       socket?.send(
         JSON.stringify({
           type: "status-update",
+          chatroomId: chatroom.chatroomId,
           member: {
             memberId: user.id,
             member: {

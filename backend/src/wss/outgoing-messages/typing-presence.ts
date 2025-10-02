@@ -27,6 +27,7 @@ export const sendTypingPresence = async (
           type: "typing-presence",
           userId: memberId,
           username: user?.username,
+          chatroomId,
         })
       );
     }

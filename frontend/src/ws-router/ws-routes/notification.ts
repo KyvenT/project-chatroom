@@ -1,22 +1,9 @@
-import { useChatroomsStore, useInvitesStore } from "../hooks/useStores";
-import type { Invite } from "../types/REST-types/Invite";
-import type { NotificationMessage } from "../types/ws-messages";
-
-export interface MentionPayload {
-  chatroomId: string;
-  senderId: string;
-  messageId: string;
-}
-
-export interface UpdateUnreadMessage {
-  chatroomId: string;
-  unreadMessages: number;
-}
-
-export interface NotificationOptions {
-  mention?: MentionPayload;
-  invite?: Invite;
-}
+import { useChatroomsStore, useInvitesStore } from "../../hooks/useStores";
+import type { Invite } from "../../types/REST-types/Invite";
+import type {
+  NotificationMessage,
+  UpdateUnreadMessage,
+} from "../../types/ws-messages";
 
 export const handleNewNotification = (message: NotificationMessage) => {
   console.log("notif received");
