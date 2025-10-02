@@ -5,8 +5,9 @@ import { useOutletContext, useParams } from "react-router";
 import MemberList from "../../../components/chat/MemberList";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { OutletContextType } from "./ChatLayout";
+import { useTypingPresenceStore } from "../../../hooks/useStores";
 
 const chatStyles = css({
   height: "100%",
@@ -32,6 +33,18 @@ function Chat() {
   const { ws } = useWebSocketContext();
   const messageInput = useRef<HTMLTextAreaElement>(null);
   const { showMembersList } = useOutletContext<OutletContextType>();
+  const typingUsers = useTypingPresenceStore((state) => state.typingUsers);
+  const popTypingUser = useTypingPresenceStore((state) => state.popTypingUser);
+
+  useEffect(() => {
+    if (typingUsers.length === 0) return;
+    const typingPresenceDuration = setTimeout(() => {
+      popTypingUser();
+    }, 3000);
+    return () => {
+      clearTimeout(typingPresenceDuration);
+    };
+  }, [typingUsers]);
 
   const handleSubmit = () => {
     if (!isLoggedIn || !messageInput.current || !chatroomId) return;
@@ -53,6 +66,14 @@ function Chat() {
       {chatroomId && (
         <div className="chatContainer">
           <ChatMessages />
+          {typingUsers.length > 0 && (
+            <>
+              {typingUsers.map((typingUser) => (
+                <span key={typingUser.userId}>{typingUser.username}</span>
+              ))}
+              <p> is typing...</p>
+            </>
+          )}
           <MessageInput
             messageInputRef={messageInput}
             handleSubmit={handleSubmit}

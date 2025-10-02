@@ -7,12 +7,12 @@ import type {
   UpdateMembersMessage,
 } from "../types/ws-messages";
 import type { NavigateFunction } from "react-router";
-import { handleChatMessage } from "./chat-message";
-import { handleNewNotification } from "./notification";
-import { handleUpdateChatrooms } from "./update-chatrooms";
-import { handleUpdateMembers } from "./update-members";
-import { handleStatusUpdate } from "./status-update";
-import { handleTypingPresence } from "./typing-presence";
+import { handleChatMessage } from "./ws-routes/chat-message";
+import { handleNewNotification } from "./ws-routes/notification";
+import { handleUpdateChatrooms } from "./ws-routes/update-chatrooms";
+import { handleUpdateMembers } from "./ws-routes/update-members";
+import { handleStatusUpdate } from "./ws-routes/status-update";
+import { handleTypingPresence } from "./ws-routes/typing-presence";
 
 export const wsMessageRouter = (
   message: any,
@@ -24,7 +24,7 @@ export const wsMessageRouter = (
       console.log("Authentication message received");
       break;
     case "chat-message":
-      handleChatMessage(message as ChatMessage);
+      handleChatMessage(message as ChatMessage, chatroomId);
       break;
     case "notification":
       handleNewNotification(message as NotificationMessage);
@@ -37,13 +37,13 @@ export const wsMessageRouter = (
       );
       break;
     case "update-members":
-      handleUpdateMembers(message as UpdateMembersMessage);
+      handleUpdateMembers(message as UpdateMembersMessage, chatroomId);
       break;
     case "status-update":
-      handleStatusUpdate(message as StatusMessage);
+      handleStatusUpdate(message as StatusMessage, chatroomId);
       break;
     case "typing-presence":
-      handleTypingPresence(message as TypingPresenceMessage);
+      handleTypingPresence(message as TypingPresenceMessage, chatroomId);
       break;
     default:
       console.log("Unknown message type: " + message.type);

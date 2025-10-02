@@ -3,6 +3,7 @@ import type { Chatroom } from "../types/REST-types/Chatroom";
 import type { Message } from "../types/REST-types/Message";
 import type { Invite } from "../types/REST-types/Invite";
 import type { ChatroomMember } from "../types/REST-types/ChatroomMember";
+import type { TypingPresence } from "../types/ws-messages";
 
 interface ChatroomListState {
   chatrooms: Chatroom[];
@@ -116,4 +117,28 @@ export const useMembersStore = create<MembersListState>((set) => ({
         return mem;
       }),
     })),
+}));
+
+interface TypingPresenceState {
+  typingUsers: TypingPresence[];
+  addTypingPresence: (typingUser: TypingPresence) => void;
+  removeTypingPresence: (userId: string) => void;
+  popTypingUser: () => void;
+}
+
+export const useTypingPresenceStore = create<TypingPresenceState>((set) => ({
+  typingUsers: [],
+  addTypingPresence: (typingUser) =>
+    set((state) => ({ typingUsers: [...state.typingUsers, typingUser] })),
+  removeTypingPresence: (userId) =>
+    set((state) => ({
+      typingUsers: state.typingUsers.filter(
+        (typingUser) => typingUser.userId !== userId,
+      ),
+    })),
+  popTypingUser: () => {
+    set((state) => ({
+      typingUsers: state.typingUsers.slice(1),
+    }));
+  },
 }));

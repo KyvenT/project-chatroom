@@ -54,6 +54,7 @@ export const sendUpdateMembers = async (
     socket?.send(
       JSON.stringify({
         type: "update-members",
+        chatroomId,
         ...messageOptions,
       })
     );

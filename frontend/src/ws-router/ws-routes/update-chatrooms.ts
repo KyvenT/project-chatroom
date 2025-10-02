@@ -1,7 +1,7 @@
 import type { NavigateFunction } from "react-router";
-import { useChatroomsStore } from "../hooks/useStores";
-import type { UpdateChatroomsMessage } from "../types/ws-messages";
-import type { Chatroom } from "../types/REST-types/Chatroom";
+import { useChatroomsStore } from "../../hooks/useStores";
+import type { UpdateChatroomsMessage } from "../../types/ws-messages";
+import type { Chatroom } from "../../types/REST-types/Chatroom";
 
 export const handleUpdateChatrooms = (
   message: UpdateChatroomsMessage,
