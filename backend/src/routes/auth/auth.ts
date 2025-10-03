@@ -1,16 +1,21 @@
 import bcrypt from "bcryptjs";
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import Prisma from "../../prisma/prisma.js";
 import jwt from "jsonwebtoken";
 import env from "../../env.js";
 import type { StringValue } from "ms";
 import crypto from "crypto";
+import { validate } from "../../validators/validate.js";
+import {
+  guestSchema,
+  userSchema,
+} from "../../validators/auth/authValidators.js";
 
 export const authRouter = Router();
 
-authRouter.post("/register", async (req, res) => {
+authRouter.post("/register", async (req: Request, res: Response) => {
+  validate(userSchema, req.body);
   const { username, password } = req.body;
-
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
@@ -34,6 +39,7 @@ authRouter.post("/register", async (req, res) => {
 });
 
 authRouter.post("/login", async (req, res) => {
+  validate(userSchema, req.body);
   const { username, password } = req.body;
 
   try {
@@ -72,6 +78,7 @@ authRouter.post("/login", async (req, res) => {
 });
 
 authRouter.post("/create-guest", async (req, res) => {
+  validate(guestSchema, req.body);
   const { chatroomId, username } = req.body;
   const randomlyGeneratedPassword = crypto.randomBytes(16).toString("hex");
 
