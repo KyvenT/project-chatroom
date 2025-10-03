@@ -1,6 +1,8 @@
 import Prisma from "../../prisma/prisma.js";
 import { Request, Response, Router } from "express";
 import { sendStatusUpdate } from "../../wss/outgoing-messages/status-update.js";
+import { updateUserStatusSchema } from "../../validators/users/userValidation.js";
+import { validate } from "../../validators/validate.js";
 
 export const usersRouter = Router();
 
@@ -26,8 +28,10 @@ usersRouter.get("/me", async (req: Request, res: Response) => {
 });
 
 usersRouter.patch("/me", async (req: Request, res: Response) => {
+  const data = validate(updateUserStatusSchema, req.body, res);
+  if (!data) return;
+  const { status } = data;
   const userId = req.userId;
-  const { status } = req.body;
 
   try {
     const user = await Prisma.user.update({

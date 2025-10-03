@@ -2,12 +2,17 @@ import { Request, Response, Router } from "express";
 import Prisma from "../../prisma/prisma.js";
 import { MembersPayload } from "../../types/payloads.js";
 import { sendUpdateChatrooms } from "../../wss/outgoing-messages/update-chatrooms.js";
+import { chatroomIdSchema } from "../../validators/chatrooms/chatroomValidation.js";
+import { validate } from "../../validators/validate.js";
+import { memberLeaveSchema } from "../../validators/members/memberValidation.js";
 
 export const membersRouter = Router();
 
 membersRouter.get("/:chatroomId", async (req: Request, res: Response) => {
+  const data = validate(chatroomIdSchema, req.params, res);
+  if (!data) return;
+  const { chatroomId } = data;
   const userId = req.userId;
-  const { chatroomId } = req.params;
 
   if (!userId) {
     res.status(400).json({ error: "Must be signed in to get members list" });
@@ -66,9 +71,10 @@ membersRouter.get("/:chatroomId", async (req: Request, res: Response) => {
 });
 
 membersRouter.delete("/:chatroomId", async (req: Request, res: Response) => {
+  const data = validate(memberLeaveSchema, { ...req.params, ...req.body }, res);
+  if (!data) return;
+  const { chatroomId, memberId } = data;
   const userId = req.userId;
-  const { chatroomId } = req.params;
-  const { memberId } = req.body;
 
   if (!userId) {
     res.status(400).json({ error: "Must be signed in to leave chatroom" });

@@ -9,13 +9,15 @@ import { validate } from "../../validators/validate.js";
 import {
   guestSchema,
   userSchema,
-} from "../../validators/auth/authValidators.js";
+} from "../../validators/auth/authValidation.js";
 
 export const authRouter = Router();
 
 authRouter.post("/register", async (req: Request, res: Response) => {
-  validate(userSchema, req.body);
-  const { username, password } = req.body;
+  const data = validate(userSchema, req.body, res);
+  if (!data) return;
+
+  const { username, password } = data;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
@@ -39,8 +41,10 @@ authRouter.post("/register", async (req: Request, res: Response) => {
 });
 
 authRouter.post("/login", async (req, res) => {
-  validate(userSchema, req.body);
-  const { username, password } = req.body;
+  const data = validate(userSchema, req.body, res);
+  if (!data) return;
+
+  const { username, password } = data;
 
   try {
     const user = await Prisma.user.findUnique({
@@ -78,8 +82,10 @@ authRouter.post("/login", async (req, res) => {
 });
 
 authRouter.post("/create-guest", async (req, res) => {
-  validate(guestSchema, req.body);
-  const { chatroomId, username } = req.body;
+  const data = validate(guestSchema, req.body, res);
+  if (!data) return;
+
+  const { chatroomId, username } = data;
   const randomlyGeneratedPassword = crypto.randomBytes(16).toString("hex");
 
   try {

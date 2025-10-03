@@ -3,6 +3,13 @@ import Prisma from "../../prisma/prisma.js";
 import { ChatroomPayload, JoinChatroomPayload } from "../../types/payloads.js";
 import { $Enums, ChatroomPrivacy } from "@prisma/client";
 import { sendUpdateChatrooms } from "../../wss/outgoing-messages/update-chatrooms.js";
+import {
+  chatroomIdSchema,
+  chatroomModifyIndexSchema,
+  chatroomModifyOptionsSchema,
+  chatroomSetOptionsSchema,
+} from "../../validators/chatrooms/chatroomValidation.js";
+import { validate } from "../../validators/validate.js";
 
 export const chatroomRouter = Router();
 
@@ -63,8 +70,11 @@ chatroomRouter.get("/me", async (req: Request, res: Response) => {
 });
 
 chatroomRouter.get("/:chatroomId", async (req: Request, res: Response) => {
-  const { chatroomId } = req.params;
+  const data = validate(chatroomIdSchema, req.params, res);
+  if (!data) return;
+
   const userId = req.userId;
+  const { chatroomId } = data;
 
   if (!userId) {
     res
@@ -117,7 +127,9 @@ chatroomRouter.get("/:chatroomId", async (req: Request, res: Response) => {
 });
 
 chatroomRouter.post("/create", async (req: Request, res: Response) => {
-  const { title, privacy } = req.body;
+  const data = validate(chatroomSetOptionsSchema, req.body, res);
+  if (!data) return;
+  const { title, privacy } = data;
   const userId = req.userId;
 
   if (!userId) {
@@ -190,7 +202,9 @@ chatroomRouter.post("/create", async (req: Request, res: Response) => {
 chatroomRouter.post(
   "/join/:chatroomId",
   async (req: Request, res: Response) => {
-    const { chatroomId } = req.params;
+    const data = validate(chatroomIdSchema, req.params, res);
+    if (!data) return;
+    const { chatroomId } = data;
     const userId = req.userId;
 
     if (!userId) {
@@ -274,8 +288,13 @@ chatroomRouter.post(
 );
 
 chatroomRouter.patch("/:chatroomId", async (req: Request, res: Response) => {
-  const { chatroomId } = req.params;
-  const { title, privacy } = req.body;
+  const data = validate(
+    chatroomModifyOptionsSchema,
+    { ...req.params, ...req.body },
+    res
+  );
+  if (!data) return;
+  const { chatroomId, title, privacy } = data;
   const userId = req.userId;
 
   try {
@@ -330,7 +349,9 @@ chatroomRouter.patch("/:chatroomId", async (req: Request, res: Response) => {
 });
 
 chatroomRouter.delete("/:chatroomId", async (req: Request, res: Response) => {
-  const { chatroomId } = req.params;
+  const data = validate(chatroomIdSchema, req.params, res);
+  if (!data) return;
+  const { chatroomId } = data;
   const userId = req.userId;
 
   try {
@@ -378,9 +399,14 @@ chatroomRouter.delete("/:chatroomId", async (req: Request, res: Response) => {
 chatroomRouter.patch(
   "/:chatroomId/chatroomIndex",
   async (req: Request, res: Response) => {
-    const { chatroomId } = req.params;
+    const data = validate(
+      chatroomModifyIndexSchema,
+      { ...req.params, ...req.body },
+      res
+    );
+    if (!data) return;
+    const { chatroomId, newIndex } = data;
     const userId = req.userId;
-    const { newIndex } = req.body;
 
     if (!userId) {
       res.status(500).json({ message: "must be signed in to pin a chatroom" });

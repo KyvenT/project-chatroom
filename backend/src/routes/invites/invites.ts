@@ -4,6 +4,13 @@ import { handleNewNotification } from "../../wss/outgoing-messages/notification.
 import { InvitePayload, JoinChatroomPayload } from "../../types/payloads.js";
 import { sendUpdateChatrooms } from "../../wss/outgoing-messages/update-chatrooms.js";
 import { $Enums } from "@prisma/client";
+import { validate } from "../../validators/validate.js";
+import {
+  inviteIdSchema,
+  sendInviteSchema,
+  updateInviteStatusSchema,
+} from "../../validators/invites/inviteValidation.js";
+import { chatroomIdSchema } from "../../validators/chatrooms/chatroomValidation.js";
 
 export const invitesRouter = Router();
 
@@ -52,7 +59,9 @@ invitesRouter.get("/me", async (req: Request, res: Response) => {
 });
 
 invitesRouter.post("/", async (req: Request, res: Response) => {
-  const { receiverUsername, chatroomId } = req.body;
+  const data = validate(sendInviteSchema, req.body, res);
+  if (!data) return;
+  const { receiverUsername, chatroomId } = data;
   const senderId = req.userId;
 
   if (!senderId) {
@@ -150,7 +159,9 @@ invitesRouter.post("/", async (req: Request, res: Response) => {
 });
 
 invitesRouter.patch("/", async (req: Request, res: Response) => {
-  const { inviteId, status } = req.body;
+  const data = validate(updateInviteStatusSchema, req.body, res);
+  if (!data) return;
+  const { inviteId, status } = data;
   const userId = req.userId;
 
   if (!userId) {
@@ -226,7 +237,9 @@ invitesRouter.patch("/", async (req: Request, res: Response) => {
 });
 
 invitesRouter.delete("/", async (req: Request, res: Response) => {
-  const { inviteId } = req.body;
+  const data = validate(inviteIdSchema, req.body, res);
+  if (!data) return;
+  const { inviteId } = data;
   const userId = req.userId;
 
   if (!userId) {
@@ -284,7 +297,9 @@ invitesRouter.delete("/", async (req: Request, res: Response) => {
 });
 
 invitesRouter.get("/:chatroomId", async (req: Request, res: Response) => {
-  const { chatroomId } = req.params;
+  const data = validate(chatroomIdSchema, req.params, res);
+  if (!data) return;
+  const { chatroomId } = data;
 
   try {
     const invites = (await Prisma.invite.findMany({

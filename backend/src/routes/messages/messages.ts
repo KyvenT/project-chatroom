@@ -1,13 +1,17 @@
 import { Request, Response, Router } from "express";
 import Prisma from "../../prisma/prisma.js";
 import { MessagePayload } from "../../types/payloads.js";
+import { validate } from "../../validators/validate.js";
+import { retrieveMessageSchema } from "../../validators/messages/messageValidation.js";
 
 export const messagesRouter = Router();
 
 messagesRouter.get(
   "/:chatroomId/:getBefore",
   async (req: Request, res: Response) => {
-    const { chatroomId, getBefore } = req.params;
+    const data = validate(retrieveMessageSchema, req.params, res);
+    if (!data) return;
+    const { chatroomId, getBefore } = data;
     const userId = req.userId;
 
     if (!userId) {
