@@ -1,8 +1,7 @@
-import "express"
+import "express";
 
 declare module "express" {
-    interface Request {
-        userId?: string;
-        isUser?: boolean;
-    }
+  interface Request {
+    userId?: string;
+  }
 }
