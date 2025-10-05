@@ -1,0 +1,56 @@
+import { sendStatusUpdate } from "../wss/outgoing-messages/status-update.js";
+import { updateUserStatusSchema } from "../validators/users/userValidation.js";
+import { validate } from "../validators/validate.js";
+import Prisma from "../prisma/prisma.js";
+import { Request, Response } from "express";
+
+export const getUserDetails = async (req: Request, res: Response) => {
+  const userId = req.userId;
+
+  try {
+    const user = await Prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      omit: {
+        passwordHash: true,
+      },
+    });
+
+    res.status(201).json({ user });
+    console.log("retrieved /me");
+  } catch (err) {
+    res.status(500).json({ error: "Server error occurred while fetching /me" });
+    console.error(err);
+  }
+};
+
+export const updateUserStatus = async (req: Request, res: Response) => {
+  const data = validate(updateUserStatusSchema, req.body, res);
+  if (!data) return;
+  const { status } = data;
+  const userId = req.userId;
+
+  try {
+    const user = await Prisma.user.update({
+      select: {
+        id: true,
+        username: true,
+        status: true,
+      },
+      data: {
+        status,
+      },
+      where: {
+        id: userId,
+      },
+    });
+
+    sendStatusUpdate(user);
+
+    res.status(200).json({ message: "Status updated" });
+    console.log("updated status");
+  } catch (err) {
+    res.status(500).json({ error: "Server error occurred while updating /me" });
+  }
+};

@@ -7,7 +7,7 @@ export const validate = <T extends ZodType>(
   res: Response
 ): z.infer<T> | undefined => {
   try {
-    const result = schema.parse(data);
+    return schema.parse(data);
   } catch (err) {
     if (err instanceof z.ZodError) {
       console.error(err.issues);
