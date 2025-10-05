@@ -14,6 +14,6 @@ export const validate = <T extends ZodType>(
       return;
     }
     console.error("error trying to validate user data", err);
-    res.status(500).json({ error: "input validation error" });
+    res.status(500).json({ message: "input validation error" });
   }
 };

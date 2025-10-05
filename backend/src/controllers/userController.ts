@@ -1,56 +1,44 @@
-import { sendStatusUpdate } from "../wss/outgoing-messages/status-update.js";
 import { updateUserStatusSchema } from "../validators/users/userValidation.js";
 import { validate } from "../validators/validate.js";
-import Prisma from "../prisma/prisma.js";
 import { Request, Response } from "express";
+import * as userService from "../services/userService.js";
 
 export const getUserDetails = async (req: Request, res: Response) => {
   const userId = req.userId;
 
-  try {
-    const user = await Prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      omit: {
-        passwordHash: true,
-      },
-    });
+  if (!userId) {
+    res.status(400).json({ message: "Must be signed in to get user details" });
+    return;
+  }
 
+  try {
+    const user = await userService.getUserDetails(userId);
     res.status(201).json({ user });
-    console.log("retrieved /me");
   } catch (err) {
-    res.status(500).json({ error: "Server error occurred while fetching /me" });
     console.error(err);
+    res
+      .status(500)
+      .json({ message: "Server error occurred while fetching /me" });
   }
 };
 
 export const updateUserStatus = async (req: Request, res: Response) => {
   const data = validate(updateUserStatusSchema, req.body, res);
   if (!data) return;
-  const { status } = data;
   const userId = req.userId;
 
+  if (!userId) {
+    res
+      .status(400)
+      .json({ message: "Must be signed in to update user status" });
+    return;
+  }
+
   try {
-    const user = await Prisma.user.update({
-      select: {
-        id: true,
-        username: true,
-        status: true,
-      },
-      data: {
-        status,
-      },
-      where: {
-        id: userId,
-      },
-    });
-
-    sendStatusUpdate(user);
-
+    await userService.updateUserStatus(userId, data);
     res.status(200).json({ message: "Status updated" });
-    console.log("updated status");
-  } catch (err) {
-    res.status(500).json({ error: "Server error occurred while updating /me" });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
   }
 };
