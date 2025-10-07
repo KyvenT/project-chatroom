@@ -7,7 +7,7 @@ export const getMessages = async (
   userId: string,
   data: z.infer<typeof retrieveMessageSchema>
 ): Promise<MessagePayload[]> => {
-  const { chatroomId, getBefore } = data;
+  const { chatroomId, getBefore, limit } = data;
 
   const verifyPromise = Prisma.chatroomMember.findUnique({
     where: {
@@ -35,7 +35,7 @@ export const getMessages = async (
     orderBy: {
       createdAt: "desc",
     },
-    take: 25,
+    take: limit,
   });
 
   const [verify, messages] = await Promise.all([

@@ -4,7 +4,11 @@ import { Request, Response } from "express";
 import * as messageService from "../services/messageService.js";
 
 export const getMessages = async (req: Request, res: Response) => {
-  const data = validate(retrieveMessageSchema, req.params, res);
+  const data = validate(
+    retrieveMessageSchema,
+    { ...req.params, ...req.query },
+    res
+  );
   if (!data) return;
   const userId = req.userId;
 

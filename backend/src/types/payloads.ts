@@ -33,13 +33,14 @@ export interface InvitePayload {
 
 export interface ChatroomPayload {
   chatroomId: string;
+  lastViewedAt: Date;
+  unreadMessages: number;
+  chatroomIndex: number;
   chatroom: {
     title: string;
     privacy: ChatroomPrivacy;
     ownerId: string;
   };
-  lastViewedAt: Date;
-  unreadMessages: number;
 }
 
 export interface JoinChatroomPayload {
