@@ -24,3 +24,8 @@ export interface TypingPresenceMessage {
   type: "typing-presence";
   chatroomId: string;
 }
+
+export interface UpdateLastViewedAtMessage {
+  type: "update-last-viewed-at";
+  chatroomId: string;
+}
