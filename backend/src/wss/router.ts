@@ -7,8 +7,10 @@ import {
   ChatMessage,
   TypingPresenceMessage,
   UpdateActiveChatroomMessage,
+  UpdateLastViewedAtMessage,
 } from "../types/ws-messages.js";
 import { handleTypingPresence } from "./incoming-message-routes/typing-presence.js";
+import { handleUpdateLastViewedAt } from "./incoming-message-routes/update-last-viewed-at.js";
 
 export const wsMessageRouter = (message: any, ws: WebSocket) => {
   switch (message.type) {
@@ -24,7 +26,10 @@ export const wsMessageRouter = (message: any, ws: WebSocket) => {
     case "typing-presence":
       handleTypingPresence(message as TypingPresenceMessage, ws);
       break;
+    case "update-last-viewed-at":
+      handleUpdateLastViewedAt(message as UpdateLastViewedAtMessage, ws);
+      break;
     default:
-      console.log("uncaught message: " + message);
+      console.log("uncaught message: ", message);
   }
 };
