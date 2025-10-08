@@ -6,15 +6,13 @@ import {
   verifiedMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
-import type {
-  ChatroomPrivacy,
-  JoinChatroom,
-} from "../../types/REST-types/Chatroom";
+import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
 import useAuthContext from "../../hooks/useAuthContext";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import Modal, { closeButtonStyles } from "../Modal";
 import type { Theme } from "@emotion/react";
+import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 
 const buttonStyles = (theme: Theme) =>
   css({
@@ -128,8 +126,8 @@ const NewChatButton = () => {
   const [isToggled, setToggle] = useToggle(false);
   const { user, isLoggedIn } = useAuthContext();
   const { register, handleSubmit } = useForm<CreateChatroomFormInput>();
-  const mutation = useMutation<JoinChatroom, Error, MutationArgs>({
-    mutationFn: verifiedMutation<JoinChatroom>,
+  const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
+    mutationFn: verifiedMutation<ConfirmationResponse>,
   });
   const theme = useTheme();
 
@@ -159,45 +157,47 @@ const NewChatButton = () => {
       >
         +
       </Button>
-      <Modal
-        modalStyles={dialogStyles(theme)}
-        open={isToggled}
-        onClose={() => setToggle(false)}
-      >
-        <form id="new-chat-form" onSubmit={handleSubmit(onSubmit)}>
-          <h2>Create a Chatroom</h2>
-          <div className="form-group chatroom-title-group">
-            <label htmlFor="title">Chatroom name: </label>
-            <input
-              {...register("title")}
-              id="title"
-              type="text"
-              placeholder="Title..."
-              maxLength={20}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="privacy">Privacy:</label>
-            <select {...register("privacy")} id="privacy">
-              <option value="INVITE_ONLY">Only owner can invite</option>
-              <option value="INVITE_PLUS">Members can invite</option>
-              <option value="JOINABLE">Any user can join by link</option>
-              <option value="PUBLIC">Guests can join by link</option>
-            </select>
-          </div>
-          <button className="submit-btn" type="submit" disabled={!isLoggedIn}>
-            Create
-          </button>
-        </form>
-        <button
-          css={[closeButtonStyles, closeButtonColors(theme)]}
-          onClick={() => setToggle(false)}
-          aria-label="Close create chatroom modal"
+      {isToggled && (
+        <Modal
+          modalStyles={dialogStyles(theme)}
+          open={isToggled}
+          onClose={() => setToggle(false)}
         >
-          X
-        </button>
-      </Modal>
+          <form id="new-chat-form" onSubmit={handleSubmit(onSubmit)}>
+            <h2>Create a Chatroom</h2>
+            <div className="form-group chatroom-title-group">
+              <label htmlFor="title">Chatroom name: </label>
+              <input
+                {...register("title")}
+                id="title"
+                type="text"
+                placeholder="Title..."
+                maxLength={20}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="privacy">Privacy:</label>
+              <select {...register("privacy")} id="privacy">
+                <option value="INVITE_ONLY">Only owner can invite</option>
+                <option value="INVITE_PLUS">Members can invite</option>
+                <option value="JOINABLE">Any user can join by link</option>
+                <option value="PUBLIC">Guests can join by link</option>
+              </select>
+            </div>
+            <button className="submit-btn" type="submit" disabled={!isLoggedIn}>
+              Create
+            </button>
+          </form>
+          <button
+            css={[closeButtonStyles, closeButtonColors(theme)]}
+            onClick={() => setToggle(false)}
+            aria-label="Close create chatroom modal"
+          >
+            X
+          </button>
+        </Modal>
+      )}
     </>
   );
 };

@@ -20,7 +20,7 @@ export const nonVerifiedQuery = async <T>({
   if (!res.ok) {
     throw new Error("query failed");
   }
-  return (await res.json()) as Promise<T>;
+  return (await res.json()) as T;
 };
 
 export const verifiedQuery = async <T>({
@@ -42,5 +42,5 @@ export const verifiedQuery = async <T>({
   if (!res.ok) {
     throw new Error("query failed");
   }
-  return (await res.json()) as Promise<T>;
+  return (await res.json()) as T;
 };

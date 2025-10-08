@@ -15,6 +15,7 @@ import {
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type { Theme } from "@emotion/react";
+import { handleWSAuth } from "../../ws-router/out-going-ws-messages/auth";
 
 const styles = (theme: Theme) =>
   css({
@@ -104,7 +105,7 @@ interface privacyDataType {
 const AuthGuard = () => {
   const [toggleContinueAsGuest, setToggleContinueAsGuest] = useToggle(false);
   const { isLoggedIn, handleSignIn } = useAuthContext();
-  const { handleWSAuth } = useWebSocketContext();
+  const { ws, setWs } = useWebSocketContext();
   const { chatroomId } = useParams();
   const guestNameRef = useRef<HTMLInputElement>(null);
   const [chatroomJoinable, setChatroomJoinable] = useState<boolean>(false);
@@ -125,7 +126,7 @@ const AuthGuard = () => {
     onSuccess: (guestAuthData) => {
       if (!guestAuthData) return;
       handleSignIn(guestAuthData);
-      handleWSAuth(guestAuthData.token);
+      handleWSAuth(ws, setWs, guestAuthData.token);
     },
   });
 

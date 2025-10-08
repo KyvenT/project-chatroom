@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import useAuthContext from "../../../hooks/useAuthContext";
 import type { UserAuth } from "../../../types/REST-types/User";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
+import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const Login = () => {
   const [password, setPasswordInput] = useState<String>("");
   const [error, setError] = useState<String>("");
   const { handleSignIn } = useAuthContext();
-  const { handleWSAuth } = useWebSocketContext();
+  const { ws, setWs } = useWebSocketContext();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -31,7 +32,7 @@ const Login = () => {
       console.log(data);
 
       handleSignIn(data);
-      handleWSAuth(data.token);
+      handleWSAuth(ws, setWs, data.token);
       navigate("/chat");
     } catch (err: any) {
       setError(err.message);
@@ -47,6 +48,7 @@ const Login = () => {
           type="text"
           onChange={(e) => setUsernameInput(e.target.value)}
           placeholder="Username..."
+          minLength={3}
           maxLength={20}
           id="username"
           required
@@ -56,6 +58,7 @@ const Login = () => {
           type="password"
           onChange={(e) => setPasswordInput(e.target.value)}
           placeholder="Password..."
+          minLength={6}
           maxLength={20}
           id="password"
           required

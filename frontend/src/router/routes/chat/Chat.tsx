@@ -8,6 +8,7 @@ import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useEffect, useRef } from "react";
 import type { OutletContextType } from "./ChatLayout";
 import { useTypingPresenceStore } from "../../../hooks/useStores";
+import { sendChatMessage } from "../../../ws-router/out-going-ws-messages/chat-message";
 
 const chatStyles = css({
   height: "100%",
@@ -47,15 +48,9 @@ function Chat() {
   }, [typingUsers]);
 
   const handleSubmit = () => {
-    if (!isLoggedIn || !messageInput.current || !chatroomId) return;
+    if (!isLoggedIn || !messageInput.current || !chatroomId || !ws) return;
 
-    ws?.send(
-      JSON.stringify({
-        type: "message",
-        content: messageInput.current.value,
-        chatroomId,
-      }),
-    );
+    sendChatMessage(ws, messageInput.current.value, chatroomId);
 
     messageInput.current.value = "";
     messageInput.current.focus();
