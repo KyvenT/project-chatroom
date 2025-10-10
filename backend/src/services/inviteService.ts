@@ -171,7 +171,7 @@ export const respondToInvite = async (
     data: {
       memberId: userId,
       chatroomId: invite.chatroomId,
-      chatroomIndex: (existingChatroomIndex?.chatroomIndex || 15) + 1,
+      chatroomIndex: (existingChatroomIndex?.chatroomIndex || 0) + 1,
     },
     omit: {
       lastViewedAt: true,
