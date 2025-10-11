@@ -26,6 +26,7 @@ export const getUserChatrooms = async (
       chatroomId: true,
       lastViewedAt: true,
       chatroomIndex: true,
+      isPinned: true,
       chatroom: {
         select: {
           title: true,
@@ -239,7 +240,7 @@ export const getUserPinnedChatrooms = async (
   const chatrooms = await Prisma.chatroomMember.findMany({
     where: {
       memberId: userId,
-      pinned: true,
+      isPinned: true,
     },
     select: {
       chatroomId: true,

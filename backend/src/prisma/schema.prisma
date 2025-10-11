@@ -53,7 +53,7 @@ model ChatroomMember {
   chatroom        Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId      String
   chatroomIndex   Int           
-  pinned          Boolean       @default(false)
+  isPinned        Boolean       @default(false)
   role            ChatroomRoles @default(MEMBER)
   joinedAt        DateTime      @default(now())
   lastViewedAt    DateTime      @default(now())

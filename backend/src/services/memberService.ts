@@ -193,7 +193,7 @@ export const pinChatroom = async (
       },
     },
     data: {
-      pinned: pin,
+      isPinned: pin,
     },
   });
 };

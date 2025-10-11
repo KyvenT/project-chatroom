@@ -36,6 +36,7 @@ export interface ChatroomPayload {
   lastViewedAt: Date;
   unreadMessages: number;
   chatroomIndex: number;
+  isPinned: boolean;
   chatroom: {
     title: string;
     privacy: ChatroomPrivacy;
