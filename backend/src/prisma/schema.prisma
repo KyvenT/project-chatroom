@@ -53,13 +53,25 @@ model ChatroomMember {
   chatroom        Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId      String
   chatroomIndex   Int           
-  isPinned        Boolean       @default(false)
+  pinnedBy        PinGroup?     
   role            ChatroomRoles @default(MEMBER)
   joinedAt        DateTime      @default(now())
   lastViewedAt    DateTime      @default(now())
 
   @@id([chatroomId, memberId])
   @@unique([memberId, chatroomIndex])
+}
+
+model PinGroup { 
+  id                    String            @id @default(uuid())
+  chatroomMember        ChatroomMember    @relation(fields: [chatroomId, userId], references: [chatroomId, memberId])
+  chatroomId            String
+  userId                String
+  name                  String
+  pinnedIndex           Int
+  createdAt             DateTime          @default(now())
+
+  @@unique([chatroomId, userId])
 }
 
 model Invite {
