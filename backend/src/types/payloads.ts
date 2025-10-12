@@ -73,7 +73,6 @@ export interface PinnedChatroomPayload {
   chatroomId: string;
   chatroom: {
     title: string;
-    messages: Message[];
   };
 }
 

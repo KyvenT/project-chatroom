@@ -3,7 +3,6 @@ import z from "zod";
 import {
   chatroomIdSchema,
   chatroomModifyIndexSchema,
-  chatroomPinSchema,
 } from "../validators/chatrooms/chatroomValidation.js";
 import { ChatroomPrivacy } from "@prisma/client";
 import { JoinChatroomPayload, MembersPayload } from "../types/payloads.js";
@@ -161,68 +160,6 @@ export const reorderChatrooms = async (
     });
 
     await Promise.all([swapNew, swapOld]);
-  }
-};
-
-export const pinChatroom = async (
-  userId: string,
-  data: z.infer<typeof chatroomPinSchema>
-) => {
-  const { chatroomId, pinGroupId, pin } = data;
-
-  const verify = await Prisma.chatroomMember.findUnique({
-    where: {
-      chatroomId_memberId: {
-        memberId: userId,
-        chatroomId,
-      },
-    },
-  });
-
-  if (!verify) {
-    throw new Error(
-      "Attempted pinning a chatroom that user is not a member of"
-    );
-  }
-
-  if (pin) {
-    const existingPinnedIndex = await Prisma.chatroomMember.findFirst({
-      select: {
-        pinnedIndex: true,
-      },
-      where: {
-        memberId: userId,
-      },
-      orderBy: {
-        chatroomIndex: "desc",
-      },
-    });
-
-    await Prisma.chatroomMember.update({
-      where: {
-        chatroomId_memberId: {
-          chatroomId,
-          memberId: userId,
-        },
-      },
-      data: {
-        pinGroupId,
-        pinnedIndex: (existingPinnedIndex?.pinnedIndex || 0) + 1,
-      },
-    });
-  } else {
-    await Prisma.chatroomMember.update({
-      where: {
-        chatroomId_memberId: {
-          chatroomId,
-          memberId: userId,
-        },
-      },
-      data: {
-        pinGroupId: null,
-        pinnedIndex: null,
-      },
-    });
   }
 };
 

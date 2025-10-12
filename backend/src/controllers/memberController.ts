@@ -1,7 +1,6 @@
 import {
   chatroomModifyIndexSchema,
   chatroomIdSchema,
-  chatroomPinSchema,
 } from "../validators/chatrooms/chatroomValidation.js";
 import { validate } from "../validators/validate.js";
 import { Request, Response } from "express";
@@ -30,26 +29,6 @@ export const reorderMemberChatroom = async (req: Request, res: Response) => {
     console.log("chatrooms reordered");
   } catch (err: any) {
     console.error("Chatroom reorder error", err.message);
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export const pinMemberChatroom = async (req: Request, res: Response) => {
-  const data = validate(chatroomPinSchema, { ...req.params, ...req.body }, res);
-  if (!data) return;
-  const userId = req.userId;
-
-  if (!userId) {
-    res.status(500).json({ message: "must be signed in to pin a chatroom" });
-    return;
-  }
-
-  try {
-    await membersService.pinChatroom(userId, data);
-    res.status(200).json({ message: "chatroom pin updated" });
-    console.log("chatroom pin updated");
-  } catch (err: any) {
-    console.error("Chatroom pin error", err.message);
     res.status(500).json({ message: err.message });
   }
 };

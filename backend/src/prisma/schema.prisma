@@ -71,6 +71,7 @@ model PinGroup {
   userId                String
   pinnedChatrooms       ChatroomMember[]
   name                  String
+  index                 Int
   createdAt             DateTime          @default(now())
 }
 
