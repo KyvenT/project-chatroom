@@ -49,15 +49,17 @@ model User {
 }
 
 model ChatroomMember {
-  member          User          @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  memberId        String
-  chatroom        Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
-  chatroomId      String
-  chatroomIndex   Int           
-  pinnedBy        PinGroup?     
-  role            ChatroomRoles @default(MEMBER)
-  joinedAt        DateTime      @default(now())
-  lastViewedAt    DateTime      @default(now())
+  member                User          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberId              String
+  chatroom              Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  chatroomId            String
+  chatroomIndex         Int           
+  pinGroup              PinGroup?            @relation(fields: [pinGroupId], references: [id], onDelete: SetNull)
+  pinGroupId            String?
+  pinnedIndex           Int?  
+  role                  ChatroomRoles @default(MEMBER)
+  joinedAt              DateTime      @default(now())
+  lastViewedAt          DateTime      @default(now())
 
   @@id([chatroomId, memberId])
   @@unique([memberId, chatroomIndex])
@@ -65,16 +67,11 @@ model ChatroomMember {
 
 model PinGroup { 
   id                    String            @id @default(uuid())
-  user                  User              @relation(fields: [userId], references: [id])
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId                String
-  chatroomMember        ChatroomMember    @relation(fields: [chatroomId, memberId], references: [chatroomId, memberId])
-  chatroomId            String
-  memberId              String 
+  pinnedChatrooms       ChatroomMember[]
   name                  String
-  pinnedIndex           Int
   createdAt             DateTime          @default(now())
-
-  @@unique([chatroomId, memberId])
 }
 
 model Invite {

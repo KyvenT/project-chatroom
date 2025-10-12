@@ -36,7 +36,6 @@ export interface ChatroomPayload {
   lastViewedAt: Date;
   unreadMessages: number;
   chatroomIndex: number;
-  isPinned: boolean;
   chatroom: {
     title: string;
     privacy: ChatroomPrivacy;
@@ -60,6 +59,14 @@ export interface ChatroomDetailsPayload {
   owner: {
     username: string;
   };
+}
+
+export interface PinnedGroupsPayload {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: Date;
+  pinnedChatrooms: PinnedChatroomPayload[];
 }
 
 export interface PinnedChatroomPayload {

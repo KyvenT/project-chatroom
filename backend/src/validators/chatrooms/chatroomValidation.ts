@@ -16,6 +16,7 @@ export const chatroomModifyIndexSchema = chatroomIdSchema.extend({
 
 export const chatroomPinSchema = chatroomIdSchema.extend({
   pin: z.boolean(),
+  pinGroupId: z.uuid(),
 });
 
 export const chatroomModifyOptionsSchema = chatroomIdSchema.extend({

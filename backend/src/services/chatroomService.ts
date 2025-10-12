@@ -1,11 +1,9 @@
 import { ChatroomPrivacy, ChatroomRoles } from "@prisma/client";
-import { getUserDetails } from "../controllers/userController.js";
 import Prisma from "../prisma/prisma.js";
 import {
   ChatroomDetailsPayload,
   ChatroomPayload,
   JoinChatroomPayload,
-  PinnedChatroomPayload,
 } from "../types/payloads.js";
 import {
   chatroomIdSchema,
@@ -26,7 +24,6 @@ export const getUserChatrooms = async (
       chatroomId: true,
       lastViewedAt: true,
       chatroomIndex: true,
-      isPinned: true,
       chatroom: {
         select: {
           title: true,
@@ -232,42 +229,6 @@ export const deleteChatroom = async (
   members.forEach((member) => {
     sendUpdateChatrooms(chatroomId, member.memberId, "LEAVE");
   });
-};
-
-export const getUserPinnedChatrooms = async (
-  userId: string
-): Promise<PinnedChatroomPayload[]> => {
-  const chatrooms = await Prisma.chatroomMember.findMany({
-    where: {
-      memberId: userId,
-      isPinned: true,
-    },
-    select: {
-      chatroomId: true,
-      chatroom: {
-        select: {
-          title: true,
-          messages: {
-            include: {
-              senderUser: {
-                select: {
-                  username: true,
-                },
-              },
-            },
-            orderBy: {
-              createdAt: "desc",
-            },
-            take: 5,
-          },
-        },
-      },
-    },
-    orderBy: {
-      chatroomIndex: "asc",
-    },
-  });
-  return chatrooms;
 };
 
 export const getChatroomPrivacy = async (
