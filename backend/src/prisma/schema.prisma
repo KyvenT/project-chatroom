@@ -42,6 +42,7 @@ model User {
   sentMessages    Message[]
   joinedChatrooms ChatroomMember[]
   ownedChatrooms  Chatroom[]
+  pinnedGroups    PinGroup[]
   sentInvites     Invite[]         @relation("SentInvite")
   receivedInvites Invite[]         @relation("ReceivedInvite")
   notifications   Notification[]
@@ -64,14 +65,16 @@ model ChatroomMember {
 
 model PinGroup { 
   id                    String            @id @default(uuid())
-  chatroomMember        ChatroomMember    @relation(fields: [chatroomId, userId], references: [chatroomId, memberId])
-  chatroomId            String
+  user                  User              @relation(fields: [userId], references: [id])
   userId                String
+  chatroomMember        ChatroomMember    @relation(fields: [chatroomId, memberId], references: [chatroomId, memberId])
+  chatroomId            String
+  memberId              String 
   name                  String
   pinnedIndex           Int
   createdAt             DateTime          @default(now())
 
-  @@unique([chatroomId, userId])
+  @@unique([chatroomId, memberId])
 }
 
 model Invite {
