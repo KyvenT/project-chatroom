@@ -16,7 +16,7 @@ export interface NotificationMessage {
     createdAt: Date;
     payload: {
       mention?: MentionPayload;
-      invite?: Invite;
+      inviteId?: string;
     };
   };
 }
@@ -84,4 +84,11 @@ export interface TypingPresence {
 export interface FeedbackMessage {
   type: "feedback";
   message: string;
+}
+
+export interface UpdateInvitesMessage {
+  type: "update-invites";
+  action: "ADD" | "DELETE";
+  invite?: Invite;
+  inviteId?: string;
 }

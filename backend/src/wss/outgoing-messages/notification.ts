@@ -14,7 +14,7 @@ export interface MentionPayload {
 
 export interface NotificationOptions {
   mention?: MentionPayload;
-  invite?: InvitePayload;
+  inviteId?: string;
 }
 
 export const createNotification = async (
@@ -25,10 +25,10 @@ export const createNotification = async (
   const queryOptions: any = {};
   switch (type) {
     case NotificationType.INVITE:
-      if (!options.invite) {
+      if (!options.inviteId) {
         console.error("Invite is required for INVITE notification");
       }
-      queryOptions.inviteId = options.invite?.id;
+      queryOptions.inviteId = options.inviteId;
       break;
     case NotificationType.MENTION:
       if (!options.mention?.messageId) {
@@ -67,7 +67,7 @@ export const sendNotification = async (
             createdAt: notification.createdAt,
             payload: {
               mention: options.mention,
-              invite: options.invite,
+              inviteId: options.inviteId,
             },
           },
         })
