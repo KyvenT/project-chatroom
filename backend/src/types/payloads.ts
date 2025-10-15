@@ -33,13 +33,14 @@ export interface InvitePayload {
 
 export interface ChatroomPayload {
   chatroomId: string;
+  lastViewedAt: Date;
+  unreadMessages: number;
+  chatroomIndex: number;
   chatroom: {
     title: string;
     privacy: ChatroomPrivacy;
     ownerId: string;
   };
-  lastViewedAt: Date;
-  unreadMessages: number;
 }
 
 export interface JoinChatroomPayload {
@@ -60,11 +61,18 @@ export interface ChatroomDetailsPayload {
   };
 }
 
+export interface PinnedGroupsPayload {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: Date;
+  pinnedChatrooms: PinnedChatroomPayload[];
+}
+
 export interface PinnedChatroomPayload {
   chatroomId: string;
   chatroom: {
     title: string;
-    messages: Message[];
   };
 }
 

@@ -10,6 +10,7 @@ import { handleNewNotification } from "../wss/outgoing-messages/notification.js"
 import { InviteStatus } from "@prisma/client";
 import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.js";
 import { chatroomIdSchema } from "../validators/chatrooms/chatroomValidation.js";
+import { sendUpdateInvites } from "../wss/outgoing-messages/update-invites.js";
 
 export const getUserInvites = async (
   userId: string
@@ -120,7 +121,12 @@ export const createInvite = async (
   });
 
   handleNewNotification("INVITE", receiver.id, {
-    invite,
+    inviteId: invite.id,
+  });
+  sendUpdateInvites({
+    memberId: receiver.id,
+    actionType: "ADD",
+    invite: invite,
   });
 };
 
@@ -171,7 +177,7 @@ export const respondToInvite = async (
     data: {
       memberId: userId,
       chatroomId: invite.chatroomId,
-      chatroomIndex: (existingChatroomIndex?.chatroomIndex || 15) + 1,
+      chatroomIndex: (existingChatroomIndex?.chatroomIndex || 0) + 1,
     },
     omit: {
       lastViewedAt: true,
@@ -180,6 +186,7 @@ export const respondToInvite = async (
   });
 
   sendUpdateChatrooms(invite.chatroomId, userId, "JOIN");
+  sendUpdateInvites({ memberId: userId, actionType: "DELETE", inviteId });
 };
 
 export const deleteInvite = async (
@@ -219,6 +226,8 @@ export const deleteInvite = async (
       id: inviteId,
     },
   });
+
+  sendUpdateInvites({ memberId: userId, actionType: "DELETE", inviteId });
 };
 
 export const getChatroomInvites = async (

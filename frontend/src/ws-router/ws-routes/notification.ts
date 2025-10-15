@@ -1,5 +1,4 @@
-import { useChatroomsStore, useInvitesStore } from "../../hooks/useStores";
-import type { Invite } from "../../types/REST-types/Invite";
+import { useChatroomsStore } from "../../hooks/useStores";
 import type {
   NotificationMessage,
   UpdateUnreadMessage,
@@ -9,9 +8,10 @@ export const handleNewNotification = (message: NotificationMessage) => {
   console.log("notif received");
   switch (message.notification.type) {
     case "INVITE":
-      useInvitesStore
-        .getState()
-        .addNewInvite(message.notification.payload.invite as Invite);
+      console.log(
+        "new invite received: ",
+        message.notification.payload.inviteId,
+      );
       break;
     case "MENTION":
       break;

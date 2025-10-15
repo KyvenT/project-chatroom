@@ -81,9 +81,7 @@ export const useInvitesStore = create<InviteListState>((set) => ({
   clearInvites: () => set({ invites: [] }),
   removeInvite: (inviteId) =>
     set((state) => ({
-      invites: state.invites.filter((invite) => {
-        invite.id !== inviteId;
-      }),
+      invites: state.invites.filter((invite) => invite.id !== inviteId),
     })),
 }));
 

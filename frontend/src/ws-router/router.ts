@@ -4,6 +4,7 @@ import type {
   StatusMessage,
   TypingPresenceMessage,
   UpdateChatroomsMessage,
+  UpdateInvitesMessage,
   UpdateMembersMessage,
 } from "../types/ws-messages";
 import type { NavigateFunction } from "react-router";
@@ -13,8 +14,11 @@ import { handleUpdateChatrooms } from "./ws-routes/update-chatrooms";
 import { handleUpdateMembers } from "./ws-routes/update-members";
 import { handleStatusUpdate } from "./ws-routes/status-update";
 import { handleTypingPresence } from "./ws-routes/typing-presence";
+import { updateLastViewedAt } from "./out-going-ws-messages/update-last-viewed-at";
+import { handleUpdateInvites } from "./ws-routes/update-invites";
 
 export const wsMessageRouter = (
+  ws: WebSocket,
   message: any,
   chatroomId: string | undefined,
   navigate: NavigateFunction,
@@ -44,6 +48,13 @@ export const wsMessageRouter = (
       break;
     case "typing-presence":
       handleTypingPresence(message as TypingPresenceMessage, chatroomId);
+      break;
+    case "update-last-viewed-at":
+      if (!chatroomId) return;
+      updateLastViewedAt(ws, chatroomId);
+      break;
+    case "update-invites":
+      handleUpdateInvites(message as UpdateInvitesMessage);
       break;
     default:
       console.log("Unknown message type: " + message.type);

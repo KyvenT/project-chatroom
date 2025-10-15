@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
 import {
   getChatroomMembers,
   removeMemberFromChatroom,
@@ -10,5 +10,5 @@ export const membersRouter = Router();
 
 membersRouter.get("/:chatroomId", getChatroomMembers);
 membersRouter.delete("/:chatroomId", removeMemberFromChatroom);
-membersRouter.patch("/:chatroomId/chatroomIndex", reorderMemberChatroom);
+membersRouter.patch("/:chatroomId/order", reorderMemberChatroom);
 membersRouter.post("/:chatroomId", joinChatroom);

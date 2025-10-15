@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import useWebSocketContext from "../../hooks/useWebSocketContext";
 import { useParams } from "react-router";
 import useToggle from "../../hooks/useToggle";
+import { sendTypingPresence } from "../../ws-router/out-going-ws-messages/typing-presence";
 
 const styles = css({
   width: "100%",
@@ -91,7 +92,7 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
   const [hasTyped, setHasTyped] = useToggle(false);
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!messageInputRef.current) return;
+    if (!messageInputRef.current || !chatroomId || !ws) return;
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (messageInputRef.current.value === "") return;
@@ -105,12 +106,7 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
 
     if (!hasTyped) {
       setHasTyped(true);
-      ws?.send(
-        JSON.stringify({
-          type: "typing-presence",
-          chatroomId,
-        }),
-      );
+      sendTypingPresence(ws, chatroomId);
     }
   };
 

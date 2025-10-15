@@ -1,12 +1,11 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessage from "./ChatMessage";
-import useAuthContext from "../../hooks/useAuthContext";
-import type { Message } from "../../types/REST-types/Message";
-import { verifiedQuery } from "../../hooks/useCustomQuery";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
 import { useMessagesStore } from "../../hooks/useStores";
+import { useFetchMessages } from "../../hooks/useFetchMessages";
+import { updateLastViewedAt } from "../../ws-router/out-going-ws-messages/update-last-viewed-at";
+import useWebSocketContext from "../../hooks/useWebSocketContext";
 
 const styles = css({
   width: "100%",
@@ -29,7 +28,6 @@ const colors = (theme: Theme) =>
 
 const ChatMessages = () => {
   const theme = useTheme();
-  const { user, isLoggedIn } = useAuthContext();
   const { chatroomId } = useParams();
   const messages = useMessagesStore((state) => state.messages);
   const addPrevMessages = useMessagesStore(
@@ -38,24 +36,15 @@ const ChatMessages = () => {
   const clearMessages = useMessagesStore((state) => state.clearMessages);
   const chatRef = useRef<HTMLDivElement>(null);
   const [getBefore, setBefore] = useState<Date | null>(null);
-
-  const { data } = useQuery<Message[]>({
-    queryKey: [chatroomId, isLoggedIn, getBefore?.toISOString()],
-    queryFn: () =>
-      verifiedQuery({
-        fetchUrl: `http://localhost:3000/api/messages/${chatroomId}/${getBefore?.toISOString()}`,
-        user,
-      }),
-    enabled: !!getBefore,
-    staleTime: Infinity,
-  });
+  const { data } = useFetchMessages(chatroomId, getBefore, 25);
+  const { ws } = useWebSocketContext();
 
   useEffect(() => {
     setBefore(new Date());
     clearMessages();
     if (!chatRef.current) return;
     chatRef.current.scrollTop = 0;
-  }, [chatroomId]);
+  }, [chatroomId, chatRef]);
 
   useEffect(() => {
     if (!data || !getBefore) return;
@@ -74,6 +63,12 @@ const ChatMessages = () => {
       setBefore(new Date(createdAt));
     }
   };
+
+  useEffect(() => {
+    if (!chatroomId || !ws) return;
+
+    updateLastViewedAt(ws, chatroomId);
+  }, [messages]);
 
   return (
     <div

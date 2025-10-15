@@ -114,25 +114,6 @@ export const deleteChatroom = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserPinnedChatrooms = async (req: Request, res: Response) => {
-  const userId = req.userId;
-
-  if (!userId) {
-    res
-      .status(500)
-      .json({ message: "Must be signed in to get pinned chatrooms" });
-    return;
-  }
-
-  try {
-    const chatrooms = await chatroomService.getUserPinnedChatrooms(userId);
-    res.status(200).json(chatrooms);
-  } catch (err: any) {
-    console.error("retrieving pinned chatrooms error");
-    res.status(500).json({ message: err.message });
-  }
-};
-
 export const getChatroomPrivacy = async (req: Request, res: Response) => {
   const data = validate(chatroomIdSchema, req.params, res);
   if (!data) return;

@@ -7,6 +7,7 @@ import { invitesRouter } from "./invites/invites.js";
 import { messagesRouter } from "./messages/messages.js";
 import { membersRouter } from "./members/members.js";
 import { publicChatroomRouter } from "./chatrooms/public-chatroom-routes.js";
+import { pinnedGroupsRouter } from "./pinned-groups/pinnedGroupsRoutes.js";
 
 const apiRouter = Router();
 
@@ -17,6 +18,7 @@ apiRouter
   .use("/users", authMiddleware, usersRouter)
   .use("/invites", authMiddleware, invitesRouter)
   .use("/messages", authMiddleware, messagesRouter)
-  .use("/members", authMiddleware, membersRouter);
+  .use("/members", authMiddleware, membersRouter)
+  .use("/pinned", authMiddleware, pinnedGroupsRouter);
 
 export default apiRouter;

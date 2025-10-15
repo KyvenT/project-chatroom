@@ -6,7 +6,7 @@ interface WebSockContextProviderProps {
 
 interface WebSocketContextType {
   ws: WebSocket | null;
-  handleWSAuth: (token: string) => void;
+  setWs: (ws: WebSocket) => void;
   closeWS: () => void;
 }
 
@@ -39,32 +39,16 @@ export default function WebSocketContextProvider({
     };
   }, [ws]);
 
-  const handleWSAuth = (token: string) => {
-    if (ws) {
-      ws.close();
-    }
-    const newWs = new WebSocket("ws://localhost:3000");
-
-    newWs.onopen = () => {
-      newWs.send(
-        JSON.stringify({
-          type: "auth",
-          token,
-        }),
-      );
-      setWs(newWs);
-    };
-  };
-
   const closeWS = () => {
     ws?.close();
+    setWs(null);
   };
 
   return (
     <WebSocketContext.Provider
       value={{
         ws,
-        handleWSAuth,
+        setWs,
         closeWS,
       }}
     >

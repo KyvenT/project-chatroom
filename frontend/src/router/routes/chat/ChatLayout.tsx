@@ -8,18 +8,16 @@ import { Link, useNavigate, useParams } from "react-router";
 import InboxButton from "../../../components/chat-layout/InboxButton";
 import { ArrowLeftToLine, MenuIcon, User, Users } from "lucide-react";
 import useAuthContext from "../../../hooks/useAuthContext";
-import useWebSocketContext from "../../../hooks/useWebSocketContext";
-import { useEffect, useState } from "react";
 import type { Theme } from "@emotion/react";
 import Button, { iconBtnStyles } from "../../../components/Button";
-import { useQuery } from "@tanstack/react-query";
-import type { Chatroom } from "../../../types/REST-types/Chatroom";
-import { verifiedQuery } from "../../../hooks/useCustomQuery";
-import { wsMessageRouter } from "../../../ws-router/router";
 import { useChatroomsStore } from "../../../hooks/useStores";
 import { ChatroomDetailsModal } from "../../../components/chat-layout/ChatroomDetailsModal";
 import AuthGuard from "../../../components/chat/AuthGuard";
 import { mq } from "../../../styles/breakpoints";
+import { useChatroomTitle } from "../../../hooks/chat-layout/useChatroomTitle";
+import { useFetchUserChatrooms } from "../../../hooks/chat-layout/useFetchUserChatrooms";
+import { useWebsocketRouter } from "../../../hooks/chat-layout/useWebsocketRouter";
+import { useUpdateActiveChatroom } from "../../../hooks/chat-layout/useUpdateActiveChatroom";
 
 const styles = css({
   height: "100%",
@@ -94,64 +92,14 @@ function ChatLayout() {
   const navigate = useNavigate();
   const { isLoggedIn, user } = useAuthContext();
   const { chatroomId } = useParams();
-  const { ws } = useWebSocketContext();
   const theme = useTheme();
-  const setChatroomList = useChatroomsStore((state) => state.setChatroomList);
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
-  const [chatroomTitle, setChatroomTitle] = useState<string | null>(null);
   const [openChatroomDetails, setOpenChatroomDetails] = useToggle(false);
   const [showMembersList, setShowMembersList] = useToggle(true);
-
-  const { data: chatroomsData } = useQuery<Chatroom[], Error>({
-    queryKey: ["chatrooms", !!isLoggedIn],
-    queryFn: () =>
-      verifiedQuery<Chatroom[]>({
-        fetchUrl: "http://localhost:3000/api/chatrooms/me",
-        user,
-      }),
-    staleTime: Infinity,
-  });
-
-  useEffect(() => {
-    if (isLoggedIn && ws && chatroomId) {
-      ws.send(
-        JSON.stringify({
-          type: "update-active-chatroom",
-          chatroomId,
-        }),
-      );
-    }
-  }, [isLoggedIn, ws, chatroomId]);
-
-  useEffect(() => {
-    if (!chatroomId) {
-      setChatroomTitle(null);
-      return;
-    }
-
-    const chatroom = chatrooms.find(
-      (chatroom) => chatroom.chatroomId === chatroomId,
-    );
-    if (chatroom?.chatroomId === chatroomId) {
-      setChatroomTitle(chatroom.chatroom.title);
-    } else {
-      setChatroomTitle(chatroomId);
-    }
-  }, [chatroomId, chatrooms]);
-
-  useEffect(() => {
-    if (chatroomsData) setChatroomList(chatroomsData);
-  }, [chatroomsData]);
-
-  useEffect(() => {
-    if (ws) {
-      ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        console.log("Message from server: ", message);
-        wsMessageRouter(message, chatroomId, navigate);
-      };
-    }
-  }, [ws, chatroomId, navigate]);
+  const chatroomTitle = useChatroomTitle();
+  useFetchUserChatrooms();
+  useWebsocketRouter();
+  useUpdateActiveChatroom();
 
   const outletContext = {
     showMembersList,

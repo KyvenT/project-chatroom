@@ -17,15 +17,18 @@ export const reorderMemberChatroom = async (req: Request, res: Response) => {
   const userId = req.userId;
 
   if (!userId) {
-    res.status(500).json({ message: "must be signed in to pin a chatroom" });
+    res
+      .status(500)
+      .json({ message: "must be signed in to reorder a chatroom" });
     return;
   }
 
   try {
     await membersService.reorderChatrooms(userId, data);
     res.status(200).json({ message: "chatrooms reordered" });
+    console.log("chatrooms reordered");
   } catch (err: any) {
-    console.error("Chatroom pin error");
+    console.error("Chatroom reorder error", err.message);
     res.status(500).json({ message: err.message });
   }
 };
