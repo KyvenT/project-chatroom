@@ -2,7 +2,8 @@ import { PinnedGroupsPayload } from "../types/payloads.js";
 import Prisma from "../prisma/prisma.js";
 import {
   chatroomPinSchema,
-  setPinnedGroupSchema,
+  editPinnedGroupSchema,
+  PinnedGroupNameSchema,
 } from "../validators/pinned-groups/pinnedGroupsValidation.js";
 import z from "zod";
 
@@ -33,12 +34,7 @@ export const getPinnedGroups = async (
   return pinnedGroups;
 };
 
-export const createPinnedGroup = async (
-  userId: string,
-  data: z.infer<typeof setPinnedGroupSchema>
-) => {
-  const { name } = data;
-
+export const createPinnedGroup = async (userId: string) => {
   const verifyUser = await Prisma.user.findUnique({
     where: {
       id: userId,
@@ -46,11 +42,7 @@ export const createPinnedGroup = async (
   });
 
   if (verifyUser?.isGuest === true) {
-    throw new Error("Only users can create chatrooms");
-  }
-
-  if (!name) {
-    throw new Error("Tried to create chatroom with empty title");
+    throw new Error("Only users can create pinned groups");
   }
 
   const existingPinnedGroupIndex = await Prisma.pinGroup.findFirst({
@@ -65,11 +57,55 @@ export const createPinnedGroup = async (
     },
   });
 
-  await Prisma.pinGroup.create({
+  const index = (existingPinnedGroupIndex?.index || 0) + 1;
+
+  const pinnedGroup = await Prisma.pinGroup.create({
+    data: {
+      name: "Untitled " + index,
+      index,
+      userId,
+    },
+  });
+
+  return pinnedGroup;
+};
+
+export const editPinnedGroup = async (
+  userId: string,
+  data: z.infer<typeof editPinnedGroupSchema>
+) => {
+  const { name, pinGroupId } = data;
+
+  const verifyUser = await Prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (verifyUser?.isGuest === true) {
+    throw new Error("Only users can edit pinned groups");
+  }
+
+  if (!name) {
+    throw new Error("Tried to edit pinned group with empty title");
+  }
+
+  const pinGroup = await Prisma.pinGroup.findUnique({
+    where: {
+      id: pinGroupId,
+    },
+  });
+
+  if (pinGroup?.userId !== userId) {
+    throw new Error("Not detected as owner of pin group");
+  }
+
+  await Prisma.pinGroup.update({
+    where: {
+      id: pinGroupId,
+    },
     data: {
       name,
-      index: (existingPinnedGroupIndex?.index || 0) + 1,
-      userId,
     },
   });
 };

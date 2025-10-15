@@ -3,7 +3,8 @@ import * as pinnedGroupService from "../services/pinnedGroupsService.js";
 import { validate } from "../validators/validate.js";
 import {
   chatroomPinSchema,
-  setPinnedGroupSchema,
+  editPinnedGroupSchema,
+  PinnedGroupNameSchema,
 } from "../validators/pinned-groups/pinnedGroupsValidation.js";
 
 export const getUserPinnedGroups = async (req: Request, res: Response) => {
@@ -26,7 +27,30 @@ export const getUserPinnedGroups = async (req: Request, res: Response) => {
 };
 
 export const createPinnedGroup = async (req: Request, res: Response) => {
-  const data = validate(setPinnedGroupSchema, req.body, res);
+  const userId = req.userId;
+
+  if (!userId) {
+    res
+      .status(500)
+      .json({ message: "Must be signed in to create a pinned group" });
+    return;
+  }
+
+  try {
+    await pinnedGroupService.createPinnedGroup(userId);
+    res.status(200).json({ message: "Pinned group created" });
+  } catch (err: any) {
+    console.error("create pinned group error");
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const editPinnedGroup = async (req: Request, res: Response) => {
+  const data = validate(
+    editPinnedGroupSchema,
+    { ...req.params, ...req.body },
+    res
+  );
   if (!data) return;
   const userId = req.userId;
 
@@ -38,8 +62,8 @@ export const createPinnedGroup = async (req: Request, res: Response) => {
   }
 
   try {
-    await pinnedGroupService.createPinnedGroup(userId, data);
-    res.status(200).json({ message: "Pinned group created" });
+    await pinnedGroupService.editPinnedGroup(userId, data);
+    res.status(200).json({ message: "Pinned group edited" });
   } catch (err: any) {
     console.error("create pinned group error");
     res.status(500).json({ message: err.message });
