@@ -1,6 +1,7 @@
 import type { PinnedGroup } from "../../types/REST-types/Chatroom";
 import { useFetchMessagesMultiple } from "../../hooks/useFetchMessages";
 import ChatMessage from "../chat/ChatMessage";
+import { useState } from "react";
 
 interface pinnedChatroomsListProps {
   pinnedGroup: PinnedGroup;
@@ -9,7 +10,8 @@ interface pinnedChatroomsListProps {
 export const PinnedChatroomsList = ({
   pinnedGroup,
 }: pinnedChatroomsListProps) => {
-  const getBefore = new Date();
+  const [getBefore] = useState<Date>(new Date());
+
   const results = useFetchMessagesMultiple(
     pinnedGroup.pinnedChatrooms.map((chatroom) => chatroom.chatroomId),
     getBefore,

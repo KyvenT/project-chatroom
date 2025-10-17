@@ -8,10 +8,13 @@ import {
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
+import type { PinnedGroup } from "../../types/REST-types/Chatroom";
+import useAuthContext from "../../hooks/useAuthContext";
 
 interface pinChatroomsModalProps {
   open: boolean;
   onClose: () => void;
+  pinnedGroup: PinnedGroup;
 }
 
 const styles = (theme: Theme) =>
@@ -32,25 +35,37 @@ const styles = (theme: Theme) =>
 export const PinChatroomsModal = ({
   open,
   onClose,
+  pinnedGroup,
 }: pinChatroomsModalProps) => {
   const theme = useTheme();
+  const { user } = useAuthContext();
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
-  const pinChatroom = useMutation<ConfirmationResponse, Error, MutationArgs>({
+  const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
     mutationFn: verifiedMutation<ConfirmationResponse>,
+    onSuccess: () => {
+      console.log("chatroom pinned successfully");
+    },
   });
 
   const handleChatroomPin = (
     chatroomId: string,
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    event.preventDefault();
-    console.log("pin ", chatroomId, ",", event.target.checked);
-    pinChatroom.mutate({
-      fetchUrl: "http://localhost:3000/api/members/" + chatroomId + "/pin",
+    console.log(
+      "pin ",
+      pinnedGroup.id,
+      ": ",
+      chatroomId,
+      ",",
+      event.target.checked,
+    );
+    mutate({
+      fetchUrl: "http://localhost:3000/api/pinned/" + chatroomId + "/pin",
       method: "PATCH",
+      user,
       reqBody: {
-        chatroomId,
         pin: event.target.checked,
+        pinGroupId: pinnedGroup.id,
       },
     });
   };
@@ -65,7 +80,7 @@ export const PinChatroomsModal = ({
               {chatroom.chatroom.title}
               <input
                 type="checkbox"
-                checked={false}
+                defaultChecked={false}
                 onChange={(e) => handleChatroomPin(chatroom.chatroomId, e)}
               />
             </li>

@@ -16,6 +16,7 @@ import { PinnedChatroomsList } from "../../../components/chat-home/pinnedChatroo
 import useToggle from "../../../hooks/useToggle";
 import { PinChatroomsModal } from "../../../components/chat-home/pinChatroomsModal";
 import type { ConfirmationResponse } from "../../../types/REST-types/Invite";
+import { useEffect, useState } from "react";
 
 const styles = css(
   mq({
@@ -111,8 +112,10 @@ const colors = (theme: Theme) =>
 const ChatHome = () => {
   const theme = useTheme();
   const { user, isLoggedIn } = useAuthContext();
-  const chatrooms = useChatroomsStore((state) => state.chatrooms);
   const [openPinModal, setOpenPinModal] = useToggle(false);
+  const [openedPinGroup, setOpenedPinGroup] = useState<PinnedGroup | null>(
+    null,
+  );
   // TODO: add pinned/favourite chatrooms in backend,
   // add table with userId and chatroomIds
   // also add special case value for active chatroom when at ChatHome
@@ -136,6 +139,10 @@ const ChatHome = () => {
     mutationFn: verifiedMutation,
   });
 
+  useEffect(() => {
+    if (!openPinModal) setOpenedPinGroup(null);
+  }, [openPinModal]);
+
   const handleAddPinnedGroupClick = () => {
     mutate({
       fetchUrl: "http://localhost:3000/api/pinned",
@@ -145,7 +152,8 @@ const ChatHome = () => {
     refetch();
   };
 
-  const handleEditBtnClick = () => {
+  const handleEditBtnClick = (pinnedGroup: PinnedGroup) => {
+    setOpenedPinGroup(pinnedGroup);
     setOpenPinModal(true);
   };
 
@@ -161,7 +169,7 @@ const ChatHome = () => {
               <Button
                 className="pinned-chatroom edit-pinned-chatrooms-btn"
                 variant="icon"
-                onClick={handleEditBtnClick}
+                onClick={() => handleEditBtnClick(pinnedGroup)}
               >
                 <Pin className="btn-icon" />
                 <p>Edit pinned chatrooms</p>
@@ -178,10 +186,11 @@ const ChatHome = () => {
           <Plus className="btn-icon" />
           Add new chatroom group
         </Button>
-        {openPinModal && (
+        {openPinModal && openedPinGroup && (
           <PinChatroomsModal
             open={openPinModal}
             onClose={() => setOpenPinModal(false)}
+            pinnedGroup={openedPinGroup}
           />
         )}
 

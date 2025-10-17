@@ -55,30 +55,29 @@ const styles = css({
 });
 
 const colors = (theme: Theme) =>
-  css({
-    ".outletWrapper": {
-      backgroundColor: theme.colors.black,
-    },
-
-    ".headerIconBtn": {
-      color: theme.colors.light_grey,
-      "&:hover": {
-        color: theme.colors.white,
-      },
-    },
-  });
-
-const titleStyles = (theme: Theme) =>
   css(
     mq({
-      fontSize: ["1.25rem", "2.5rem"],
-      fontWeight: "450",
-      padding: 0,
-      color: theme.colors.white,
-      textWrap: "nowrap",
+      ".outletWrapper": {
+        backgroundColor: theme.colors.black,
+      },
 
-      "&:hover": {
+      ".headerIconBtn": {
         color: theme.colors.light_grey,
+        "&:hover": {
+          color: theme.colors.white,
+        },
+      },
+
+      ".title": {
+        fontSize: ["1.25rem", "2.5rem"],
+        fontWeight: "450",
+        padding: 0,
+        color: theme.colors.light_grey,
+        textWrap: "nowrap",
+      },
+
+      ".chatroom-details-btn:hover": {
+        color: theme.colors.white,
       },
     }),
   );
@@ -128,7 +127,7 @@ function ChatLayout() {
               <Button
                 onClick={() => setOpenChatroomDetails(true)}
                 variant="icon"
-                otherStyles={titleStyles(theme)}
+                className="title chatroom-details-btn"
                 aria-label="Open chatroom details"
               >
                 {chatroomTitle}
@@ -143,7 +142,7 @@ function ChatLayout() {
               )}
             </>
           ) : (
-            <h1>Welcome</h1>
+            <h1 className="title">Home</h1>
           )}
           <div className="blankSpace"></div>
           {isLoggedIn ? (
