@@ -26,18 +26,6 @@ const styles = css(
     flexDirection: "column",
     gap: "4px",
 
-    ".pinned-chatroom": {
-      padding: "8px",
-      borderRadius: "8px",
-      width: ["50%", "33%", "25%", "15%", "12.5%"],
-      cursor: "pointer",
-      aspectRatio: 1,
-
-      div: {
-        width: "100%",
-      },
-    },
-
     ul: {
       listStyle: "none",
       padding: 0,
@@ -45,8 +33,10 @@ const styles = css(
     },
 
     ".pinned-group-carousel": {
+      width: "100%",
+      height: "80%",
       display: "flex",
-      gap: "10px",
+      flexDirection: "row",
       overflowX: "auto",
     },
 
@@ -67,7 +57,14 @@ const styles = css(
     },
 
     ".pinned-group": {
+      width: "100%",
       padding: "4px",
+    },
+
+    ".pinned-groups": {
+      display: "flex",
+      flexDirection: "column",
+      width: "100%",
     },
 
     ".title": {
@@ -85,16 +82,6 @@ const styles = css(
 const colors = (theme: Theme) =>
   css({
     backgroundColor: theme.colors.black,
-
-    ".pinned-chatroom": {
-      color: theme.colors.white,
-      border: `1px solid ${theme.colors.dark_grey}`,
-      backgroundColor: theme.colors.grey,
-    },
-
-    ".pinned-chatroom:hover": {
-      borderColor: theme.colors.white,
-    },
 
     ".pinned-group": {
       color: theme.colors.white,
@@ -161,22 +148,24 @@ const ChatHome = () => {
     <>
       <div css={[styles, colors(theme)]}>
         <h2 className="title">Pinned Chatroom Groups</h2>
-        {pinnedGroups?.map((pinnedGroup) => (
-          <div key={pinnedGroup.id} className="pinned-group">
-            <h3 className="pinned-group-name">{pinnedGroup.name}</h3>
-            <div className="pinned-group-carousel">
-              <PinnedChatroomsList pinnedGroup={pinnedGroup} />
-              <Button
-                className="pinned-chatroom edit-pinned-chatrooms-btn"
-                variant="icon"
-                onClick={() => handleEditBtnClick(pinnedGroup)}
-              >
-                <Pin className="btn-icon" />
-                <p>Edit pinned chatrooms</p>
-              </Button>
+        <div className="pinned-groups">
+          {pinnedGroups?.map((pinnedGroup) => (
+            <div key={pinnedGroup.id} className="pinned-group">
+              <h3 className="pinned-group-name">{pinnedGroup.name}</h3>
+              <div className="pinned-group-carousel">
+                <PinnedChatroomsList pinnedGroup={pinnedGroup} />
+                <Button
+                  className="pinned-chatroom edit-pinned-chatrooms-btn"
+                  variant="icon"
+                  onClick={() => handleEditBtnClick(pinnedGroup)}
+                >
+                  <Pin className="btn-icon" />
+                  <p>Edit pinned chatrooms</p>
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         <Button
           className="pinned-chatroom edit-pinned-chatrooms-btn"
@@ -193,21 +182,6 @@ const ChatHome = () => {
             pinnedGroup={openedPinGroup}
           />
         )}
-
-        <li className="pinned-chatroom">
-          <div>
-            <h4>Sample Chatroom</h4>
-            <ul>
-              <li>
-                <p>Message 1</p>
-                <p>Message 2</p>
-                <p>Message 3</p>
-                <p>Message 4</p>
-                <p>Message 5</p>
-              </li>
-            </ul>
-          </div>
-        </li>
       </div>
     </>
   );

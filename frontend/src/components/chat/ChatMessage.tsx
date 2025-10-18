@@ -15,8 +15,6 @@ const styles = css({
   padding: "10px",
   borderRadius: "8px",
   backgroundClip: "padding-box",
-  borderWidth: "1px",
-  borderStyle: "solid",
 
   strong: {
     fontWeight: "500",
@@ -32,7 +30,7 @@ const colors = (theme: Theme) =>
   css({
     backgroundColor: "inherit",
     color: theme.colors.white,
-    borderColor: theme.colors.black,
+    borderColor: "transparent",
 
     "&:hover": {
       backgroundColor: theme.colors.dark_grey,
@@ -57,7 +55,13 @@ const ChatMessage = ({ id, content, sender, timestamp }: ChatMessageProps) => {
         <p>
           <strong>{sender}</strong>
         </p>
-        <span className="timeStamp">{timestamp.toLocaleString()}</span>
+        <span className="timeStamp">
+          {timestamp.toLocaleString("en-US", {
+            dateStyle: "short",
+            timeStyle: "short",
+            hour12: true,
+          })}
+        </span>
       </div>
       <p className="content">{content}</p>
     </div>
