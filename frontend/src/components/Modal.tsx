@@ -1,6 +1,7 @@
 import { css, type SerializedStyles } from "@emotion/react";
 import type React from "react";
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
 export interface ModalProps
   extends React.DialogHTMLAttributes<HTMLDialogElement> {
@@ -38,6 +39,23 @@ const Modal = ({
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      if (!onClose) return;
+      console.log(dialogRef.current?.contains(event.target as Node));
+      if (dialogRef.current?.contains(event.target as Node)) {
+        return;
+      }
+      onClose();
+    };
+
+    document.addEventListener("mousedown", handleClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+    };
+  }, []);
+
+  useEffect(() => {
     if (open) {
       if (variant === "requiredInteraction") {
         dialogRef.current?.showModal();
@@ -57,16 +75,16 @@ const Modal = ({
     }
   };
 
-  return (
+  return createPortal(
     <dialog
       ref={dialogRef}
       onKeyDown={handleESCPress}
-      // @ts-ignore typescript does not detect closedby
-      closedby="none"
       css={[dialogStyles, modalStyles]}
+      onClick={(e) => e.stopPropagation()}
     >
       {children}
-    </dialog>
+    </dialog>,
+    document.body,
   );
 };
 
