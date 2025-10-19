@@ -36,39 +36,43 @@ const ChatMessages = () => {
   const clearMessages = useMessagesStore((state) => state.clearMessages);
   const chatRef = useRef<HTMLDivElement>(null);
   const [getBefore, setBefore] = useState<Date | null>(null);
-  const { data } = useFetchMessages(chatroomId, getBefore, 25);
+  const { data, isSuccess } = useFetchMessages(chatroomId, getBefore, 25);
   const { ws } = useWebSocketContext();
 
   useEffect(() => {
     setBefore(new Date());
     clearMessages();
-    if (!chatRef.current) return;
+  }, [chatroomId]);
+
+  useEffect(() => {
+    if (!isSuccess || !chatRef.current) return;
     chatRef.current.scrollTop = 0;
-  }, [chatroomId, chatRef]);
+  }, [isSuccess, chatRef]);
 
   useEffect(() => {
     if (!data || !getBefore) return;
-
     addPrevMessages(data);
   }, [data, addPrevMessages, getBefore]);
+
+  useEffect(() => {
+    if (!chatroomId || !ws) return;
+    updateLastViewedAt(ws, chatroomId);
+  }, [messages]);
 
   const getHistoricalMessages = () => {
     const el = chatRef.current;
     if (!el || !data) return;
     if (el.scrollHeight + el.scrollTop - el.clientHeight <= 1) {
       console.log("end reached");
+
+      // if fetching more messages returns empty array, return
       if (data.length === 0) return;
 
+      // set getBefore to oldest fetched message's date
       const { createdAt } = data[data.length - 1];
       setBefore(new Date(createdAt));
     }
   };
-
-  useEffect(() => {
-    if (!chatroomId || !ws) return;
-
-    updateLastViewedAt(ws, chatroomId);
-  }, [messages]);
 
   return (
     <div
