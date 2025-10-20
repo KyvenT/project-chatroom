@@ -56,11 +56,13 @@ const ChatMessage = ({ id, content, sender, timestamp }: ChatMessageProps) => {
           <strong>{sender}</strong>
         </p>
         <span className="timeStamp">
-          {timestamp.toLocaleString("en-US", {
-            dateStyle: "short",
-            timeStyle: "short",
-            hour12: true,
-          })}
+          {`${timestamp.getFullYear()}/${timestamp.getMonth() + 1}/${timestamp.getDate()} ${timestamp.toLocaleString(
+            "en-US",
+            {
+              timeStyle: "short",
+              hour12: true,
+            },
+          )}`}
         </span>
       </div>
       <p className="content">{content}</p>
