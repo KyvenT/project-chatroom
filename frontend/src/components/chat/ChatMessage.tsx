@@ -13,7 +13,7 @@ const styles = css({
   width: "100%",
   height: "auto",
   padding: "10px",
-  borderRadius: "8px",
+  borderRadius: "0 8px 8px 0",
   backgroundClip: "padding-box",
 
   strong: {

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { css, useTheme } from "@emotion/react";
 import { mq } from "../../styles/breakpoints";
 import type { Theme } from "@emotion/react";
+import { useNavigate } from "react-router";
 
 interface pinnedChatroomsListProps {
   pinnedGroup: PinnedGroup;
@@ -12,27 +13,32 @@ interface pinnedChatroomsListProps {
 
 const styles = css(
   mq({
+    maxWidth: "90%",
     display: "flex",
-    width: "100%",
-    height: "100%",
+    overflowX: "scroll",
+    gap: "4px",
+    padding: "8px",
 
     ".pinned-chatroom": {
       borderRadius: "8px",
-      width: "25%",
       cursor: "pointer",
-      aspectRatio: 1,
-      height: "100%",
-      overflowY: "auto",
-
-      div: {
-        width: "100%",
-      },
+      display: "flex",
+      flexDirection: "column",
+      flex: "0 0 22vw",
+      aspectRatio: 1.2,
     },
 
-    ".messages": {},
+    ".messages": {
+      flex: 1,
+      width: "22vw",
+      display: "flex",
+      flexDirection: "column-reverse",
+      overflowY: "auto",
+    },
 
     ".chatroom-title-area": {
       padding: "4px 8px",
+      borderRadius: "8px 8px 0 0",
       position: "sticky",
       top: 0,
       width: "100%",
@@ -48,6 +54,12 @@ const styles = css(
 const colors = (theme: Theme) =>
   css(
     mq({
+      scrollbarColor: `transparent transparent`,
+      backgroundColor: theme.colors.black,
+      "&:hover": {
+        scrollbarColor: `${theme.colors.white} transparent`,
+      },
+
       ".pinned-chatroom": {
         color: theme.colors.white,
         border: `1px solid ${theme.colors.dark_grey}`,
@@ -71,6 +83,7 @@ export const PinnedChatroomsList = ({
 }: pinnedChatroomsListProps) => {
   const [getBefore] = useState<Date>(new Date());
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const results = useFetchMessagesMultiple(
     pinnedGroup.pinnedChatrooms.map((chatroom) => chatroom.chatroomId),
@@ -78,10 +91,18 @@ export const PinnedChatroomsList = ({
     5,
   );
 
+  const handleClick = (chatroomId: string) => {
+    navigate(`/chat/${chatroomId}`);
+  };
+
   return (
     <ul css={[styles, colors(theme)]}>
       {pinnedGroup.pinnedChatrooms.map((chatroom, i) => (
-        <li className="pinned-chatroom" key={chatroom.chatroomId}>
+        <li
+          className="pinned-chatroom"
+          key={chatroom.chatroomId}
+          onClick={() => handleClick(chatroom.chatroomId)}
+        >
           <div className="chatroom-title-area">
             <h4 className="chatroom-title">{chatroom.chatroom.title}</h4>
           </div>

@@ -1,6 +1,5 @@
 import type { Theme } from "@emotion/react";
 import { css, useTheme } from "@emotion/react";
-import { useChatroomsStore } from "../../../hooks/useStores";
 import Button from "../../../components/Button";
 import { Pin, Plus } from "lucide-react";
 import {
@@ -16,7 +15,7 @@ import { PinnedChatroomsList } from "../../../components/chat-home/pinnedChatroo
 import useToggle from "../../../hooks/useToggle";
 import { PinChatroomsModal } from "../../../components/chat-home/pinChatroomsModal";
 import type { ConfirmationResponse } from "../../../types/REST-types/Invite";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const styles = css(
   mq({
@@ -25,6 +24,7 @@ const styles = css(
     display: "flex",
     flexDirection: "column",
     gap: "4px",
+    overflowY: "auto",
 
     ul: {
       listStyle: "none",
@@ -36,8 +36,6 @@ const styles = css(
       width: "100%",
       height: "80%",
       display: "flex",
-      flexDirection: "row",
-      overflowX: "auto",
     },
 
     h6: {
@@ -98,7 +96,7 @@ const colors = (theme: Theme) =>
 
 const ChatHome = () => {
   const theme = useTheme();
-  const { user, isLoggedIn } = useAuthContext();
+  const { user } = useAuthContext();
   const [openPinModal, setOpenPinModal] = useToggle(false);
   const [openedPinGroup, setOpenedPinGroup] = useState<PinnedGroup | null>(
     null,
@@ -109,7 +107,7 @@ const ChatHome = () => {
   // to receive messages for all pinned chatrooms
 
   const { data: pinnedGroups, refetch } = useQuery({
-    queryKey: ["pinnedChatrooms", !!isLoggedIn],
+    queryKey: ["pinnedChatrooms", user.userId],
     queryFn: () =>
       verifiedQuery<PinnedGroup[]>({
         fetchUrl: "http://localhost:3000/api/pinned/me",
@@ -118,12 +116,9 @@ const ChatHome = () => {
     staleTime: Infinity,
   });
 
-  const { data, mutate } = useMutation<
-    ConfirmationResponse,
-    Error,
-    MutationArgs
-  >({
+  const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
     mutationFn: verifiedMutation,
+    onSuccess: () => refetch(),
   });
 
   useEffect(() => {
@@ -136,13 +131,12 @@ const ChatHome = () => {
       method: "POST",
       user,
     });
-    refetch();
   };
 
-  const handleEditBtnClick = (pinnedGroup: PinnedGroup) => {
+  const handleEditBtnClick = useCallback((pinnedGroup: PinnedGroup) => {
     setOpenedPinGroup(pinnedGroup);
     setOpenPinModal(true);
-  };
+  }, []);
 
   return (
     <>

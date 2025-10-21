@@ -36,7 +36,7 @@ const ChatMessages = () => {
   const clearMessages = useMessagesStore((state) => state.clearMessages);
   const chatRef = useRef<HTMLDivElement>(null);
   const [getBefore, setBefore] = useState<Date | null>(null);
-  const { data, isSuccess } = useFetchMessages(chatroomId, getBefore, 25);
+  const { data } = useFetchMessages(chatroomId, getBefore, 25);
   const { ws } = useWebSocketContext();
 
   useEffect(() => {
@@ -45,9 +45,9 @@ const ChatMessages = () => {
   }, [chatroomId]);
 
   useEffect(() => {
-    if (!isSuccess || !chatRef.current) return;
-    chatRef.current.scrollTop = 0;
-  }, [isSuccess, chatRef]);
+    if (!chatRef.current) return;
+    requestAnimationFrame(() => (chatRef.current!.scrollTop = 0));
+  }, [chatroomId, chatRef]);
 
   useEffect(() => {
     if (!data || !getBefore) return;
