@@ -5,9 +5,14 @@ import {
   chatroomModifyIndexSchema,
 } from "../validators/chatrooms/chatroomValidation.js";
 import { ChatroomPrivacy } from "@prisma/client";
-import { JoinChatroomPayload, MembersPayload } from "../types/payloads.js";
+import {
+  ChatroomMemberDetailsPayload,
+  JoinChatroomPayload,
+  MembersPayload,
+  UserDetailsPayload,
+} from "../types/payloads.js";
 import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.js";
-import { memberLeaveSchema } from "../validators/members/memberValidation.js";
+import { chatroomMemberSchema } from "../validators/members/memberValidation.js";
 
 export const joinChatroom = async (
   userId: string,
@@ -199,6 +204,15 @@ export const getChatroomMembers = async (
     omit: {
       chatroomId: true,
       joinedAt: true,
+      pinGroupId: true,
+      pinnedIndex: true,
+      chatroomIndex: true,
+      lastViewedAt: true,
+    },
+    orderBy: {
+      member: {
+        username: "asc",
+      },
     },
   });
   const [members] = await Promise.all([membersPromise]);
@@ -208,7 +222,7 @@ export const getChatroomMembers = async (
 
 export const removeMemberFromChatroom = async (
   userId: string,
-  data: z.infer<typeof memberLeaveSchema>
+  data: z.infer<typeof chatroomMemberSchema>
 ) => {
   const { chatroomId, memberId } = data;
 
@@ -248,4 +262,46 @@ export const removeMemberFromChatroom = async (
   });
 
   sendUpdateChatrooms(chatroomId, userId, "LEAVE");
+};
+
+export const getMemberDetails = async (
+  userId: string,
+  data: z.infer<typeof chatroomMemberSchema>
+): Promise<ChatroomMemberDetailsPayload> => {
+  const { chatroomId, memberId } = data;
+
+  const verify = await Prisma.chatroomMember.findUnique({
+    where: {
+      chatroomId_memberId: {
+        memberId: userId,
+        chatroomId,
+      },
+    },
+  });
+
+  if (!verify) {
+    throw new Error(
+      "Not detected as chatroom member to retrieve member details"
+    );
+  }
+
+  const user = await Prisma.chatroomMember.findUnique({
+    where: {
+      chatroomId_memberId: { memberId, chatroomId },
+    },
+    select: {
+      joinedAt: true,
+      member: {
+        omit: {
+          passwordHash: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
 };

@@ -4,8 +4,9 @@ import {
 } from "../validators/chatrooms/chatroomValidation.js";
 import { validate } from "../validators/validate.js";
 import { Request, Response } from "express";
-import { memberLeaveSchema } from "../validators/members/memberValidation.js";
+import { chatroomMemberSchema } from "../validators/members/memberValidation.js";
 import * as membersService from "../services/memberService.js";
+import { ChatroomMemberDetailsPayload } from "../types/payloads.js";
 
 export const reorderMemberChatroom = async (req: Request, res: Response) => {
   const data = validate(
@@ -53,7 +54,11 @@ export const getChatroomMembers = async (req: Request, res: Response) => {
 };
 
 export const removeMemberFromChatroom = async (req: Request, res: Response) => {
-  const data = validate(memberLeaveSchema, { ...req.params, ...req.body }, res);
+  const data = validate(
+    chatroomMemberSchema,
+    { ...req.params, ...req.body },
+    res
+  );
   if (!data) return;
   const userId = req.userId;
 
@@ -86,6 +91,28 @@ export const joinChatroom = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Chatroom joined" });
   } catch (error: any) {
     console.error("Chatroom join error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getMemberDetails = async (req: Request, res: Response) => {
+  const data = validate(chatroomMemberSchema, req.params, res);
+  if (!data) return;
+  const userId = req.userId;
+
+  if (!userId) {
+    res
+      .status(400)
+      .json({ message: "Must be signed in to get member details" });
+    return;
+  }
+
+  try {
+    const memberDetails: ChatroomMemberDetailsPayload =
+      await membersService.getMemberDetails(userId, data);
+    res.status(200).json(memberDetails);
+  } catch (error: any) {
+    console.error("Get chatroom member details error:", error);
     res.status(500).json({ message: error.message });
   }
 };

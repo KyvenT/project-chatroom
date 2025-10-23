@@ -104,3 +104,8 @@ export interface UserDetailsPayload {
   createdAt: Date;
   isGuest: boolean;
 }
+
+export interface ChatroomMemberDetailsPayload {
+  joinedAt: Date;
+  member: UserDetailsPayload;
+}
