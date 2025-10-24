@@ -1,8 +1,11 @@
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
+import { useMembersStore } from "../../hooks/useStores";
+import { useMemo } from "react";
+import { MemberInfo } from "./MemberInfoPopup";
+import Button from "../Button";
 
 interface MemberStatusList {
-  members: string[];
   status: string;
 }
 
@@ -40,16 +43,26 @@ const colors = (theme: Theme) =>
     },
   });
 
-const MemberStatusList = ({ members, status }: MemberStatusList) => {
+const MemberStatusList = ({ status }: MemberStatusList) => {
   const theme = useTheme();
+  const members = useMembersStore((state) => state.members);
+
+  const onlineList = useMemo(() => {
+    return members.filter((member) => member.member.status === status);
+  }, [members]);
+
+  const onMemberClick = () => {};
 
   return (
     <div css={[styles, colors(theme)]}>
       <h3>{status}</h3>
       <ul>
-        {members.map((username) => (
-          <li key={username}>
-            <p>{username}</p>
+        {onlineList.map((member) => (
+          <li key={member.memberId}>
+            <Button variant="icon" className="memberBtn">
+              {member.member.username}
+            </Button>
+            <MemberInfo member={member}></MemberInfo>
           </li>
         ))}
       </ul>
