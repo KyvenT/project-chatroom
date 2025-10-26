@@ -70,12 +70,32 @@ export const PinChatroomsModal = ({
     });
   };
 
+  const pinnedIds = pinnedGroup.pinnedChatrooms.map(
+    (chatroom) => chatroom.chatroomId,
+  );
+  const pinnedChatrooms = chatrooms.filter((chatroom) =>
+    pinnedIds.includes(chatroom.chatroomId),
+  );
+  const unpinnedChatrooms = chatrooms.filter(
+    (chatroom) => !pinnedIds.includes(chatroom.chatroomId),
+  );
+
   return (
     <Modal modalStyles={styles(theme)} open={open} onClose={onClose}>
       <div>
         <h5>Pinned chatrooms</h5>
         <ul>
-          {chatrooms.map((chatroom) => (
+          {pinnedChatrooms.map((chatroom) => (
+            <li key={chatroom.chatroomId}>
+              {chatroom.chatroom.title}
+              <input
+                type="checkbox"
+                defaultChecked={true}
+                onChange={(e) => handleChatroomPin(chatroom.chatroomId, e)}
+              />
+            </li>
+          ))}
+          {unpinnedChatrooms.map((chatroom) => (
             <li key={chatroom.chatroomId}>
               {chatroom.chatroom.title}
               <input

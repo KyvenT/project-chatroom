@@ -15,6 +15,10 @@ export const useWebsocketRouter = () => {
         console.log("Message from server: ", message);
         wsMessageRouter(ws, message, chatroomId, navigate);
       };
+      ws.onclose = () => {
+        console.log("WebSocket connection closed");
+        navigate("/logout");
+      };
     }
   }, [ws, chatroomId, navigate]);
 };

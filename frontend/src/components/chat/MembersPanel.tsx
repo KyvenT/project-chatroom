@@ -1,7 +1,7 @@
 import useAuthContext from "../../hooks/useAuthContext";
 import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
 import { useParams } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import MemberStatusList from "./MemberStatusList";
 import { verifiedQuery } from "../../hooks/useCustomQuery";
 import { css, useTheme } from "@emotion/react";
@@ -10,9 +10,11 @@ import ProfileStatus from "./ProfileStatus";
 import { useQuery } from "@tanstack/react-query";
 import { useMembersStore } from "../../hooks/useStores";
 import { mq } from "../../styles/breakpoints";
+import { MemberInfo } from "./MemberInfoPopup";
 
 const styles = css(
   mq({
+    position: "relative",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -42,6 +44,9 @@ const MembersPanel = () => {
   const theme = useTheme();
   const members = useMembersStore((state) => state.members);
   const setMembers = useMembersStore((state) => state.setMembers);
+  const [clickedMember, setClickedMember] = useState<ChatroomMember | null>(
+    null,
+  );
 
   const { data } = useQuery<ChatroomMember[]>({
     queryKey: [user.userId, chatroomId],
@@ -62,15 +67,22 @@ const MembersPanel = () => {
   const status = members.find((member) => member.memberId === user.userId)
     ?.member.status;
 
+  const onMemberClick = (member: ChatroomMember) => {
+    setClickedMember(member);
+  };
+
   return (
-    <div css={[styles, colors(theme)]}>
-      <div css={membersListStyles}>
-        <MemberStatusList status="ONLINE" />
-        <MemberStatusList status="AWAY" />
-        <MemberStatusList status="OFFLINE" />
+    <>
+      <div css={[styles, colors(theme)]}>
+        <div css={membersListStyles}>
+          <MemberStatusList status="ONLINE" onMemberClick={onMemberClick} />
+          <MemberStatusList status="AWAY" onMemberClick={onMemberClick} />
+          <MemberStatusList status="OFFLINE" onMemberClick={onMemberClick} />
+        </div>
+        <ProfileStatus status={status || "OFFLINE"} />
+        {clickedMember && <MemberInfo member={clickedMember} />}
       </div>
-      <ProfileStatus status={status || "OFFLINE"} />
-    </div>
+    </>
   );
 };
 

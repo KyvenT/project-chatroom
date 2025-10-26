@@ -2,11 +2,12 @@ import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import { useMembersStore } from "../../hooks/useStores";
 import { useMemo } from "react";
-import { MemberInfo } from "./MemberInfoPopup";
 import Button from "../Button";
+import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
 
 interface MemberStatusList {
   status: string;
+  onMemberClick: (member: ChatroomMember) => void;
 }
 
 const styles = css({
@@ -43,26 +44,27 @@ const colors = (theme: Theme) =>
     },
   });
 
-const MemberStatusList = ({ status }: MemberStatusList) => {
+const MemberStatusList = ({ status, onMemberClick }: MemberStatusList) => {
   const theme = useTheme();
   const members = useMembersStore((state) => state.members);
 
-  const onlineList = useMemo(() => {
+  const statusMembersList = useMemo(() => {
     return members.filter((member) => member.member.status === status);
   }, [members]);
-
-  const onMemberClick = () => {};
 
   return (
     <div css={[styles, colors(theme)]}>
       <h3>{status}</h3>
       <ul>
-        {onlineList.map((member) => (
+        {statusMembersList.map((member) => (
           <li key={member.memberId}>
-            <Button variant="icon" className="memberBtn">
+            <Button
+              variant="icon"
+              className="memberBtn"
+              onClick={() => onMemberClick(member)}
+            >
               {member.member.username}
             </Button>
-            <MemberInfo member={member}></MemberInfo>
           </li>
         ))}
       </ul>
