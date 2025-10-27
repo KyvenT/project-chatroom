@@ -1,8 +1,7 @@
 import useAuthContext from "../../hooks/useAuthContext";
 import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
 import { useParams } from "react-router";
-import { useEffect, useState } from "react";
-import MemberStatusList from "./MemberStatusList";
+import { useEffect, useMemo, useState } from "react";
 import { verifiedQuery } from "../../hooks/useCustomQuery";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
@@ -11,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMembersStore } from "../../hooks/useStores";
 import { mq } from "../../styles/breakpoints";
 import { MemberInfo } from "./MemberInfoPopup";
+import Button from "../Button";
 
 const styles = css(
   mq({
@@ -21,6 +21,23 @@ const styles = css(
     width: ["100%", "100%", "25%", "15%"],
     fontSize: ["2rem", "1rem"],
     padding: "4px 2px",
+
+    h3: {
+      fontWeight: 500,
+      fontSize: ".66rem",
+      userSelect: "none",
+    },
+
+    ul: {
+      padding: 0,
+    },
+
+    li: {
+      listStyle: "none",
+      borderRadius: "2px",
+      margin: "4px",
+      padding: "2px",
+    },
   }),
 );
 
@@ -29,6 +46,18 @@ const colors = (theme: Theme) =>
     backgroundColor: theme.colors.black,
     borderLeft: `1px solid ${theme.colors.dark_grey}`,
     borderBottom: `1px solid ${theme.colors.dark_grey}`,
+
+    h3: {
+      color: theme.colors.grey,
+    },
+
+    li: {
+      color: theme.colors.white,
+    },
+
+    "li:hover": {
+      backgroundColor: theme.colors.dark_grey,
+    },
   });
 
 const membersListStyles = css({
@@ -64,20 +93,52 @@ const MembersPanel = () => {
     setMembers(data);
   }, [data]);
 
-  const status = members.find((member) => member.memberId === user.userId)
-    ?.member.status;
-
   const onMemberClick = (member: ChatroomMember) => {
     setClickedMember(member);
   };
+
+  const statusLists = useMemo(() => {
+    const onlineList = members.filter(
+      (member) => member.member.status === "ONLINE",
+    );
+    const awayList = members.filter(
+      (member) => member.member.status === "AWAY",
+    );
+    const offlineList = members.filter(
+      (member) => member.member.status === "OFFLINE",
+    );
+
+    return [onlineList, awayList, offlineList];
+  }, [members]);
+  const status = members.find((member) => member.memberId === user.userId)
+    ?.member.status;
 
   return (
     <>
       <div css={[styles, colors(theme)]}>
         <div css={membersListStyles}>
-          <MemberStatusList status="ONLINE" onMemberClick={onMemberClick} />
-          <MemberStatusList status="AWAY" onMemberClick={onMemberClick} />
-          <MemberStatusList status="OFFLINE" onMemberClick={onMemberClick} />
+          {statusLists.map((statusList) => (
+            <>
+              {statusList.length > 0 && (
+                <div>
+                  <h3>{statusList[0].member.status}</h3>
+                  <ul>
+                    {statusList.map((member) => (
+                      <li key={member.memberId}>
+                        <Button
+                          variant="icon"
+                          className="memberBtn"
+                          onClick={() => onMemberClick(member)}
+                        >
+                          {member.member.username}
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          ))}
         </div>
         <ProfileStatus status={status || "OFFLINE"} />
         {clickedMember && <MemberInfo member={clickedMember} />}
