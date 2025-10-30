@@ -79,7 +79,7 @@ const colors = (theme: Theme) =>
       ".chatroom-details-btn:hover": {
         color: theme.colors.white,
       },
-    }),
+    })
   );
 
 export type OutletContextType = {
@@ -153,7 +153,7 @@ function ChatLayout() {
                 buttonVariant="icon"
               >
                 <h3>{user.username}</h3>
-                <Link to="">Account Settings</Link>
+                <Link to="/account">Account</Link>
                 <Button onClick={() => navigate("/logout")}>Log Out</Button>
               </DropdownButton>
               {chatroomId && (

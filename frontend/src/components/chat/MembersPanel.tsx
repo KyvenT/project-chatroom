@@ -38,7 +38,7 @@ const styles = css(
       margin: "4px",
       padding: "2px",
     },
-  }),
+  })
 );
 
 const colors = (theme: Theme) =>
@@ -74,7 +74,7 @@ const MembersPanel = () => {
   const members = useMembersStore((state) => state.members);
   const setMembers = useMembersStore((state) => state.setMembers);
   const [clickedMember, setClickedMember] = useState<ChatroomMember | null>(
-    null,
+    null
   );
 
   const { data } = useQuery<ChatroomMember[]>({
@@ -85,7 +85,9 @@ const MembersPanel = () => {
         user,
       }),
     enabled: !!user.userId,
-    staleTime: Infinity,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   useEffect(() => {
@@ -97,21 +99,21 @@ const MembersPanel = () => {
     setClickedMember(member);
   };
 
-  const statusLists = useMemo(() => {
+  const { statusLists, status } = useMemo(() => {
     const onlineList = members.filter(
-      (member) => member.member.status === "ONLINE",
+      (member) => member.member.status === "ONLINE"
     );
     const awayList = members.filter(
-      (member) => member.member.status === "AWAY",
+      (member) => member.member.status === "AWAY"
     );
     const offlineList = members.filter(
-      (member) => member.member.status === "OFFLINE",
+      (member) => member.member.status === "OFFLINE"
     );
+    const status = members.find((member) => member.memberId === user.userId)
+      ?.member.status;
 
-    return [onlineList, awayList, offlineList];
+    return { statusLists: [onlineList, awayList, offlineList], status };
   }, [members]);
-  const status = members.find((member) => member.memberId === user.userId)
-    ?.member.status;
 
   return (
     <>

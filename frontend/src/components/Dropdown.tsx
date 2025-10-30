@@ -14,6 +14,7 @@ const defaultDropdownStyles = css({
   border: "1px solid black",
   padding: "10px",
   borderRadius: "5px",
+  zIndex: "2",
 });
 
 const colors = (theme: Theme) =>
