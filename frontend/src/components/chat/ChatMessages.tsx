@@ -31,28 +31,22 @@ const ChatMessages = () => {
   const { chatroomId } = useParams();
   const messages = useMessagesStore((state) => state.messages);
   const addPrevMessages = useMessagesStore(
-    (state) => state.addPreviousMessages,
+    (state) => state.addPreviousMessages
   );
   const clearMessages = useMessagesStore((state) => state.clearMessages);
   const chatRef = useRef<HTMLDivElement>(null);
-  const [getBefore, setBefore] = useState<Date | null>(null);
+  const [getBefore, setBefore] = useState<Date>(new Date());
   const { data } = useFetchMessages(chatroomId, getBefore, 25);
   const { ws } = useWebSocketContext();
 
   useEffect(() => {
-    setBefore(new Date());
     clearMessages();
   }, [chatroomId]);
 
   useEffect(() => {
-    if (!chatRef.current) return;
-    requestAnimationFrame(() => (chatRef.current!.scrollTop = 0));
-  }, [chatroomId, chatRef]);
-
-  useEffect(() => {
-    if (!data || !getBefore) return;
+    if (!data) return;
     addPrevMessages(data);
-  }, [data, addPrevMessages, getBefore]);
+  }, [data, addPrevMessages]);
 
   useEffect(() => {
     if (!chatroomId || !ws) return;

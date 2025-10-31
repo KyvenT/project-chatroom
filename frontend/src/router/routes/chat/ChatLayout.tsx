@@ -138,6 +138,7 @@ function ChatLayout() {
                   onClose={() => setOpenChatroomDetails(false)}
                   chatroomId={chatroomId}
                   user={user}
+                  key={chatroomId}
                 />
               )}
             </>

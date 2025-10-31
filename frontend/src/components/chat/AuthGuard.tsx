@@ -5,7 +5,7 @@ import useToggle from "../../hooks/useToggle";
 import useAuthContext from "../../hooks/useAuthContext";
 import { ArrowLeftIcon } from "lucide-react";
 import type { UserAuth } from "../../types/REST-types/User";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import useWebSocketContext from "../../hooks/useWebSocketContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
@@ -108,7 +108,6 @@ const AuthGuard = () => {
   const { ws, setWs } = useWebSocketContext();
   const { chatroomId } = useParams();
   const guestNameRef = useRef<HTMLInputElement>(null);
-  const [chatroomJoinable, setChatroomJoinable] = useState<boolean>(false);
   const theme = useTheme();
 
   const { data: privacyData } = useQuery<privacyDataType>({
@@ -130,10 +129,6 @@ const AuthGuard = () => {
     },
   });
 
-  useEffect(() => {
-    setChatroomJoinable(privacyData?.privacy === "PUBLIC");
-  }, [privacyData]);
-
   const handleGuestCreation = async (event: React.FormEvent) => {
     event.preventDefault();
     if (privacyData?.privacy !== "PUBLIC") return;
@@ -146,6 +141,8 @@ const AuthGuard = () => {
       reqBody: { username, chatroomId },
     });
   };
+
+  const chatroomJoinable: boolean = privacyData?.privacy === "PUBLIC";
 
   return (
     <Modal

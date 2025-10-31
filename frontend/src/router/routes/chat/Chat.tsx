@@ -60,7 +60,7 @@ function Chat() {
     <div css={[chatStyles, colors(theme)]}>
       {chatroomId && (
         <div className="chatContainer">
-          <ChatMessages />
+          <ChatMessages key={chatroomId} />
           {typingUsers.length > 0 && (
             <>
               {typingUsers.map((typingUser) => (

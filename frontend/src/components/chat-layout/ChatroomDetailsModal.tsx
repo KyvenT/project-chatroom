@@ -14,7 +14,6 @@ import {
   verifiedMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
-import { useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { SquarePen } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
@@ -146,7 +145,7 @@ export const ChatroomDetailsModal = ({
   const [enableTitleEdit, setEnableTitleEdit] = useToggle(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useToggle(false);
   const { isLoggedIn } = useAuthContext();
-  const { data: chatroomDetails } = useQuery<ChatroomDetails>({
+  const { data: chatroomDetails, refetch } = useQuery<ChatroomDetails>({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
       verifiedQuery({
@@ -157,10 +156,9 @@ export const ChatroomDetailsModal = ({
     staleTime: 0,
   });
 
-  const { register, handleSubmit, reset, setFocus } =
-    useForm<ChatroomFormInput>({
-      defaultValues: { privacy: chatroomDetails?.privacy },
-    });
+  const { register, handleSubmit, setFocus } = useForm<ChatroomFormInput>({
+    defaultValues: { privacy: chatroomDetails?.privacy },
+  });
 
   const chatroomMutation = useMutation<
     ConfirmationResponse,
@@ -169,10 +167,6 @@ export const ChatroomDetailsModal = ({
   >({
     mutationFn: verifiedMutation<ConfirmationResponse>,
   });
-
-  useEffect(() => {
-    reset({ title: "", privacy: chatroomDetails?.privacy });
-  }, [chatroomDetails, reset]);
 
   const handleLeave = () => {
     chatroomMutation.mutate({
@@ -211,6 +205,7 @@ export const ChatroomDetailsModal = ({
         privacy,
       },
     });
+    refetch();
   };
 
   const isOwner = chatroomDetails?.ownerId === user.userId;
