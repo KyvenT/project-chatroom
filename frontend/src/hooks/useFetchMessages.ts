@@ -35,11 +35,11 @@ export const useFetchMessagesMultiple = (
   getBefore: Date | null,
   limit: number,
 ) => {
-  const { user, isLoggedIn } = useAuthContext();
+  const { user } = useAuthContext();
 
   const data = useQueries<MessageQueries>({
     queries: chatroomIds.map((chatroomId) => ({
-      queryKey: [chatroomIds.length, isLoggedIn, getBefore?.toISOString()],
+      queryKey: [chatroomId, user.userId, getBefore?.toISOString()],
       queryFn: () =>
         verifiedQuery<Message[]>({
           fetchUrl: `http://localhost:3000/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,

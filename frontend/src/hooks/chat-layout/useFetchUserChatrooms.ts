@@ -10,12 +10,13 @@ export const useFetchUserChatrooms = () => {
   const { isLoggedIn, user } = useAuthContext();
 
   const { data: chatroomsData } = useQuery<Chatroom[], Error>({
-    queryKey: ["chatrooms", !!isLoggedIn],
+    queryKey: ["chatrooms", user.userId],
     queryFn: () =>
       verifiedQuery<Chatroom[]>({
         fetchUrl: "http://localhost:3000/api/chatrooms/me",
         user,
       }),
+    enabled: !!isLoggedIn,
     staleTime: Infinity,
   });
 

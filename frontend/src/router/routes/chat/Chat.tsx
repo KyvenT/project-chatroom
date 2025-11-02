@@ -2,7 +2,7 @@ import { css, useTheme, type Theme } from "@emotion/react";
 import ChatMessages from "../../../components/chat/ChatMessages";
 import MessageInput from "../../../components/chat/MessageInput";
 import { useOutletContext, useParams } from "react-router";
-import MemberList from "../../../components/chat/MemberList";
+import MembersPanel from "../../../components/chat/MembersPanel";
 import useAuthContext from "../../../hooks/useAuthContext";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useEffect, useRef } from "react";
@@ -60,7 +60,7 @@ function Chat() {
     <div css={[chatStyles, colors(theme)]}>
       {chatroomId && (
         <div className="chatContainer">
-          <ChatMessages />
+          <ChatMessages key={chatroomId} />
           {typingUsers.length > 0 && (
             <>
               {typingUsers.map((typingUser) => (
@@ -75,7 +75,7 @@ function Chat() {
           />
         </div>
       )}
-      {chatroomId && showMembersList && <MemberList />}
+      {chatroomId && showMembersList && <MembersPanel />}
     </div>
   );
 }

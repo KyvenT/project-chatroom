@@ -18,6 +18,9 @@ import { useChatroomTitle } from "../../../hooks/chat-layout/useChatroomTitle";
 import { useFetchUserChatrooms } from "../../../hooks/chat-layout/useFetchUserChatrooms";
 import { useWebsocketRouter } from "../../../hooks/chat-layout/useWebsocketRouter";
 import { useUpdateActiveChatroom } from "../../../hooks/chat-layout/useUpdateActiveChatroom";
+import { verifiedQuery } from "../../../hooks/useCustomQuery";
+import { useQuery } from "@tanstack/react-query";
+import type { ChatroomDetails } from "../../../types/REST-types/Chatroom";
 
 const styles = css({
   height: "100%",
@@ -55,32 +58,31 @@ const styles = css({
 });
 
 const colors = (theme: Theme) =>
-  css({
-    ".outletWrapper": {
-      backgroundColor: theme.colors.black,
-    },
-
-    ".headerIconBtn": {
-      color: theme.colors.light_grey,
-      "&:hover": {
-        color: theme.colors.white,
-      },
-    },
-  });
-
-const titleStyles = (theme: Theme) =>
   css(
     mq({
-      fontSize: ["1.25rem", "2.5rem"],
-      fontWeight: "450",
-      padding: 0,
-      color: theme.colors.white,
-      textWrap: "nowrap",
-
-      "&:hover": {
-        color: theme.colors.light_grey,
+      ".outletWrapper": {
+        backgroundColor: theme.colors.black,
       },
-    }),
+
+      ".headerIconBtn": {
+        color: theme.colors.light_grey,
+        "&:hover": {
+          color: theme.colors.white,
+        },
+      },
+
+      ".title": {
+        fontSize: ["1.25rem", "2.5rem"],
+        fontWeight: "450",
+        padding: 0,
+        color: theme.colors.light_grey,
+        textWrap: "nowrap",
+      },
+
+      ".chatroom-details-btn:hover": {
+        color: theme.colors.white,
+      },
+    })
   );
 
 export type OutletContextType = {
@@ -100,6 +102,17 @@ function ChatLayout() {
   useFetchUserChatrooms();
   useWebsocketRouter();
   useUpdateActiveChatroom();
+
+  const { data: chatroomData, refetch } = useQuery<ChatroomDetails>({
+    queryKey: ["active-chatroom", chatroomId],
+    queryFn: () =>
+      verifiedQuery({
+        fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
+        user,
+      }),
+    enabled: !!chatroomId,
+    staleTime: 0,
+  });
 
   const outletContext = {
     showMembersList,
@@ -128,22 +141,24 @@ function ChatLayout() {
               <Button
                 onClick={() => setOpenChatroomDetails(true)}
                 variant="icon"
-                otherStyles={titleStyles(theme)}
+                className="title chatroom-details-btn"
                 aria-label="Open chatroom details"
               >
                 {chatroomTitle}
               </Button>
-              {openChatroomDetails && (
+              {openChatroomDetails && chatroomData && (
                 <ChatroomDetailsModal
                   open={openChatroomDetails}
                   onClose={() => setOpenChatroomDetails(false)}
                   chatroomId={chatroomId}
                   user={user}
+                  key={chatroomId}
+                  chatroomData={chatroomData}
                 />
               )}
             </>
           ) : (
-            <h1>Welcome</h1>
+            <h1 className="title">Home</h1>
           )}
           <div className="blankSpace"></div>
           {isLoggedIn ? (
@@ -154,7 +169,7 @@ function ChatLayout() {
                 buttonVariant="icon"
               >
                 <h3>{user.username}</h3>
-                <Link to="">Account Settings</Link>
+                <Link to="/account">Account</Link>
                 <Button onClick={() => navigate("/logout")}>Log Out</Button>
               </DropdownButton>
               {chatroomId && (

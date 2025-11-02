@@ -3,7 +3,7 @@ import SidebarChatroomButton from "./SidebarChatroomButton";
 import NewChatButton from "./NewChatButton";
 import { Link, useParams } from "react-router";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
-import { HomeIcon } from "lucide-react";
+import { HomeIcon, Settings } from "lucide-react";
 import { iconBtnStyles } from "../Button";
 import { mq } from "../../styles/breakpoints";
 
@@ -47,7 +47,7 @@ const sidebarStyles = css(
     ".homeBtn": {
       padding: "2px",
     },
-  }),
+  })
 );
 
 const colors = (theme: Theme) =>
@@ -79,6 +79,9 @@ const Sidebar = ({ chatrooms }: SidebarProps) => {
       <div className="topSection">
         <Link to="/chat" className="homeBtn" css={iconBtnStyles(theme)}>
           <HomeIcon className="homeIcon" size="2.25rem" />
+        </Link>
+        <Link to="/settings" css={iconBtnStyles(theme)}>
+          <Settings size="2.25rem" />
         </Link>
       </div>
       <div className="chatsHeader">

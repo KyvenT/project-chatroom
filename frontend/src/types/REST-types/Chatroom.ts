@@ -1,15 +1,20 @@
 export interface Chatroom {
   chatroomId: string;
+  lastViewedAt: Date;
+  unreadMessages: number;
+  chatroomIndex: number;
   chatroom: {
     title: string;
     privacy: ChatroomPrivacy;
     ownerId: string;
   };
-  lastViewedAt: Date;
-  unreadMessages: number;
 }
 
-export type ChatroomPrivacy = "INVITE_ONLY" | "INVITE_PLUS" | "JOINABLE" | "PUBLIC"
+export type ChatroomPrivacy =
+  | "INVITE_ONLY"
+  | "INVITE_PLUS"
+  | "JOINABLE"
+  | "PUBLIC";
 
 export interface JoinChatroom {
   joinedAt: Date;
@@ -26,5 +31,20 @@ export interface ChatroomDetails {
   createdAt: Date;
   owner: {
     username: string;
+  };
+}
+
+export interface PinnedGroup {
+  id: string;
+  userId: string;
+  name: string;
+  createdAt: Date;
+  pinnedChatrooms: PinnedChatroom[];
+}
+
+export interface PinnedChatroom {
+  chatroomId: string;
+  chatroom: {
+    title: string;
   };
 }
