@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
-import LandingPage from "./routes/Landing";
+import LandingPage from "./routes/landing/Landing";
 import AuthLayout from "./routes/auth/AuthLayout";
 import { useMemo } from "react";
 import ErrorPage from "./ErrorPage";
