@@ -73,9 +73,10 @@ const MembersPanel = () => {
   const theme = useTheme();
   const members = useMembersStore((state) => state.members);
   const setMembers = useMembersStore((state) => state.setMembers);
-  const [clickedMember, setClickedMember] = useState<ChatroomMember | null>(
-    null
-  );
+  const [clickedMember, setClickedMember] = useState<{
+    member: ChatroomMember;
+    button: HTMLButtonElement;
+  } | null>(null);
 
   const { data } = useQuery<ChatroomMember[]>({
     queryKey: [user.userId, chatroomId],
@@ -95,8 +96,11 @@ const MembersPanel = () => {
     setMembers(data);
   }, [data]);
 
-  const onMemberClick = (member: ChatroomMember) => {
-    setClickedMember(member);
+  const onMemberClick = (
+    member: ChatroomMember,
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    setClickedMember({ member, button: event.target as HTMLButtonElement });
   };
 
   const { statusLists, status } = useMemo(() => {
@@ -130,7 +134,7 @@ const MembersPanel = () => {
                         <Button
                           variant="icon"
                           className="memberBtn"
-                          onClick={() => onMemberClick(member)}
+                          onClick={(event) => onMemberClick(member, event)}
                         >
                           {member.member.username}
                         </Button>
@@ -143,8 +147,8 @@ const MembersPanel = () => {
           ))}
         </div>
         <ProfileStatus status={status || "OFFLINE"} />
-        {clickedMember && <MemberInfo member={clickedMember} />}
       </div>
+      {clickedMember && <MemberInfo clickedMember={clickedMember} />}
     </>
   );
 };

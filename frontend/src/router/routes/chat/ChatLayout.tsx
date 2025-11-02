@@ -18,6 +18,9 @@ import { useChatroomTitle } from "../../../hooks/chat-layout/useChatroomTitle";
 import { useFetchUserChatrooms } from "../../../hooks/chat-layout/useFetchUserChatrooms";
 import { useWebsocketRouter } from "../../../hooks/chat-layout/useWebsocketRouter";
 import { useUpdateActiveChatroom } from "../../../hooks/chat-layout/useUpdateActiveChatroom";
+import { verifiedQuery } from "../../../hooks/useCustomQuery";
+import { useQuery } from "@tanstack/react-query";
+import type { ChatroomDetails } from "../../../types/REST-types/Chatroom";
 
 const styles = css({
   height: "100%",
@@ -100,6 +103,17 @@ function ChatLayout() {
   useWebsocketRouter();
   useUpdateActiveChatroom();
 
+  const { data: chatroomData, refetch } = useQuery<ChatroomDetails>({
+    queryKey: ["active-chatroom", chatroomId],
+    queryFn: () =>
+      verifiedQuery({
+        fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
+        user,
+      }),
+    enabled: !!chatroomId,
+    staleTime: 0,
+  });
+
   const outletContext = {
     showMembersList,
   };
@@ -132,13 +146,14 @@ function ChatLayout() {
               >
                 {chatroomTitle}
               </Button>
-              {openChatroomDetails && (
+              {openChatroomDetails && chatroomData && (
                 <ChatroomDetailsModal
                   open={openChatroomDetails}
                   onClose={() => setOpenChatroomDetails(false)}
                   chatroomId={chatroomId}
                   user={user}
                   key={chatroomId}
+                  chatroomData={chatroomData}
                 />
               )}
             </>

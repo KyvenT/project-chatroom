@@ -128,6 +128,7 @@ interface ChatroomDetailsProps extends ModalProps {
   user: UserAuth;
   chatroomId: string;
   onClose: () => void;
+  chatroomData: ChatroomDetails;
 }
 
 interface ChatroomFormInput {
@@ -140,24 +141,15 @@ export const ChatroomDetailsModal = ({
   onClose,
   chatroomId,
   user,
+  chatroomData,
 }: ChatroomDetailsProps) => {
   const theme = useTheme();
   const [enableTitleEdit, setEnableTitleEdit] = useToggle(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useToggle(false);
   const { isLoggedIn } = useAuthContext();
-  const { data: chatroomDetails, refetch } = useQuery<ChatroomDetails>({
-    queryKey: ["active-chatroom", chatroomId],
-    queryFn: () =>
-      verifiedQuery({
-        fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
-        user,
-      }),
-    enabled: !!chatroomId,
-    staleTime: 0,
-  });
 
   const { register, handleSubmit, setFocus } = useForm<ChatroomFormInput>({
-    defaultValues: { privacy: chatroomDetails?.privacy },
+    defaultValues: { privacy: chatroomData?.privacy },
   });
 
   const chatroomMutation = useMutation<
@@ -181,7 +173,7 @@ export const ChatroomDetailsModal = ({
   };
 
   const handleDelete = () => {
-    if (chatroomDetails?.ownerId !== user.userId) return;
+    if (chatroomData?.ownerId !== user.userId) return;
     chatroomMutation.mutate({
       fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
       method: "DELETE",
@@ -205,14 +197,13 @@ export const ChatroomDetailsModal = ({
         privacy,
       },
     });
-    refetch();
   };
 
-  const isOwner = chatroomDetails?.ownerId === user.userId;
+  const isOwner = chatroomData?.ownerId === user.userId;
 
   return (
     <>
-      {chatroomDetails && (
+      {chatroomData && (
         <Modal
           open={open}
           onClose={onClose}
@@ -225,11 +216,11 @@ export const ChatroomDetailsModal = ({
                   <input
                     {...register("title")}
                     type="text"
-                    placeholder={chatroomDetails.title}
+                    placeholder={chatroomData.title}
                     maxLength={20}
                   ></input>
                 ) : (
-                  <h3>{chatroomDetails.title}</h3>
+                  <h3>{chatroomData.title}</h3>
                 )}
                 {isOwner && (
                   <Button
@@ -245,13 +236,11 @@ export const ChatroomDetailsModal = ({
                 )}
               </div>
               <h5>
-                Owned by: <span>{chatroomDetails.owner?.username}</span>
+                Owned by: <span>{chatroomData.owner?.username}</span>
               </h5>
               <p>
                 Created at:
-                <span>
-                  {new Date(chatroomDetails.createdAt).toLocaleString()}
-                </span>
+                <span>{new Date(chatroomData.createdAt).toLocaleString()}</span>
               </p>
             </div>
 
@@ -289,7 +278,7 @@ export const ChatroomDetailsModal = ({
                 >
                   <h3>
                     Are you sure you want to delete "
-                    <span>{chatroomDetails.title}</span>"?
+                    <span>{chatroomData.title}</span>"?
                   </h3>
                   <br />
                   <div className="actionBtns">

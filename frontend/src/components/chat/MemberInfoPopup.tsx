@@ -11,24 +11,30 @@ import { mq } from "../../styles/breakpoints";
 import type { Theme } from "@emotion/react";
 
 export type MemberInfoProps = {
-  member: ChatroomMember;
+  clickedMember: {
+    member: ChatroomMember;
+    button: HTMLButtonElement;
+  };
 };
 
-const styles = (theme: Theme) =>
+const styles = (theme: Theme, button: HTMLButtonElement) =>
   css(
     mq({
       position: "absolute",
-      right: 0,
+      top: button.getBoundingClientRect().top,
+      left: button.getBoundingClientRect().left,
       transform: "translate(-100%, 0)",
       border: `1px solid ${theme.colors.white}`,
       borderRadius: "6px",
       padding: "8px",
       color: theme.colors.white,
       backgroundColor: theme.colors.grey,
-    }),
+    })
   );
 
-export const MemberInfo = ({ member }: MemberInfoProps) => {
+export const MemberInfo = ({
+  clickedMember: { member, button },
+}: MemberInfoProps) => {
   const { chatroomId } = useParams();
   const theme = useTheme();
   const { user } = useAuthContext();
@@ -42,7 +48,7 @@ export const MemberInfo = ({ member }: MemberInfoProps) => {
   });
 
   return (
-    <div css={styles(theme)}>
+    <div css={styles(theme, button)}>
       <h3>{member.member.username}</h3>
       <p>{member.member.status}</p>
       <p>{data && new Date(data.joinedAt).toISOString()}</p>
