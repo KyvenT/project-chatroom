@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   ChatroomMember,
   ChatroomMemberDetails,
@@ -11,12 +11,18 @@ import { mq } from "../../styles/breakpoints";
 import type { Theme } from "@emotion/react";
 import { useMembersStore } from "../../hooks/useStores";
 import Button from "../Button";
+import type { ConfirmationResponse } from "../../types/REST-types/Invite";
+import {
+  verifiedMutation,
+  type MutationArgs,
+} from "../../hooks/useCustomMutation";
 
 export type MemberInfoProps = {
   clickedMember: {
     member: ChatroomMember;
     button: HTMLButtonElement;
   };
+  onClose: () => void;
 };
 
 const styles = (theme: Theme, button: HTMLButtonElement) =>
@@ -36,11 +42,17 @@ const styles = (theme: Theme, button: HTMLButtonElement) =>
 
 export const MemberInfo = ({
   clickedMember: { member, button },
+  onClose,
 }: MemberInfoProps) => {
   const { chatroomId } = useParams();
   const theme = useTheme();
   const members = useMembersStore((state) => state.members);
   const { user } = useAuthContext();
+
+  const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
+    mutationFn: verifiedMutation,
+  });
+
   const { data } = useQuery<ChatroomMemberDetails>({
     queryKey: [member.memberId],
     queryFn: () =>
@@ -53,12 +65,28 @@ export const MemberInfo = ({
   const userRole = members.find((mem) => mem.memberId === user.userId)?.role;
   const canKick = userRole !== "MEMBER" && userRole !== member.role;
 
+  const handleKick = () => {
+    mutation.mutate({
+      fetchUrl: `http://localhost:3000/api/members/${chatroomId}`,
+      method: "DELETE",
+      user,
+      reqBody: {
+        memberId: member.memberId,
+      },
+    });
+    onClose();
+  };
+
   return (
     <div css={styles(theme, button)}>
       <h3>{member.member.username}</h3>
       <p>{member.member.status}</p>
       <p>{data && new Date(data.joinedAt).toISOString()}</p>
-      {canKick && <Button>Kick</Button>}
+      {canKick && (
+        <Button onClick={handleKick} disabled={!canKick}>
+          Kick
+        </Button>
+      )}
     </div>
   );
 };

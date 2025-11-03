@@ -246,7 +246,11 @@ export const removeMemberFromChatroom = async (
     throw new Error("Chatroom not found");
   }
 
-  if (memberId !== userId && userId !== verify.chatroom.ownerId) {
+  if (
+    verify.role !== "OWNER" &&
+    memberId !== userId &&
+    userId !== verify.chatroom.ownerId
+  ) {
     throw new Error(
       "Not detected as the user that requested to leave, or is not owner of chatroom"
     );
@@ -255,13 +259,13 @@ export const removeMemberFromChatroom = async (
   await Prisma.chatroomMember.delete({
     where: {
       chatroomId_memberId: {
-        memberId: userId,
+        memberId,
         chatroomId,
       },
     },
   });
 
-  sendUpdateChatrooms(chatroomId, userId, "LEAVE");
+  sendUpdateChatrooms(chatroomId, memberId, "LEAVE");
 };
 
 export const getMemberDetails = async (

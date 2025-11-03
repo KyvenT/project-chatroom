@@ -148,7 +148,12 @@ const MembersPanel = () => {
         </div>
         <ProfileStatus status={status || "OFFLINE"} />
       </div>
-      {clickedMember && <MemberInfo clickedMember={clickedMember} />}
+      {clickedMember && (
+        <MemberInfo
+          clickedMember={clickedMember}
+          onClose={() => setClickedMember(null)}
+        />
+      )}
     </>
   );
 };
