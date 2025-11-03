@@ -1,11 +1,14 @@
 import type { Status } from "../../components/chat/ProfileStatus";
 
+export type ChatroomRoles = "OWNER" | "ADMIN" | "MEMBER";
+
 export interface ChatroomMember {
   member: {
     username: string;
     status: Status;
   };
   memberId: string;
+  role: ChatroomRoles;
 }
 
 export interface UserDetails {

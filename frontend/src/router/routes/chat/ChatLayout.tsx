@@ -103,7 +103,7 @@ function ChatLayout() {
   useWebsocketRouter();
   useUpdateActiveChatroom();
 
-  const { data: chatroomData, refetch } = useQuery<ChatroomDetails>({
+  const { data: chatroomData } = useQuery<ChatroomDetails>({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
       verifiedQuery({

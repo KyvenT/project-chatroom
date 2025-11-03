@@ -9,6 +9,8 @@ import { useParams } from "react-router";
 import { css, useTheme } from "@emotion/react";
 import { mq } from "../../styles/breakpoints";
 import type { Theme } from "@emotion/react";
+import { useMembersStore } from "../../hooks/useStores";
+import Button from "../Button";
 
 export type MemberInfoProps = {
   clickedMember: {
@@ -37,6 +39,7 @@ export const MemberInfo = ({
 }: MemberInfoProps) => {
   const { chatroomId } = useParams();
   const theme = useTheme();
+  const members = useMembersStore((state) => state.members);
   const { user } = useAuthContext();
   const { data } = useQuery<ChatroomMemberDetails>({
     queryKey: [member.memberId],
@@ -47,11 +50,15 @@ export const MemberInfo = ({
       }),
   });
 
+  const userRole = members.find((mem) => mem.memberId === user.userId)?.role;
+  const canKick = userRole !== "MEMBER" && userRole !== member.role;
+
   return (
     <div css={styles(theme, button)}>
       <h3>{member.member.username}</h3>
       <p>{member.member.status}</p>
       <p>{data && new Date(data.joinedAt).toISOString()}</p>
+      {canKick && <Button>Kick</Button>}
     </div>
   );
 };
