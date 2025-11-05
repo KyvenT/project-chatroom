@@ -1,10 +1,10 @@
 import { css, useTheme, type Theme } from "@emotion/react";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
+import { useOutsideClick } from "../hooks/useHandleOutsideClick";
 
 interface DropdownProps {
   children: React.ReactNode;
   onClose: () => void;
-  buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 const defaultDropdownStyles = css({
@@ -23,26 +23,11 @@ const colors = (theme: Theme) =>
     color: theme.colors.dark_grey,
   });
 
-const Dropdown = ({ children, onClose, buttonRef }: DropdownProps) => {
+const Dropdown = ({ children, onClose }: DropdownProps) => {
   const theme = useTheme();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current?.contains(event.target as HTMLElement) ||
-        buttonRef.current?.contains(event.target as HTMLElement)
-      ) {
-        return;
-      }
-      onClose();
-    };
-    document.addEventListener("click", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
+  useOutsideClick(onClose, dropdownRef);
 
   return (
     <div ref={dropdownRef} css={[defaultDropdownStyles, colors(theme)]}>

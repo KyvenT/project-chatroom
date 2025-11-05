@@ -82,6 +82,7 @@ export interface MembersPayload {
     username: string;
   };
   memberId: string;
+  role: ChatroomRoles;
 }
 
 export interface MessagePayload {

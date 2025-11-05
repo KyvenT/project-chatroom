@@ -1,5 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { verifiedQuery } from "../../hooks/useCustomQuery";
+import { useMutation } from "@tanstack/react-query";
 import type {
   ChatroomDetails,
   ChatroomPrivacy,
