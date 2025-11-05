@@ -2,6 +2,7 @@ import { css, type SerializedStyles } from "@emotion/react";
 import type React from "react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useOutsideClick } from "../hooks/useHandleOutsideClick";
 
 export interface ModalProps
   extends React.DialogHTMLAttributes<HTMLDialogElement> {
@@ -38,22 +39,7 @@ const Modal = ({
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      if (!onClose) return;
-      console.log(dialogRef.current?.contains(event.target as Node));
-      if (dialogRef.current?.contains(event.target as Node)) {
-        return;
-      }
-      onClose();
-    };
-
-    document.addEventListener("mousedown", handleClick);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-    };
-  }, []);
+  useOutsideClick(onClose, dialogRef);
 
   useEffect(() => {
     if (open) {
@@ -68,9 +54,9 @@ const Modal = ({
   }, [open]);
 
   const handleESCPress = (e: React.KeyboardEvent) => {
-    if (variant === "requiredInteraction") return;
+    if (variant === "requiredInteraction" || !onClose) return;
 
-    if (e.key === "Escape" && onClose) {
+    if (e.key === "Escape") {
       onClose();
     }
   };
@@ -79,12 +65,14 @@ const Modal = ({
     <dialog
       ref={dialogRef}
       onKeyDown={handleESCPress}
+      /* @ts-ignore */
+      closedBy="none"
       css={[dialogStyles, modalStyles]}
       onClick={(e) => e.stopPropagation()}
     >
       {children}
     </dialog>,
-    document.body,
+    document.body
   );
 };
 

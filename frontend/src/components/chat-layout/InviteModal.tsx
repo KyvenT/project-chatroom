@@ -87,7 +87,7 @@ const inviteListColors = (theme: Theme) =>
     ul: {
       border: `1px solid ${theme.colors.white}`,
       color: theme.colors.light_grey,
-      scrollbarColor: `${theme.colors.white} transparent`,
+      scrollbarColor: `${theme.colors.light_grey} transparent`,
 
       li: {},
 

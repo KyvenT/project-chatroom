@@ -48,21 +48,20 @@ const styles = css(
         fontSize: "1.15rem",
       },
     },
-  }),
+  })
 );
 
 const colors = (theme: Theme) =>
   css(
     mq({
       scrollbarColor: `transparent transparent`,
-      backgroundColor: theme.colors.black,
       "&:hover": {
         scrollbarColor: `${theme.colors.white} transparent`,
       },
 
       ".pinned-chatroom": {
         color: theme.colors.white,
-        border: `1px solid ${theme.colors.dark_grey}`,
+        border: `1px solid ${theme.colors.light_grey}`,
         backgroundColor: theme.colors.grey,
         scrollbarColor: `transparent transparent`,
       },
@@ -75,7 +74,7 @@ const colors = (theme: Theme) =>
       ".chatroom-title-area": {
         backgroundColor: theme.colors.dark_grey,
       },
-    }),
+    })
   );
 
 export const PinnedChatroomsList = ({
@@ -88,7 +87,7 @@ export const PinnedChatroomsList = ({
   const results = useFetchMessagesMultiple(
     pinnedGroup.pinnedChatrooms.map((chatroom) => chatroom.chatroomId),
     getBefore,
-    5,
+    5
   );
 
   const handleClick = (chatroomId: string) => {

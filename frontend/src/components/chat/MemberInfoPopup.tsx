@@ -16,6 +16,8 @@ import {
   verifiedMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
+import { useOutsideClick } from "../../hooks/useHandleOutsideClick";
+import { useRef } from "react";
 
 export type MemberInfoProps = {
   clickedMember: {
@@ -48,6 +50,7 @@ export const MemberInfo = ({
   const theme = useTheme();
   const members = useMembersStore((state) => state.members);
   const { user } = useAuthContext();
+  const popupRef = useRef<HTMLDivElement>(null);
 
   const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
     mutationFn: verifiedMutation,
@@ -61,6 +64,8 @@ export const MemberInfo = ({
         user,
       }),
   });
+
+  useOutsideClick(onClose, popupRef);
 
   const userRole = members.find((mem) => mem.memberId === user.userId)?.role;
   const canKick = userRole !== "MEMBER" && userRole !== member.role;
@@ -78,7 +83,7 @@ export const MemberInfo = ({
   };
 
   return (
-    <div css={styles(theme, button)}>
+    <div css={styles(theme, button)} ref={popupRef}>
       <h3>{member.member.username}</h3>
       <p>{member.member.status}</p>
       <p>{data && new Date(data.joinedAt).toISOString()}</p>
