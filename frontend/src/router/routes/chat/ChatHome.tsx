@@ -74,7 +74,7 @@ const styles = css(
       fontWeight: "400",
       fontSize: "1.25rem",
     },
-  }),
+  })
 );
 
 const colors = (theme: Theme) =>
@@ -99,7 +99,7 @@ const ChatHome = () => {
   const { user } = useAuthContext();
   const [openPinModal, setOpenPinModal] = useToggle(false);
   const [openedPinGroup, setOpenedPinGroup] = useState<PinnedGroup | null>(
-    null,
+    null
   );
   // TODO: add pinned/favourite chatrooms in backend,
   // add table with userId and chatroomIds
@@ -141,7 +141,7 @@ const ChatHome = () => {
   return (
     <>
       <div css={[styles, colors(theme)]}>
-        <h2 className="title">Pinned Chatroom Groups</h2>
+        <h2 className="title">Pinned Chats</h2>
         <div className="pinned-groups">
           {pinnedGroups?.map((pinnedGroup) => (
             <div key={pinnedGroup.id} className="pinned-group">

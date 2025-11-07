@@ -33,12 +33,39 @@ const styles = (theme: Theme, button: HTMLButtonElement) =>
       position: "absolute",
       top: button.getBoundingClientRect().top,
       left: button.getBoundingClientRect().left,
-      transform: "translate(-100%, 0)",
+      transform: "translateX(-100%)",
       border: `1px solid ${theme.colors.white}`,
-      borderRadius: "6px",
+      borderRadius: "4px",
       padding: "8px",
       color: theme.colors.white,
-      backgroundColor: theme.colors.grey,
+      backgroundColor: theme.colors.dark_grey,
+
+      ".username": {
+        fontSize: "1.3rem",
+        fontWeight: "500",
+      },
+
+      ".status": {
+        fontSize: "1rem",
+      },
+
+      ".joinedAt": {
+        fontSize: "1rem",
+      },
+
+      ".kickBtn": {
+        backgroundColor: "transparent",
+        border: `1px solid ${theme.colors.white}`,
+        color: theme.colors.white,
+        padding: "4px 8px",
+        borderRadius: "4px",
+        fontSize: "1.05rem",
+        cursor: "pointer",
+      },
+
+      ".kickBtn:hover": {
+        backgroundColor: theme.colors.grey,
+      },
     })
   );
 
@@ -84,11 +111,13 @@ export const MemberInfo = ({
 
   return (
     <div css={styles(theme, button)} ref={popupRef}>
-      <h3>{member.member.username}</h3>
-      <p>{member.member.status}</p>
-      <p>{data && new Date(data.joinedAt).toISOString()}</p>
+      <h3 className="username">{member.member.username}</h3>
+      <p className="status">{member.member.status}</p>
+      <p className="joinedAt">
+        joined {data && new Date(data.joinedAt).toLocaleDateString()}
+      </p>
       {canKick && (
-        <Button onClick={handleKick} disabled={!canKick}>
+        <Button onClick={handleKick} disabled={!canKick} className="kickBtn">
           Kick
         </Button>
       )}
