@@ -22,12 +22,6 @@ const styles = css(
     fontSize: ["2rem", "1rem"],
     padding: "4px 2px",
 
-    h3: {
-      fontWeight: 500,
-      fontSize: ".66rem",
-      userSelect: "none",
-    },
-
     ul: {
       padding: 0,
     },
@@ -38,6 +32,16 @@ const styles = css(
       margin: "4px",
       padding: "2px",
     },
+
+    ".memberBtn": {
+      fontSize: "1rem",
+    },
+
+    ".status": {
+      fontSize: ".8rem",
+      userSelect: "none",
+      fontWeight: 500,
+    },
   })
 );
 
@@ -47,7 +51,7 @@ const colors = (theme: Theme) =>
     borderLeft: `1px solid ${theme.colors.dark_grey}`,
     borderBottom: `1px solid ${theme.colors.dark_grey}`,
 
-    h3: {
+    ".status": {
       color: theme.colors.grey,
     },
 
@@ -127,7 +131,7 @@ const MembersPanel = () => {
             <>
               {statusList.length > 0 && (
                 <div>
-                  <h3>{statusList[0].member.status}</h3>
+                  <h3 className="status">{statusList[0].member.status}</h3>
                   <ul>
                     {statusList.map((member) => (
                       <li key={member.memberId}>

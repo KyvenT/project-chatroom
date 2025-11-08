@@ -5,6 +5,7 @@ export interface Message {
   content: string;
   senderUserId: string;
   senderUser: {
+    id: string;
     username: string;
   };
   editedAt: Date | null;

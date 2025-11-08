@@ -87,6 +87,7 @@ export interface MembersPayload {
 
 export interface MessagePayload {
   senderUser: {
+    id: string;
     username: string;
   };
   id: string;
