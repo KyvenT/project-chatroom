@@ -21,11 +21,12 @@ const createMessage = async (
       include: {
         senderUser: {
           select: {
+            id: true,
             username: true,
           },
         },
       },
-    })) as Message & { senderUser: { username: string } };
+    })) as MessagePayload;
 
     ws.send(
       JSON.stringify({

@@ -18,6 +18,9 @@ import {
 } from "../../hooks/useCustomMutation";
 import { useOutsideClick } from "../../hooks/useHandleOutsideClick";
 import { useRef } from "react";
+import { createPortal } from "react-dom";
+
+type PopupPosition = "LEFT" | "RIGHT";
 
 export type MemberInfoProps = {
   clickedMember: {
@@ -25,15 +28,27 @@ export type MemberInfoProps = {
     button: HTMLButtonElement;
   };
   onClose: () => void;
+  position?: PopupPosition;
 };
 
-const styles = (theme: Theme, button: HTMLButtonElement) =>
+const styles = (
+  theme: Theme,
+  button: HTMLButtonElement,
+  position: PopupPosition
+) =>
   css(
     mq({
       position: "absolute",
       top: button.getBoundingClientRect().top,
-      left: button.getBoundingClientRect().left,
-      transform: "translateX(-100%)",
+      ...(position === "LEFT"
+        ? {
+            left: button.getBoundingClientRect().left,
+            transform: "translateX(-100%)",
+          }
+        : {
+            left: button.getBoundingClientRect().right,
+          }),
+
       border: `1px solid ${theme.colors.white}`,
       borderRadius: "4px",
       padding: "8px",
@@ -72,6 +87,7 @@ const styles = (theme: Theme, button: HTMLButtonElement) =>
 export const MemberInfo = ({
   clickedMember: { member, button },
   onClose,
+  position = "LEFT",
 }: MemberInfoProps) => {
   const { chatroomId } = useParams();
   const theme = useTheme();
@@ -109,8 +125,8 @@ export const MemberInfo = ({
     onClose();
   };
 
-  return (
-    <div css={styles(theme, button)} ref={popupRef}>
+  return createPortal(
+    <div css={styles(theme, button, position)} ref={popupRef}>
       <h3 className="username">{member.member.username}</h3>
       <p className="status">{member.member.status}</p>
       <p className="joinedAt">
@@ -121,6 +137,7 @@ export const MemberInfo = ({
           Kick
         </Button>
       )}
-    </div>
+    </div>,
+    document.body
   );
 };

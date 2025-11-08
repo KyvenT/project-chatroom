@@ -28,6 +28,7 @@ export const getMessages = async (
     include: {
       senderUser: {
         select: {
+          id: true,
           username: true,
         },
       },

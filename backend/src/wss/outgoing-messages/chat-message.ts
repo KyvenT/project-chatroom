@@ -27,6 +27,7 @@ export const sendChatMessage = async (message: MessagePayload) => {
               senderUserId: message.senderUserId,
               createdAt: message.createdAt,
               senderUser: {
+                id: message.senderUser.id,
                 username: message.senderUser.username,
               },
               editedAt: message.editedAt,
