@@ -1,9 +1,17 @@
 # project-chatroom
 
-Real-time chatroom project created for learning purposes
-Uses a combination of REST api and websockets
+Full-stack real-time chatroom project created for learning purposes
 
-Features: User Authentication, Real-time Chatting, Notification Badges, Invites
+Uses a combination of REST API and websockets
+
+Features: 
+- User Authentication
+- Real-time Chatting and Updates
+- Notification Badges
+- Chatroom Privacy Levels (allow guests/joinable via URL/invite only)
+- Guest User Support
+- Pinned Chatroom Groups
+- Chatroom Ordering and Reorderability 
 
 # Frontend
 
