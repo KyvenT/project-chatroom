@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react";
+import useAuthContext from "../hooks/useAuthContext";
 
 interface WebSockContextProviderProps {
   children: React.ReactNode;
@@ -7,17 +8,17 @@ interface WebSockContextProviderProps {
 interface WebSocketContextType {
   ws: WebSocket | null;
   setWs: (ws: WebSocket) => void;
-  closeWS: () => void;
 }
 
 export const WebSocketContext = createContext<WebSocketContextType | null>(
-  null,
+  null
 );
 
 export default function WebSocketContextProvider({
   children,
 }: WebSockContextProviderProps) {
   const [ws, setWs] = useState<WebSocket | null>(null);
+  const { user } = useAuthContext();
 
   useEffect(() => {
     if (ws) {
@@ -34,19 +35,20 @@ export default function WebSocketContextProvider({
         console.log("WebSocket connection closed");
       }
     };
-  }, [ws]);
+  }, []);
 
-  const closeWS = () => {
-    ws?.close();
-    setWs(null);
-  };
+  useEffect(() => {
+    if (!user.userId) {
+      ws?.close();
+      setWs(null);
+    }
+  }, [user.userId]);
 
   return (
     <WebSocketContext.Provider
       value={{
         ws,
         setWs,
-        closeWS,
       }}
     >
       {children}
