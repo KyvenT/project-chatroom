@@ -26,7 +26,7 @@ const colors = (theme: Theme) =>
     scrollbarColor: `${theme.colors.dark_grey} transparent`,
   });
 
-const ChatMessages = () => {
+const ChatMessageList = () => {
   const theme = useTheme();
   const { chatroomId } = useParams();
   const messages = useMessagesStore((state) => state.messages);
@@ -90,4 +90,4 @@ const ChatMessages = () => {
   );
 };
 
-export default ChatMessages;
+export default ChatMessageList;

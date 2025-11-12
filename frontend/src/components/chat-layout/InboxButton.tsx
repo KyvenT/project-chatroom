@@ -38,7 +38,7 @@ const InboxButton = () => {
 
   const handleInviteResponse = (
     event: React.FormEvent,
-    userAccepted: boolean,
+    userAccepted: boolean
   ) => {
     event.preventDefault();
     const inviteId = (event.target as HTMLButtonElement).form?.id;
@@ -66,7 +66,7 @@ const InboxButton = () => {
       buttonText={<Mail size="2.5rem" />}
       buttonVariant="icon"
     >
-      {invites.length === 0 && <p>No invites received</p>}
+      {invites.length === 0 && <p className="emptyInboxMsg">All caught up!</p>}
       <ul>
         {invites.map((invite) => {
           return (

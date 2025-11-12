@@ -111,7 +111,7 @@ export const PinnedChatroomsList = ({
                 key={message.id}
                 id={message.id}
                 content={message.content}
-                sender={message.senderUser.username || "Unnamed User"}
+                sender={message.senderUser || "Unnamed User"}
                 timestamp={new Date(message.createdAt)}
               />
             ))}

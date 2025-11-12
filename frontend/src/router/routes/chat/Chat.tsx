@@ -1,5 +1,5 @@
 import { css, useTheme, type Theme } from "@emotion/react";
-import ChatMessages from "../../../components/chat/ChatMessages";
+import ChatMessageList from "../../../components/chat/ChatMessageList";
 import MessageInput from "../../../components/chat/MessageInput";
 import { useOutletContext, useParams } from "react-router";
 import MembersPanel from "../../../components/chat/MembersPanel";
@@ -60,7 +60,7 @@ function Chat() {
     <div css={[chatStyles, colors(theme)]}>
       {chatroomId && (
         <div className="chatContainer">
-          <ChatMessages key={chatroomId} />
+          <ChatMessageList key={chatroomId} />
           {typingUsers.length > 0 && (
             <>
               {typingUsers.map((typingUser) => (

@@ -2,16 +2,27 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import type { UserAuth } from "../../../types/REST-types/User";
 import useAuthContext from "../../../hooks/useAuthContext";
+import { authPageStyles, type LoginCredentials } from "./Login";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import Button from "../../../components/Button";
+import { Eye, EyeClosed } from "lucide-react";
+import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
+import useWebSocketContext from "../../../hooks/useWebSocketContext";
+import { useTheme } from "@emotion/react";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [username, setUsernameInput] = useState<String>("");
-  const [password, setPasswordInput] = useState<String>("");
+  const { ws, setWs } = useWebSocketContext();
   const [error, setError] = useState<String>("");
   const { handleSignIn } = useAuthContext();
+  const [isRevealingPassword, setIsRevealingPassword] =
+    useState<boolean>(false);
+  const theme = useTheme();
+  const { register, handleSubmit, setFocus } = useForm<LoginCredentials>();
 
-  const handleRegister = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleRegister: SubmitHandler<LoginCredentials> = async (data) => {
+    const { username, password } = data;
+
     try {
       const res = await fetch("http://localhost:3000/api/auth/register", {
         method: "POST",
@@ -29,6 +40,7 @@ const Signup = () => {
       console.log(data);
 
       handleSignIn(data);
+      handleWSAuth(ws, setWs, data.token);
       navigate("/chat");
     } catch (err: any) {
       setError(err.message);
@@ -36,31 +48,58 @@ const Signup = () => {
     }
   };
 
+  const handleRevealPasswordClick = () => {
+    setIsRevealingPassword((prev) => !prev);
+    setFocus("password");
+  };
+
   return (
-    <>
-      <h3>Create an account</h3>
-      <form id="registerForm" className="authForm" onSubmit={handleRegister}>
+    <div css={authPageStyles(theme)}>
+      <h1>Create an account</h1>{" "}
+      <form
+        id="registerForm"
+        className="authForm"
+        onSubmit={handleSubmit(handleRegister)}
+      >
         <input
+          className="textInput usernameInput"
+          {...register("username")}
           type="text"
-          onChange={(e) => setUsernameInput(e.target.value)}
           placeholder="Username..."
+          minLength={3}
           maxLength={20}
-          id="username"
           required
+          autoFocus
         />
-        <input
-          type="password"
-          onChange={(e) => setPasswordInput(e.target.value)}
-          placeholder="Password..."
-          maxLength={20}
-          id="password"
-          required
-        />
-        <button type="submit">Register</button>
+        <div className="passwordContainer">
+          <input
+            className="textInput passwordInput"
+            {...register("password")}
+            {...(isRevealingPassword ? { type: "text" } : { type: "password" })}
+            placeholder="Password..."
+            minLength={6}
+            maxLength={128}
+            required
+          />
+          <Button
+            className="revealPasswordBtn"
+            type="button"
+            onClick={handleRevealPasswordClick}
+          >
+            {isRevealingPassword ? (
+              <EyeClosed size="1.5rem" />
+            ) : (
+              <Eye size="1.5rem" />
+            )}
+          </Button>
+        </div>{" "}
+        <button className="submitBtn" type="submit">
+          Register
+        </button>
         <Link to="/login">Already have an account?</Link>
       </form>
       {error && <p>Error: {error}</p>}
-    </>
+    </div>
   );
 };
 
