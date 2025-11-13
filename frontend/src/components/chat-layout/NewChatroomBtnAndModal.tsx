@@ -50,6 +50,7 @@ const dialogStyles = (theme: Theme) =>
     },
 
     "#title": {
+      flex: 1,
       fontSize: "1rem",
       borderRadius: "4px",
       padding: "4px",
@@ -62,11 +63,6 @@ const dialogStyles = (theme: Theme) =>
       outline: "none",
     },
 
-    ".chatroom-title-group": {
-      display: "flex",
-      justifyContent: "space-between",
-    },
-
     ".form-group": {
       width: "100%",
       fontSize: "1rem",
@@ -77,7 +73,7 @@ const dialogStyles = (theme: Theme) =>
 
     ".submit-btn": {
       fontSize: "1rem",
-      borderRadius: "5px",
+      borderRadius: "4px",
       width: "fit-content",
       padding: "4px 8px",
       backgroundColor: "transparent",
@@ -91,6 +87,7 @@ const dialogStyles = (theme: Theme) =>
     },
 
     "#privacy": {
+      flex: 1,
       fontSize: "1rem",
       backgroundColor: "transparent",
       color: theme.colors.white,

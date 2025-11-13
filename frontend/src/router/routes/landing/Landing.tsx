@@ -14,7 +14,7 @@ const styles = css(
     flexDirection: "column",
 
     ".brandTitle": {
-      userSelect: "none",
+      cursor: "default",
       fontSize: ["1.5rem", "1.75rem"],
     },
 

@@ -114,15 +114,6 @@ const closeButtonColors = (theme: Theme) =>
     },
   });
 
-const confirmDeleteModalStyles = (theme: Theme) =>
-  css({
-    padding: "30px",
-    borderRadius: "5px",
-    backgroundColor: theme.colors.dark_grey,
-    color: theme.colors.white,
-    border: `1px solid ${theme.colors.light_grey}`,
-  });
-
 interface ChatroomDetailsProps extends ModalProps {
   user: UserAuth;
   chatroomId: string;
@@ -271,7 +262,7 @@ export const ChatroomDetailsModal = ({
                   </Button>
                 </div>
                 <Modal
-                  modalStyles={confirmDeleteModalStyles(theme)}
+                  modalStyles={chatroomDetailsModalStyles(theme)}
                   open={confirmDeleteModalOpen}
                   variant="requiredInteraction"
                 >
