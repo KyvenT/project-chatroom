@@ -4,10 +4,12 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useOutsideClick } from "../hooks/useHandleOutsideClick";
 
+type ModalVariant = "default" | "requiredInteraction";
+
 export interface ModalProps
   extends React.DialogHTMLAttributes<HTMLDialogElement> {
   modalStyles?: SerializedStyles;
-  variant?: "default" | "requiredInteraction";
+  variant?: ModalVariant;
   onClose?: () => void;
 }
 
@@ -21,14 +23,16 @@ export const closeButtonStyles = css({
   fontSize: "1rem",
 });
 
-const dialogStyles = css({
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  padding: 0,
-  border: 0,
-});
+const dialogStyles = (variant: ModalVariant) =>
+  css({
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    padding: 0,
+    border: 0,
+    zIndex: variant === "requiredInteraction" ? 9999 : 1,
+  });
 
 const Modal = ({
   children,
@@ -39,7 +43,7 @@ const Modal = ({
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  useOutsideClick(onClose, dialogRef);
+  useOutsideClick({ callbackFn: onClose, elementRef: dialogRef });
 
   useEffect(() => {
     if (open) {
@@ -67,7 +71,7 @@ const Modal = ({
       onKeyDown={handleESCPress}
       /* @ts-ignore */
       closedBy="none"
-      css={[dialogStyles, modalStyles]}
+      css={[dialogStyles(variant), modalStyles]}
       onClick={(e) => e.stopPropagation()}
     >
       {children}
