@@ -13,7 +13,7 @@ export const getUserDetails = async (req: Request, res: Response) => {
 
   try {
     const user = await userService.getUserDetails(userId);
-    res.status(201).json({ user });
+    res.status(201).json(user);
   } catch (err) {
     console.error(err);
     res
