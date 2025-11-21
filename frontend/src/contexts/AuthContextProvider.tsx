@@ -23,7 +23,6 @@ export default function AuthContextProvider({
     token: "",
     isGuest: true,
   });
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const handleSignIn = (newUser: UserAuth) => {
     if (!newUser.userId || !newUser.username || !newUser.token) {
@@ -35,13 +34,13 @@ export default function AuthContextProvider({
       token: newUser.token,
       isGuest: newUser.isGuest,
     });
-    setIsLoggedIn(true);
   };
 
   const handleLogOut = () => {
     setUser({ userId: "", username: "", token: "", isGuest: true });
-    setIsLoggedIn(false);
   };
+
+  const isLoggedIn = !!user.userId;
 
   return (
     <AuthContext.Provider
