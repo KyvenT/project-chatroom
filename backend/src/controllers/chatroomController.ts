@@ -120,7 +120,7 @@ export const getChatroomPrivacy = async (req: Request, res: Response) => {
 
   try {
     const privacy = await chatroomService.getChatroomPrivacy(data);
-    res.status(200).json(privacy);
+    res.status(200).json({ privacy });
   } catch (err) {
     console.error("couldnt fetch chatroom privacy", err);
     res.status(500).json({ message: "couldnt fetch chatroom privacy" });

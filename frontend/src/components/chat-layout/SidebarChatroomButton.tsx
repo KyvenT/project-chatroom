@@ -7,6 +7,7 @@ import { UserRoundPlus } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
 import { InviteModal } from "./InviteModal";
 import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
+import type React from "react";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
@@ -61,11 +62,19 @@ const styles = css({
   },
 });
 
-const dynamicStyles = (theme: Theme, isActive: boolean) =>
+const dynamicStyles = (
+  theme: Theme,
+  isActive: boolean,
+  isDraggedOver: boolean
+) =>
   css({
     div: {
       backgroundColor: isActive ? theme.colors.white : "inherit",
-      borderColor: isActive ? theme.colors.white : "transparent",
+      borderColor: isDraggedOver
+        ? "green"
+        : isActive
+        ? theme.colors.white
+        : "transparent",
     },
 
     "div:hover": {
@@ -113,15 +122,48 @@ const SidebarChatroomButton = ({
   const { user } = useAuthContext();
   const [isHovered, setHovered] = useToggle(false);
   const [inviteModalOpen, setInviteModalOpen] = useToggle(false);
+  const [isDraggedOver, setIsDraggedOver] = useToggle(false);
 
   const canInvite: boolean = !!(
     (ownerId === user.userId || privacy !== "INVITE_ONLY") &&
     user.isGuest === false
   );
 
+  const handleDragStart = (event: React.DragEvent) => {
+    event.dataTransfer.setData(
+      "application/json",
+      JSON.stringify({ originChatroom: chatroomId })
+    );
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDraggedOver(true);
+  };
+
+  const handleDragOverEnd = () => {
+    setIsDraggedOver(false);
+  };
+
+  const handleDrop = (event: React.DragEvent) => {
+    const data = event.dataTransfer.getData("application/json");
+    const { originChatroom } = JSON.parse(data);
+    console.log("origin chatroom:", originChatroom);
+    console.log("target chatroom:", chatroomId);
+
+    // do swap update here
+  };
+
   return (
     <>
-      <li css={[styles, dynamicStyles(theme, isActive)]}>
+      <li
+        css={[styles, dynamicStyles(theme, isActive, isDraggedOver)]}
+        draggable
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragOverEnd}
+        onDrop={handleDrop}
+      >
         <div
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
