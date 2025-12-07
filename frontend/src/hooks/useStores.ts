@@ -13,6 +13,10 @@ interface ChatroomListState {
   setChatroomList: (chatrooms: Chatroom[]) => void;
   updateChatroomUnread: (newUnreadCount: number, chatroomId: string) => void;
   updateChatroom: (updatedChatroom: Chatroom) => void;
+  swapChatroomOrder: (
+    firstChatroom: Chatroom,
+    secondChatroom: Chatroom
+  ) => void;
 }
 
 export const useChatroomsStore = create<ChatroomListState>((set) => ({
@@ -22,7 +26,7 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
   removeChatroom: (chatroomId: string) =>
     set((state) => ({
       chatrooms: state.chatrooms.filter(
-        (chatroom) => chatroom.chatroomId !== chatroomId,
+        (chatroom) => chatroom.chatroomId !== chatroomId
       ),
     })),
   emptyChatroomList: () => set({ chatrooms: [] }),
@@ -41,6 +45,24 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
       chatrooms: state.chatrooms.map((chatroom) => {
         if (chatroom.chatroomId === updatedChatroom.chatroomId) {
           return updatedChatroom;
+        }
+        return chatroom;
+      }),
+    })),
+  swapChatroomOrder: (firstChatroom, secondChatroom) =>
+    set((state) => ({
+      chatrooms: state.chatrooms.map((chatroom) => {
+        if (chatroom.chatroomId === firstChatroom.chatroomId) {
+          return {
+            ...secondChatroom,
+            chatroomIndex: firstChatroom.chatroomIndex,
+          };
+        }
+        if (chatroom.chatroomId === secondChatroom.chatroomId) {
+          return {
+            ...firstChatroom,
+            chatroomIndex: secondChatroom.chatroomIndex,
+          };
         }
         return chatroom;
       }),
@@ -131,7 +153,7 @@ export const useTypingPresenceStore = create<TypingPresenceState>((set) => ({
   removeTypingPresence: (userId) =>
     set((state) => ({
       typingUsers: state.typingUsers.filter(
-        (typingUser) => typingUser.userId !== userId,
+        (typingUser) => typingUser.userId !== userId
       ),
     })),
   popTypingUser: () => {

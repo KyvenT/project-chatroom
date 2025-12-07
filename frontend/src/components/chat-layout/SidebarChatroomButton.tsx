@@ -6,16 +6,13 @@ import Button from "../Button";
 import { UserRoundPlus } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
 import { InviteModal } from "./InviteModal";
-import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
+import type { Chatroom } from "../../types/REST-types/Chatroom";
 import type React from "react";
+import { useChatroomsStore } from "../../hooks/useStores";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
-  chatroomId: string;
-  unreadMessages: number;
-  children: string;
-  privacy: ChatroomPrivacy;
-  ownerId: string;
+  chatroom: Chatroom;
 }
 
 const styles = css({
@@ -112,17 +109,22 @@ export interface inviteFormInput {
 
 const SidebarChatroomButton = ({
   isActive = false,
-  children,
-  chatroomId,
-  unreadMessages,
-  ownerId,
-  privacy,
+  chatroom,
 }: SidebarChatroomButtonProps) => {
+  const {
+    chatroomId,
+    chatroomIndex,
+    unreadMessages,
+    chatroom: { ownerId, privacy, title },
+  } = chatroom;
   const theme = useTheme();
   const { user } = useAuthContext();
   const [isHovered, setHovered] = useToggle(false);
   const [inviteModalOpen, setInviteModalOpen] = useToggle(false);
   const [isDraggedOver, setIsDraggedOver] = useToggle(false);
+  const swapChatroomOrder = useChatroomsStore(
+    (state) => state.swapChatroomOrder
+  );
 
   const canInvite: boolean = !!(
     (ownerId === user.userId || privacy !== "INVITE_ONLY") &&
@@ -132,7 +134,9 @@ const SidebarChatroomButton = ({
   const handleDragStart = (event: React.DragEvent) => {
     event.dataTransfer.setData(
       "application/json",
-      JSON.stringify({ originChatroom: chatroomId })
+      JSON.stringify({
+        firstChatroom: chatroom,
+      })
     );
   };
 
@@ -147,11 +151,12 @@ const SidebarChatroomButton = ({
 
   const handleDrop = (event: React.DragEvent) => {
     const data = event.dataTransfer.getData("application/json");
-    const { originChatroom } = JSON.parse(data);
-    console.log("origin chatroom:", originChatroom);
-    console.log("target chatroom:", chatroomId);
+    const { firstChatroom } = JSON.parse(data);
+    console.log("origin chatroom:", firstChatroom.chatroomId);
+    console.log("target chatroom:", chatroomId, " ", chatroomIndex);
 
     // do swap update here
+    swapChatroomOrder(firstChatroom, chatroom);
   };
 
   return (
@@ -169,7 +174,7 @@ const SidebarChatroomButton = ({
           onMouseLeave={() => setHovered(false)}
         >
           <NavLink className="chatroomLink" to={"/chat/" + chatroomId}>
-            {children}
+            {title}
           </NavLink>
           {unreadMessages > 0 && (
             <span className="unreadBadge">{unreadMessages}</span>
@@ -190,7 +195,7 @@ const SidebarChatroomButton = ({
         <InviteModal
           inviteModalOpen={inviteModalOpen}
           chatroomId={chatroomId}
-          title={children}
+          title={title}
           onClose={() => setInviteModalOpen(false)}
           user={user}
           canInvite={canInvite}

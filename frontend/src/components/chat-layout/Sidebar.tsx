@@ -95,13 +95,8 @@ const Sidebar = ({ chatrooms }: SidebarProps) => {
               <SidebarChatroomButton
                 key={chatroom.chatroomId}
                 isActive={chatroomId === chatroom.chatroomId}
-                chatroomId={chatroom.chatroomId}
-                unreadMessages={chatroom.unreadMessages}
-                privacy={chatroom.chatroom.privacy}
-                ownerId={chatroom.chatroom.ownerId}
-              >
-                {chatroom.chatroom.title}
-              </SidebarChatroomButton>
+                chatroom={chatroom}
+              />
             );
           })}
       </ul>
