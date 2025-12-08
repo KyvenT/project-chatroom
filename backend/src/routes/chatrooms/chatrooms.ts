@@ -4,6 +4,7 @@ import {
   deleteChatroom,
   getChatroomDetails,
   getUserChatrooms,
+  swapChatroomIndexes,
   updateChatroom,
 } from "../../controllers/chatroomController.js";
 
@@ -14,3 +15,4 @@ chatroomRouter.get("/:chatroomId", getChatroomDetails);
 chatroomRouter.post("/create", createChatroom);
 chatroomRouter.patch("/:chatroomId", updateChatroom);
 chatroomRouter.delete("/:chatroomId", deleteChatroom);
+chatroomRouter.patch("/reorder", swapChatroomIndexes);

@@ -2,6 +2,7 @@ import {
   chatroomIdSchema,
   chatroomModifyOptionsSchema,
   chatroomSetOptionsSchema,
+  swapChatroomIndexesSchema,
 } from "../validators/chatrooms/chatroomValidation.js";
 import { validate } from "../validators/validate.js";
 import { Request, Response } from "express";
@@ -124,5 +125,24 @@ export const getChatroomPrivacy = async (req: Request, res: Response) => {
   } catch (err) {
     console.error("couldnt fetch chatroom privacy", err);
     res.status(500).json({ message: "couldnt fetch chatroom privacy" });
+  }
+};
+
+export const swapChatroomIndexes = async (req: Request, res: Response) => {
+  const data = validate(swapChatroomIndexesSchema, req.body, res);
+  if (!data) return;
+  const userId = req.userId;
+
+  if (!userId) {
+    res.status(400).json({ message: "Must be signed in to reorder chatrooms" });
+    return;
+  }
+
+  try {
+    await chatroomService.swapChatroomIndexes(userId, data);
+    res.status(200).json({ message: "Chatrooms reordered successfully" });
+  } catch (err) {
+    console.error("couldn't swap chatrooms", err);
+    res.status(500).json({ message: "Failed to reorder chatrooms" });
   }
 };

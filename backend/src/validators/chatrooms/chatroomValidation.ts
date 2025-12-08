@@ -17,3 +17,8 @@ export const chatroomModifyIndexSchema = chatroomIdSchema.extend({
 export const chatroomModifyOptionsSchema = chatroomIdSchema.extend({
   ...chatroomSetOptionsSchema.shape,
 });
+
+export const swapChatroomIndexesSchema = z.object({
+  firstChatroomId: z.string(),
+  secondChatroomId: z.string(),
+});
