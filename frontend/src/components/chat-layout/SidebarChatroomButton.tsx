@@ -9,6 +9,10 @@ import { InviteModal } from "./InviteModal";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
 import type React from "react";
 import { useChatroomsStore } from "../../hooks/useStores";
+import { useMutation } from "@tanstack/react-query";
+import { verifiedMutation } from "../../hooks/useCustomMutation";
+import type { ConfirmationResponse } from "../../types/REST-types/Invite";
+import { useEffect } from "react";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
@@ -125,6 +129,11 @@ const SidebarChatroomButton = ({
   const swapChatroomOrder = useChatroomsStore(
     (state) => state.swapChatroomOrder
   );
+  const { mutate, isSuccess, isError } = useMutation({
+    mutationFn: verifiedMutation<ConfirmationResponse>,
+    onSuccess: () => console.log("chatrooms swapped"),
+    onError: () => console.log("chatroom swap error"),
+  });
 
   const canInvite: boolean = !!(
     (ownerId === user.userId || privacy !== "INVITE_ONLY") &&
@@ -157,7 +166,26 @@ const SidebarChatroomButton = ({
 
     // do swap update here
     swapChatroomOrder(firstChatroom, chatroom);
+    /*
+    mutate({
+      fetchUrl: "http://localhost:3000/api/chatrooms/reorder",
+      user,
+      method: "PATCH",
+      reqBody: {
+        firstChatroomId: firstChatroom.chatroomId,
+        secondChatroomId: chatroomId,
+      },
+    });
+    */
   };
+
+  useEffect(() => {
+    if (isSuccess) console.log("swapped");
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (isError) console.log("swap error");
+  }, [isError]);
 
   return (
     <>
