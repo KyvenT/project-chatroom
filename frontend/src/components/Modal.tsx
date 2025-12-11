@@ -2,7 +2,6 @@ import { css, type SerializedStyles } from "@emotion/react";
 import type React from "react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useOutsideClick } from "../hooks/useHandleOutsideClick";
 
 type ModalVariant = "default" | "requiredInteraction";
 
@@ -34,6 +33,17 @@ const dialogStyles = (variant: ModalVariant) =>
     zIndex: variant === "requiredInteraction" ? 9999 : 1,
   });
 
+const backdropStyles = (variant: ModalVariant) =>
+  css({
+    position: "absolute",
+    top: 0,
+    left: 0,
+    backgroundColor:
+      variant === "requiredInteraction" ? "rgba(50,50,50,0.2)" : "transparent",
+    height: "100dvh",
+    width: "100dvw",
+  });
+
 const Modal = ({
   children,
   modalStyles,
@@ -42,8 +52,6 @@ const Modal = ({
   variant = "default",
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useOutsideClick({ callbackFn: onClose, elementRef: dialogRef });
 
   useEffect(() => {
     if (open) {
@@ -66,16 +74,18 @@ const Modal = ({
   };
 
   return createPortal(
-    <dialog
-      ref={dialogRef}
-      onKeyDown={handleESCPress}
-      /* @ts-ignore */
-      closedBy="none"
-      css={[dialogStyles(variant), modalStyles]}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {children}
-    </dialog>,
+    <div css={backdropStyles(variant)} onClick={onClose}>
+      <dialog
+        ref={dialogRef}
+        onKeyDown={handleESCPress}
+        /* @ts-ignore */
+        closedBy="none"
+        css={[dialogStyles(variant), modalStyles]}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </dialog>
+    </div>,
     document.body
   );
 };

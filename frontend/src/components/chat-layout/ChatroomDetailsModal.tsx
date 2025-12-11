@@ -261,33 +261,35 @@ export const ChatroomDetailsModal = ({
                     Delete Chatroom
                   </Button>
                 </div>
-                <Modal
-                  modalStyles={chatroomDetailsModalStyles(theme)}
-                  open={confirmDeleteModalOpen}
-                  variant="requiredInteraction"
-                >
-                  <h3>
-                    Are you sure you want to delete "
-                    <span>{chatroomData.title}</span>"?
-                  </h3>
-                  <br />
-                  <div className="actionBtns">
-                    <Button
-                      className="actionBtn"
-                      type="button"
-                      onClick={handleDelete}
-                    >
-                      Confirm Delete
-                    </Button>
-                    <Button
-                      className="actionBtn"
-                      type="button"
-                      onClick={() => setConfirmDeleteModalOpen(false)}
-                    >
-                      Go back
-                    </Button>
-                  </div>
-                </Modal>
+                {confirmDeleteModalOpen && (
+                  <Modal
+                    modalStyles={chatroomDetailsModalStyles(theme)}
+                    open={confirmDeleteModalOpen}
+                    variant="requiredInteraction"
+                  >
+                    <h3>
+                      Are you sure you want to delete "
+                      <span>{chatroomData.title}</span>"?
+                    </h3>
+                    <br />
+                    <div className="actionBtns">
+                      <Button
+                        className="actionBtn"
+                        type="button"
+                        onClick={handleDelete}
+                      >
+                        Confirm Delete
+                      </Button>
+                      <Button
+                        className="actionBtn"
+                        type="button"
+                        onClick={() => setConfirmDeleteModalOpen(false)}
+                      >
+                        Go back
+                      </Button>
+                    </div>
+                  </Modal>
+                )}
               </>
             )}
           </form>
