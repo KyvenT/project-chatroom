@@ -292,6 +292,18 @@ export const swapChatroomIndexes = async (
     throw new Error("Chatroom(s) not found");
   }
 
+  const changeToTempIndex = await Prisma.chatroomMember.update({
+    where: {
+      chatroomId_memberId: {
+        chatroomId: secondChatroomId,
+        memberId: userId,
+      },
+    },
+    data: {
+      chatroomIndex: -1,
+    },
+  });
+
   const firstChatroomUpdate = Prisma.chatroomMember.update({
     where: {
       chatroomId_memberId: {
@@ -307,7 +319,7 @@ export const swapChatroomIndexes = async (
   const secondChatroomUpdate = Prisma.chatroomMember.update({
     where: {
       chatroomId_memberId: {
-        chatroomId: firstChatroomId,
+        chatroomId: secondChatroomId,
         memberId: userId,
       },
     },

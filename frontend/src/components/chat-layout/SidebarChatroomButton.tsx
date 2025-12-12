@@ -166,7 +166,7 @@ const SidebarChatroomButton = ({
 
     // do swap update here
     swapChatroomOrder(firstChatroom, chatroom);
-    /*
+
     mutate({
       fetchUrl: "http://localhost:3000/api/chatrooms/reorder",
       user,
@@ -176,7 +176,6 @@ const SidebarChatroomButton = ({
         secondChatroomId: chatroomId,
       },
     });
-    */
   };
 
   useEffect(() => {
