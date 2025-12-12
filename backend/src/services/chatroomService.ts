@@ -292,41 +292,39 @@ export const swapChatroomIndexes = async (
     throw new Error("Chatroom(s) not found");
   }
 
-  const changeToTempIndex = await Prisma.chatroomMember.update({
-    where: {
-      chatroomId_memberId: {
-        chatroomId: secondChatroomId,
-        memberId: userId,
+  const chatroomUpdate = Prisma.$transaction([
+    Prisma.chatroomMember.update({
+      where: {
+        chatroomId_memberId: {
+          chatroomId: secondChatroomId,
+          memberId: userId,
+        },
       },
-    },
-    data: {
-      chatroomIndex: -1,
-    },
-  });
-
-  const firstChatroomUpdate = Prisma.chatroomMember.update({
-    where: {
-      chatroomId_memberId: {
-        chatroomId: firstChatroomId,
-        memberId: userId,
+      data: {
+        chatroomIndex: -1,
       },
-    },
-    data: {
-      chatroomIndex: secondChatroomIndex.chatroomIndex,
-    },
-  });
-
-  const secondChatroomUpdate = Prisma.chatroomMember.update({
-    where: {
-      chatroomId_memberId: {
-        chatroomId: secondChatroomId,
-        memberId: userId,
+    }),
+    Prisma.chatroomMember.update({
+      where: {
+        chatroomId_memberId: {
+          chatroomId: firstChatroomId,
+          memberId: userId,
+        },
       },
-    },
-    data: {
-      chatroomIndex: firstChatroomIndex.chatroomIndex,
-    },
-  });
-
-  await Promise.all([firstChatroomUpdate, secondChatroomUpdate]);
+      data: {
+        chatroomIndex: secondChatroomIndex.chatroomIndex,
+      },
+    }),
+    Prisma.chatroomMember.update({
+      where: {
+        chatroomId_memberId: {
+          chatroomId: secondChatroomId,
+          memberId: userId,
+        },
+      },
+      data: {
+        chatroomIndex: firstChatroomIndex.chatroomIndex,
+      },
+    }),
+  ]);
 };
