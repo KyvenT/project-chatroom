@@ -6,15 +6,17 @@ import Button from "../Button";
 import { UserRoundPlus } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
 import { InviteModal } from "./InviteModal";
-import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
+import type { Chatroom } from "../../types/REST-types/Chatroom";
+import type React from "react";
+import { useChatroomsStore } from "../../hooks/useStores";
+import { useMutation } from "@tanstack/react-query";
+import { verifiedMutation } from "../../hooks/useCustomMutation";
+import type { ConfirmationResponse } from "../../types/REST-types/Invite";
+import { useEffect } from "react";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
-  chatroomId: string;
-  unreadMessages: number;
-  children: string;
-  privacy: ChatroomPrivacy;
-  ownerId: string;
+  chatroom: Chatroom;
 }
 
 const styles = css({
@@ -61,11 +63,19 @@ const styles = css({
   },
 });
 
-const dynamicStyles = (theme: Theme, isActive: boolean) =>
+const dynamicStyles = (
+  theme: Theme,
+  isActive: boolean,
+  isDraggedOver: boolean
+) =>
   css({
     div: {
       backgroundColor: isActive ? theme.colors.white : "inherit",
-      borderColor: isActive ? theme.colors.white : "transparent",
+      borderColor: isDraggedOver
+        ? "green"
+        : isActive
+        ? theme.colors.white
+        : "transparent",
     },
 
     "div:hover": {
@@ -103,31 +113,95 @@ export interface inviteFormInput {
 
 const SidebarChatroomButton = ({
   isActive = false,
-  children,
-  chatroomId,
-  unreadMessages,
-  ownerId,
-  privacy,
+  chatroom,
 }: SidebarChatroomButtonProps) => {
+  const {
+    chatroomId,
+    chatroomIndex,
+    unreadMessages,
+    chatroom: { ownerId, privacy, title },
+  } = chatroom;
   const theme = useTheme();
   const { user } = useAuthContext();
   const [isHovered, setHovered] = useToggle(false);
   const [inviteModalOpen, setInviteModalOpen] = useToggle(false);
+  const [isDraggedOver, setIsDraggedOver] = useToggle(false);
+  const swapChatroomOrder = useChatroomsStore(
+    (state) => state.swapChatroomOrder
+  );
+  const { mutate, isSuccess, isError } = useMutation({
+    mutationFn: verifiedMutation<ConfirmationResponse>,
+    onSuccess: () => console.log("chatrooms swapped"),
+    onError: () => console.log("chatroom swap error"),
+  });
 
   const canInvite: boolean = !!(
     (ownerId === user.userId || privacy !== "INVITE_ONLY") &&
     user.isGuest === false
   );
 
+  const handleDragStart = (event: React.DragEvent) => {
+    event.dataTransfer.setData(
+      "application/json",
+      JSON.stringify({
+        firstChatroom: chatroom,
+      })
+    );
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDraggedOver(true);
+  };
+
+  const handleDragOverEnd = () => {
+    setIsDraggedOver(false);
+  };
+
+  const handleDrop = (event: React.DragEvent) => {
+    const data = event.dataTransfer.getData("application/json");
+    const { firstChatroom } = JSON.parse(data);
+    console.log("origin chatroom:", firstChatroom.chatroomId);
+    console.log("target chatroom:", chatroomId, " ", chatroomIndex);
+
+    // do swap update here
+    swapChatroomOrder(firstChatroom, chatroom);
+
+    mutate({
+      fetchUrl: "http://localhost:3000/api/chatrooms/reorder",
+      user,
+      method: "PATCH",
+      reqBody: {
+        firstChatroomId: firstChatroom.chatroomId,
+        secondChatroomId: chatroomId,
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (isSuccess) console.log("swapped");
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (isError) console.log("swap error");
+  }, [isError]);
+
   return (
     <>
-      <li css={[styles, dynamicStyles(theme, isActive)]}>
+      <li
+        css={[styles, dynamicStyles(theme, isActive, isDraggedOver)]}
+        draggable
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragOverEnd}
+        onDrop={handleDrop}
+      >
         <div
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
           <NavLink className="chatroomLink" to={"/chat/" + chatroomId}>
-            {children}
+            {title}
           </NavLink>
           {unreadMessages > 0 && (
             <span className="unreadBadge">{unreadMessages}</span>
@@ -148,7 +222,7 @@ const SidebarChatroomButton = ({
         <InviteModal
           inviteModalOpen={inviteModalOpen}
           chatroomId={chatroomId}
-          title={children}
+          title={title}
           onClose={() => setInviteModalOpen(false)}
           user={user}
           canInvite={canInvite}

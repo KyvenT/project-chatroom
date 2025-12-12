@@ -9,6 +9,7 @@ import {
   chatroomIdSchema,
   chatroomModifyOptionsSchema,
   chatroomSetOptionsSchema,
+  swapChatroomIndexesSchema,
 } from "../validators/chatrooms/chatroomValidation.js";
 import z from "zod";
 import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.js";
@@ -250,4 +251,80 @@ export const getChatroomPrivacy = async (
   }
 
   return chatroom.privacy;
+};
+
+export const swapChatroomIndexes = async (
+  userId: string,
+  data: z.infer<typeof swapChatroomIndexesSchema>
+) => {
+  const { firstChatroomId, secondChatroomId } = data;
+
+  const firstChatroomIndexPromise = Prisma.chatroomMember.findUnique({
+    where: {
+      chatroomId_memberId: {
+        chatroomId: firstChatroomId,
+        memberId: userId,
+      },
+    },
+    select: {
+      chatroomIndex: true,
+    },
+  });
+
+  const secondChatroomIndexPromise = Prisma.chatroomMember.findUnique({
+    where: {
+      chatroomId_memberId: {
+        chatroomId: secondChatroomId,
+        memberId: userId,
+      },
+    },
+    select: {
+      chatroomIndex: true,
+    },
+  });
+
+  const [firstChatroomIndex, secondChatroomIndex] = await Promise.all([
+    firstChatroomIndexPromise,
+    secondChatroomIndexPromise,
+  ]);
+
+  if (!firstChatroomIndex || !secondChatroomIndex) {
+    throw new Error("Chatroom(s) not found");
+  }
+
+  const chatroomUpdate = Prisma.$transaction([
+    Prisma.chatroomMember.update({
+      where: {
+        chatroomId_memberId: {
+          chatroomId: secondChatroomId,
+          memberId: userId,
+        },
+      },
+      data: {
+        chatroomIndex: -1,
+      },
+    }),
+    Prisma.chatroomMember.update({
+      where: {
+        chatroomId_memberId: {
+          chatroomId: firstChatroomId,
+          memberId: userId,
+        },
+      },
+      data: {
+        chatroomIndex: secondChatroomIndex.chatroomIndex,
+      },
+    }),
+    Prisma.chatroomMember.update({
+      where: {
+        chatroomId_memberId: {
+          chatroomId: secondChatroomId,
+          memberId: userId,
+        },
+      },
+      data: {
+        chatroomIndex: firstChatroomIndex.chatroomIndex,
+      },
+    }),
+  ]);
 };

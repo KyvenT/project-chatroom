@@ -114,15 +114,6 @@ const closeButtonColors = (theme: Theme) =>
     },
   });
 
-const confirmDeleteModalStyles = (theme: Theme) =>
-  css({
-    padding: "30px",
-    borderRadius: "5px",
-    backgroundColor: theme.colors.dark_grey,
-    color: theme.colors.white,
-    border: `1px solid ${theme.colors.light_grey}`,
-  });
-
 interface ChatroomDetailsProps extends ModalProps {
   user: UserAuth;
   chatroomId: string;
@@ -270,33 +261,35 @@ export const ChatroomDetailsModal = ({
                     Delete Chatroom
                   </Button>
                 </div>
-                <Modal
-                  modalStyles={confirmDeleteModalStyles(theme)}
-                  open={confirmDeleteModalOpen}
-                  variant="requiredInteraction"
-                >
-                  <h3>
-                    Are you sure you want to delete "
-                    <span>{chatroomData.title}</span>"?
-                  </h3>
-                  <br />
-                  <div className="actionBtns">
-                    <Button
-                      className="actionBtn"
-                      type="button"
-                      onClick={handleDelete}
-                    >
-                      Confirm Delete
-                    </Button>
-                    <Button
-                      className="actionBtn"
-                      type="button"
-                      onClick={() => setConfirmDeleteModalOpen(false)}
-                    >
-                      Go back
-                    </Button>
-                  </div>
-                </Modal>
+                {confirmDeleteModalOpen && (
+                  <Modal
+                    modalStyles={chatroomDetailsModalStyles(theme)}
+                    open={confirmDeleteModalOpen}
+                    variant="requiredInteraction"
+                  >
+                    <h3>
+                      Are you sure you want to delete "
+                      <span>{chatroomData.title}</span>"?
+                    </h3>
+                    <br />
+                    <div className="actionBtns">
+                      <Button
+                        className="actionBtn"
+                        type="button"
+                        onClick={handleDelete}
+                      >
+                        Confirm Delete
+                      </Button>
+                      <Button
+                        className="actionBtn"
+                        type="button"
+                        onClick={() => setConfirmDeleteModalOpen(false)}
+                      >
+                        Go back
+                      </Button>
+                    </div>
+                  </Modal>
+                )}
               </>
             )}
           </form>

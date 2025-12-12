@@ -33,6 +33,7 @@ const styles = (theme: Theme) =>
     },
 
     h3: {
+      cursor: "default",
       fontWeight: 400,
       fontSize: "1.2rem",
       textAlign: "center",

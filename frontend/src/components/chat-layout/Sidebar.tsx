@@ -1,6 +1,6 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import SidebarChatroomButton from "./SidebarChatroomButton";
-import NewChatButton from "./NewChatButton";
+import NewChatButton from "./NewChatroomBtnAndModal";
 import { Link, useParams } from "react-router";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
 import { HomeIcon, Settings } from "lucide-react";
@@ -95,13 +95,8 @@ const Sidebar = ({ chatrooms }: SidebarProps) => {
               <SidebarChatroomButton
                 key={chatroom.chatroomId}
                 isActive={chatroomId === chatroom.chatroomId}
-                chatroomId={chatroom.chatroomId}
-                unreadMessages={chatroom.unreadMessages}
-                privacy={chatroom.chatroom.privacy}
-                ownerId={chatroom.chatroom.ownerId}
-              >
-                {chatroom.chatroom.title}
-              </SidebarChatroomButton>
+                chatroom={chatroom}
+              />
             );
           })}
       </ul>

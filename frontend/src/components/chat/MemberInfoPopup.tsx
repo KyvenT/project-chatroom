@@ -108,7 +108,7 @@ export const MemberInfo = ({
       }),
   });
 
-  useOutsideClick(onClose, popupRef);
+  useOutsideClick({ callbackFn: onClose, elementRef: popupRef });
 
   const userRole = members.find((mem) => mem.memberId === user.userId)?.role;
   const canKick = userRole !== "MEMBER" && userRole !== member.role;

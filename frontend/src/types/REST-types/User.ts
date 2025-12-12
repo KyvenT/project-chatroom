@@ -1,3 +1,5 @@
+export type UserStatus = "ONLINE" | "AWAY" | "OFFLINE";
+
 export interface UserAuth {
   userId: string;
   token: string;
@@ -7,5 +9,14 @@ export interface UserAuth {
 
 export interface StatusUpdate {
   userId: string;
-  status: "ONLINE" | "AWAY" | "OFFLINE";
+  status: UserStatus;
+}
+
+export interface UserDetails {
+  id: string;
+  email: string | null;
+  username: string;
+  status: UserStatus;
+  createdAt: Date;
+  isGuest: boolean;
 }

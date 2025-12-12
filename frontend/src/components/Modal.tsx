@@ -2,12 +2,13 @@ import { css, type SerializedStyles } from "@emotion/react";
 import type React from "react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useOutsideClick } from "../hooks/useHandleOutsideClick";
+
+type ModalVariant = "default" | "requiredInteraction";
 
 export interface ModalProps
   extends React.DialogHTMLAttributes<HTMLDialogElement> {
   modalStyles?: SerializedStyles;
-  variant?: "default" | "requiredInteraction";
+  variant?: ModalVariant;
   onClose?: () => void;
 }
 
@@ -21,14 +22,27 @@ export const closeButtonStyles = css({
   fontSize: "1rem",
 });
 
-const dialogStyles = css({
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  padding: 0,
-  border: 0,
-});
+const dialogStyles = (variant: ModalVariant) =>
+  css({
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    padding: 0,
+    border: 0,
+    zIndex: variant === "requiredInteraction" ? 9999 : 1,
+  });
+
+const backdropStyles = (variant: ModalVariant) =>
+  css({
+    position: "absolute",
+    top: 0,
+    left: 0,
+    backgroundColor:
+      variant === "requiredInteraction" ? "rgba(50,50,50,0.2)" : "transparent",
+    height: "100dvh",
+    width: "100dvw",
+  });
 
 const Modal = ({
   children,
@@ -38,8 +52,6 @@ const Modal = ({
   variant = "default",
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useOutsideClick(onClose, dialogRef);
 
   useEffect(() => {
     if (open) {
@@ -62,16 +74,18 @@ const Modal = ({
   };
 
   return createPortal(
-    <dialog
-      ref={dialogRef}
-      onKeyDown={handleESCPress}
-      /* @ts-ignore */
-      closedBy="none"
-      css={[dialogStyles, modalStyles]}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {children}
-    </dialog>,
+    <div css={backdropStyles(variant)} onClick={onClose}>
+      <dialog
+        ref={dialogRef}
+        onKeyDown={handleESCPress}
+        /* @ts-ignore */
+        closedBy="none"
+        css={[dialogStyles(variant), modalStyles]}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </dialog>
+    </div>,
     document.body
   );
 };

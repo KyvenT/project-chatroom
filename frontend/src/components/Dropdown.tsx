@@ -27,7 +27,7 @@ const Dropdown = ({ children, onClose }: DropdownProps) => {
   const theme = useTheme();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useOutsideClick(onClose, dropdownRef);
+  useOutsideClick({ callbackFn: onClose, elementRef: dropdownRef });
 
   return (
     <div ref={dropdownRef} css={[defaultDropdownStyles, colors(theme)]}>

@@ -36,9 +36,7 @@ const DropdownButton = ({
         {buttonText}
       </button>
       {isToggled && (
-        <Dropdown buttonRef={buttonRef} onClose={() => setToggled(false)}>
-          {children}
-        </Dropdown>
+        <Dropdown onClose={() => setToggled(false)}>{children}</Dropdown>
       )}
     </div>
   );

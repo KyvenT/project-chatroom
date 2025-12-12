@@ -11,6 +11,6 @@ export const membersRouter = Router();
 
 membersRouter.get("/:chatroomId", getChatroomMembers);
 membersRouter.delete("/:chatroomId", removeMemberFromChatroom);
-membersRouter.patch("/:chatroomId/order", reorderMemberChatroom);
 membersRouter.post("/:chatroomId", joinChatroom);
+membersRouter.patch("/:chatroomId/order", reorderMemberChatroom);
 membersRouter.get("/:chatroomId/:memberId", getMemberDetails);
