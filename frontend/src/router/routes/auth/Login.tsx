@@ -33,7 +33,7 @@ export const authPageStyles = (theme: Theme) =>
       },
 
       ".authForm": {
-        width: "25dvw",
+        width: ["80dvw", "70dvw", "50dvw", "25dvw"],
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -43,12 +43,12 @@ export const authPageStyles = (theme: Theme) =>
         ".textInput": {
           fontSize: "1.25rem",
           minWidth: 0,
-          width: "80%",
+          width: "90%",
           outline: "none",
         },
 
         ".passwordContainer": {
-          width: "80%",
+          width: "90%",
           display: "flex",
           border: `1px solid ${theme.colors.grey}`,
           borderRadius: "4px",
