@@ -1,7 +1,7 @@
 import type { Theme } from "@emotion/react";
 import { css, useTheme } from "@emotion/react";
 import Button from "../../../components/Button";
-import { Pin, Plus } from "lucide-react";
+import { Pin, Plus, SquarePen } from "lucide-react";
 import {
   verifiedMutation,
   type MutationArgs,
@@ -46,7 +46,8 @@ const styles = css(
     ".edit-pinned-chatrooms-btn": {
       fontSize: "1rem",
       textWrap: "wrap",
-      width: ["50%", "10%"],
+      width: ["33%", "10%"],
+      aspectRatio: 1,
 
       ".btn-icon": {
         width: "2.25rem",
@@ -73,6 +74,19 @@ const styles = css(
     ".pinned-group-name": {
       fontWeight: "400",
       fontSize: "1.25rem",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    },
+
+    ".pinned-group-title-section": {
+      display: "flex",
+      alignItems: "center",
+    },
+
+    ".edit-title-btn": {
+      minHeight: 0,
+      aspectRatio: 1,
     },
   })
 );
@@ -86,7 +100,7 @@ const colors = (theme: Theme) =>
     },
 
     ".pinned-group:hover": {
-      backgroundColor: theme.colors.dark_grey,
+      backgroundColor: theme.colors.black,
     },
 
     ".title": {
@@ -101,12 +115,11 @@ const ChatHome = () => {
   const [openedPinGroup, setOpenedPinGroup] = useState<PinnedGroup | null>(
     null
   );
-  // TODO: add pinned/favourite chatrooms in backend,
-  // add table with userId and chatroomIds
-  // also add special case value for active chatroom when at ChatHome
-  // to receive messages for all pinned chatrooms
+  const [enableTitleEdit, setEnableTitleEdit] = useState<string>("");
+  const [hoveredPinGroup, setHoveredPinGroup] = useState<string>("");
+  const [pinnedGroups, setPinnedGroups] = useState<PinnedGroup[]>([]);
 
-  const { data: pinnedGroups, refetch } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["pinnedChatrooms", user.userId],
     queryFn: () =>
       verifiedQuery<PinnedGroup[]>({
@@ -115,6 +128,10 @@ const ChatHome = () => {
       }),
     staleTime: Infinity,
   });
+
+  useEffect(() => {
+    if (data) setPinnedGroups(data);
+  }, [data]);
 
   const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
     mutationFn: verifiedMutation,
@@ -133,6 +150,25 @@ const ChatHome = () => {
     });
   };
 
+  const handleEditPinnedGroupName = (pinnedGroupId: string, name: string) => {
+    mutate({
+      fetchUrl: `http://localhost:3000/api/pinned/${pinnedGroupId}`,
+      method: "PATCH",
+      user,
+      reqBody: {
+        name,
+      },
+    });
+    setPinnedGroups((prev) =>
+      prev?.map((pinnedGroup) => {
+        if (pinnedGroup.id === pinnedGroupId) {
+          return { ...pinnedGroup, name };
+        }
+        return pinnedGroup;
+      })
+    );
+  };
+
   const handleEditBtnClick = useCallback((pinnedGroup: PinnedGroup) => {
     setOpenedPinGroup(pinnedGroup);
     setOpenPinModal(true);
@@ -144,8 +180,40 @@ const ChatHome = () => {
         <h2 className="title">Pinned Chats</h2>
         <div className="pinned-groups">
           {pinnedGroups?.map((pinnedGroup) => (
-            <div key={pinnedGroup.id} className="pinned-group">
-              <h3 className="pinned-group-name">{pinnedGroup.name}</h3>
+            <div
+              key={pinnedGroup.id}
+              className="pinned-group"
+              onMouseOver={() => setHoveredPinGroup(pinnedGroup.id)}
+              onMouseLeave={() => setHoveredPinGroup("")}
+            >
+              <div className="pinned-group-title-section">
+                {enableTitleEdit === pinnedGroup.id ? (
+                  <input
+                    type="text"
+                    key={pinnedGroup.id}
+                    placeholder={pinnedGroup.name}
+                    maxLength={20}
+                    defaultValue={pinnedGroup.name}
+                  ></input>
+                ) : (
+                  <h3 className="pinned-group-name">{pinnedGroup.name}</h3>
+                )}
+
+                {hoveredPinGroup === pinnedGroup.id && (
+                  <Button
+                    variant="icon"
+                    type="button"
+                    onClick={() => {
+                      setEnableTitleEdit((prev) =>
+                        prev ? "" : pinnedGroup.id
+                      );
+                    }}
+                    className="edit-title-btn"
+                  >
+                    <SquarePen size="1rem" />
+                  </Button>
+                )}
+              </div>
               <div className="pinned-group-carousel">
                 <PinnedChatroomsList pinnedGroup={pinnedGroup} />
                 <Button

@@ -42,6 +42,12 @@ const styles = css({
   ".userBtn:hover": {
     textDecoration: "underline",
   },
+
+  ".timeStamp": {
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
 });
 
 const colors = (theme: Theme) =>

@@ -73,7 +73,9 @@ const colors = (theme: Theme) =>
         fontWeight: "450",
         padding: 0,
         color: theme.colors.light_grey,
-        textWrap: "nowrap",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
       },
 
       ".chatroom-details-btn:hover": {
