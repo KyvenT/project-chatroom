@@ -6,6 +6,7 @@ import apiRouter from "./routes/routes.js";
 import cors from "cors";
 import { corsPreflightMiddleware } from "./middleware/corsPreflightMiddleware.js";
 import { startWSS } from "./wss/wss.js";
+import { rateLimitMiddleware } from "./middleware/rateLimitMiddleware.js";
 
 const corsOptions = {
   origin: ["http://localhost:5173"],
@@ -30,6 +31,7 @@ app.use(express.static(pathToStaticFiles));
 // middleware
 app.use(express.json());
 app.use(corsPreflightMiddleware);
+app.use(rateLimitMiddleware);
 
 // routes
 app.use("/api", apiRouter);
