@@ -35,6 +35,9 @@ const styles = css(
 
     ".memberBtn": {
       fontSize: "1rem",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
     },
 
     ".status": {

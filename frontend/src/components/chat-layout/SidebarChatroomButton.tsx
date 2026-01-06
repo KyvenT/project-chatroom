@@ -39,6 +39,9 @@ const styles = css({
     textDecoration: "none",
     userSelect: "none",
     fontSize: "1.25rem",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
 
   ".unreadBadge": {

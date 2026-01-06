@@ -9,6 +9,13 @@ import type { Theme } from "@emotion/react";
 const styles = (theme: Theme) =>
   css(
     mq({
+      ".container": {
+        width: "90%",
+        backgroundColor: theme.colors.grey,
+        padding: "12px",
+        margin: "auto",
+      },
+
       ".profilePicture": {
         aspectRatio: "1",
         width: "100px",
@@ -31,22 +38,24 @@ export const AccountProfilePage = () => {
 
   return (
     <div css={styles(theme)}>
-      <h1 className="title">Account</h1>
-      <div className="profilePicture"></div>
-      <input
-        type="file"
-        id="profilePictureInput"
-        accept="image/png, image/jpeg"
-      ></input>
-      <h2>Username: {user.username}</h2>
-      <h3>User ID: {user.userId}</h3>
-      <p>{user.isGuest ? "Guest account" : "User account"}</p>
-      <p>
-        Account created on:{" "}
-        {data?.createdAt &&
-          new Date(data?.createdAt).toLocaleDateString("en-US")}
-      </p>
-      <p>{data?.email ? "Email verified" : "Email unverified"}</p>
+      <div className="container">
+        <h1 className="title">Account Details</h1>
+        <div className="profilePicture"></div>
+        <input
+          type="file"
+          id="profilePictureInput"
+          accept="image/png, image/jpeg"
+        ></input>
+        <h2>Username: {user.username}</h2>
+        <h3>User ID: {user.userId}</h3>
+        <p>{user.isGuest ? "Guest account" : "User account"}</p>
+        <p>
+          Account created on:{" "}
+          {data?.createdAt &&
+            new Date(data?.createdAt).toLocaleDateString("en-US")}
+        </p>
+        <p>{data?.email ? "Email verified" : "Email unverified"}</p>
+      </div>
     </div>
   );
 };

@@ -35,6 +35,12 @@ const styles = (status: Status) =>
         padding: "4px",
       },
     },
+
+    ".username": {
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    },
   });
 
 const colors = (theme: Theme) =>
@@ -100,7 +106,7 @@ const ProfileStatus = ({ status }: ProfileStatusProps) => {
           Offline
         </option>
       </select>
-      <p>{user.username}</p>
+      <p className="username">{user.username}</p>
     </div>
   );
 };

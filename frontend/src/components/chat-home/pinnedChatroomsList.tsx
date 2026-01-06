@@ -46,6 +46,9 @@ const styles = css(
       ".chatroom-title": {
         fontWeight: "500",
         fontSize: "1.15rem",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
       },
     },
   })
@@ -61,13 +64,12 @@ const colors = (theme: Theme) =>
 
       ".pinned-chatroom": {
         color: theme.colors.white,
-        border: `1px solid ${theme.colors.light_grey}`,
         backgroundColor: theme.colors.grey,
         scrollbarColor: `transparent transparent`,
       },
 
       ".pinned-chatroom:hover": {
-        borderColor: theme.colors.white,
+        border: `1px solid ${theme.colors.white}`,
         scrollbarColor: `${theme.colors.white} transparent`,
       },
 

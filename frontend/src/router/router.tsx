@@ -9,7 +9,6 @@ import Signup from "./routes/auth/Signup";
 import ChatLayout from "./routes/chat/ChatLayout";
 import ChatHome from "./routes/chat/ChatHome";
 import Logout from "./routes/auth/Logout";
-import { UtilityLayout } from "./routes/utility/UtilityLayout";
 import { AccountProfilePage } from "./routes/utility/AccountProfile";
 import { SettingsPage } from "./routes/utility/Settings";
 
@@ -40,7 +39,7 @@ const Router = () => {
         ],
       },
       {
-        Component: UtilityLayout,
+        Component: ChatLayout,
         errorElement: <ErrorPage />,
         children: [
           { path: "account", Component: AccountProfilePage },

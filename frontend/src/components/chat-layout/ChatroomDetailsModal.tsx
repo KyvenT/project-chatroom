@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   ChatroomDetails,
   ChatroomPrivacy,
@@ -17,6 +17,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { SquarePen } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
 import useToggle from "../../hooks/useToggle";
+import { verifiedQuery } from "../../hooks/useCustomQuery";
 
 const chatroomDetailsModalStyles = (theme: Theme) =>
   css({
@@ -118,7 +119,6 @@ interface ChatroomDetailsProps extends ModalProps {
   user: UserAuth;
   chatroomId: string;
   onClose: () => void;
-  chatroomData: ChatroomDetails;
 }
 
 interface ChatroomFormInput {
@@ -131,15 +131,28 @@ export const ChatroomDetailsModal = ({
   onClose,
   chatroomId,
   user,
-  chatroomData,
 }: ChatroomDetailsProps) => {
   const theme = useTheme();
   const [enableTitleEdit, setEnableTitleEdit] = useToggle(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useToggle(false);
   const { isLoggedIn } = useAuthContext();
 
+  const { data: chatroomData, refetch } = useQuery<ChatroomDetails>({
+    queryKey: ["active-chatroom", chatroomId],
+    queryFn: () =>
+      verifiedQuery({
+        fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
+        user,
+      }),
+    enabled: !!chatroomId,
+    staleTime: 0,
+  });
+
   const { register, handleSubmit, setFocus } = useForm<ChatroomFormInput>({
-    defaultValues: { privacy: chatroomData?.privacy },
+    defaultValues: {
+      title: chatroomData?.title,
+      privacy: chatroomData?.privacy,
+    },
   });
 
   const chatroomMutation = useMutation<
@@ -187,6 +200,8 @@ export const ChatroomDetailsModal = ({
         privacy,
       },
     });
+
+    refetch();
   };
 
   const isOwner = chatroomData?.ownerId === user.userId;
