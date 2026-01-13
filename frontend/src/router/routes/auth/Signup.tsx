@@ -9,6 +9,7 @@ import { Eye, EyeClosed } from "lucide-react";
 import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useTheme } from "@emotion/react";
+import { API_URL } from "../../../env";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const Signup = () => {
     const { username, password } = data;
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/register", {
+      const res = await fetch(`http://${API_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -11,6 +11,7 @@ import { useMembersStore } from "../../hooks/useStores";
 import { mq } from "../../styles/breakpoints";
 import { MemberInfo } from "./MemberInfoPopup";
 import Button from "../Button";
+import { API_URL } from "../../env";
 
 const styles = css(
   mq({
@@ -89,7 +90,7 @@ const MembersPanel = () => {
     queryKey: [user.userId, chatroomId],
     queryFn: () =>
       verifiedQuery<ChatroomMember[]>({
-        fetchUrl: "http://localhost:3000/api/members/" + chatroomId,
+        fetchUrl: `http://${API_URL}/api/members/${chatroomId}`,
         user,
       }),
     enabled: !!user.userId,

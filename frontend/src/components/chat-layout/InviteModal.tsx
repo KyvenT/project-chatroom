@@ -16,6 +16,7 @@ import { verifiedQuery } from "../../hooks/useCustomQuery";
 import Button from "../Button";
 import { useState } from "react";
 import { Send } from "lucide-react";
+import { API_URL } from "../../env";
 
 const dialogStyles = (theme: Theme) =>
   css({
@@ -125,7 +126,7 @@ export const InviteModal = ({
     queryKey: ["inviteList", chatroomId],
     queryFn: () =>
       verifiedQuery({
-        fetchUrl: "http://localhost:3000/api/invites/" + chatroomId,
+        fetchUrl: `http://${API_URL}/api/invites/${chatroomId}`,
         method: "GET",
         user,
       }),
@@ -149,7 +150,7 @@ export const InviteModal = ({
     }
     const { username } = formData;
     mutate({
-      fetchUrl: "http://localhost:3000/api/invites/",
+      fetchUrl: `http://${API_URL}/api/invites/`,
       method: "POST",
       user,
       reqBody: {

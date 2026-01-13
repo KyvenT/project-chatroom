@@ -10,6 +10,7 @@ import { mq } from "../../../styles/breakpoints";
 import Button from "../../../components/Button";
 import { Eye, EyeClosed } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { API_URL } from "../../../env";
 
 export const authPageStyles = (theme: Theme) =>
   css(
@@ -119,7 +120,7 @@ const Login = () => {
     const { username, password } = data;
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
+      const res = await fetch(`http://${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

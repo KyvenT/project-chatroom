@@ -19,6 +19,7 @@ import {
 import { useOutsideClick } from "../../hooks/useHandleOutsideClick";
 import { useRef } from "react";
 import { createPortal } from "react-dom";
+import { API_URL } from "../../env";
 
 type PopupPosition = "LEFT" | "RIGHT";
 
@@ -103,7 +104,7 @@ export const MemberInfo = ({
     queryKey: [member.memberId],
     queryFn: () =>
       verifiedQuery({
-        fetchUrl: `http://localhost:3000/api/members/${chatroomId}/${member.memberId}`,
+        fetchUrl: `http://${API_URL}/api/members/${chatroomId}/${member.memberId}`,
         user,
       }),
   });
@@ -115,7 +116,7 @@ export const MemberInfo = ({
 
   const handleKick = () => {
     mutation.mutate({
-      fetchUrl: `http://localhost:3000/api/members/${chatroomId}`,
+      fetchUrl: `http://${API_URL}/api/members/${chatroomId}`,
       method: "DELETE",
       user,
       reqBody: {

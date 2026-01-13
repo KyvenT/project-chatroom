@@ -13,6 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import { verifiedMutation } from "../../hooks/useCustomMutation";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { useEffect } from "react";
+import { API_URL } from "../../env";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
@@ -171,7 +172,7 @@ const SidebarChatroomButton = ({
     swapChatroomOrder(firstChatroom, chatroom);
 
     mutate({
-      fetchUrl: "http://localhost:3000/api/chatrooms/reorder",
+      fetchUrl: `http://${API_URL}/api/chatrooms/reorder`,
       user,
       method: "PATCH",
       reqBody: {

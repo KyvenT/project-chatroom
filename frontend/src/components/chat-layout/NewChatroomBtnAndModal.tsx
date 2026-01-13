@@ -13,6 +13,7 @@ import type { SubmitHandler } from "react-hook-form";
 import Modal, { closeButtonStyles } from "../Modal";
 import type { Theme } from "@emotion/react";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
+import { API_URL } from "../../env";
 
 const buttonStyles = (theme: Theme) =>
   css({
@@ -134,7 +135,7 @@ const NewChatButton = () => {
     const { title, privacy } = data;
     setToggle(false);
     mutation.mutate({
-      fetchUrl: "http://localhost:3000/api/chatrooms/create",
+      fetchUrl: `http://${API_URL}/api/chatrooms/create`,
       method: "POST",
       user,
       reqBody: {

@@ -5,6 +5,7 @@ import { type UserDetails } from "../../../types/REST-types/User";
 import { css, useTheme } from "@emotion/react";
 import { mq } from "../../../styles/breakpoints";
 import type { Theme } from "@emotion/react";
+import { API_URL } from "../../../env";
 
 const styles = (theme: Theme) =>
   css(
@@ -32,7 +33,10 @@ export const AccountProfilePage = () => {
   const { data } = useQuery<UserDetails>({
     queryKey: [],
     queryFn: () =>
-      verifiedQuery({ fetchUrl: `http://localhost:3000/api/users/me`, user }),
+      verifiedQuery({
+        fetchUrl: `http://${API_URL}/api/users/me`,
+        user,
+      }),
     staleTime: 0,
   });
 

@@ -10,6 +10,7 @@ import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import type { PinnedGroup } from "../../types/REST-types/Chatroom";
 import useAuthContext from "../../hooks/useAuthContext";
+import { API_URL } from "../../env";
 
 interface pinChatroomsModalProps {
   open: boolean;
@@ -49,7 +50,7 @@ export const PinChatroomsModal = ({
 
   const handleChatroomPin = (
     chatroomId: string,
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     console.log(
       "pin ",
@@ -57,10 +58,10 @@ export const PinChatroomsModal = ({
       ": ",
       chatroomId,
       ",",
-      event.target.checked,
+      event.target.checked
     );
     mutate({
-      fetchUrl: "http://localhost:3000/api/pinned/" + chatroomId + "/pin",
+      fetchUrl: `http://${API_URL}/api/pinned/${chatroomId}/pin`,
       method: "PATCH",
       user,
       reqBody: {
@@ -71,13 +72,13 @@ export const PinChatroomsModal = ({
   };
 
   const pinnedIds = pinnedGroup.pinnedChatrooms.map(
-    (chatroom) => chatroom.chatroomId,
+    (chatroom) => chatroom.chatroomId
   );
   const pinnedChatrooms = chatrooms.filter((chatroom) =>
-    pinnedIds.includes(chatroom.chatroomId),
+    pinnedIds.includes(chatroom.chatroomId)
   );
   const unpinnedChatrooms = chatrooms.filter(
-    (chatroom) => !pinnedIds.includes(chatroom.chatroomId),
+    (chatroom) => !pinnedIds.includes(chatroom.chatroomId)
   );
 
   return (

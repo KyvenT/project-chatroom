@@ -4,6 +4,7 @@ import type { Chatroom } from "../../types/REST-types/Chatroom";
 import { verifiedQuery } from "../useCustomQuery";
 import { useEffect } from "react";
 import useAuthContext from "../useAuthContext";
+import { API_URL } from "../../env";
 
 export const useFetchUserChatrooms = () => {
   const setChatroomList = useChatroomsStore((state) => state.setChatroomList);
@@ -13,7 +14,7 @@ export const useFetchUserChatrooms = () => {
     queryKey: ["chatrooms", user.userId],
     queryFn: () =>
       verifiedQuery<Chatroom[]>({
-        fetchUrl: "http://localhost:3000/api/chatrooms/me",
+        fetchUrl: `http://${API_URL}/api/chatrooms/me`,
         user,
       }),
     enabled: !!isLoggedIn,
