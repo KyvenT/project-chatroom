@@ -7,11 +7,12 @@ import {
 import { verifiedQuery } from "./useCustomQuery";
 import useAuthContext from "./useAuthContext";
 import type { Message } from "../types/REST-types/Message";
+import { API_URL } from "../env";
 
 export const useFetchMessages = (
   chatroomId: string | undefined,
   getBefore: Date | null,
-  limit: number,
+  limit: number
 ) => {
   const { user, isLoggedIn } = useAuthContext();
 
@@ -19,7 +20,7 @@ export const useFetchMessages = (
     queryKey: [chatroomId, isLoggedIn, getBefore?.toISOString()],
     queryFn: () =>
       verifiedQuery<Message[]>({
-        fetchUrl: `http://localhost:3000/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
+        fetchUrl: `http://${API_URL}/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
         user,
       }),
     enabled: !!getBefore,
@@ -33,7 +34,7 @@ type MessageQueries = UseQueryOptions<Message[]>[];
 export const useFetchMessagesMultiple = (
   chatroomIds: string[],
   getBefore: Date | null,
-  limit: number,
+  limit: number
 ) => {
   const { user } = useAuthContext();
 
@@ -42,7 +43,7 @@ export const useFetchMessagesMultiple = (
       queryKey: [chatroomId, user.userId, getBefore?.toISOString()],
       queryFn: () =>
         verifiedQuery<Message[]>({
-          fetchUrl: `http://localhost:3000/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
+          fetchUrl: `http://${API_URL}/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
           user,
         }),
       enabled: !!getBefore,

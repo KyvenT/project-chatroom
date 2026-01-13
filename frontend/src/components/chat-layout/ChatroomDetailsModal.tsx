@@ -18,6 +18,7 @@ import { SquarePen } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
 import useToggle from "../../hooks/useToggle";
 import { verifiedQuery } from "../../hooks/useCustomQuery";
+import { API_URL } from "../../env";
 
 const chatroomDetailsModalStyles = (theme: Theme) =>
   css({
@@ -141,7 +142,7 @@ export const ChatroomDetailsModal = ({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
       verifiedQuery({
-        fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
+        fetchUrl: `http://${API_URL}/api/chatrooms/${chatroomId}`,
         user,
       }),
     enabled: !!chatroomId,
@@ -165,7 +166,7 @@ export const ChatroomDetailsModal = ({
 
   const handleLeave = () => {
     chatroomMutation.mutate({
-      fetchUrl: "http://localhost:3000/api/members/" + chatroomId,
+      fetchUrl: `http://${API_URL}/api/members/${chatroomId}`,
       method: "DELETE",
       user,
       reqBody: {
@@ -178,7 +179,7 @@ export const ChatroomDetailsModal = ({
   const handleDelete = () => {
     if (chatroomData?.ownerId !== user.userId) return;
     chatroomMutation.mutate({
-      fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
+      fetchUrl: `http://${API_URL}/api/chatrooms/${chatroomId}`,
       method: "DELETE",
       user,
     });
@@ -192,7 +193,7 @@ export const ChatroomDetailsModal = ({
     console.log("update chatroom to: ", title, privacy);
 
     chatroomMutation.mutate({
-      fetchUrl: "http://localhost:3000/api/chatrooms/" + chatroomId,
+      fetchUrl: `http://${API_URL}/api/chatrooms/${chatroomId}`,
       method: "PATCH",
       user,
       reqBody: {

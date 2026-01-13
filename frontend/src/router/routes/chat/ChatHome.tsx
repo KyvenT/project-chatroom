@@ -16,6 +16,7 @@ import useToggle from "../../../hooks/useToggle";
 import { PinChatroomsModal } from "../../../components/chat-home/pinChatroomsModal";
 import type { ConfirmationResponse } from "../../../types/REST-types/Invite";
 import { useCallback, useEffect, useState } from "react";
+import { API_URL } from "../../../env";
 
 const styles = css(
   mq({
@@ -47,6 +48,7 @@ const styles = css(
       fontSize: "1rem",
       textWrap: "wrap",
       width: ["33%", "10%"],
+      height: "auto",
       aspectRatio: 1,
 
       ".btn-icon": {
@@ -72,6 +74,7 @@ const styles = css(
     },
 
     ".pinned-group-name": {
+      display: "inline",
       fontWeight: "400",
       fontSize: "1.25rem",
       whiteSpace: "nowrap",
@@ -79,14 +82,11 @@ const styles = css(
       textOverflow: "ellipsis",
     },
 
-    ".pinned-group-title-section": {
-      display: "flex",
-      alignItems: "center",
-    },
-
     ".edit-title-btn": {
+      display: "inline",
       minHeight: 0,
       aspectRatio: 1,
+      padding: "auto 4px",
     },
   })
 );
@@ -123,7 +123,7 @@ const ChatHome = () => {
     queryKey: ["pinnedChatrooms", user.userId],
     queryFn: () =>
       verifiedQuery<PinnedGroup[]>({
-        fetchUrl: "http://localhost:3000/api/pinned/me",
+        fetchUrl: `http://${API_URL}/api/pinned/me`,
         user,
       }),
     staleTime: Infinity,
@@ -142,9 +142,9 @@ const ChatHome = () => {
     if (!openPinModal) setOpenedPinGroup(null);
   }, [openPinModal]);
 
-  const handleAddPinnedGroupClick = () => {
+  const handleAddPinnedGroupClick: () => void = () => {
     mutate({
-      fetchUrl: "http://localhost:3000/api/pinned",
+      fetchUrl: `http://${API_URL}/api/pinned`,
       method: "POST",
       user,
     });
@@ -152,7 +152,7 @@ const ChatHome = () => {
 
   const handleEditPinnedGroupName = (pinnedGroupId: string, name: string) => {
     mutate({
-      fetchUrl: `http://localhost:3000/api/pinned/${pinnedGroupId}`,
+      fetchUrl: `http://${API_URL}/api/pinned/${pinnedGroupId}`,
       method: "PATCH",
       user,
       reqBody: {
@@ -210,7 +210,7 @@ const ChatHome = () => {
                     }}
                     className="edit-title-btn"
                   >
-                    <SquarePen size="1rem" />
+                    <SquarePen />
                   </Button>
                 )}
               </div>

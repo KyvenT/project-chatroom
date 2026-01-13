@@ -9,8 +9,25 @@ import {
 } from "../../hooks/useCustomMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Mail } from "lucide-react";
-import type { Theme } from "@emotion/react";
+import { css, type Theme } from "@emotion/react";
 import { useInvitesStore } from "../../hooks/useStores";
+import { mq } from "../../styles/breakpoints";
+import { API_URL } from "../../env";
+
+const styles = css(
+  mq({
+    width: "fit-content",
+    display: "flex",
+    flexDirection: "column",
+
+    ul: {
+      listStyle: "none",
+      padding: 0,
+    },
+
+    ".emptyInboxMsg": { display: "flex" },
+  })
+);
 
 const InboxButton = () => {
   const { user } = useAuthContext();
@@ -21,7 +38,7 @@ const InboxButton = () => {
     queryKey: ["inbox", user.token],
     queryFn: () =>
       verifiedQuery<Invite[]>({
-        fetchUrl: "http://localhost:3000/api/invites/me",
+        fetchUrl: `http://${API_URL}/api/invites/me`,
         user,
       }),
     staleTime: Infinity,
@@ -51,7 +68,7 @@ const InboxButton = () => {
     }
 
     mutation.mutate({
-      fetchUrl: "http://localhost:3000/api/invites/",
+      fetchUrl: `http://${API_URL}/api/invites/`,
       user,
       method: "PATCH",
       reqBody: { inviteId, status },
@@ -66,31 +83,37 @@ const InboxButton = () => {
       buttonText={<Mail size="2.5rem" />}
       buttonVariant="icon"
     >
-      {invites.length === 0 && <p className="emptyInboxMsg">All caught up!</p>}
-      <ul>
-        {invites.map((invite) => {
-          return (
-            <li key={invite.id}>
-              <h5>{invite.chatroom.title}</h5>
-              <p>Invited by: {invite.sender.username}</p>
-              <form id={invite.id}>
-                <button
-                  id="accept"
-                  onClick={(event) => handleInviteResponse(event, true)}
-                >
-                  Accept
-                </button>
-                <button
-                  id="reject"
-                  onClick={(event) => handleInviteResponse(event, false)}
-                >
-                  Reject
-                </button>
-              </form>
-            </li>
-          );
-        })}
-      </ul>
+      <div css={styles}>
+        {invites.length === 0 && (
+          <p className="emptyInboxMsg">All caught up!</p>
+        )}
+        <ul>
+          {invites.map((invite) => {
+            return (
+              <li key={invite.id} className="invite">
+                <h5 className="invite-chatroom">{invite.chatroom.title}</h5>
+                <p className="invite-sender">
+                  Invited by: {invite.sender.username}
+                </p>
+                <form id={invite.id}>
+                  <button
+                    id="accept"
+                    onClick={(event) => handleInviteResponse(event, true)}
+                  >
+                    Accept
+                  </button>
+                  <button
+                    id="reject"
+                    onClick={(event) => handleInviteResponse(event, false)}
+                  >
+                    Reject
+                  </button>
+                </form>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </DropdownButton>
   );
 };

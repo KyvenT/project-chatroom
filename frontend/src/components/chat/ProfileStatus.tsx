@@ -8,6 +8,7 @@ import {
 } from "../../hooks/useCustomMutation";
 import type { StatusUpdate } from "../../types/REST-types/User";
 import { useRef } from "react";
+import { API_URL } from "../../env";
 
 export type Status = "ONLINE" | "AWAY" | "OFFLINE";
 
@@ -77,7 +78,7 @@ const ProfileStatus = ({ status }: ProfileStatusProps) => {
     const newStatus = statusRef.current?.value;
 
     mutation.mutate({
-      fetchUrl: "http://localhost:3000/api/users/me",
+      fetchUrl: `http://${API_URL}/api/users/me`,
       method: "PATCH",
       user,
       reqBody: { status: newStatus },

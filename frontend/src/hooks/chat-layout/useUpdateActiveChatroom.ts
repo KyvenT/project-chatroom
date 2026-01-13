@@ -15,14 +15,14 @@ export const useUpdateActiveChatroom = () => {
           JSON.stringify({
             type: "update-active-chatroom",
             chatroomId,
-          }),
+          })
         );
       } else {
         ws.send(
           JSON.stringify({
             type: "update-active-chatroom",
             chatroomId: "home",
-          }),
+          })
         );
       }
     }

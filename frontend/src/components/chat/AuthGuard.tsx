@@ -16,6 +16,7 @@ import {
 } from "../../hooks/useCustomMutation";
 import type { Theme } from "@emotion/react";
 import { handleWSAuth } from "../../ws-router/out-going-ws-messages/auth";
+import { API_URL } from "../../env";
 
 const styles = (theme: Theme) =>
   css({
@@ -115,7 +116,7 @@ const AuthGuard = () => {
     queryKey: ["chatroom-privacy", chatroomId],
     queryFn: () =>
       nonVerifiedQuery({
-        fetchUrl: "http://localhost:3000/api/chatroomsPublic/" + chatroomId,
+        fetchUrl: `http://${API_URL}/api/chatroomsPublic/${chatroomId}`,
       }),
     enabled: !!chatroomId,
     staleTime: Infinity,
@@ -137,7 +138,7 @@ const AuthGuard = () => {
     const username = guestNameRef.current?.value;
     if (!username) return;
     mutate({
-      fetchUrl: "http://localhost:3000/api/auth/create-guest",
+      fetchUrl: `http://${API_URL}/api/auth/create-guest`,
       method: "POST",
       reqBody: { username, chatroomId },
     });
