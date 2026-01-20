@@ -39,6 +39,9 @@ const styles = css(
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
     },
 
     ".status": {
@@ -46,7 +49,7 @@ const styles = css(
       userSelect: "none",
       fontWeight: 500,
     },
-  })
+  }),
 );
 
 const colors = (theme: Theme) =>
@@ -106,20 +109,20 @@ const MembersPanel = () => {
 
   const onMemberClick = (
     member: ChatroomMember,
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     setClickedMember({ member, button: event.target as HTMLButtonElement });
   };
 
   const { statusLists, status } = useMemo(() => {
     const onlineList = members.filter(
-      (member) => member.member.status === "ONLINE"
+      (member) => member.member.status === "ONLINE",
     );
     const awayList = members.filter(
-      (member) => member.member.status === "AWAY"
+      (member) => member.member.status === "AWAY",
     );
     const offlineList = members.filter(
-      (member) => member.member.status === "OFFLINE"
+      (member) => member.member.status === "OFFLINE",
     );
     const status = members.find((member) => member.memberId === user.userId)
       ?.member.status;
