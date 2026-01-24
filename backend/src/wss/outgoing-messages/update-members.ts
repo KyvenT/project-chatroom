@@ -7,7 +7,7 @@ export type updateMembersActions = "JOIN" | "LEAVE";
 export const sendUpdateMembers = async (
   chatroomId: string,
   memberId: string,
-  actionType: updateMembersActions
+  actionType: updateMembersActions,
 ) => {
   const messageOptions: any = {};
   switch (actionType) {
@@ -27,6 +27,7 @@ export const sendUpdateMembers = async (
               status: true,
             },
           },
+          role: true,
         },
       })) as MembersPayload;
 
@@ -56,7 +57,7 @@ export const sendUpdateMembers = async (
         type: "update-members",
         chatroomId,
         ...messageOptions,
-      })
+      }),
     );
   });
 };

@@ -103,7 +103,10 @@ const MembersPanel = () => {
   });
 
   useEffect(() => {
-    if (!data) return;
+    if (!data) {
+      setMembers([]);
+      return;
+    }
     setMembers(data);
   }, [data]);
 

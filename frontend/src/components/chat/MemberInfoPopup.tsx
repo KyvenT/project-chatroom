@@ -133,9 +133,6 @@ export const MemberInfo = ({
 
   useOutsideClick({ callbackFn: onClose, elementRef: popupRef });
 
-  const userRole = members.find((mem) => mem.memberId === user.userId)?.role;
-  const canKick = userRole !== "MEMBER" && userRole !== member.role;
-
   const handleKick = () => {
     mutation.mutate({
       fetchUrl: `http://${API_URL}/api/members/${chatroomId}`,
@@ -147,6 +144,9 @@ export const MemberInfo = ({
     });
     onClose();
   };
+
+  const userRole = members.find((mem) => mem.memberId === user.userId)?.role;
+  const canKick = userRole !== "MEMBER" && userRole !== member.role;
 
   return createPortal(
     <div css={styles(theme, button, position)} ref={popupRef}>

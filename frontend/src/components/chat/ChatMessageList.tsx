@@ -31,7 +31,7 @@ const ChatMessageList = () => {
   const { chatroomId } = useParams();
   const messages = useMessagesStore((state) => state.messages);
   const addPrevMessages = useMessagesStore(
-    (state) => state.addPreviousMessages
+    (state) => state.addPreviousMessages,
   );
   const clearMessages = useMessagesStore((state) => state.clearMessages);
   const chatRef = useRef<HTMLDivElement>(null);
@@ -54,9 +54,14 @@ const ChatMessageList = () => {
   }, [messages]);
 
   const getHistoricalMessages = () => {
-    const el = chatRef.current;
-    if (!el || !data) return;
-    if (el.scrollHeight + el.scrollTop - el.clientHeight <= 1) {
+    const chatMessagesContainer = chatRef.current;
+    if (!chatMessagesContainer || !data) return;
+    if (
+      chatMessagesContainer.scrollHeight +
+        chatMessagesContainer.scrollTop -
+        chatMessagesContainer.clientHeight <=
+      1
+    ) {
       console.log("end reached");
 
       // if fetching more messages returns empty array, return
