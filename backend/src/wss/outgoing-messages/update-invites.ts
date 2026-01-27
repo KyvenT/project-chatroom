@@ -1,11 +1,11 @@
 import { socketMap } from "../../lib/socketMaps.js";
 import { InvitePayload } from "../../types/payloads.js";
 
-export type updateInvitesActions = "ADD" | "DELETE";
+export type UpdateInvitesActions = "ADD" | "DELETE";
 
 export interface updateOptions {
   memberId: string;
-  actionType: updateInvitesActions;
+  actionType: UpdateInvitesActions;
   inviteId?: string;
   invite?: InvitePayload;
 }
@@ -43,7 +43,7 @@ export const sendUpdateInvites = async ({
         type: "update-invites",
         action: actionType,
         ...messageOptions,
-      })
+      }),
     );
   } catch (err) {
     console.error("failed to send invite update" + err);

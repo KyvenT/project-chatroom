@@ -4,8 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "prisma": "cd src && npx prisma generate",
     "dev": "nodemon --watch src --ext ts --exec \"npm run build && node dist/index.js\"",
-    "build": "tsc",
+    "build": "npm run prisma && tsc",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

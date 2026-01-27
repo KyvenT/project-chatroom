@@ -1,16 +1,10 @@
 import Prisma from "../../prisma/prisma.js";
 import { Notification, NotificationType } from "@prisma/client";
 import { socketMap } from "../../lib/socketMaps.js";
-import { InvitePayload } from "../../types/payloads.js";
+import { MentionPayload } from "../../types/payloads.js";
 
 // TODO:
 // figure out mentions (use notifications array on each msg), need to add on frontend
-
-export interface MentionPayload {
-  chatroomId: string;
-  senderId: string;
-  messageId: string;
-}
 
 export interface NotificationOptions {
   mention?: MentionPayload;
@@ -20,7 +14,7 @@ export interface NotificationOptions {
 export const createNotification = async (
   type: NotificationType,
   userId: string,
-  options: NotificationOptions
+  options: NotificationOptions,
 ) => {
   const queryOptions: any = {};
   switch (type) {
@@ -53,7 +47,7 @@ export const createNotification = async (
 
 export const sendNotification = async (
   notification: Notification,
-  options: NotificationOptions
+  options: NotificationOptions,
 ) => {
   try {
     const recipientSocket = socketMap.getByKey(notification.userId);
@@ -70,7 +64,7 @@ export const sendNotification = async (
               inviteId: options.inviteId,
             },
           },
-        })
+        }),
       );
     }
   } catch (err) {
@@ -81,7 +75,7 @@ export const sendNotification = async (
 export const handleNewNotification = async (
   type: NotificationType,
   userId: string,
-  options: NotificationOptions
+  options: NotificationOptions,
 ) => {
   try {
     const notification = await createNotification(type, userId, options);
