@@ -2,12 +2,12 @@ import Prisma from "../../prisma/prisma.js";
 import { MembersPayload } from "../../types/payloads.js";
 import { socketMap } from "../../lib/socketMaps.js";
 
-export type updateMembersActions = "JOIN" | "LEAVE";
+export type UpdateMembersActions = "JOIN" | "LEAVE";
 
 export const sendUpdateMembers = async (
   chatroomId: string,
   memberId: string,
-  actionType: updateMembersActions
+  actionType: UpdateMembersActions,
 ) => {
   const messageOptions: any = {};
   switch (actionType) {
@@ -27,6 +27,7 @@ export const sendUpdateMembers = async (
               status: true,
             },
           },
+          role: true,
         },
       })) as MembersPayload;
 
@@ -56,7 +57,7 @@ export const sendUpdateMembers = async (
         type: "update-members",
         chatroomId,
         ...messageOptions,
-      })
+      }),
     );
   });
 };

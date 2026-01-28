@@ -1,21 +1,9 @@
-import {
-  chatroomModifyIndexSchema,
-  chatroomIdSchema,
-} from "../validators/chatrooms/chatroomValidation.js";
-import { validate } from "../validators/validate.js";
 import { Request, Response } from "express";
-import { chatroomMemberSchema } from "../validators/members/memberValidation.js";
 import * as membersService from "../services/memberService.js";
 import { ChatroomMemberDetailsPayload } from "../types/payloads.js";
 
 export const reorderMemberChatroom = async (req: Request, res: Response) => {
-  const data = validate(
-    chatroomModifyIndexSchema,
-    { ...req.params, ...req.body },
-    res
-  );
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res
@@ -35,9 +23,7 @@ export const reorderMemberChatroom = async (req: Request, res: Response) => {
 };
 
 export const getChatroomMembers = async (req: Request, res: Response) => {
-  const data = validate(chatroomIdSchema, req.params, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to get members list" });
@@ -54,13 +40,7 @@ export const getChatroomMembers = async (req: Request, res: Response) => {
 };
 
 export const removeMemberFromChatroom = async (req: Request, res: Response) => {
-  const data = validate(
-    chatroomMemberSchema,
-    { ...req.params, ...req.body },
-    res
-  );
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to leave chatroom" });
@@ -77,9 +57,7 @@ export const removeMemberFromChatroom = async (req: Request, res: Response) => {
 };
 
 export const joinChatroom = async (req: Request, res: Response) => {
-  const data = validate(chatroomIdSchema, req.params, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to join" });
@@ -96,9 +74,7 @@ export const joinChatroom = async (req: Request, res: Response) => {
 };
 
 export const getMemberDetails = async (req: Request, res: Response) => {
-  const data = validate(chatroomMemberSchema, req.params, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res

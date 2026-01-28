@@ -1,11 +1,5 @@
 import { Request, Response } from "express";
 import * as pinnedGroupService from "../services/pinnedGroupsService.js";
-import { validate } from "../validators/validate.js";
-import {
-  chatroomPinSchema,
-  editPinnedGroupSchema,
-  PinnedGroupNameSchema,
-} from "../validators/pinned-groups/pinnedGroupsValidation.js";
 
 export const getUserPinnedGroups = async (req: Request, res: Response) => {
   const userId = req.userId;
@@ -46,13 +40,7 @@ export const createPinnedGroup = async (req: Request, res: Response) => {
 };
 
 export const editPinnedGroup = async (req: Request, res: Response) => {
-  const data = validate(
-    editPinnedGroupSchema,
-    { ...req.params, ...req.body },
-    res
-  );
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res
@@ -71,9 +59,7 @@ export const editPinnedGroup = async (req: Request, res: Response) => {
 };
 
 export const pinMemberChatroom = async (req: Request, res: Response) => {
-  const data = validate(chatroomPinSchema, { ...req.params, ...req.body }, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(500).json({ message: "must be signed in to pin a chatroom" });

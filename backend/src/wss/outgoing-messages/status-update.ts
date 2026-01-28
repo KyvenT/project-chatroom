@@ -5,7 +5,7 @@ import Prisma from "../../prisma/prisma.js";
 export const sendStatusUpdate = async (user: {
   username: string;
   id: string;
-  status: "ONLINE" | "AWAY" | "OFFLINE";
+  status: Status;
 }) => {
   const affectedChatrooms = await Prisma.chatroomMember.findMany({
     select: {
@@ -31,7 +31,7 @@ export const sendStatusUpdate = async (user: {
               status: user.status,
             },
           },
-        })
+        }),
       );
     });
   });

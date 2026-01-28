@@ -1,10 +1,3 @@
-import {
-  chatroomIdSchema,
-  chatroomModifyOptionsSchema,
-  chatroomSetOptionsSchema,
-  swapChatroomIndexesSchema,
-} from "../validators/chatrooms/chatroomValidation.js";
-import { validate } from "../validators/validate.js";
 import { Request, Response } from "express";
 import * as chatroomService from "../services/chatroomService.js";
 
@@ -28,10 +21,7 @@ export const getUserChatrooms = async (req: Request, res: Response) => {
 };
 
 export const getChatroomDetails = async (req: Request, res: Response) => {
-  const data = validate(chatroomIdSchema, req.params, res);
-  if (!data) return;
-
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res
@@ -43,7 +33,7 @@ export const getChatroomDetails = async (req: Request, res: Response) => {
   try {
     const chatroomDetails = await chatroomService.getChatroomDetails(
       userId,
-      data
+      data,
     );
     res.status(200).json(chatroomDetails);
   } catch (err: any) {
@@ -53,9 +43,7 @@ export const getChatroomDetails = async (req: Request, res: Response) => {
 };
 
 export const createChatroom = async (req: Request, res: Response) => {
-  const data = validate(chatroomSetOptionsSchema, req.body, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to create a chatroom" });
@@ -72,14 +60,7 @@ export const createChatroom = async (req: Request, res: Response) => {
 };
 
 export const updateChatroom = async (req: Request, res: Response) => {
-  const data = validate(
-    chatroomModifyOptionsSchema,
-    { ...req.params, ...req.body },
-    res
-  );
-  if (!data) return;
-
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to update a chatroom" });
@@ -97,9 +78,7 @@ export const updateChatroom = async (req: Request, res: Response) => {
 };
 
 export const deleteChatroom = async (req: Request, res: Response) => {
-  const data = validate(chatroomIdSchema, req.params, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to delete a chatroom" });
@@ -116,8 +95,7 @@ export const deleteChatroom = async (req: Request, res: Response) => {
 };
 
 export const getChatroomPrivacy = async (req: Request, res: Response) => {
-  const data = validate(chatroomIdSchema, req.params, res);
-  if (!data) return;
+  const { data } = req;
 
   try {
     const privacy = await chatroomService.getChatroomPrivacy(data);
@@ -129,9 +107,7 @@ export const getChatroomPrivacy = async (req: Request, res: Response) => {
 };
 
 export const swapChatroomIndexes = async (req: Request, res: Response) => {
-  const data = validate(swapChatroomIndexesSchema, req.body, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to reorder chatrooms" });

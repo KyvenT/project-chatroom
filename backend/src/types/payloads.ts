@@ -98,6 +98,12 @@ export interface MessagePayload {
   editedAt: Date | null;
 }
 
+export interface MentionPayload {
+  chatroomId: string;
+  senderId: string;
+  messageId: string;
+}
+
 export interface UserDetailsPayload {
   id: string;
   email: string | null;

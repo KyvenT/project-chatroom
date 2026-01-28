@@ -35,7 +35,7 @@ export type MemberInfoProps = {
 const styles = (
   theme: Theme,
   button: HTMLButtonElement,
-  position: PopupPosition
+  position: PopupPosition,
 ) =>
   css(
     mq({
@@ -62,11 +62,14 @@ const styles = (
       },
 
       ".status": {
-        fontSize: "1rem",
+        fontSize: ".8rem",
+        color: theme.colors.light_grey,
+        cursor: "default",
       },
 
       ".joinedAt": {
         fontSize: "1rem",
+        cursor: "default",
       },
 
       ".kickBtn": {
@@ -82,7 +85,26 @@ const styles = (
       ".kickBtn:hover": {
         backgroundColor: theme.colors.grey,
       },
-    })
+
+      ".you-tag": {
+        color: theme.colors.grey,
+        padding: "0 4px",
+        fontSize: "1rem",
+        cursor: "default",
+      },
+
+      ".username-container": {
+        display: "flex",
+        alignItems: "center",
+      },
+
+      ".buttons-container": {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "4px 0 0",
+      },
+    }),
   );
 
 export const MemberInfo = ({
@@ -111,9 +133,6 @@ export const MemberInfo = ({
 
   useOutsideClick({ callbackFn: onClose, elementRef: popupRef });
 
-  const userRole = members.find((mem) => mem.memberId === user.userId)?.role;
-  const canKick = userRole !== "MEMBER" && userRole !== member.role;
-
   const handleKick = () => {
     mutation.mutate({
       fetchUrl: `http://${API_URL}/api/members/${chatroomId}`,
@@ -126,19 +145,29 @@ export const MemberInfo = ({
     onClose();
   };
 
+  const userRole = members.find((mem) => mem.memberId === user.userId)?.role;
+  const canKick = userRole !== "MEMBER" && userRole !== member.role;
+
   return createPortal(
     <div css={styles(theme, button, position)} ref={popupRef}>
-      <h3 className="username">{member.member.username}</h3>
+      <div className="username-container">
+        <h3 className="username">{member.member.username}</h3>
+        {member.memberId === user.userId && (
+          <span className="you-tag">(YOU)</span>
+        )}
+      </div>
       <p className="status">{member.member.status}</p>
       <p className="joinedAt">
         joined {data && new Date(data.joinedAt).toLocaleDateString()}
       </p>
-      {canKick && (
-        <Button onClick={handleKick} disabled={!canKick} className="kickBtn">
-          Kick
-        </Button>
-      )}
+      <div className="buttons-container">
+        {canKick && (
+          <Button onClick={handleKick} disabled={!canKick} className="kickBtn">
+            Kick
+          </Button>
+        )}
+      </div>
     </div>,
-    document.body
+    document.body,
   );
 };

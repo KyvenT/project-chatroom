@@ -23,9 +23,9 @@ export const getUserDetails = async (req: Request, res: Response) => {
 };
 
 export const updateUserStatus = async (req: Request, res: Response) => {
-  const data = validate(updateUserStatusSchema, req.body, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { ok } = validate(updateUserStatusSchema, req.body);
+  if (!ok) return;
+  const { userId, data } = req;
 
   if (!userId) {
     res

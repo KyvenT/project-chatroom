@@ -1,16 +1,8 @@
-import { validate } from "../validators/validate.js";
-import { retrieveMessageSchema } from "../validators/messages/messageValidation.js";
 import { Request, Response } from "express";
 import * as messageService from "../services/messageService.js";
 
 export const getMessages = async (req: Request, res: Response) => {
-  const data = validate(
-    retrieveMessageSchema,
-    { ...req.params, ...req.query },
-    res
-  );
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to get messages" });

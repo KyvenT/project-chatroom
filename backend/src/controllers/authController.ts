@@ -1,11 +1,8 @@
 import { Request, Response } from "express";
-import { guestSchema, userSchema } from "../validators/auth/authValidation.js";
-import { validate } from "../validators/validate.js";
 import * as authService from "../services/authService.js";
 
 export const createUser = async (req: Request, res: Response) => {
-  const data = validate(userSchema, req.body, res);
-  if (!data) return;
+  const { data } = req;
 
   try {
     const userData = await authService.createUser(data);
@@ -18,8 +15,7 @@ export const createUser = async (req: Request, res: Response) => {
 };
 
 export const authenticateUser = async (req: Request, res: Response) => {
-  const data = validate(userSchema, req.body, res);
-  if (!data) return;
+  const { data } = req;
 
   try {
     const userData = await authService.loginUser(data);
@@ -32,8 +28,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
 };
 
 export const createGuest = async (req: Request, res: Response) => {
-  const data = validate(guestSchema, req.body, res);
-  if (!data) return;
+  const { data } = req;
 
   try {
     const guestData = await authService.createGuest(data);

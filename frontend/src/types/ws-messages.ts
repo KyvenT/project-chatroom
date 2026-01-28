@@ -1,5 +1,8 @@
 import type { Chatroom } from "./REST-types/Chatroom";
-import type { ChatroomMember } from "./REST-types/ChatroomMember";
+import type {
+  ChatroomMember,
+  ChatroomRoles,
+} from "./REST-types/ChatroomMember";
 import type { Invite } from "./REST-types/Invite";
 import type { Message } from "./REST-types/Message";
 
@@ -56,6 +59,7 @@ export interface UpdateMembersMessage {
       username: string;
     };
     memberId: string;
+    role: ChatroomRoles;
   };
   memberId?: string;
 }
