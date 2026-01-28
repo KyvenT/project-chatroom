@@ -2,6 +2,8 @@ enum WSMessageTypes {
   Auth = "auth",
   Message = "message",
   UpdateActiveChatroom = "update-active-chatroom",
+  TypingPresence = "typing-presence",
+  UpdateLastViewedAt = "update-last-viewed-at",
 }
 
 export interface AuthMessage {
@@ -16,16 +18,16 @@ export interface ChatMessage {
 }
 
 export interface UpdateActiveChatroomMessage {
-  type: "update-active-chatroom";
+  type: WSMessageTypes.UpdateActiveChatroom;
   chatroomId: string;
 }
 
 export interface TypingPresenceMessage {
-  type: "typing-presence";
+  type: WSMessageTypes.TypingPresence;
   chatroomId: string;
 }
 
 export interface UpdateLastViewedAtMessage {
-  type: "update-last-viewed-at";
+  type: WSMessageTypes.UpdateLastViewedAt;
   chatroomId: string;
 }

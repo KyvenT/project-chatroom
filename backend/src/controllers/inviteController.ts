@@ -1,10 +1,3 @@
-import { validate } from "../validators/validate.js";
-import {
-  inviteIdSchema,
-  sendInviteSchema,
-  updateInviteStatusSchema,
-} from "../validators/invites/inviteValidation.js";
-import { chatroomIdSchema } from "../validators/chatrooms/chatroomValidation.js";
 import { Request, Response } from "express";
 import * as inviteService from "../services/inviteService.js";
 
@@ -27,9 +20,7 @@ export const getUserInvites = async (req: Request, res: Response) => {
 };
 
 export const createInvite = async (req: Request, res: Response) => {
-  const data = validate(sendInviteSchema, req.body, res);
-  if (!data) return;
-  const senderId = req.userId;
+  const { userId: senderId, data } = req;
 
   if (!senderId) {
     res.status(400).json({ message: "Must be signed in to send invite" });
@@ -48,9 +39,7 @@ export const createInvite = async (req: Request, res: Response) => {
 };
 
 export const respondToInvite = async (req: Request, res: Response) => {
-  const data = validate(updateInviteStatusSchema, req.body, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to respond to invite" });
@@ -67,9 +56,7 @@ export const respondToInvite = async (req: Request, res: Response) => {
 };
 
 export const deleteInvite = async (req: Request, res: Response) => {
-  const data = validate(inviteIdSchema, req.body, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res.status(400).json({ message: "Must be signed in to delete invite" });
@@ -86,9 +73,7 @@ export const deleteInvite = async (req: Request, res: Response) => {
 };
 
 export const getChatroomInvites = async (req: Request, res: Response) => {
-  const data = validate(chatroomIdSchema, req.params, res);
-  if (!data) return;
-  const userId = req.userId;
+  const { userId, data } = req;
 
   if (!userId) {
     res
