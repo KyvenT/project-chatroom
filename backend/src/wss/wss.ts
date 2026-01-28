@@ -2,11 +2,11 @@ import { WebSocketServer } from "ws";
 import { socketMap, userActiveChatroomMap } from "../lib/socketMaps.js";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { wsMessageRouter } from "./router.js";
-import Prisma from "../prisma/prisma.js";
-import { updateLastViewedAt } from "./outgoing-messages/update-unread-count.js";
+import { WSMessageSchema } from "../validators/ws/wsValidation.js";
+import { validate } from "../validators/validate.js";
 
 export const startWSS = (
-  server: Server<typeof IncomingMessage, typeof ServerResponse>
+  server: Server<typeof IncomingMessage, typeof ServerResponse>,
 ) => {
   const wss = new WebSocketServer({ server });
 
@@ -15,8 +15,16 @@ export const startWSS = (
 
     ws.on("message", (data: string) => {
       const message = JSON.parse(data);
+      const result = validate(WSMessageSchema, message);
+
+      if (!result.ok) {
+        console.log(message);
+        console.error("ws message validation error", result.error);
+        return;
+      }
+
       console.log(`Received websocket message type: ${message.type}`);
-      wsMessageRouter(message, ws);
+      wsMessageRouter(result.data, ws);
     });
 
     ws.on("close", () => {
@@ -26,7 +34,7 @@ export const startWSS = (
       if (userId) {
         const chatroom = userActiveChatroomMap.getByKey(userId);
         if (chatroom) {
-          updateLastViewedAt(chatroom, userId);
+          // updateLastViewedAt(chatroom, userId);
           userActiveChatroomMap.deleteByKey(userId);
         }
         socketMap.deleteByValue(ws);
