@@ -1,4 +1,14 @@
-enum WSMessageTypes {
+import z from "zod";
+import {
+  AuthMessageSchema,
+  ChatMessageSchema,
+  TypingPresenceMessageSchema,
+  UpdateActiveChatroomMessageSchema,
+  UpdateLastViewedAtMessageSchema,
+  WSMessageSchema,
+} from "../validators/ws/wsValidation.js";
+
+export enum WSMessageTypes {
   Auth = "auth",
   Message = "message",
   UpdateActiveChatroom = "update-active-chatroom",
@@ -6,28 +16,18 @@ enum WSMessageTypes {
   UpdateLastViewedAt = "update-last-viewed-at",
 }
 
-export interface AuthMessage {
-  type: WSMessageTypes.Auth;
-  token: string;
-}
+export type AuthMessage = z.infer<typeof AuthMessageSchema>;
 
-export interface ChatMessage {
-  type: WSMessageTypes.Message;
-  content: string;
-  chatroomId: string;
-}
+export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 
-export interface UpdateActiveChatroomMessage {
-  type: WSMessageTypes.UpdateActiveChatroom;
-  chatroomId: string;
-}
+export type UpdateActiveChatroomMessage = z.infer<
+  typeof UpdateActiveChatroomMessageSchema
+>;
 
-export interface TypingPresenceMessage {
-  type: WSMessageTypes.TypingPresence;
-  chatroomId: string;
-}
+export type TypingPresenceMessage = z.infer<typeof TypingPresenceMessageSchema>;
 
-export interface UpdateLastViewedAtMessage {
-  type: WSMessageTypes.UpdateLastViewedAt;
-  chatroomId: string;
-}
+export type UpdateLastViewedAtMessage = z.infer<
+  typeof UpdateLastViewedAtMessageSchema
+>;
+
+export type WSMessage = z.infer<typeof WSMessageSchema>;

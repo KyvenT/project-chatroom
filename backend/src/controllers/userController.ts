@@ -1,5 +1,3 @@
-import { updateUserStatusSchema } from "../validators/users/userValidation.js";
-import { validate } from "../validators/validate.js";
 import { Request, Response } from "express";
 import * as userService from "../services/userService.js";
 
@@ -23,8 +21,6 @@ export const getUserDetails = async (req: Request, res: Response) => {
 };
 
 export const updateUserStatus = async (req: Request, res: Response) => {
-  const { ok } = validate(updateUserStatusSchema, req.body);
-  if (!ok) return;
   const { userId, data } = req;
 
   if (!userId) {

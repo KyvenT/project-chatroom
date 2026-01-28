@@ -8,26 +8,27 @@ import {
   TypingPresenceMessage,
   UpdateActiveChatroomMessage,
   UpdateLastViewedAtMessage,
+  WSMessage,
 } from "../types/ws-messages.js";
 import { handleTypingPresence } from "./incoming-message-routes/typing-presence.js";
 import { handleUpdateLastViewedAt } from "./incoming-message-routes/update-last-viewed-at.js";
 
-export const wsMessageRouter = (message: any, ws: WebSocket) => {
+export const wsMessageRouter = (message: WSMessage, ws: WebSocket) => {
   switch (message.type) {
     case "auth":
-      authenticateSocket(message as AuthMessage, ws);
+      authenticateSocket(message, ws);
       break;
     case "message":
-      handleChatMessage(message as ChatMessage, ws);
+      handleChatMessage(message, ws);
       break;
     case "update-active-chatroom":
-      updateActiveChatroom(message as UpdateActiveChatroomMessage, ws);
+      updateActiveChatroom(message, ws);
       break;
     case "typing-presence":
-      handleTypingPresence(message as TypingPresenceMessage, ws);
+      handleTypingPresence(message, ws);
       break;
     case "update-last-viewed-at":
-      handleUpdateLastViewedAt(message as UpdateLastViewedAtMessage, ws);
+      handleUpdateLastViewedAt(message, ws);
       break;
     default:
       console.log("uncaught message: ", message);
