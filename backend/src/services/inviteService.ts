@@ -1,5 +1,5 @@
 import z from "zod";
-import Prisma from "../prisma/prisma.js";
+import Prisma from "../prisma.js";
 import { InvitePayload } from "../types/payloads.js";
 import {
   inviteIdSchema,
@@ -13,7 +13,7 @@ import { chatroomIdSchema } from "../validators/chatrooms/chatroomValidation.js"
 import { sendUpdateInvites } from "../wss/outgoing-messages/update-invites.js";
 
 export const getUserInvites = async (
-  userId: string
+  userId: string,
 ): Promise<InvitePayload[]> => {
   const invites = await Prisma.invite.findMany({
     where: {
@@ -43,7 +43,7 @@ export const getUserInvites = async (
 
 export const createInvite = async (
   senderId: string,
-  data: z.infer<typeof sendInviteSchema>
+  data: z.infer<typeof sendInviteSchema>,
 ) => {
   const { receiverUsername, chatroomId } = data;
 
@@ -132,7 +132,7 @@ export const createInvite = async (
 
 export const respondToInvite = async (
   userId: string,
-  data: z.infer<typeof updateInviteStatusSchema>
+  data: z.infer<typeof updateInviteStatusSchema>,
 ) => {
   const { inviteId, status } = data;
 
@@ -191,7 +191,7 @@ export const respondToInvite = async (
 
 export const deleteInvite = async (
   userId: string,
-  data: z.infer<typeof inviteIdSchema>
+  data: z.infer<typeof inviteIdSchema>,
 ) => {
   const { inviteId } = data;
 
@@ -217,7 +217,7 @@ export const deleteInvite = async (
     userId !== chatroom?.ownerId
   ) {
     throw new Error(
-      "Tried to delete invite but user is not receiver, sender, or owner of chatroom"
+      "Tried to delete invite but user is not receiver, sender, or owner of chatroom",
     );
   }
 
@@ -232,7 +232,7 @@ export const deleteInvite = async (
 
 export const getChatroomInvites = async (
   userId: string,
-  data: z.infer<typeof chatroomIdSchema>
+  data: z.infer<typeof chatroomIdSchema>,
 ): Promise<InvitePayload[]> => {
   const { chatroomId } = data;
 

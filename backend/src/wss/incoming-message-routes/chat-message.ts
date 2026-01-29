@@ -1,4 +1,4 @@
-import Prisma from "../../prisma/prisma.js";
+import Prisma from "../../prisma.js";
 import WebSocket from "ws";
 import { ChatMessage } from "../../types/ws-messages.js";
 import { socketMap } from "../../lib/socketMaps.js";
@@ -9,7 +9,7 @@ import { sendChatMessage } from "../outgoing-messages/chat-message.js";
 const createMessage = async (
   userId: string,
   message: ChatMessage,
-  ws: WebSocket
+  ws: WebSocket,
 ): Promise<MessagePayload | undefined> => {
   try {
     const createdMessage = (await Prisma.message.create({
@@ -37,7 +37,7 @@ const createMessage = async (
           ", " +
           createdMessage.createdAt +
           ")",
-      })
+      }),
     );
     return createdMessage;
   } catch (err) {
@@ -46,14 +46,14 @@ const createMessage = async (
       JSON.stringify({
         type: "feedback",
         message: "message failed to send (" + err + ")",
-      })
+      }),
     );
   }
 };
 
 export const handleChatMessage = async (
   message: ChatMessage,
-  ws: WebSocket
+  ws: WebSocket,
 ) => {
   console.log(message.content);
   const user = socketMap.getByValue(ws);

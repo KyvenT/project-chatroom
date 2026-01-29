@@ -1,5 +1,5 @@
 import { socketMap } from "../../lib/socketMaps.js";
-import Prisma from "../../prisma/prisma.js";
+import Prisma from "../../prisma.js";
 import { sendUpdateMembers } from "./update-members.js";
 
 export type chatroomUpdateActions = "JOIN" | "LEAVE" | "UPDATE";
@@ -7,7 +7,7 @@ export type chatroomUpdateActions = "JOIN" | "LEAVE" | "UPDATE";
 export const sendUpdateChatrooms = async (
   chatroomId: string,
   memberId: string,
-  actionType: chatroomUpdateActions
+  actionType: chatroomUpdateActions,
 ) => {
   const messageOptions: any = {};
   switch (actionType) {
@@ -50,7 +50,7 @@ export const sendUpdateChatrooms = async (
       JSON.stringify({
         type: "update-chatrooms",
         ...messageOptions,
-      })
+      }),
     );
   } catch (err) {
     console.error("failed to send join event" + err);

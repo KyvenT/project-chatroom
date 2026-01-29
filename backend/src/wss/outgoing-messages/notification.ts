@@ -1,4 +1,4 @@
-import Prisma from "../../prisma/prisma.js";
+import Prisma from "../../prisma.js";
 import { Notification, NotificationType } from "@prisma/client";
 import { socketMap } from "../../lib/socketMaps.js";
 import { MentionPayload } from "../../types/payloads.js";

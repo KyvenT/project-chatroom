@@ -2,12 +2,12 @@ import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
 import { MessagePayload } from "../../types/payloads.js";
 import { handleNewNotification } from "./notification.js";
 import { sendUpdateUnreadMessage } from "./update-unread-count.js";
-import Prisma from "../../prisma/prisma.js";
+import Prisma from "../../prisma.js";
 
 export const sendChatMessage = async (message: MessagePayload) => {
   try {
     const activeRecipients = userActiveChatroomMap.getByValue(
-      message.chatroomId
+      message.chatroomId,
     );
 
     console.log("activeRecipients before filter: ", activeRecipients);
@@ -15,7 +15,7 @@ export const sendChatMessage = async (message: MessagePayload) => {
       const recipientSocket = socketMap.getByKey(activeUserId);
       if (recipientSocket) {
         console.log(
-          "Active user in chatroom " + message.chatroomId + ": " + activeUserId
+          "Active user in chatroom " + message.chatroomId + ": " + activeUserId,
         );
         recipientSocket.send(
           JSON.stringify({
@@ -32,7 +32,7 @@ export const sendChatMessage = async (message: MessagePayload) => {
               },
               editedAt: message.editedAt,
             },
-          })
+          }),
         );
       }
     });
@@ -84,7 +84,7 @@ export const sendChatMessage = async (message: MessagePayload) => {
       sendUpdateUnreadMessage(
         message.chatroomId,
         recipient.memberId,
-        unreadMessages
+        unreadMessages,
       );
 
       /*

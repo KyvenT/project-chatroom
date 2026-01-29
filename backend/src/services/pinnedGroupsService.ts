@@ -1,5 +1,5 @@
 import { PinnedGroupsPayload } from "../types/payloads.js";
-import Prisma from "../prisma/prisma.js";
+import Prisma from "../prisma.js";
 import {
   chatroomPinSchema,
   editPinnedGroupSchema,
@@ -8,7 +8,7 @@ import {
 import z from "zod";
 
 export const getPinnedGroups = async (
-  userId: string
+  userId: string,
 ): Promise<PinnedGroupsPayload[]> => {
   const pinnedGroups = await Prisma.pinGroup.findMany({
     where: {
@@ -72,7 +72,7 @@ export const createPinnedGroup = async (userId: string) => {
 
 export const editPinnedGroup = async (
   userId: string,
-  data: z.infer<typeof editPinnedGroupSchema>
+  data: z.infer<typeof editPinnedGroupSchema>,
 ) => {
   const { name, pinGroupId } = data;
 
@@ -112,7 +112,7 @@ export const editPinnedGroup = async (
 
 export const pinChatroom = async (
   userId: string,
-  data: z.infer<typeof chatroomPinSchema>
+  data: z.infer<typeof chatroomPinSchema>,
 ) => {
   const { chatroomId, pinGroupId, pin } = data;
 
@@ -127,7 +127,7 @@ export const pinChatroom = async (
 
   if (!verify) {
     throw new Error(
-      "Attempted pinning a chatroom that user is not a member of"
+      "Attempted pinning a chatroom that user is not a member of",
     );
   }
 

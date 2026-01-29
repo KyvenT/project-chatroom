@@ -1,11 +1,11 @@
 import WebSocket from "ws";
 import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
 import { UpdateActiveChatroomMessage } from "../../types/ws-messages.js";
-import Prisma from "../../prisma/prisma.js";
+import Prisma from "../../prisma.js";
 
 export const updateActiveChatroom = async (
   message: UpdateActiveChatroomMessage,
-  ws: WebSocket
+  ws: WebSocket,
 ) => {
   try {
     const userId = socketMap.getByValue(ws);
@@ -44,7 +44,7 @@ export const updateActiveChatroom = async (
     ]);
 
     console.log(
-      "Updated active chatroom for user " + userId + " to " + chatroomId
+      "Updated active chatroom for user " + userId + " to " + chatroomId,
     );
     console.log("Current active chatrooms: ");
     userActiveChatroomMap.forEach((value, key) => {
@@ -54,12 +54,12 @@ export const updateActiveChatroom = async (
       JSON.stringify({
         type: "feedback",
         message: "Active chatroom updated to " + chatroomId,
-      })
+      }),
     );
   } catch (err) {
     console.error(err);
     ws.send(
-      JSON.stringify({ error: "Failed to update active chatroom: " + err })
+      JSON.stringify({ error: "Failed to update active chatroom: " + err }),
     );
   }
 };

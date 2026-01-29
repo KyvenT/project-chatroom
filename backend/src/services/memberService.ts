@@ -1,4 +1,4 @@
-import Prisma from "../prisma/prisma.js";
+import Prisma from "../prisma.js";
 import z from "zod";
 import {
   chatroomIdSchema,
@@ -16,7 +16,7 @@ import { chatroomMemberSchema } from "../validators/members/memberValidation.js"
 
 export const joinChatroom = async (
   userId: string,
-  data: z.infer<typeof chatroomIdSchema>
+  data: z.infer<typeof chatroomIdSchema>,
 ) => {
   const { chatroomId } = data;
 
@@ -77,7 +77,7 @@ export const joinChatroom = async (
 
 export const reorderChatrooms = async (
   userId: string,
-  data: z.infer<typeof chatroomModifyIndexSchema>
+  data: z.infer<typeof chatroomModifyIndexSchema>,
 ) => {
   const { chatroomId, newIndex } = data;
 
@@ -170,7 +170,7 @@ export const reorderChatrooms = async (
 
 export const getChatroomMembers = async (
   userId: string,
-  data: z.infer<typeof chatroomIdSchema>
+  data: z.infer<typeof chatroomIdSchema>,
 ): Promise<MembersPayload[]> => {
   const { chatroomId } = data;
 
@@ -185,7 +185,7 @@ export const getChatroomMembers = async (
 
   if (!verify) {
     throw new Error(
-      "Attempted retrieving member list from a chatroom that user is not a member of"
+      "Attempted retrieving member list from a chatroom that user is not a member of",
     );
   }
 
@@ -222,7 +222,7 @@ export const getChatroomMembers = async (
 
 export const removeMemberFromChatroom = async (
   userId: string,
-  data: z.infer<typeof chatroomMemberSchema>
+  data: z.infer<typeof chatroomMemberSchema>,
 ) => {
   const { chatroomId, memberId } = data;
 
@@ -252,7 +252,7 @@ export const removeMemberFromChatroom = async (
     userId !== verify.chatroom.ownerId
   ) {
     throw new Error(
-      "Not detected as the user that requested to leave, or is not owner of chatroom"
+      "Not detected as the user that requested to leave, or is not owner of chatroom",
     );
   }
 
@@ -270,7 +270,7 @@ export const removeMemberFromChatroom = async (
 
 export const getMemberDetails = async (
   userId: string,
-  data: z.infer<typeof chatroomMemberSchema>
+  data: z.infer<typeof chatroomMemberSchema>,
 ): Promise<ChatroomMemberDetailsPayload> => {
   const { chatroomId, memberId } = data;
 
@@ -285,7 +285,7 @@ export const getMemberDetails = async (
 
   if (!verify) {
     throw new Error(
-      "Not detected as chatroom member to retrieve member details"
+      "Not detected as chatroom member to retrieve member details",
     );
   }
 

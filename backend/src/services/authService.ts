@@ -1,7 +1,7 @@
 import z from "zod";
 import { guestSchema, userSchema } from "../validators/auth/authValidation.js";
 import bcrypt from "bcryptjs";
-import Prisma from "../prisma/prisma.js";
+import Prisma from "../prisma.js";
 import jwt from "jsonwebtoken";
 import env from "../env.js";
 import type { StringValue } from "ms";
@@ -9,7 +9,7 @@ import { AuthPayload } from "../types/payloads.js";
 import crypto from "crypto";
 
 export const createUser = async (
-  data: z.infer<typeof userSchema>
+  data: z.infer<typeof userSchema>,
 ): Promise<AuthPayload> => {
   const { username, password } = data;
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -30,7 +30,7 @@ export const createUser = async (
 };
 
 export const loginUser = async (
-  data: z.infer<typeof userSchema>
+  data: z.infer<typeof userSchema>,
 ): Promise<AuthPayload> => {
   const { username, password } = data;
   const user = await Prisma.user.findUnique({
@@ -57,7 +57,7 @@ export const loginUser = async (
 };
 
 export const createGuest = async (
-  data: z.infer<typeof guestSchema>
+  data: z.infer<typeof guestSchema>,
 ): Promise<AuthPayload> => {
   const { chatroomId, username } = data;
   const randomlyGeneratedPassword = crypto.randomBytes(16).toString("hex");

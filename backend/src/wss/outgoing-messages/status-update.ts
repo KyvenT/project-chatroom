@@ -1,6 +1,6 @@
 import { Status } from "@prisma/client";
 import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
-import Prisma from "../../prisma/prisma.js";
+import Prisma from "../../prisma.js";
 
 export const sendStatusUpdate = async (user: {
   username: string;

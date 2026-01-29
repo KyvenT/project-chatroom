@@ -1,11 +1,11 @@
 import z from "zod";
-import Prisma from "../prisma/prisma.js";
+import Prisma from "../prisma.js";
 import { UserDetailsPayload } from "../types/payloads.js";
 import { updateUserStatusSchema } from "../validators/users/userValidation.js";
 import { sendStatusUpdate } from "../wss/outgoing-messages/status-update.js";
 
 export const getUserDetails = async (
-  userId: string
+  userId: string,
 ): Promise<UserDetailsPayload> => {
   const user = await Prisma.user.findUnique({
     where: {
@@ -25,7 +25,7 @@ export const getUserDetails = async (
 
 export const updateUserStatus = async (
   userId: string,
-  data: z.infer<typeof updateUserStatusSchema>
+  data: z.infer<typeof updateUserStatusSchema>,
 ) => {
   const { status } = data;
 
