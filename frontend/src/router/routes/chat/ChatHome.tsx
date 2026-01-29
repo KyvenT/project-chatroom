@@ -88,7 +88,7 @@ const styles = css(
       aspectRatio: 1,
       padding: "auto 4px",
     },
-  })
+  }),
 );
 
 const colors = (theme: Theme) =>
@@ -113,7 +113,7 @@ const ChatHome = () => {
   const { user } = useAuthContext();
   const [openPinModal, setOpenPinModal] = useToggle(false);
   const [openedPinGroup, setOpenedPinGroup] = useState<PinnedGroup | null>(
-    null
+    null,
   );
   const [enableTitleEdit, setEnableTitleEdit] = useState<string>("");
   const [hoveredPinGroup, setHoveredPinGroup] = useState<string>("");
@@ -150,6 +150,7 @@ const ChatHome = () => {
     });
   };
 
+  /*
   const handleEditPinnedGroupName = (pinnedGroupId: string, name: string) => {
     mutate({
       fetchUrl: `http://${API_URL}/api/pinned/${pinnedGroupId}`,
@@ -168,6 +169,7 @@ const ChatHome = () => {
       })
     );
   };
+  */
 
   const handleEditBtnClick = useCallback((pinnedGroup: PinnedGroup) => {
     setOpenedPinGroup(pinnedGroup);
@@ -205,7 +207,7 @@ const ChatHome = () => {
                     type="button"
                     onClick={() => {
                       setEnableTitleEdit((prev) =>
-                        prev ? "" : pinnedGroup.id
+                        prev ? "" : pinnedGroup.id,
                       );
                     }}
                     className="edit-title-btn"
