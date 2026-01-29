@@ -1,9 +1,9 @@
 import { socketMap } from "../../lib/socketMaps.js";
-import Prisma from "../../prisma/prisma.js";
+import Prisma from "../../prisma.js";
 
 export const updateLastViewedAt = async (
   chatroomId: string,
-  userId: string
+  userId: string,
 ) => {
   return Prisma.chatroomMember.update({
     data: { lastViewedAt: new Date() },
@@ -19,7 +19,7 @@ export const updateLastViewedAt = async (
 export const sendUpdateUnreadMessage = (
   chatroomId: string,
   userId: string,
-  unreadMessageCount: number
+  unreadMessageCount: number,
 ) => {
   const recipientSocket = socketMap.getByKey(userId);
   if (recipientSocket) {
@@ -33,7 +33,7 @@ export const sendUpdateUnreadMessage = (
             unreadMessages: unreadMessageCount,
           },
         },
-      })
+      }),
     );
   }
 };

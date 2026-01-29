@@ -1,9 +1,9 @@
 import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
-import Prisma from "../../prisma/prisma.js";
+import Prisma from "../../prisma.js";
 
 export const sendTypingPresence = async (
   chatroomId: string,
-  memberId: string
+  memberId: string,
 ) => {
   const user = await Prisma.user.findUnique({
     where: {
@@ -28,7 +28,7 @@ export const sendTypingPresence = async (
           userId: memberId,
           username: user?.username,
           chatroomId,
-        })
+        }),
       );
     }
   });

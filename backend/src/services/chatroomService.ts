@@ -1,5 +1,5 @@
 import { ChatroomPrivacy, ChatroomRoles } from "@prisma/client";
-import Prisma from "../prisma/prisma.js";
+import Prisma from "../prisma.js";
 import {
   ChatroomDetailsPayload,
   ChatroomPayload,
@@ -15,7 +15,7 @@ import z from "zod";
 import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.js";
 
 export const getUserChatrooms = async (
-  userId: string
+  userId: string,
 ): Promise<ChatroomPayload[]> => {
   const chatroomsData = await Prisma.chatroomMember.findMany({
     where: {
@@ -49,7 +49,7 @@ export const getUserChatrooms = async (
         },
       });
       return { ...chatroom, unreadMessages };
-    }
+    },
   );
 
   return await Promise.all(chatroomPromises);
@@ -57,7 +57,7 @@ export const getUserChatrooms = async (
 
 export const getChatroomDetails = async (
   userId: string,
-  data: z.infer<typeof chatroomIdSchema>
+  data: z.infer<typeof chatroomIdSchema>,
 ): Promise<ChatroomDetailsPayload> => {
   const { chatroomId } = data;
   const verifyMembership = await Prisma.chatroomMember.findUnique({
@@ -100,7 +100,7 @@ export const getChatroomDetails = async (
 
 export const createChatroom = async (
   userId: string,
-  data: z.infer<typeof chatroomSetOptionsSchema>
+  data: z.infer<typeof chatroomSetOptionsSchema>,
 ) => {
   const { title, privacy } = data;
 
@@ -155,7 +155,7 @@ export const createChatroom = async (
 
 export const updateChatroom = async (
   userId: string,
-  data: z.infer<typeof chatroomModifyOptionsSchema>
+  data: z.infer<typeof chatroomModifyOptionsSchema>,
 ) => {
   const { chatroomId, title, privacy } = data;
 
@@ -199,7 +199,7 @@ export const updateChatroom = async (
 
 export const deleteChatroom = async (
   userId: string,
-  data: z.infer<typeof chatroomIdSchema>
+  data: z.infer<typeof chatroomIdSchema>,
 ) => {
   const { chatroomId } = data;
   const verify = await Prisma.chatroom.findUnique({
@@ -233,7 +233,7 @@ export const deleteChatroom = async (
 };
 
 export const getChatroomPrivacy = async (
-  data: z.infer<typeof chatroomIdSchema>
+  data: z.infer<typeof chatroomIdSchema>,
 ): Promise<ChatroomPrivacy> => {
   const { chatroomId } = data;
 
@@ -255,7 +255,7 @@ export const getChatroomPrivacy = async (
 
 export const swapChatroomIndexes = async (
   userId: string,
-  data: z.infer<typeof swapChatroomIndexesSchema>
+  data: z.infer<typeof swapChatroomIndexesSchema>,
 ) => {
   const { firstChatroomId, secondChatroomId } = data;
 

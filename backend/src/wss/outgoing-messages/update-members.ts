@@ -1,4 +1,4 @@
-import Prisma from "../../prisma/prisma.js";
+import Prisma from "../../prisma.js";
 import { MembersPayload } from "../../types/payloads.js";
 import { socketMap } from "../../lib/socketMaps.js";
 

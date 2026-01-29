@@ -1,11 +1,11 @@
 import { MessagePayload } from "../types/payloads.js";
 import { retrieveMessageSchema } from "../validators/messages/messageValidation.js";
 import z from "zod";
-import Prisma from "../prisma/prisma.js";
+import Prisma from "../prisma.js";
 
 export const getMessages = async (
   userId: string,
-  data: z.infer<typeof retrieveMessageSchema>
+  data: z.infer<typeof retrieveMessageSchema>,
 ): Promise<MessagePayload[]> => {
   const { chatroomId, getBefore, limit } = data;
 
@@ -46,7 +46,7 @@ export const getMessages = async (
 
   if (!verify) {
     throw new Error(
-      "Attempted retrieving messages from a chatroom that user is not a member of"
+      "Attempted retrieving messages from a chatroom that user is not a member of",
     );
   }
 
