@@ -1,15 +1,18 @@
 import { z } from "zod";
 
 const ENVSchema = z.object({
-  DB_NAME: z.string(),
-  DB_HOST: z.string(),
-  DB_USERNAME: z.string(),
-  DB_PASSWORD: z.string(),
-  DB_PORT: z.string().transform(Number),
-  DB_URL: z.string(),
+  DEV_DB_NAME: z.string(),
+  DEV_DB_HOST: z.string(),
+  DEV_DB_USERNAME: z.string(),
+  DEV_DB_PASSWORD: z.string(),
+  DEV_DB_PORT: z.string().transform(Number),
+  DEV_DB_URL: z.string(),
   JWT_EXPIRATION: z.string(),
   JWT_SECRET: z.string(),
   SERVER_PORT: z.string().transform(Number),
+  DB_USERNAME: z.string(),
+  DB_PASSWORD: z.string(),
+  DB_URL: z.string(),
 });
 
 const env = ENVSchema.parse(process.env);
