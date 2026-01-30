@@ -50,7 +50,7 @@ export const PinChatroomsModal = ({
 
   const handleChatroomPin = (
     chatroomId: string,
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     console.log(
       "pin ",
@@ -58,10 +58,10 @@ export const PinChatroomsModal = ({
       ": ",
       chatroomId,
       ",",
-      event.target.checked
+      event.target.checked,
     );
     mutate({
-      fetchUrl: `http://${API_URL}/api/pinned/${chatroomId}/pin`,
+      fetchUrl: `${API_URL}/api/pinned/${chatroomId}/pin`,
       method: "PATCH",
       user,
       reqBody: {
@@ -72,13 +72,13 @@ export const PinChatroomsModal = ({
   };
 
   const pinnedIds = pinnedGroup.pinnedChatrooms.map(
-    (chatroom) => chatroom.chatroomId
+    (chatroom) => chatroom.chatroomId,
   );
   const pinnedChatrooms = chatrooms.filter((chatroom) =>
-    pinnedIds.includes(chatroom.chatroomId)
+    pinnedIds.includes(chatroom.chatroomId),
   );
   const unpinnedChatrooms = chatrooms.filter(
-    (chatroom) => !pinnedIds.includes(chatroom.chatroomId)
+    (chatroom) => !pinnedIds.includes(chatroom.chatroomId),
   );
 
   return (

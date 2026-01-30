@@ -26,7 +26,7 @@ const styles = css(
     },
 
     ".emptyInboxMsg": { display: "flex" },
-  })
+  }),
 );
 
 const InboxButton = () => {
@@ -38,7 +38,7 @@ const InboxButton = () => {
     queryKey: ["inbox", user.token],
     queryFn: () =>
       verifiedQuery<Invite[]>({
-        fetchUrl: `http://${API_URL}/api/invites/me`,
+        fetchUrl: `${API_URL}/api/invites/me`,
         user,
       }),
     staleTime: Infinity,
@@ -55,7 +55,7 @@ const InboxButton = () => {
 
   const handleInviteResponse = (
     event: React.FormEvent,
-    userAccepted: boolean
+    userAccepted: boolean,
   ) => {
     event.preventDefault();
     const inviteId = (event.target as HTMLButtonElement).form?.id;
@@ -68,7 +68,7 @@ const InboxButton = () => {
     }
 
     mutation.mutate({
-      fetchUrl: `http://${API_URL}/api/invites/`,
+      fetchUrl: `${API_URL}/api/invites/`,
       user,
       method: "PATCH",
       reqBody: { inviteId, status },

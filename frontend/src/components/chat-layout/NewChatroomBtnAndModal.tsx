@@ -135,7 +135,7 @@ const NewChatButton = () => {
     const { title, privacy } = data;
     setToggle(false);
     mutation.mutate({
-      fetchUrl: `http://${API_URL}/api/chatrooms/create`,
+      fetchUrl: `${API_URL}/api/chatrooms/create`,
       method: "POST",
       user,
       reqBody: {

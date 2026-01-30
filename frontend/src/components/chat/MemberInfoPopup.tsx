@@ -126,7 +126,7 @@ export const MemberInfo = ({
     queryKey: [member.memberId],
     queryFn: () =>
       verifiedQuery({
-        fetchUrl: `http://${API_URL}/api/members/${chatroomId}/${member.memberId}`,
+        fetchUrl: `${API_URL}/api/members/${chatroomId}/${member.memberId}`,
         user,
       }),
   });
@@ -135,7 +135,7 @@ export const MemberInfo = ({
 
   const handleKick = () => {
     mutation.mutate({
-      fetchUrl: `http://${API_URL}/api/members/${chatroomId}`,
+      fetchUrl: `${API_URL}/api/members/${chatroomId}`,
       method: "DELETE",
       user,
       reqBody: {

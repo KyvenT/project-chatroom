@@ -70,7 +70,7 @@ const styles = css({
 const dynamicStyles = (
   theme: Theme,
   isActive: boolean,
-  isDraggedOver: boolean
+  isDraggedOver: boolean,
 ) =>
   css({
     div: {
@@ -78,8 +78,8 @@ const dynamicStyles = (
       borderColor: isDraggedOver
         ? "green"
         : isActive
-        ? theme.colors.white
-        : "transparent",
+          ? theme.colors.white
+          : "transparent",
     },
 
     "div:hover": {
@@ -131,7 +131,7 @@ const SidebarChatroomButton = ({
   const [inviteModalOpen, setInviteModalOpen] = useToggle(false);
   const [isDraggedOver, setIsDraggedOver] = useToggle(false);
   const swapChatroomOrder = useChatroomsStore(
-    (state) => state.swapChatroomOrder
+    (state) => state.swapChatroomOrder,
   );
   const { mutate, isSuccess, isError } = useMutation({
     mutationFn: verifiedMutation<ConfirmationResponse>,
@@ -149,7 +149,7 @@ const SidebarChatroomButton = ({
       "application/json",
       JSON.stringify({
         firstChatroom: chatroom,
-      })
+      }),
     );
   };
 
@@ -172,7 +172,7 @@ const SidebarChatroomButton = ({
     swapChatroomOrder(firstChatroom, chatroom);
 
     mutate({
-      fetchUrl: `http://${API_URL}/api/chatrooms/reorder`,
+      fetchUrl: `${API_URL}/api/chatrooms/reorder`,
       user,
       method: "PATCH",
       reqBody: {
