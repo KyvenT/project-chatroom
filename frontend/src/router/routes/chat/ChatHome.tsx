@@ -123,7 +123,7 @@ const ChatHome = () => {
     queryKey: ["pinnedChatrooms", user.userId],
     queryFn: () =>
       verifiedQuery<PinnedGroup[]>({
-        fetchUrl: `http://${API_URL}/api/pinned/me`,
+        fetchUrl: `${API_URL}/api/pinned/me`,
         user,
       }),
     staleTime: Infinity,
@@ -144,7 +144,7 @@ const ChatHome = () => {
 
   const handleAddPinnedGroupClick: () => void = () => {
     mutate({
-      fetchUrl: `http://${API_URL}/api/pinned`,
+      fetchUrl: `${API_URL}/api/pinned`,
       method: "POST",
       user,
     });

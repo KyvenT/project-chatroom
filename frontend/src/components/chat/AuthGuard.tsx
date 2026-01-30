@@ -116,7 +116,7 @@ const AuthGuard = () => {
     queryKey: ["chatroom-privacy", chatroomId],
     queryFn: () =>
       nonVerifiedQuery({
-        fetchUrl: `http://${API_URL}/api/chatroomsPublic/${chatroomId}`,
+        fetchUrl: `${API_URL}/api/chatroomsPublic/${chatroomId}`,
       }),
     enabled: !!chatroomId,
     staleTime: Infinity,
@@ -138,7 +138,7 @@ const AuthGuard = () => {
     const username = guestNameRef.current?.value;
     if (!username) return;
     mutate({
-      fetchUrl: `http://${API_URL}/api/auth/create-guest`,
+      fetchUrl: `${API_URL}/api/auth/create-guest`,
       method: "POST",
       reqBody: { username, chatroomId },
     });

@@ -142,7 +142,7 @@ export const ChatroomDetailsModal = ({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
       verifiedQuery({
-        fetchUrl: `http://${API_URL}/api/chatrooms/${chatroomId}`,
+        fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
         user,
       }),
     enabled: !!chatroomId,
@@ -166,7 +166,7 @@ export const ChatroomDetailsModal = ({
 
   const handleLeave = () => {
     chatroomMutation.mutate({
-      fetchUrl: `http://${API_URL}/api/members/${chatroomId}`,
+      fetchUrl: `${API_URL}/api/members/${chatroomId}`,
       method: "DELETE",
       user,
       reqBody: {
@@ -179,7 +179,7 @@ export const ChatroomDetailsModal = ({
   const handleDelete = () => {
     if (chatroomData?.ownerId !== user.userId) return;
     chatroomMutation.mutate({
-      fetchUrl: `http://${API_URL}/api/chatrooms/${chatroomId}`,
+      fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
       method: "DELETE",
       user,
     });
@@ -193,7 +193,7 @@ export const ChatroomDetailsModal = ({
     console.log("update chatroom to: ", title, privacy);
 
     chatroomMutation.mutate({
-      fetchUrl: `http://${API_URL}/api/chatrooms/${chatroomId}`,
+      fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
       method: "PATCH",
       user,
       reqBody: {

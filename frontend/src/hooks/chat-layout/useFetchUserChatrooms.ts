@@ -14,7 +14,7 @@ export const useFetchUserChatrooms = () => {
     queryKey: ["chatrooms", user.userId],
     queryFn: () =>
       verifiedQuery<Chatroom[]>({
-        fetchUrl: `http://${API_URL}/api/chatrooms/me`,
+        fetchUrl: `${API_URL}/api/chatrooms/me`,
         user,
       }),
     enabled: !!isLoggedIn,
