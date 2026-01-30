@@ -93,7 +93,7 @@ const MembersPanel = () => {
     queryKey: [user.userId, chatroomId],
     queryFn: () =>
       verifiedQuery<ChatroomMember[]>({
-        fetchUrl: `http://${API_URL}/api/members/${chatroomId}`,
+        fetchUrl: `${API_URL}/api/members/${chatroomId}`,
         user,
       }),
     enabled: !!user.userId,

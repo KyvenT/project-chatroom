@@ -24,7 +24,7 @@ const styles = (theme: Theme) =>
         borderRadius: "50%",
         //backgroundImage: "",
       },
-    })
+    }),
   );
 
 export const AccountProfilePage = () => {
@@ -34,7 +34,7 @@ export const AccountProfilePage = () => {
     queryKey: [],
     queryFn: () =>
       verifiedQuery({
-        fetchUrl: `http://${API_URL}/api/users/me`,
+        fetchUrl: `${API_URL}/api/users/me`,
         user,
       }),
     staleTime: 0,

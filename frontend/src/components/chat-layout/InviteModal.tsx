@@ -126,7 +126,7 @@ export const InviteModal = ({
     queryKey: ["inviteList", chatroomId],
     queryFn: () =>
       verifiedQuery({
-        fetchUrl: `http://${API_URL}/api/invites/${chatroomId}`,
+        fetchUrl: `${API_URL}/api/invites/${chatroomId}`,
         method: "GET",
         user,
       }),
@@ -150,7 +150,7 @@ export const InviteModal = ({
     }
     const { username } = formData;
     mutate({
-      fetchUrl: `http://${API_URL}/api/invites/`,
+      fetchUrl: `${API_URL}/api/invites/`,
       method: "POST",
       user,
       reqBody: {

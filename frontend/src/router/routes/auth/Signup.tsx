@@ -25,7 +25,7 @@ const Signup = () => {
     const { username, password } = data;
 
     try {
-      const res = await fetch(`http://${API_URL}/api/auth/register`, {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -78,7 +78,7 @@ const ProfileStatus = ({ status }: ProfileStatusProps) => {
     const newStatus = statusRef.current?.value;
 
     mutation.mutate({
-      fetchUrl: `http://${API_URL}/api/users/me`,
+      fetchUrl: `${API_URL}/api/users/me`,
       method: "PATCH",
       user,
       reqBody: { status: newStatus },
