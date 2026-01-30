@@ -1,5 +1,3 @@
-import { API_URL } from "../../env";
-
 export const handleWSAuth = (
   ws: WebSocket | null,
   setWs: (ws: WebSocket) => void,
@@ -8,7 +6,7 @@ export const handleWSAuth = (
   if (ws) {
     ws.close();
   }
-  const newWs = new WebSocket(`wss://${API_URL}`);
+  const newWs = new WebSocket(`wss://${window.location.host}`);
 
   newWs.onopen = () => {
     newWs.send(
