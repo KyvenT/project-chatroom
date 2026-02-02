@@ -23,6 +23,12 @@ export const authenticateUser = async (req: Request, res: Response) => {
     console.log(`User logged in: ${userData.username}`);
   } catch (error: any) {
     console.error("Login error:", error);
+    if (
+      error.message === "User not found" ||
+      error.message === "Invalid password"
+    ) {
+      return res.status(401).json({ message: error.message });
+    }
     return res.status(500).json({ message: error.message });
   }
 };

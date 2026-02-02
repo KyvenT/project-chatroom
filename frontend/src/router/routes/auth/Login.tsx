@@ -130,6 +130,8 @@ const Login = () => {
 
       if (!res.ok) {
         console.error(res.status);
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Login failed");
       }
 
       const data = (await res.json()) as UserAuth;
