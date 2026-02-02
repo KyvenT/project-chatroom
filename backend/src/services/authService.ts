@@ -14,13 +14,21 @@ export const createUser = async (
   const { username, password } = data;
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await Prisma.user.create({
-    data: {
-      username,
-      passwordHash: hashedPassword,
-      isGuest: false,
-    },
-  });
+  let user;
+  try {
+    user = await Prisma.user.create({
+      data: {
+        username,
+        passwordHash: hashedPassword,
+        isGuest: false,
+      },
+    });
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      throw new Error("Username already exists");
+    }
+    throw new Error("Failed to create user");
+  }
 
   const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
     expiresIn: env.JWT_EXPIRATION as StringValue,
@@ -72,21 +80,34 @@ export const createGuest = async (
     throw new Error("Guests are not allowed to join this chatroom");
   }
 
-  const guest = await Prisma.user.create({
-    data: {
-      username,
-      passwordHash: randomlyGeneratedPassword,
-      isGuest: true,
-    },
-  });
+  let guest;
+  try {
+    guest = await Prisma.user.create({
+      data: {
+        username,
+        passwordHash: randomlyGeneratedPassword,
+        isGuest: true,
+      },
+    });
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      throw new Error("Username already exists");
+    }
+    throw new Error("Failed to create guest user");
+  }
 
-  const guestMember = await Prisma.chatroomMember.create({
-    data: {
-      memberId: guest.id,
-      chatroomId,
-      chatroomIndex: 1,
-    },
-  });
+  try {
+    await Prisma.chatroomMember.create({
+      data: {
+        memberId: guest.id,
+        chatroomId,
+        chatroomIndex: 1,
+      },
+    });
+  } catch (error: any) {
+    console.error("Failed to add guest to chatroom:", error);
+    throw new Error("Failed to add guest to chatroom");
+  }
 
   const token = jwt.sign({ userId: guest.id }, env.JWT_SECRET, {
     expiresIn: env.JWT_EXPIRATION as StringValue,
