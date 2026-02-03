@@ -17,10 +17,13 @@ export const nonVerifiedQuery = async <T>({
     },
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    throw new Error("query failed");
+    throw new Error(data.message || "query error");
   }
-  return (await res.json()) as T;
+
+  return data as Promise<T>;
 };
 
 export const verifiedQuery = async <T>({
@@ -39,8 +42,11 @@ export const verifiedQuery = async <T>({
     },
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    throw new Error("query failed");
+    throw new Error(data.message || "query error");
   }
-  return (await res.json()) as T;
+
+  return data as Promise<T>;
 };
