@@ -1,3 +1,4 @@
+import type { Theme } from "@emotion/react";
 import { css, type SerializedStyles } from "@emotion/react";
 import type React from "react";
 import { useEffect, useRef } from "react";
@@ -5,22 +6,26 @@ import { createPortal } from "react-dom";
 
 type ModalVariant = "default" | "requiredInteraction";
 
-export interface ModalProps
-  extends React.DialogHTMLAttributes<HTMLDialogElement> {
+export interface ModalProps extends React.DialogHTMLAttributes<HTMLDialogElement> {
   modalStyles?: SerializedStyles;
   variant?: ModalVariant;
   onClose?: () => void;
 }
 
-export const closeButtonStyles = css({
-  position: "absolute",
-  top: "10px",
-  right: "10px",
-  backgroundColor: "transparent",
-  border: "none",
-  cursor: "pointer",
-  fontSize: "1rem",
-});
+export const closeButtonStyles = (theme: Theme) =>
+  css({
+    position: "absolute",
+    top: "10px",
+    right: "10px",
+    backgroundColor: "transparent",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "1rem",
+    color: theme.colors.white,
+    "&:hover": {
+      opacity: 0.7,
+    },
+  });
 
 const dialogStyles = (variant: ModalVariant) =>
   css({
@@ -86,7 +91,7 @@ const Modal = ({
         {children}
       </dialog>
     </div>,
-    document.body
+    document.body,
   );
 };
 

@@ -107,14 +107,6 @@ const dialogStyles = (theme: Theme) =>
     },
   });
 
-const closeButtonColors = (theme: Theme) =>
-  css({
-    color: theme.colors.white,
-    "&:hover": {
-      color: theme.colors.light_grey,
-    },
-  });
-
 interface CreateChatroomFormInput {
   title: string;
   privacy: ChatroomPrivacy;
@@ -188,7 +180,7 @@ const NewChatButton = () => {
             </button>
           </form>
           <button
-            css={[closeButtonStyles, closeButtonColors(theme)]}
+            css={closeButtonStyles(theme)}
             onClick={() => setToggle(false)}
             aria-label="Close create chatroom modal"
           >

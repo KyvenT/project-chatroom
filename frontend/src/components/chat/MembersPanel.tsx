@@ -12,6 +12,7 @@ import { mq } from "../../styles/breakpoints";
 import { MemberInfo } from "./MemberInfoPopup";
 import Button from "../Button";
 import { API_URL } from "../../env";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 const styles = css(
   mq({
@@ -88,6 +89,7 @@ const MembersPanel = () => {
     member: ChatroomMember;
     button: HTMLButtonElement;
   } | null>(null);
+  const isMobile = useIsMobile();
 
   const { data } = useQuery<ChatroomMember[]>({
     queryKey: [user.userId, chatroomId],
@@ -166,6 +168,7 @@ const MembersPanel = () => {
         <MemberInfo
           clickedMember={clickedMember}
           onClose={() => setClickedMember(null)}
+          position={isMobile ? "RIGHT" : "LEFT"}
         />
       )}
     </>

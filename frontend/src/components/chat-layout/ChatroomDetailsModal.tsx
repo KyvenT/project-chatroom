@@ -107,15 +107,6 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
     },
   });
 
-const closeButtonColors = (theme: Theme) =>
-  css({
-    color: theme.colors.white,
-    "&:hover": {
-      color: theme.colors.light_grey,
-      fontSize: "1.05rem",
-    },
-  });
-
 interface ChatroomDetailsProps extends ModalProps {
   user: UserAuth;
   chatroomId: string;
@@ -309,10 +300,7 @@ export const ChatroomDetailsModal = ({
               </>
             )}
           </form>
-          <button
-            css={[closeButtonStyles, closeButtonColors(theme)]}
-            onClick={onClose}
-          >
+          <button css={closeButtonStyles(theme)} onClick={onClose}>
             X
           </button>
         </Modal>

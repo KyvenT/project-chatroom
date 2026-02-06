@@ -84,6 +84,10 @@ export const authPageStyles = (theme: Theme) =>
           backgroundColor: "white",
         },
 
+        ".submitBtn:active": {
+          boxShadow: `inset 1px 1px 2px 1px ${theme.colors.light_grey}`,
+        },
+
         ".revealPasswordBtn": {
           cursor: "pointer",
           backgroundColor: "transparent",
