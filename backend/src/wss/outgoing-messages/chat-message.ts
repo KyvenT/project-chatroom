@@ -13,28 +13,16 @@ export const sendChatMessage = async (message: MessagePayload) => {
     console.log("activeRecipients before filter: ", activeRecipients);
     activeRecipients?.forEach((activeUserId) => {
       const recipientSocket = socketMap.getByKey(activeUserId);
-      if (recipientSocket) {
-        console.log(
-          "Active user in chatroom " + message.chatroomId + ": " + activeUserId,
-        );
-        recipientSocket.send(
-          JSON.stringify({
-            type: "chat-message",
-            message: {
-              id: message.id,
-              content: message.content,
-              chatroomId: message.chatroomId,
-              senderUserId: message.senderUserId,
-              createdAt: message.createdAt,
-              senderUser: {
-                id: message.senderUser.id,
-                username: message.senderUser.username,
-              },
-              editedAt: message.editedAt,
-            },
-          }),
-        );
-      }
+      if (!recipientSocket) return;
+      console.log(
+        "Active user in chatroom " + message.chatroomId + ": " + activeUserId,
+      );
+      recipientSocket.send(
+        JSON.stringify({
+          type: "chat-message",
+          message: message,
+        }),
+      );
     });
 
     const recipients = await Prisma.chatroomMember.findMany({

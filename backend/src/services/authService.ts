@@ -7,6 +7,7 @@ import env from "../env.js";
 import type { StringValue } from "ms";
 import { AuthPayload } from "../types/payloads.js";
 import crypto from "crypto";
+import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.js";
 
 export const createUser = async (
   data: z.infer<typeof userSchema>,
@@ -112,6 +113,8 @@ export const createGuest = async (
   const token = jwt.sign({ userId: guest.id }, env.JWT_SECRET, {
     expiresIn: env.JWT_EXPIRATION as StringValue,
   });
+
+  sendUpdateChatrooms(chatroomId, guest.id, "JOIN");
 
   return { token, userId: guest.id, username, isGuest: guest.isGuest };
 };
