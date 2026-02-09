@@ -15,7 +15,7 @@ export const getPinnedGroups = async (
       userId,
     },
     include: {
-      pinnedChatrooms: {
+      chatrooms: {
         select: {
           chatroomId: true,
           chatroom: {
@@ -23,6 +23,7 @@ export const getPinnedGroups = async (
               title: true,
             },
           },
+          pinnedIndex: true,
         },
         orderBy: {
           pinnedIndex: "asc",
@@ -132,41 +133,32 @@ export const pinChatroom = async (
   }
 
   if (pin) {
-    const existingPinnedIndex = await Prisma.chatroomMember.findFirst({
+    const existingPinnedIndex = await Prisma.memberPinnedGroups.findFirst({
       select: {
         pinnedIndex: true,
       },
       where: {
-        memberId: userId,
+        pinGroupId: pinGroupId,
       },
       orderBy: {
-        chatroomIndex: "desc",
+        pinnedIndex: "desc",
       },
     });
 
-    await Prisma.chatroomMember.update({
-      where: {
-        chatroomId_memberId: {
-          chatroomId,
-          memberId: userId,
-        },
-      },
+    await Prisma.memberPinnedGroups.create({
       data: {
         pinGroupId,
+        chatroomId,
         pinnedIndex: (existingPinnedIndex?.pinnedIndex || 0) + 1,
       },
     });
   } else {
-    await Prisma.chatroomMember.update({
+    await Prisma.memberPinnedGroups.delete({
       where: {
-        chatroomId_memberId: {
+        chatroomId_pinGroupId: {
           chatroomId,
-          memberId: userId,
+          pinGroupId,
         },
-      },
-      data: {
-        pinGroupId: null,
-        pinnedIndex: null,
       },
     });
   }

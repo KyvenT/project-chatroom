@@ -66,7 +66,7 @@ export interface PinnedGroupsPayload {
   userId: string;
   name: string;
   createdAt: Date;
-  pinnedChatrooms: PinnedChatroomPayload[];
+  chatrooms: PinnedChatroomPayload[];
 }
 
 export interface PinnedChatroomPayload {
@@ -74,6 +74,7 @@ export interface PinnedChatroomPayload {
   chatroom: {
     title: string;
   };
+  pinnedIndex: number;
 }
 
 export interface MembersPayload {
