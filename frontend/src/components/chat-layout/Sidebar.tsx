@@ -47,7 +47,7 @@ const sidebarStyles = css(
     ".homeBtn": {
       padding: "2px",
     },
-  })
+  }),
 );
 
 const colors = (theme: Theme) =>

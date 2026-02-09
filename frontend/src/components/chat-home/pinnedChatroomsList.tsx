@@ -51,7 +51,7 @@ const styles = css(
         textOverflow: "ellipsis",
       },
     },
-  })
+  }),
 );
 
 const colors = (theme: Theme) =>
@@ -66,6 +66,7 @@ const colors = (theme: Theme) =>
         color: theme.colors.white,
         backgroundColor: theme.colors.grey,
         scrollbarColor: `transparent transparent`,
+        border: `1px solid ${theme.colors.grey}`,
       },
 
       ".pinned-chatroom:hover": {
@@ -76,7 +77,7 @@ const colors = (theme: Theme) =>
       ".chatroom-title-area": {
         backgroundColor: theme.colors.dark_grey,
       },
-    })
+    }),
   );
 
 export const PinnedChatroomsList = ({
@@ -87,9 +88,9 @@ export const PinnedChatroomsList = ({
   const navigate = useNavigate();
 
   const results = useFetchMessagesMultiple(
-    pinnedGroup.pinnedChatrooms.map((chatroom) => chatroom.chatroomId),
+    pinnedGroup.chatrooms.map((chatroom) => chatroom.chatroomId),
     getBefore,
-    5
+    5,
   );
 
   const handleClick = (chatroomId: string) => {
@@ -98,7 +99,7 @@ export const PinnedChatroomsList = ({
 
   return (
     <ul css={[styles, colors(theme)]}>
-      {pinnedGroup.pinnedChatrooms.map((chatroom, i) => (
+      {pinnedGroup.chatrooms.map((chatroom, i) => (
         <li
           className="pinned-chatroom"
           key={chatroom.chatroomId}

@@ -1,7 +1,7 @@
 import type { Theme } from "@emotion/react";
 import { css, useTheme } from "@emotion/react";
 import Button from "../../../components/Button";
-import { Pin, Plus } from "lucide-react";
+import { Loader2, Pin, Plus } from "lucide-react";
 import {
   verifiedMutation,
   type MutationArgs,
@@ -24,7 +24,7 @@ const styles = css(
     display: "flex",
     flexDirection: "column",
     gap: "4px",
-    overflowY: "auto",
+    overflowY: "scroll",
 
     ul: {
       listStyle: "none",
@@ -93,6 +93,7 @@ const styles = css(
 const colors = (theme: Theme) =>
   css({
     backgroundColor: theme.colors.black,
+    color: theme.colors.white,
 
     ".pinned-group": {
       color: theme.colors.white,
@@ -113,7 +114,7 @@ const ChatHome = () => {
   const [openedPinGroupId, setOpenedPinGroupId] = useState<string | null>(null);
   const [pinnedGroups, setPinnedGroups] = useState<PinnedGroup[]>([]);
 
-  const { data, refetch } = useQuery({
+  const { data, refetch, isLoading, isError, error } = useQuery({
     queryKey: ["pinnedChatrooms", user.userId],
     queryFn: () =>
       verifiedQuery<PinnedGroup[]>({
@@ -146,6 +147,23 @@ const ChatHome = () => {
 
   const openedPinGroup =
     pinnedGroups.find((group) => group.id === openedPinGroupId) || null;
+
+  if (isLoading) {
+    return (
+      <div css={[styles, colors(theme)]}>
+        <p>Loading...</p>
+        <Loader2 />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div css={[styles, colors(theme)]}>
+        <p>Failed to load pinned groups: {error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <>

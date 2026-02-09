@@ -58,7 +58,7 @@ const Signup = () => {
 
   return (
     <div css={authPageStyles(theme)}>
-      <h1>Create an account</h1>{" "}
+      <h1>Register account</h1>
       <form
         id="registerForm"
         className="authForm"

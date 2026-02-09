@@ -13,6 +13,7 @@ import useAuthContext from "../../hooks/useAuthContext";
 import { API_URL } from "../../env";
 import { Check, Pencil, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { mq } from "../../styles/breakpoints";
 
 interface pinChatroomsModalProps {
   open: boolean;
@@ -22,67 +23,101 @@ interface pinChatroomsModalProps {
 }
 
 const styles = (theme: Theme) =>
-  css({
-    gap: "10px",
-    backgroundColor: theme.colors.dark_grey,
-    color: theme.colors.white,
-    border: `1px solid ${theme.colors.light_grey}`,
-    borderRadius: "8px",
-    padding: "30px",
+  css(
+    mq({
+      width: ["80%", "80%", "40%"],
+      backgroundColor: theme.colors.dark_grey,
+      color: theme.colors.white,
+      border: `1px solid ${theme.colors.light_grey}`,
+      borderRadius: "8px",
+      padding: "30px",
 
-    ul: {
-      listStyle: "none",
-      padding: 0,
-    },
-
-    ".title-section": {
-      width: "100%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      minWidth: "300px",
-
-      h3: {
-        fontSize: "1.5rem",
-        margin: 0,
-        fontWeight: 400,
-      },
-
-      ".edit-title-section": {
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-      },
-
-      ".edit-title-btn": {
-        background: "none",
-        border: "none",
+      ul: {
+        listStyle: "none",
         padding: 0,
-        cursor: "pointer",
       },
 
-      ".edit-title-btn:hover": {
-        opacity: 0.7,
+      ".title-section": {
+        width: "100%",
+
+        h3: {
+          fontSize: "1.5rem",
+          margin: 0,
+          fontWeight: 400,
+        },
+
+        ".edit-title-section": {
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+        },
+
+        ".edit-title-btn": {
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+        },
+
+        ".edit-title-btn:hover": {
+          opacity: 0.7,
+        },
+
+        ".btn-icon": {
+          width: "1.25rem",
+          height: "1.25rem",
+          color: theme.colors.white,
+          cursor: "pointer",
+        },
+
+        input: {
+          flex: 1,
+          minWidth: 0,
+          fontSize: "1.5rem",
+          fontWeight: 400,
+          backgroundColor: theme.colors.grey,
+          color: theme.colors.white,
+          border: `1px solid ${theme.colors.white}`,
+          borderRadius: "4px",
+          padding: "4px",
+        },
       },
 
-      ".btn-icon": {
-        width: "1.25rem",
-        height: "1.25rem",
-        color: theme.colors.white,
-        cursor: "pointer",
+      ".unpinned-chatroom": {
+        button: {
+          fontSize: "1.1rem",
+          backgroundColor: "transparent",
+          color: theme.colors.white,
+          border: 0,
+          width: "100%",
+          cursor: "pointer",
+        },
+
+        "button:hover": {
+          backgroundColor: theme.colors.grey,
+        },
       },
 
-      input: {
-        fontSize: "1.5rem",
+      h5: {
+        fontSize: "1.2rem",
         fontWeight: 400,
-        backgroundColor: theme.colors.grey,
-        color: theme.colors.white,
-        border: `1px solid ${theme.colors.white}`,
-        borderRadius: "4px",
-        padding: "4px",
       },
-    },
-  });
+
+      ".chatroom-list": {
+        marginBottom: "20px",
+        border: `1px solid ${theme.colors.light_grey}`,
+        borderRadius: "4px",
+        padding: "12px",
+        height: ["60px", "60px", "100px"],
+        overflowY: "scroll",
+        scrollbarColor: `transparent transparent`,
+        "&:hover": {
+          scrollbarColor: `${theme.colors.white} transparent`,
+        },
+      },
+    }),
+  );
 
 export const PinChatroomsModal = ({
   open,
@@ -122,9 +157,13 @@ export const PinChatroomsModal = ({
         if (group.id === pinnedGroup.id) {
           return {
             ...group,
-            pinnedChatrooms: [
-              ...group.pinnedChatrooms,
-              { chatroomId, chatroom: { title: chatroomTitle } },
+            chatrooms: [
+              ...group.chatrooms,
+              {
+                chatroomId,
+                chatroom: { title: chatroomTitle },
+                pinnedIndex: group.chatrooms.length,
+              },
             ],
           };
         }
@@ -152,7 +191,7 @@ export const PinChatroomsModal = ({
     );
   };
 
-  const pinnedIds = pinnedGroup.pinnedChatrooms.map(
+  const pinnedIds = pinnedGroup.chatrooms.map(
     (chatroom) => chatroom.chatroomId,
   );
   const pinnedChatrooms = chatrooms.filter((chatroom) =>
@@ -212,14 +251,32 @@ export const PinChatroomsModal = ({
             <X />
           </button>
         </div>
-        <ul>
-          <h5>Pinned Chatrooms</h5>
-          {pinnedChatrooms.map((chatroom) => (
-            <li key={chatroom.chatroomId}>{chatroom.chatroom.title}</li>
-          ))}
-          <h5>Unpinned Chatrooms</h5>
+        <h5>Pinned Chatrooms</h5>
+        <ul className="chatroom-list">
+          {pinnedChatrooms.length === 0 ? (
+            <p>No pinned chatrooms</p>
+          ) : (
+            pinnedChatrooms.map((chatroom) => (
+              <li key={chatroom.chatroomId} className="unpinned-chatroom">
+                <button
+                  onClick={() =>
+                    handleChatroomPin(
+                      chatroom.chatroomId,
+                      chatroom.chatroom.title,
+                      false,
+                    )
+                  }
+                >
+                  {chatroom.chatroom.title}
+                </button>
+              </li>
+            ))
+          )}
+        </ul>
+        <h5>Pin chatrooms</h5>
+        <ul className="chatroom-list">
           {unpinnedChatrooms.map((chatroom) => (
-            <li key={chatroom.chatroomId}>
+            <li key={chatroom.chatroomId} className="unpinned-chatroom">
               <button
                 onClick={() =>
                   handleChatroomPin(

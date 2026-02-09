@@ -26,6 +26,7 @@ export const authPageStyles = (theme: Theme) =>
       backgroundColor: "white",
       borderRadius: "10px",
       boxShadow: "0 2px 2px rgba(0,0,0,0.1)",
+      textAlign: "center",
 
       h1: {
         cursor: "default",
