@@ -210,7 +210,7 @@ const SidebarChatroomButton = ({
           {unreadMessages > 0 && (
             <span className="unreadBadge">{unreadMessages}</span>
           )}
-          {isHovered && canInvite && (
+          {(isActive || isHovered) && canInvite && (
             <Button
               onClick={() => setInviteModalOpen()}
               variant="icon"

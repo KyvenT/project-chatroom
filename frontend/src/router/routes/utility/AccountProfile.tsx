@@ -24,6 +24,23 @@ const styles = (theme: Theme) =>
         borderRadius: "50%",
         //backgroundImage: "",
       },
+
+      h2: {
+        fontSize: "1.25rem",
+        fontWeight: "600",
+        margin: 0,
+      },
+
+      span: {
+        fontSize: "1rem",
+        fontWeight: "300",
+      },
+
+      ".flex": {
+        display: "flex",
+        gap: "8px",
+        alignItems: "center",
+      },
     }),
   );
 
@@ -44,21 +61,29 @@ export const AccountProfilePage = () => {
     <div css={styles(theme)}>
       <div className="container">
         <h1 className="title">Account Details</h1>
-        <div className="profilePicture"></div>
+        {/*<div className="profilePicture"></div>
         <input
           type="file"
           id="profilePictureInput"
           accept="image/png, image/jpeg"
         ></input>
-        <h2>Username: {user.username}</h2>
-        <h3>User ID: {user.userId}</h3>
+        */}
+        <div className="username flex">
+          <h2>Username</h2>
+          <span>{user.username}</span>
+        </div>
+        <div className="flex">
+          <h2>User ID</h2>
+          <span>{user.userId}</span>
+        </div>
         <p>{user.isGuest ? "Guest account" : "User account"}</p>
         <p>
           Account created on:{" "}
           {data?.createdAt &&
             new Date(data?.createdAt).toLocaleDateString("en-US")}
         </p>
-        <p>{data?.email ? "Email verified" : "Email unverified"}</p>
+        {/*<p>{data?.email ? "Email verified" : "Email unverified"}</p>*/}
+        {/*<button>Delete account</button>*/}
       </div>
     </div>
   );

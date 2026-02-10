@@ -93,6 +93,12 @@ const styles = (
         cursor: "default",
       },
 
+      ".isGuest": {
+        color: theme.colors.light_grey,
+        fontSize: ".9rem",
+        cursor: "default",
+      },
+
       ".username-container": {
         display: "flex",
         alignItems: "center",
@@ -157,6 +163,7 @@ export const MemberInfo = ({
         )}
       </div>
       <p className="status">{member.member.status}</p>
+      {data?.member.isGuest && <p className="isGuest">(Guest)</p>}
       <p className="joinedAt">
         joined {data && new Date(data.joinedAt).toLocaleDateString()}
       </p>

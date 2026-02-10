@@ -14,107 +14,112 @@ import {
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { SquarePen } from "lucide-react";
+import { SquarePen, X } from "lucide-react";
 import useAuthContext from "../../hooks/useAuthContext";
 import useToggle from "../../hooks/useToggle";
 import { verifiedQuery } from "../../hooks/useCustomQuery";
 import { API_URL } from "../../env";
+import { mq } from "../../styles/breakpoints";
 
 const chatroomDetailsModalStyles = (theme: Theme) =>
-  css({
-    padding: "30px",
-    borderRadius: "5px",
-    backgroundColor: theme.colors.dark_grey,
-    color: theme.colors.white,
-    border: `1px solid ${theme.colors.light_grey}`,
-
-    ".title": {
-      width: "100%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      h3: {
-        fontWeight: 400,
-        fontSize: "1.1rem",
-      },
-      input: {
-        fontSize: "1rem",
-        flex: 1,
-        fontWeight: 400,
-        margin: 0,
-        borderRadius: "4px",
-        backgroundColor: theme.colors.grey,
-        color: theme.colors.white,
-        border: `1px solid ${theme.colors.white}`,
-      },
-    },
-
-    form: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: "12px",
-    },
-
-    ".actionBtn": {
-      width: "fit-content",
-      fontSize: "1rem",
-      color: theme.colors.white,
-      backgroundColor: "transparent",
-      border: `1px solid ${theme.colors.white}`,
-      padding: "6px 10px",
+  css(
+    mq({
+      width: ["80%", "60%", "40%", "30%"],
+      padding: "30px",
       borderRadius: "5px",
-      cursor: "pointer",
-    },
-
-    ".actionBtn:hover": {
-      backgroundColor: theme.colors.grey,
-    },
-
-    ".privacySection": {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      width: "100%",
-
-      select: {
-        backgroundColor: "transparent",
-        color: theme.colors.white,
-        padding: "6px",
-        borderRadius: "4px",
-        border: `1px solid ${theme.colors.white}`,
-        cursor: "pointer",
-
-        option: {
-          backgroundColor: theme.colors.dark_grey,
-        },
-
-        "option:hover": {
-          backgroundColor: theme.colors.light_grey,
-        },
-      },
-
-      "select:hover": {
-        backgroundColor: theme.colors.grey,
-      },
-    },
-
-    ".actionBtns": {
+      backgroundColor: theme.colors.dark_grey,
+      color: theme.colors.white,
+      border: `1px solid ${theme.colors.light_grey}`,
       display: "flex",
       justifyContent: "center",
-      alignItems: "center",
-      gap: "8px",
-    },
-  });
 
-const closeButtonColors = (theme: Theme) =>
-  css({
-    color: theme.colors.white,
-    "&:hover": {
-      color: theme.colors.light_grey,
-      fontSize: "1.05rem",
-    },
-  });
+      ".title": {
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        h3: {
+          fontWeight: 400,
+          fontSize: "1.1rem",
+        },
+        input: {
+          fontSize: "1rem",
+          flex: 1,
+          fontWeight: 400,
+          margin: 0,
+          borderRadius: "4px",
+          backgroundColor: theme.colors.grey,
+          color: theme.colors.white,
+          border: `1px solid ${theme.colors.white}`,
+        },
+      },
+
+      "#editChatroom": {
+        display: "flex",
+        flexDirection: "column",
+        gap: "12px",
+        width: "90%",
+      },
+
+      ".chatroomInfo": {
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        justifyContent: "center",
+      },
+
+      ".actionBtn": {
+        width: "fit-content",
+        fontSize: "1rem",
+        color: theme.colors.white,
+        backgroundColor: "transparent",
+        border: `1px solid ${theme.colors.white}`,
+        padding: "6px 10px",
+        borderRadius: "5px",
+        cursor: "pointer",
+      },
+
+      ".actionBtn:hover": {
+        backgroundColor: theme.colors.grey,
+      },
+
+      ".privacySection": {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        width: "100%",
+
+        select: {
+          backgroundColor: "transparent",
+          color: theme.colors.white,
+          padding: "6px",
+          borderRadius: "4px",
+          border: `1px solid ${theme.colors.white}`,
+          cursor: "pointer",
+
+          option: {
+            backgroundColor: theme.colors.dark_grey,
+          },
+
+          "option:hover": {
+            backgroundColor: theme.colors.light_grey,
+          },
+        },
+
+        "select:hover": {
+          backgroundColor: theme.colors.grey,
+        },
+      },
+
+      ".actionBtns": {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: "8px",
+      },
+    }),
+  );
 
 interface ChatroomDetailsProps extends ModalProps {
   user: UserAuth;
@@ -242,10 +247,10 @@ export const ChatroomDetailsModal = ({
                 )}
               </div>
               <h5>
-                Owned by: <span>{chatroomData.owner?.username}</span>
+                Chatroom Owner: <span>{chatroomData.owner?.username}</span>
               </h5>
               <p>
-                Created at:
+                Created at:{" "}
                 <span>{new Date(chatroomData.createdAt).toLocaleString()}</span>
               </p>
             </div>
@@ -309,11 +314,8 @@ export const ChatroomDetailsModal = ({
               </>
             )}
           </form>
-          <button
-            css={[closeButtonStyles, closeButtonColors(theme)]}
-            onClick={onClose}
-          >
-            X
+          <button css={closeButtonStyles(theme)} onClick={onClose}>
+            <X />
           </button>
         </Modal>
       )}

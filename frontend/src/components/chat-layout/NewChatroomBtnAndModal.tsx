@@ -14,6 +14,8 @@ import Modal, { closeButtonStyles } from "../Modal";
 import type { Theme } from "@emotion/react";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { API_URL } from "../../env";
+import { mq } from "../../styles/breakpoints";
+import { X } from "lucide-react";
 
 const buttonStyles = (theme: Theme) =>
   css({
@@ -29,91 +31,89 @@ const buttonStyles = (theme: Theme) =>
   });
 
 const dialogStyles = (theme: Theme) =>
-  css({
-    gap: "10px",
-    backgroundColor: theme.colors.dark_grey,
-    color: theme.colors.white,
-    border: `1px solid ${theme.colors.light_grey}`,
-    borderRadius: "10px",
-    padding: "30px",
-
-    h2: {
-      fontWeight: "500",
-      color: theme.colors.white,
-    },
-
-    "#new-chat-form": {
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      gap: "5px",
-    },
-
-    "#title": {
-      flex: 1,
-      fontSize: "1rem",
-      borderRadius: "4px",
-      padding: "4px",
-      border: `1px solid ${theme.colors.white}`,
-      backgroundColor: "transparent",
-      color: theme.colors.white,
-    },
-
-    "#title:focus": {
-      outline: "none",
-    },
-
-    ".form-group": {
-      width: "100%",
-      fontSize: "1rem",
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-    },
-
-    ".submit-btn": {
-      fontSize: "1rem",
-      borderRadius: "4px",
-      width: "fit-content",
-      padding: "4px 8px",
-      backgroundColor: "transparent",
-      color: theme.colors.white,
-      border: `1px solid ${theme.colors.white}`,
-      cursor: "pointer",
-    },
-
-    ".submit-btn:hover": {
-      backgroundColor: theme.colors.grey,
-    },
-
-    "#privacy": {
-      flex: 1,
-      fontSize: "1rem",
-      backgroundColor: "transparent",
-      color: theme.colors.white,
-      border: `1px solid ${theme.colors.white}`,
-      padding: "4px",
-      borderRadius: "4px",
-      cursor: "pointer",
-    },
-
-    "#privacy:hover": {
-      backgroundColor: theme.colors.grey,
-    },
-
-    "#privacy option": {
+  css(
+    mq({
+      width: ["80%", "60%", "40%", "30%"],
+      gap: "10px",
       backgroundColor: theme.colors.dark_grey,
-    },
-  });
+      color: theme.colors.white,
+      border: `1px solid ${theme.colors.light_grey}`,
+      borderRadius: "10px",
+      padding: "30px",
 
-const closeButtonColors = (theme: Theme) =>
-  css({
-    color: theme.colors.white,
-    "&:hover": {
-      color: theme.colors.light_grey,
-    },
-  });
+      h2: {
+        fontWeight: "500",
+        color: theme.colors.white,
+        cursor: "default",
+      },
+
+      "#new-chat-form": {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: "5px",
+      },
+
+      "#title": {
+        flex: 1,
+        minWidth: 0,
+        fontSize: "1rem",
+        borderRadius: "4px",
+        padding: "4px",
+        border: `1px solid ${theme.colors.white}`,
+        backgroundColor: "transparent",
+        color: theme.colors.white,
+      },
+
+      "#title:focus": {
+        outline: "none",
+      },
+
+      ".form-group": {
+        width: "100%",
+        fontSize: "1rem",
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+      },
+
+      ".submit-btn": {
+        fontSize: "1rem",
+        borderRadius: "4px",
+        width: "fit-content",
+        padding: "4px 8px",
+        backgroundColor: "transparent",
+        color: theme.colors.white,
+        border: `1px solid ${theme.colors.white}`,
+        cursor: "pointer",
+      },
+
+      ".submit-btn:hover": {
+        backgroundColor: theme.colors.grey,
+      },
+
+      "#privacy": {
+        flex: 1,
+        minWidth: 0,
+        fontSize: "1rem",
+        backgroundColor: "transparent",
+        color: theme.colors.white,
+        border: `1px solid ${theme.colors.white}`,
+        padding: "4px",
+        borderRadius: "4px",
+        cursor: "pointer",
+      },
+
+      "#privacy:hover": {
+        backgroundColor: theme.colors.grey,
+      },
+
+      "#privacy option": {
+        backgroundColor: theme.colors.dark_grey,
+      },
+    }),
+  );
 
 interface CreateChatroomFormInput {
   title: string;
@@ -123,7 +123,12 @@ interface CreateChatroomFormInput {
 const NewChatButton = () => {
   const [isToggled, setToggle] = useToggle(false);
   const { user, isLoggedIn } = useAuthContext();
-  const { register, handleSubmit } = useForm<CreateChatroomFormInput>();
+  const { register, handleSubmit, reset } = useForm<CreateChatroomFormInput>({
+    defaultValues: {
+      title: "",
+      privacy: "INVITE_ONLY",
+    },
+  });
   const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
     mutationFn: verifiedMutation<ConfirmationResponse>,
   });
@@ -143,6 +148,7 @@ const NewChatButton = () => {
         privacy,
       },
     });
+    reset();
   };
 
   return (
@@ -162,7 +168,7 @@ const NewChatButton = () => {
           onClose={() => setToggle(false)}
         >
           <form id="new-chat-form" onSubmit={handleSubmit(onSubmit)}>
-            <h2>Create a Chatroom</h2>
+            <h2>Create Chatroom</h2>
             <div className="form-group chatroom-title-group">
               <label htmlFor="title">Chatroom name: </label>
               <input
@@ -188,11 +194,11 @@ const NewChatButton = () => {
             </button>
           </form>
           <button
-            css={[closeButtonStyles, closeButtonColors(theme)]}
+            css={closeButtonStyles(theme)}
             onClick={() => setToggle(false)}
             aria-label="Close create chatroom modal"
           >
-            X
+            <X />
           </button>
         </Modal>
       )}

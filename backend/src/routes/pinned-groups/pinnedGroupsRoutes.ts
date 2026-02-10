@@ -24,7 +24,7 @@ pinnedGroupsRouter.patch(
   pinMemberChatroom,
 );
 pinnedGroupsRouter.patch(
-  "/:pinnedGroupId",
+  "/:pinGroupId",
   validationMiddleware(editPinnedGroupSchema, (req) => ({
     ...req.params,
     ...req.body,

@@ -92,6 +92,11 @@ const styles = (theme: Theme) =>
     ".guestSubmitBtn:hover": {
       backgroundColor: theme.colors.grey,
     },
+
+    ".errorMessage": {
+      color: "#ff4d4d",
+      fontSize: "0.9rem",
+    },
   });
 
 const modalStyles = (theme: Theme) =>
@@ -122,7 +127,7 @@ const AuthGuard = () => {
     staleTime: Infinity,
   });
 
-  const { mutate } = useMutation<UserAuth, Error, MutationArgs>({
+  const { mutate, error } = useMutation<UserAuth, Error, MutationArgs>({
     mutationFn: nonVerifiedMutation<UserAuth>,
     onSuccess: (guestAuthData) => {
       if (!guestAuthData) return;
@@ -145,6 +150,7 @@ const AuthGuard = () => {
   };
 
   const chatroomJoinable: boolean = privacyData?.privacy === "PUBLIC";
+  const errorMessage: string = error?.message || "";
 
   return (
     <Modal
@@ -172,6 +178,7 @@ const AuthGuard = () => {
                 ></input>
               </div>
             </form>
+            <span className="errorMessage">{errorMessage}</span>
             <button className="guestSubmitBtn" type="submit" form="createGuest">
               Join as Guest
             </button>

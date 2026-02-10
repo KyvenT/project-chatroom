@@ -15,58 +15,63 @@ import type { Theme } from "@emotion/react";
 import { verifiedQuery } from "../../hooks/useCustomQuery";
 import Button from "../Button";
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { Send, X } from "lucide-react";
 import { API_URL } from "../../env";
+import { mq } from "../../styles/breakpoints";
 
 const dialogStyles = (theme: Theme) =>
-  css({
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-    backgroundColor: theme.colors.dark_grey,
-    borderRadius: "10px",
-    padding: "30px",
-    border: `1px solid ${theme.colors.white}`,
-
-    "h3, h5": {
-      color: theme.colors.white,
-      userSelect: "none",
-      fontWeight: 400,
-    },
-
-    h3: {
-      fontSize: "1.2rem",
-    },
-
-    h5: {
-      fontSize: "1.05rem",
-    },
-
-    "#inviteForm": {
+  css(
+    mq({
+      width: ["80%", "60%", "40%", "30%"],
       display: "flex",
+      flexDirection: "column",
+      gap: "4px",
+      backgroundColor: theme.colors.dark_grey,
+      borderRadius: "10px",
+      padding: "30px",
       border: `1px solid ${theme.colors.white}`,
-      padding: "4px",
-      borderRadius: "8px",
 
-      input: {
-        flex: 1,
-        backgroundColor: "transparent",
+      "h3, h5": {
         color: theme.colors.white,
-        fontSize: "1rem",
-        border: 0,
+        userSelect: "none",
+        fontWeight: 400,
       },
 
-      "input:focus": {
-        outline: 0,
+      h3: {
+        fontSize: "1.2rem",
       },
 
-      ".inviteBtn": {},
-    },
+      h5: {
+        fontSize: "1.05rem",
+      },
 
-    ".inviteErrorMessage": {
-      color: "red",
-    },
-  });
+      "#inviteForm": {
+        display: "flex",
+        border: `1px solid ${theme.colors.white}`,
+        padding: "4px",
+        borderRadius: "8px",
+
+        input: {
+          flex: 1,
+          minWidth: 0,
+          backgroundColor: "transparent",
+          color: theme.colors.white,
+          fontSize: "1rem",
+          border: 0,
+        },
+
+        "input:focus": {
+          outline: 0,
+        },
+
+        ".inviteBtn": {},
+      },
+
+      ".inviteErrorMessage": {
+        color: "red",
+      },
+    }),
+  );
 
 const inviteListStyles = css({
   ul: {
@@ -209,12 +214,12 @@ export const InviteModal = ({
         </ul>
       </div>
       <Button
-        css={closeButtonStyles}
+        css={closeButtonStyles(theme)}
         variant="icon"
         onClick={onClose}
         aria-label="Close invite modal"
       >
-        X
+        <X />
       </Button>
     </Modal>
   );

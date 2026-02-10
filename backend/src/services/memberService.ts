@@ -204,8 +204,6 @@ export const getChatroomMembers = async (
     omit: {
       chatroomId: true,
       joinedAt: true,
-      pinGroupId: true,
-      pinnedIndex: true,
       chatroomIndex: true,
       lastViewedAt: true,
     },

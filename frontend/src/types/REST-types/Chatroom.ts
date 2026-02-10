@@ -39,7 +39,7 @@ export interface PinnedGroup {
   userId: string;
   name: string;
   createdAt: Date;
-  pinnedChatrooms: PinnedChatroom[];
+  chatrooms: PinnedChatroom[];
 }
 
 export interface PinnedChatroom {
@@ -47,4 +47,5 @@ export interface PinnedChatroom {
   chatroom: {
     title: string;
   };
+  pinnedIndex: number;
 }

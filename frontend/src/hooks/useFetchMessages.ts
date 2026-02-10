@@ -16,7 +16,7 @@ export const useFetchMessages = (
 ) => {
   const { user, isLoggedIn } = useAuthContext();
 
-  const data = useQuery<Message[]>({
+  return useQuery<Message[]>({
     queryKey: [chatroomId, isLoggedIn, getBefore?.toISOString()],
     queryFn: () =>
       verifiedQuery<Message[]>({
@@ -25,8 +25,14 @@ export const useFetchMessages = (
       }),
     enabled: !!getBefore,
     staleTime: Infinity,
+    retryDelay: 1000,
+    retry: (failureCount, error) => {
+      if (error instanceof Error && error.message === "Unauthorized") {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
-  return data;
 };
 
 type MessageQueries = UseQueryOptions<Message[]>[];
@@ -48,6 +54,13 @@ export const useFetchMessagesMultiple = (
         }),
       enabled: !!getBefore,
       staleTime: Infinity,
+      retryDelay: 1000,
+      retry: (failureCount, error) => {
+        if (error instanceof Error && error.message === "Unauthorized") {
+          return false;
+        }
+        return failureCount < 3;
+      },
     })),
   });
   return data;

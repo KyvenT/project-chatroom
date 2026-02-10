@@ -27,9 +27,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const pathToStaticFiles = path.join(__dirname, "../frontend");
 
-// setting up path for static files
-app.use(express.static(pathToStaticFiles));
-
 // middleware
 app.use(express.json());
 //app.use(corsPreflightMiddleware);
@@ -38,8 +35,11 @@ app.use(rateLimitMiddleware);
 // routes
 app.use("/api", apiRouter);
 
+// setting up path for static files
+app.use(express.static(pathToStaticFiles));
+
 // initial send of index.html
-app.get("/", (req, res) => {
+app.get(/.*/, (req, res) => {
   console.log("Serving index.html");
   res.sendFile(path.join(pathToStaticFiles, "index.html"));
 });

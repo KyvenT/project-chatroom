@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { Link } from "react-router";
 import { mq } from "../../../styles/breakpoints";
-import { Keyboard, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import Button from "../../../components/Button";
 import { useEffect } from "react";
@@ -84,6 +84,7 @@ const styles = css(
     ".card": {
       width: "70%",
       display: "flex",
+      flexDirection: ["column", "row"],
       border: "1px solid grey",
       padding: "10px",
       borderRadius: "6px",
@@ -108,7 +109,14 @@ const styles = css(
       alignItems: "center",
       gap: "4px",
     },
-  })
+
+    ".sampleImage": {
+      width: "100%",
+      height: "auto",
+      border: "1px solid grey",
+      borderRadius: "6px",
+    },
+  }),
 );
 
 const LandingPage = () => {
@@ -137,37 +145,59 @@ const LandingPage = () => {
             )}
             <h1 className="brandTitle">Project Chatroom</h1>
           </div>
-          {(!isMobile || mobileNavOpen) && (
+          {mobileNavOpen && (
             <ul className="centerNavLinks">
               <Link to="" className="navLink centerNavLink">
                 About Project Chatroom
               </Link>
+              {/*
               <Link to="/chat" className="navLink centerNavLink">
                 Join a chatroom
               </Link>
+              */}
+              <Link to="/login" className="navLink centerNavLink">
+                Log In
+              </Link>
+              <Link to="/register" className="navLink centerNavLink">
+                Register
+              </Link>
             </ul>
           )}
-          <p>
-            <Link to="/login" className="navLink">
-              Log In
-            </Link>{" "}
-            /{" "}
-            <Link to="/register" className="navLink">
-              Register
-            </Link>
-          </p>
+          {!isMobile && (
+            <>
+              <ul className="centerNavLinks">
+                <Link to="" className="navLink centerNavLink">
+                  About Project Chatroom
+                </Link>
+                {/*
+              <Link to="/chat" className="navLink centerNavLink">
+                Join a chatroom
+              </Link>
+              */}
+              </ul>
+              <p>
+                <Link to="/login" className="navLink">
+                  Log In
+                </Link>{" "}
+                /{" "}
+                <Link to="/register" className="navLink">
+                  Register
+                </Link>
+              </p>
+            </>
+          )}
         </nav>
       </div>
       <div className="content">
         <div className="card">
           <div className="cardSection">
             <h2 className="">
-              Quickly create chatrooms to manage group communication on the fly
+              Create chatrooms to manage group communication on the fly
             </h2>
-            <p>Create and send a link!</p>
+            <p>Supports guest access without registration!</p>
           </div>
           <div className="cardSection">
-            <Keyboard />
+            <img className="sampleImage" src="/sample.png" alt="Sample UI" />
           </div>
         </div>
       </div>

@@ -26,6 +26,7 @@ export const authPageStyles = (theme: Theme) =>
       backgroundColor: "white",
       borderRadius: "10px",
       boxShadow: "0 2px 2px rgba(0,0,0,0.1)",
+      textAlign: "center",
 
       h1: {
         cursor: "default",
@@ -84,6 +85,10 @@ export const authPageStyles = (theme: Theme) =>
           backgroundColor: "white",
         },
 
+        ".submitBtn:active": {
+          boxShadow: `inset 1px 1px 2px 1px ${theme.colors.light_grey}`,
+        },
+
         ".revealPasswordBtn": {
           cursor: "pointer",
           backgroundColor: "transparent",
@@ -130,6 +135,8 @@ const Login = () => {
 
       if (!res.ok) {
         console.error(res.status);
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Login failed");
       }
 
       const data = (await res.json()) as UserAuth;

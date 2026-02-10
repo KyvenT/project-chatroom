@@ -17,6 +17,7 @@ model Chatroom {
   messages             Message[]
   members              ChatroomMember[]
   invites              Invite[]
+  pinGroups            MemberPinnedGroups[] 
 }
 
 model Message {
@@ -46,6 +47,7 @@ model User {
   sentInvites     Invite[]         @relation("SentInvite")
   receivedInvites Invite[]         @relation("ReceivedInvite")
   notifications   Notification[]
+  sessions        Session[]
 }
 
 model ChatroomMember {
@@ -54,9 +56,6 @@ model ChatroomMember {
   chatroom              Chatroom      @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId            String
   chatroomIndex         Int           
-  pinGroup              PinGroup?            @relation(fields: [pinGroupId], references: [id], onDelete: SetNull)
-  pinGroupId            String?
-  pinnedIndex           Int?  
   role                  ChatroomRoles @default(MEMBER)
   joinedAt              DateTime      @default(now())
   lastViewedAt          DateTime      @default(now())
@@ -69,10 +68,20 @@ model PinGroup {
   id                    String            @id @default(uuid())
   user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId                String
-  pinnedChatrooms       ChatroomMember[]
+  chatrooms             MemberPinnedGroups[]
   name                  String
   index                 Int
-  createdAt             DateTime          @default(now())
+  createdAt             DateTime         @default(now())
+}
+
+model MemberPinnedGroups {
+  chatroom              Chatroom        @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
+  chatroomId            String
+  pinGroup              PinGroup        @relation(fields: [pinGroupId], references: [id], onDelete: Cascade)
+  pinGroupId            String
+  pinnedIndex           Int 
+
+  @@id([chatroomId, pinGroupId])
 }
 
 model Invite {
@@ -99,6 +108,16 @@ model Notification {
   inviteId  String?          @unique
   message   Message?         @relation(fields: [messageId], references: [id], onDelete: Cascade)
   messageId String?
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  refreshToken String   @unique
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  revokedAt    DateTime?
 }
 
 enum NotificationType {

@@ -20,11 +20,13 @@ export const nonVerifiedMutation = async <T>({
     body: JSON.stringify(reqBody),
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    throw new Error("mutation error");
+    throw new Error(data.message || "mutation error");
   }
 
-  return (await res.json()) as Promise<T>;
+  return data as Promise<T>;
 };
 
 export const verifiedMutation = async <T>({
@@ -45,9 +47,11 @@ export const verifiedMutation = async <T>({
     body: JSON.stringify(reqBody),
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    throw new Error("mutation error");
+    throw new Error(data.message || "mutation error");
   }
 
-  return (await res.json()) as Promise<T>;
+  return data as Promise<T>;
 };
