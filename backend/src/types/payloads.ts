@@ -11,6 +11,7 @@ export interface AuthPayload {
   userId: string;
   username: string;
   isGuest: boolean;
+  refreshToken: string;
 }
 
 export interface InvitePayload {
