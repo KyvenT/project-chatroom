@@ -9,3 +9,7 @@ export const guestSchema = z.object({
   chatroomId: z.string(),
   username: z.string(),
 });
+
+export const refreshTokenSchema = z.object({
+  refreshToken: z.string(),
+});
