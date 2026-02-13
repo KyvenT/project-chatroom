@@ -84,7 +84,7 @@ export const useRefreshToken = async (req: Request, res: Response) => {
     res.status(200).json({ accessToken });
   } catch (error: any) {
     console.error("Failed to refresh access token:", error);
-    return res.status(401).json({ message: "Invalid refresh token" });
+    return res.status(401).json({ message: error.message });
   }
 };
 

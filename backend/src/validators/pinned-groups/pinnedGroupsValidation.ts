@@ -17,3 +17,9 @@ export const PinnedGroupNameSchema = z.object({
 export const editPinnedGroupSchema = PinnedGroupNameSchema.extend({
   ...pinGroupIdSchema.shape,
 });
+
+export const reorderPinnedGroupChatroomsSchema = z.object({
+  chatroomId1: z.string(),
+  chatroomId2: z.string(),
+  pinGroupId: z.uuid(),
+});
