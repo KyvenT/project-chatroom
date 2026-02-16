@@ -3,8 +3,8 @@ import type {
   ChatroomMember,
   ChatroomMemberDetails,
 } from "../../types/REST-types/ChatroomMember";
-import { verifiedQuery } from "../../hooks/useCustomQuery";
-import useAuthContext from "../../hooks/useAuthContext";
+import { customQuery } from "../../hooks/useCustomQuery";
+import { useAuthStore } from "../../hooks/useStores";
 import { useParams } from "react-router";
 import { css, useTheme } from "@emotion/react";
 import { mq } from "../../styles/breakpoints";
@@ -13,7 +13,7 @@ import { useMembersStore } from "../../hooks/useStores";
 import Button from "../Button";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import { useOutsideClick } from "../../hooks/useHandleOutsideClick";
@@ -121,19 +121,19 @@ export const MemberInfo = ({
   const { chatroomId } = useParams();
   const theme = useTheme();
   const members = useMembersStore((state) => state.members);
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
+
   const popupRef = useRef<HTMLDivElement>(null);
 
   const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: verifiedMutation,
+    mutationFn: customMutation,
   });
 
   const { data } = useQuery<ChatroomMemberDetails>({
     queryKey: [member.memberId],
     queryFn: () =>
-      verifiedQuery({
+      customQuery({
         fetchUrl: `${API_URL}/api/members/${chatroomId}/${member.memberId}`,
-        user,
       }),
   });
 
@@ -143,7 +143,6 @@ export const MemberInfo = ({
     mutation.mutate({
       fetchUrl: `${API_URL}/api/members/${chatroomId}`,
       method: "DELETE",
-      user,
       reqBody: {
         memberId: member.memberId,
       },

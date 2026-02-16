@@ -85,7 +85,7 @@ export const createInvite = async (
   }
 
   if (checkExisting) {
-    const deletePrevious = await Prisma.invite.deleteMany({
+    await Prisma.invite.deleteMany({
       where: {
         receiver: {
           username: receiverUsername,

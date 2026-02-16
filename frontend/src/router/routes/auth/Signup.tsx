@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import type { UserAuth } from "../../../types/REST-types/User";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { useAuthStore } from "../../../hooks/useStores";
 import { authPageStyles, type LoginCredentials } from "./Login";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../components/Button";
@@ -10,45 +10,47 @@ import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useTheme } from "@emotion/react";
 import { API_URL } from "../../../env";
+import {
+  customMutation,
+  type MutationArgs,
+} from "../../../hooks/useCustomMutation";
+import { useMutation } from "@tanstack/react-query";
+import { Loader } from "../../../components/Loader";
 
 const Signup = () => {
   const navigate = useNavigate();
   const { ws, setWs } = useWebSocketContext();
   const [error, setError] = useState<String>("");
-  const { handleSignIn } = useAuthContext();
+  const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const [isRevealingPassword, setIsRevealingPassword] =
     useState<boolean>(false);
   const theme = useTheme();
   const { register, handleSubmit, setFocus } = useForm<LoginCredentials>();
+  const { mutate, isPending } = useMutation<UserAuth, Error, MutationArgs>({
+    mutationFn: customMutation<UserAuth>,
+    onError: (err) => {
+      setError(err.message);
+    },
+    onSuccess: (loginResponse) => {
+      setError("");
+      if (!loginResponse) {
+        console.error("Login response is undefined");
+        return;
+      }
+      handleSignIn(loginResponse);
+      handleWSAuth(ws, setWs, loginResponse.token);
+      navigate("/chat");
+    },
+  });
 
   const handleRegister: SubmitHandler<LoginCredentials> = async (data) => {
     const { username, password } = data;
 
-    try {
-      const res = await fetch(`${API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!res.ok) {
-        console.error(res.status);
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Signup failed");
-      }
-
-      const data = (await res.json()) as UserAuth;
-      console.log(data);
-
-      handleSignIn(data);
-      handleWSAuth(ws, setWs, data.token);
-      navigate("/chat");
-    } catch (err: any) {
-      setError(err.message);
-      console.log(err);
-    }
+    mutate({
+      fetchUrl: `${API_URL}/api/auth/register`,
+      method: "POST",
+      reqBody: { username, password },
+    });
   };
 
   const handleRevealPasswordClick = () => {
@@ -96,12 +98,13 @@ const Signup = () => {
             )}
           </Button>
         </div>{" "}
+        {isPending && <Loader />}
+        {error && <p>Error: {error}</p>}
         <button className="submitBtn" type="submit">
           Register
         </button>
         <Link to="/login">Already have an account?</Link>
       </form>
-      {error && <p>Error: {error}</p>}
     </div>
   );
 };

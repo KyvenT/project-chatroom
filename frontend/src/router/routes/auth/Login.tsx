@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { useAuthStore } from "../../../hooks/useStores";
 import type { UserAuth } from "../../../types/REST-types/User";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
@@ -11,6 +11,12 @@ import Button from "../../../components/Button";
 import { Eye, EyeClosed } from "lucide-react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { API_URL } from "../../../env";
+import { useMutation } from "@tanstack/react-query";
+import {
+  customMutation,
+  type MutationArgs,
+} from "../../../hooks/useCustomMutation";
+import { Loader } from "../../../components/Loader";
 
 export const authPageStyles = (theme: Theme) =>
   css(
@@ -114,41 +120,37 @@ export type LoginCredentials = {
 const Login = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<String>("");
-  const { handleSignIn } = useAuthContext();
+  const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const { ws, setWs } = useWebSocketContext();
   const [isRevealingPassword, setIsRevealingPassword] =
     useState<boolean>(false);
   const theme = useTheme();
   const { register, handleSubmit, setFocus } = useForm<LoginCredentials>();
+  const { mutate, isPending } = useMutation<UserAuth, Error, MutationArgs>({
+    mutationFn: customMutation<UserAuth>,
+    onError: (err) => {
+      setError(err.message);
+    },
+    onSuccess: (loginResponse) => {
+      setError("");
+      if (!loginResponse) {
+        console.error("Login response is undefined");
+        return;
+      }
+      handleSignIn(loginResponse);
+      handleWSAuth(ws, setWs, loginResponse.token);
+      navigate("/chat");
+    },
+  });
 
   const handleLogin: SubmitHandler<LoginCredentials> = async (data) => {
     const { username, password } = data;
 
-    try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!res.ok) {
-        console.error(res.status);
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Login failed");
-      }
-
-      const data = (await res.json()) as UserAuth;
-      console.log(data);
-
-      handleSignIn(data);
-      handleWSAuth(ws, setWs, data.token);
-      navigate("/chat");
-    } catch (err: any) {
-      setError(err.message);
-      console.log(err);
-    }
+    mutate({
+      fetchUrl: `${API_URL}/api/auth/login`,
+      method: "POST",
+      reqBody: { username, password },
+    });
   };
 
   const handleRevealPasswordClick = () => {
@@ -195,13 +197,14 @@ const Login = () => {
               <Eye className="eyeIcon" size="1.5rem" />
             )}
           </Button>
-        </div>
+        </div>{" "}
+        {isPending && <Loader />}
+        {error && <p>Error: {error}</p>}
         <button className="submitBtn" type="submit">
           Login
         </button>
         <Link to="/register">Don't have an account?</Link>
       </form>
-      {error && <p>Error: {error}</p>}
     </div>
   );
 };

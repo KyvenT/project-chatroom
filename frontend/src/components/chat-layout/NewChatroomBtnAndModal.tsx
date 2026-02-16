@@ -3,11 +3,11 @@ import useToggle from "../../hooks/useToggle";
 import Button from "../Button";
 import { useMutation } from "@tanstack/react-query";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
-import useAuthContext from "../../hooks/useAuthContext";
+import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import Modal, { closeButtonStyles } from "../Modal";
@@ -122,7 +122,7 @@ interface CreateChatroomFormInput {
 
 const NewChatButton = () => {
   const [isToggled, setToggle] = useToggle(false);
-  const { user, isLoggedIn } = useAuthContext();
+  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
   const { register, handleSubmit, reset } = useForm<CreateChatroomFormInput>({
     defaultValues: {
       title: "",
@@ -130,7 +130,7 @@ const NewChatButton = () => {
     },
   });
   const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: verifiedMutation<ConfirmationResponse>,
+    mutationFn: customMutation<ConfirmationResponse>,
   });
   const theme = useTheme();
 
@@ -142,7 +142,6 @@ const NewChatButton = () => {
     mutation.mutate({
       fetchUrl: `${API_URL}/api/chatrooms/create`,
       method: "POST",
-      user,
       reqBody: {
         title,
         privacy,

@@ -1,6 +1,5 @@
 import { css, Global, ThemeProvider } from "@emotion/react";
 import Router from "../router/router";
-import AuthContextProvider from "../contexts/AuthContextProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import WebSocketContextProvider from "../contexts/WebSocketContextProvider";
 
@@ -31,14 +30,12 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthContextProvider>
-        <WebSocketContextProvider>
-          <ThemeProvider theme={theme}>
-            <Global styles={globalStyles} />
-            <Router />
-          </ThemeProvider>
-        </WebSocketContextProvider>
-      </AuthContextProvider>
+      <WebSocketContextProvider>
+        <ThemeProvider theme={theme}>
+          <Global styles={globalStyles} />
+          <Router />
+        </ThemeProvider>
+      </WebSocketContextProvider>
     </QueryClientProvider>
   );
 }

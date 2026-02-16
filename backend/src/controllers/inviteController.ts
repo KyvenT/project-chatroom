@@ -32,9 +32,7 @@ export const createInvite = async (req: Request, res: Response) => {
     res.status(201).json({ message: "Invite sent successfully" });
   } catch (err: any) {
     console.error(err);
-    res
-      .status(500)
-      .json({ message: "Server error occurred during invite creation" });
+    res.status(500).json({ message: err.message });
   }
 };
 

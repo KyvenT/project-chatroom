@@ -2,16 +2,16 @@ import { css, useTheme } from "@emotion/react";
 import { Link, useParams } from "react-router";
 import Modal from "../Modal";
 import useToggle from "../../hooks/useToggle";
-import useAuthContext from "../../hooks/useAuthContext";
+import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import { ArrowLeftIcon } from "lucide-react";
 import type { UserAuth } from "../../types/REST-types/User";
 import React, { useRef } from "react";
 import useWebSocketContext from "../../hooks/useWebSocketContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
-import { nonVerifiedQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../hooks/useCustomQuery";
 import {
-  nonVerifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type { Theme } from "@emotion/react";
@@ -111,16 +111,17 @@ interface privacyDataType {
 
 const AuthGuard = () => {
   const [toggleContinueAsGuest, setToggleContinueAsGuest] = useToggle(false);
-  const { isLoggedIn, handleSignIn } = useAuthContext();
+  const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const { ws, setWs } = useWebSocketContext();
   const { chatroomId } = useParams();
   const guestNameRef = useRef<HTMLInputElement>(null);
   const theme = useTheme();
+  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
 
   const { data: privacyData } = useQuery<privacyDataType>({
     queryKey: ["chatroom-privacy", chatroomId],
     queryFn: () =>
-      nonVerifiedQuery({
+      customQuery({
         fetchUrl: `${API_URL}/api/chatroomsPublic/${chatroomId}`,
       }),
     enabled: !!chatroomId,
@@ -128,7 +129,7 @@ const AuthGuard = () => {
   });
 
   const { mutate, error } = useMutation<UserAuth, Error, MutationArgs>({
-    mutationFn: nonVerifiedMutation<UserAuth>,
+    mutationFn: customMutation<UserAuth>,
     onSuccess: (guestAuthData) => {
       if (!guestAuthData) return;
       handleSignIn(guestAuthData);

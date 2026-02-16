@@ -12,11 +12,11 @@ export const getUserChatrooms = async (req: Request, res: Response) => {
   try {
     const chatrooms = await chatroomService.getUserChatrooms(userId);
     res.status(201).json(chatrooms);
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res
       .status(500)
-      .json({ message: "Server error occurred while fetching chatrooms" });
+      .json({ message: "Error occurred while fetching chatrooms" });
   }
 };
 
@@ -100,9 +100,9 @@ export const getChatroomPrivacy = async (req: Request, res: Response) => {
   try {
     const privacy = await chatroomService.getChatroomPrivacy(data);
     res.status(200).json({ privacy });
-  } catch (err) {
+  } catch (err: any) {
     console.error("couldnt fetch chatroom privacy", err);
-    res.status(500).json({ message: "couldnt fetch chatroom privacy" });
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -117,8 +117,8 @@ export const swapChatroomIndexes = async (req: Request, res: Response) => {
   try {
     await chatroomService.swapChatroomIndexes(userId, data);
     res.status(200).json({ message: "Chatrooms reordered successfully" });
-  } catch (err) {
+  } catch (err: any) {
     console.error("couldn't swap chatrooms", err);
-    res.status(500).json({ message: "Failed to reorder chatrooms" });
+    res.status(500).json({ message: err.message });
   }
 };

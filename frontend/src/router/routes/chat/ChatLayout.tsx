@@ -7,7 +7,7 @@ import DropdownButton from "../../../components/DropdownButton";
 import { Link, useNavigate, useParams } from "react-router";
 import InboxButton from "../../../components/chat-layout/InboxButton";
 import { ArrowLeftToLine, MenuIcon, User, Users } from "lucide-react";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
 import type { Theme } from "@emotion/react";
 import Button, { iconBtnStyles } from "../../../components/Button";
 import { useChatroomsStore } from "../../../hooks/useStores";
@@ -81,7 +81,7 @@ const colors = (theme: Theme) =>
       ".chatroom-details-btn:hover": {
         color: theme.colors.white,
       },
-    })
+    }),
   );
 
 export type OutletContextType = {
@@ -91,7 +91,8 @@ export type OutletContextType = {
 function ChatLayout() {
   const [sidebarToggled, setSidebarToggled] = useToggle(false);
   const navigate = useNavigate();
-  const { isLoggedIn, user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
+  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
   const { chatroomId } = useParams();
   const theme = useTheme();
   const chatrooms = useChatroomsStore((state) => state.chatrooms);

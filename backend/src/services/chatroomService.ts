@@ -110,6 +110,10 @@ export const createChatroom = async (
     },
   });
 
+  if (!verifyUser) {
+    throw new Error("User not found");
+  }
+
   if (verifyUser?.isGuest === true) {
     throw new Error("Only users can create chatrooms");
   }
@@ -292,7 +296,7 @@ export const swapChatroomIndexes = async (
     throw new Error("Chatroom(s) not found");
   }
 
-  const chatroomUpdate = Prisma.$transaction([
+  const chatroomUpdate = await Prisma.$transaction([
     Prisma.chatroomMember.update({
       where: {
         chatroomId_memberId: {

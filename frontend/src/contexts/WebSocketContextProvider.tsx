@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import useAuthContext from "../hooks/useAuthContext";
+import { useAuthStore } from "../hooks/useStores";
 
 interface WebSockContextProviderProps {
   children: React.ReactNode;
@@ -11,14 +11,14 @@ interface WebSocketContextType {
 }
 
 export const WebSocketContext = createContext<WebSocketContextType | null>(
-  null
+  null,
 );
 
 export default function WebSocketContextProvider({
   children,
 }: WebSockContextProviderProps) {
   const [ws, setWs] = useState<WebSocket | null>(null);
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     if (ws) {

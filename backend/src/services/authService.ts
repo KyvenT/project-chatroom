@@ -205,15 +205,20 @@ export const createSession = async (userId: string) => {
   return { refreshToken, accessToken };
 };
 
-export const revokeSession = async (refreshToken: string) => {
-  await Prisma.session.update({
-    where: {
-      refreshToken: hashRefreshToken(refreshToken),
-    },
-    data: {
-      revokedAt: new Date(),
-    },
-  });
+const revokeSession = async (refreshToken: string) => {
+  try {
+    await Prisma.session.update({
+      where: {
+        refreshToken: hashRefreshToken(refreshToken),
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
+  } catch (error: any) {
+    console.error("Failed to revoke session:", error);
+    throw new Error("Failed to revoke session");
+  }
 };
 
 export const logoutUser = async (refreshToken: string) => {

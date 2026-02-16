@@ -4,8 +4,8 @@ import {
   type UseQueryOptions,
 } from "@tanstack/react-query";
 
-import { verifiedQuery } from "./useCustomQuery";
-import useAuthContext from "./useAuthContext";
+import { customQuery } from "./useCustomQuery";
+import { useAuthStore, useChatroomsStore } from "./useStores";
 import type { Message } from "../types/REST-types/Message";
 import { API_URL } from "../env";
 
@@ -14,18 +14,27 @@ export const useFetchMessages = (
   getBefore: Date | null,
   limit: number,
 ) => {
-  const { user, isLoggedIn } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
+  const chatroom = useChatroomsStore((state) =>
+    state.chatrooms.find((c) => c.chatroomId === chatroomId),
+  );
+
+  const enabled =
+    chatroomId !== undefined &&
+    chatroom !== undefined &&
+    !!user.userId &&
+    !!getBefore;
 
   return useQuery<Message[]>({
-    queryKey: [chatroomId, isLoggedIn, getBefore?.toISOString()],
+    queryKey: [chatroomId, user.userId, getBefore?.toISOString()],
     queryFn: () =>
-      verifiedQuery<Message[]>({
+      customQuery<Message[]>({
         fetchUrl: `${API_URL}/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
-        user,
       }),
-    enabled: !!getBefore,
+    enabled,
     staleTime: Infinity,
-    retryDelay: 1000,
+    refetchOnWindowFocus: false,
+    retryDelay: 10000,
     retry: (failureCount, error) => {
       if (error instanceof Error && error.message === "Unauthorized") {
         return false;
@@ -42,17 +51,26 @@ export const useFetchMessagesMultiple = (
   getBefore: Date | null,
   limit: number,
 ) => {
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
+
+  let enabled = !!user.userId && !!getBefore;
+
+  chatroomIds.forEach((chatroomId) => {
+    const chatroom = useChatroomsStore((state) =>
+      state.chatrooms.find((c) => c.chatroomId === chatroomId),
+    );
+
+    if (!chatroomId || !chatroom) enabled = false;
+  });
 
   const data = useQueries<MessageQueries>({
     queries: chatroomIds.map((chatroomId) => ({
       queryKey: [chatroomId, user.userId, getBefore?.toISOString()],
       queryFn: () =>
-        verifiedQuery<Message[]>({
+        customQuery<Message[]>({
           fetchUrl: `${API_URL}/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
-          user,
         }),
-      enabled: !!getBefore,
+      enabled,
       staleTime: Infinity,
       retryDelay: 1000,
       retry: (failureCount, error) => {

@@ -10,16 +10,17 @@ import type { Theme } from "@emotion/react";
 import Button from "../Button";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { SquarePen, X } from "lucide-react";
-import useAuthContext from "../../hooks/useAuthContext";
+import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import useToggle from "../../hooks/useToggle";
-import { verifiedQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../hooks/useCustomQuery";
 import { API_URL } from "../../env";
 import { mq } from "../../styles/breakpoints";
+import { Loader } from "../Loader";
 
 const chatroomDetailsModalStyles = (theme: Theme) =>
   css(
@@ -141,16 +142,20 @@ export const ChatroomDetailsModal = ({
   const theme = useTheme();
   const [enableTitleEdit, setEnableTitleEdit] = useToggle(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useToggle(false);
-  const { isLoggedIn } = useAuthContext();
+  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
 
-  const { data: chatroomData, refetch } = useQuery<ChatroomDetails>({
+  const {
+    data: chatroomData,
+    refetch,
+    isLoading,
+    isError,
+  } = useQuery<ChatroomDetails>({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
-      verifiedQuery({
+      customQuery({
         fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
-        user,
       }),
-    enabled: !!chatroomId,
+    enabled: !!chatroomId && open,
     staleTime: 0,
   });
 
@@ -166,14 +171,13 @@ export const ChatroomDetailsModal = ({
     Error,
     MutationArgs
   >({
-    mutationFn: verifiedMutation<ConfirmationResponse>,
+    mutationFn: customMutation<ConfirmationResponse>,
   });
 
   const handleLeave = () => {
     chatroomMutation.mutate({
       fetchUrl: `${API_URL}/api/members/${chatroomId}`,
       method: "DELETE",
-      user,
       reqBody: {
         memberId: user.userId,
       },
@@ -186,7 +190,6 @@ export const ChatroomDetailsModal = ({
     chatroomMutation.mutate({
       fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
       method: "DELETE",
-      user,
     });
     onClose();
   };
@@ -200,7 +203,6 @@ export const ChatroomDetailsModal = ({
     chatroomMutation.mutate({
       fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
       method: "PATCH",
-      user,
       reqBody: {
         title,
         privacy,
@@ -211,6 +213,30 @@ export const ChatroomDetailsModal = ({
   };
 
   const isOwner = chatroomData?.ownerId === user.userId;
+
+  if (isLoading) {
+    return (
+      <Modal
+        open={open}
+        onClose={onClose}
+        modalStyles={chatroomDetailsModalStyles(theme)}
+      >
+        <Loader /> <p>Loading chatroom details...</p>
+      </Modal>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Modal
+        open={open}
+        onClose={onClose}
+        modalStyles={chatroomDetailsModalStyles(theme)}
+      >
+        <p>Failed to load chatroom details</p>
+      </Modal>
+    );
+  }
 
   return (
     <>

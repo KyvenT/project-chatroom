@@ -6,18 +6,19 @@ import type {
   Invite,
 } from "../../types/REST-types/Invite";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import { css, useTheme } from "@emotion/react";
 import type { UserAuth } from "../../types/REST-types/User";
 import type { Theme } from "@emotion/react";
-import { verifiedQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../hooks/useCustomQuery";
 import Button from "../Button";
 import { useState } from "react";
 import { Send, X } from "lucide-react";
 import { API_URL } from "../../env";
 import { mq } from "../../styles/breakpoints";
+import { Loader } from "../Loader";
 
 const dialogStyles = (theme: Theme) =>
   css(
@@ -121,7 +122,6 @@ export const InviteModal = ({
   title,
   onClose,
   canInvite,
-  user,
   chatroomId,
 }: InviteModalProps) => {
   const { register, handleSubmit } = useForm<inviteFormInput>();
@@ -130,18 +130,21 @@ export const InviteModal = ({
   const { data: invitesData, refetch } = useQuery<Invite[]>({
     queryKey: ["inviteList", chatroomId],
     queryFn: () =>
-      verifiedQuery({
+      customQuery({
         fetchUrl: `${API_URL}/api/invites/${chatroomId}`,
-        method: "GET",
-        user,
       }),
     enabled: !!inviteModalOpen,
     refetchOnWindowFocus: false,
     staleTime: 0,
   });
-  const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: verifiedMutation<ConfirmationResponse>,
+  const { mutate, isPending } = useMutation<
+    ConfirmationResponse,
+    Error,
+    MutationArgs
+  >({
+    mutationFn: customMutation<ConfirmationResponse>,
     onSuccess: () => {
+      setInviteError("");
       refetch();
     },
     onError: (err) => {
@@ -157,7 +160,6 @@ export const InviteModal = ({
     mutate({
       fetchUrl: `${API_URL}/api/invites/`,
       method: "POST",
-      user,
       reqBody: {
         receiverUsername: username,
         chatroomId,
@@ -187,6 +189,7 @@ export const InviteModal = ({
           <Send size="1rem" />
         </Button>
       </form>
+      {isPending && <Loader />}
       <span className="inviteErrorMessage">{inviteError}</span>
       <div css={[inviteListStyles, inviteListColors(theme)]}>
         <h5>Invited users: </h5>

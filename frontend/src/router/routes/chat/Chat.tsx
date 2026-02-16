@@ -3,7 +3,7 @@ import ChatMessageList from "../../../components/chat/ChatMessageList";
 import MessageInput from "../../../components/chat/MessageInput";
 import { useOutletContext, useParams } from "react-router";
 import MembersPanel from "../../../components/chat/MembersPanel";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useEffect, useRef } from "react";
 import type { OutletContextType } from "./ChatLayout";
@@ -30,7 +30,7 @@ const colors = (theme: Theme) =>
 function Chat() {
   const theme = useTheme();
   const { chatroomId } = useParams();
-  const { isLoggedIn } = useAuthContext();
+  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
   const { ws } = useWebSocketContext();
   const messageInput = useRef<HTMLTextAreaElement>(null);
   const { showMembersList } = useOutletContext<OutletContextType>();

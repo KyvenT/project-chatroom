@@ -4,6 +4,7 @@ import {
   chatroomPinSchema,
   editPinnedGroupSchema,
   PinnedGroupNameSchema,
+  reorderPinnedGroupChatroomsSchema,
 } from "../validators/pinned-groups/pinnedGroupsValidation.js";
 import z from "zod";
 
@@ -162,4 +163,68 @@ export const pinChatroom = async (
       },
     });
   }
+};
+
+export const swapPinnedChatrooms = async (
+  userId: string,
+  data: z.infer<typeof reorderPinnedGroupChatroomsSchema>,
+) => {
+  const { pinGroupId, chatroomId1, chatroomId2 } = data;
+
+  const verifyPinGroup = await Prisma.pinGroup.findUnique({
+    where: {
+      id: pinGroupId,
+    },
+  });
+
+  if (verifyPinGroup?.userId !== userId) {
+    throw new Error("Not detected as owner of pin group");
+  }
+
+  const pinnedChatroom1 = await Prisma.memberPinnedGroups.findUnique({
+    where: {
+      chatroomId_pinGroupId: {
+        chatroomId: chatroomId1,
+        pinGroupId,
+      },
+    },
+  });
+
+  const pinnedChatroom2 = await Prisma.memberPinnedGroups.findUnique({
+    where: {
+      chatroomId_pinGroupId: {
+        chatroomId: chatroomId2,
+        pinGroupId,
+      },
+    },
+  });
+
+  if (!pinnedChatroom1 || !pinnedChatroom2) {
+    throw new Error("One or both pinned chatrooms not found");
+  }
+
+  await Prisma.$transaction([
+    Prisma.memberPinnedGroups.update({
+      where: {
+        chatroomId_pinGroupId: {
+          chatroomId: pinnedChatroom1.chatroomId,
+          pinGroupId,
+        },
+      },
+      data: {
+        pinnedIndex: pinnedChatroom2.pinnedIndex,
+      },
+    }),
+    Prisma.memberPinnedGroups.update({
+      where: {
+        chatroomId_pinGroupId: {
+          chatroomId: pinnedChatroom2.chatroomId,
+          pinGroupId,
+        },
+      },
+      data: {
+        pinnedIndex: pinnedChatroom1.pinnedIndex,
+      },
+    }),
+  ]);
 };

@@ -1,8 +1,8 @@
-import useAuthContext from "../../hooks/useAuthContext";
+import { useAuthStore } from "../../hooks/useStores";
 import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
 import { useParams } from "react-router";
 import { useEffect, useMemo, useState } from "react";
-import { verifiedQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../hooks/useCustomQuery";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import ProfileStatus from "./ProfileStatus";
@@ -80,7 +80,7 @@ const membersListStyles = css({
 });
 
 const MembersPanel = () => {
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
   const { chatroomId } = useParams();
   const theme = useTheme();
   const members = useMembersStore((state) => state.members);
@@ -94,9 +94,8 @@ const MembersPanel = () => {
   const { data } = useQuery<ChatroomMember[]>({
     queryKey: [user.userId, chatroomId],
     queryFn: () =>
-      verifiedQuery<ChatroomMember[]>({
+      customQuery<ChatroomMember[]>({
         fetchUrl: `${API_URL}/api/members/${chatroomId}`,
-        user,
       }),
     enabled: !!user.userId,
     staleTime: 0,

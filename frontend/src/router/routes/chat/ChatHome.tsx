@@ -3,13 +3,13 @@ import { css, useTheme } from "@emotion/react";
 import Button from "../../../components/Button";
 import { Loader2, Pin, Plus } from "lucide-react";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../../hooks/useCustomMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { useAuthStore } from "../../../hooks/useStores";
 import { type PinnedGroup } from "../../../types/REST-types/Chatroom";
-import { verifiedQuery } from "../../../hooks/useCustomQuery";
+import { customQuery } from "../../../hooks/useCustomQuery";
 import { mq } from "../../../styles/breakpoints";
 import { PinnedChatroomsList } from "../../../components/chat-home/pinnedChatroomsList";
 import { PinChatroomsModal } from "../../../components/chat-home/pinChatroomsModal";
@@ -91,36 +91,42 @@ const styles = css(
 );
 
 const colors = (theme: Theme) =>
-  css({
-    backgroundColor: theme.colors.black,
-    color: theme.colors.white,
-
-    ".pinned-group": {
-      color: theme.colors.white,
-    },
-
-    ".pinned-group:hover": {
+  css(
+    mq({
       backgroundColor: theme.colors.black,
-    },
-
-    ".title": {
       color: theme.colors.white,
-    },
-  });
+      scrollbarColor: `transparent transparent`,
+      "&:hover": {
+        scrollbarColor: `${theme.colors.white} transparent`,
+      },
+
+      ".pinned-group": {
+        color: theme.colors.white,
+      },
+
+      ".pinned-group:hover": {
+        backgroundColor: theme.colors.black,
+      },
+
+      ".title": {
+        color: theme.colors.white,
+      },
+    }),
+  );
 
 const ChatHome = () => {
   const theme = useTheme();
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
   const [openedPinGroupId, setOpenedPinGroupId] = useState<string | null>(null);
   const [pinnedGroups, setPinnedGroups] = useState<PinnedGroup[]>([]);
 
   const { data, refetch, isLoading, isError, error } = useQuery({
     queryKey: ["pinnedChatrooms", user.userId],
     queryFn: () =>
-      verifiedQuery<PinnedGroup[]>({
+      customQuery<PinnedGroup[]>({
         fetchUrl: `${API_URL}/api/pinned/me`,
-        user,
       }),
+    enabled: !!user.userId,
     staleTime: 0,
   });
 
@@ -129,7 +135,7 @@ const ChatHome = () => {
   }, [data]);
 
   const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: verifiedMutation,
+    mutationFn: customMutation,
     onSuccess: () => refetch(),
   });
 
@@ -137,7 +143,6 @@ const ChatHome = () => {
     mutate({
       fetchUrl: `${API_URL}/api/pinned`,
       method: "POST",
-      user,
     });
   };
 
