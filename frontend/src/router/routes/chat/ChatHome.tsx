@@ -3,13 +3,13 @@ import { css, useTheme } from "@emotion/react";
 import Button from "../../../components/Button";
 import { Loader2, Pin, Plus } from "lucide-react";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../../hooks/useCustomMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../../hooks/useStores";
 import { type PinnedGroup } from "../../../types/REST-types/Chatroom";
-import { verifiedQuery } from "../../../hooks/useCustomQuery";
+import { customQuery } from "../../../hooks/useCustomQuery";
 import { mq } from "../../../styles/breakpoints";
 import { PinnedChatroomsList } from "../../../components/chat-home/pinnedChatroomsList";
 import { PinChatroomsModal } from "../../../components/chat-home/pinChatroomsModal";
@@ -117,7 +117,7 @@ const ChatHome = () => {
   const { data, refetch, isLoading, isError, error } = useQuery({
     queryKey: ["pinnedChatrooms", user.userId],
     queryFn: () =>
-      verifiedQuery<PinnedGroup[]>({
+      customQuery<PinnedGroup[]>({
         fetchUrl: `${API_URL}/api/pinned/me`,
       }),
     staleTime: 0,
@@ -128,7 +128,7 @@ const ChatHome = () => {
   }, [data]);
 
   const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: verifiedMutation,
+    mutationFn: customMutation,
     onSuccess: () => refetch(),
   });
 

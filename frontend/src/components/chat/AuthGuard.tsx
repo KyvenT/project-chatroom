@@ -9,9 +9,9 @@ import React, { useRef } from "react";
 import useWebSocketContext from "../../hooks/useWebSocketContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
-import { nonVerifiedQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../hooks/useCustomQuery";
 import {
-  nonVerifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type { Theme } from "@emotion/react";
@@ -121,7 +121,7 @@ const AuthGuard = () => {
   const { data: privacyData } = useQuery<privacyDataType>({
     queryKey: ["chatroom-privacy", chatroomId],
     queryFn: () =>
-      nonVerifiedQuery({
+      customQuery({
         fetchUrl: `${API_URL}/api/chatroomsPublic/${chatroomId}`,
       }),
     enabled: !!chatroomId,
@@ -129,7 +129,7 @@ const AuthGuard = () => {
   });
 
   const { mutate, error } = useMutation<UserAuth, Error, MutationArgs>({
-    mutationFn: nonVerifiedMutation<UserAuth>,
+    mutationFn: customMutation<UserAuth>,
     onSuccess: (guestAuthData) => {
       if (!guestAuthData) return;
       handleSignIn(guestAuthData);

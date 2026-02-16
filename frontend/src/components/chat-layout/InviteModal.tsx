@@ -6,13 +6,13 @@ import type {
   Invite,
 } from "../../types/REST-types/Invite";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import { css, useTheme } from "@emotion/react";
 import type { UserAuth } from "../../types/REST-types/User";
 import type { Theme } from "@emotion/react";
-import { verifiedQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../hooks/useCustomQuery";
 import Button from "../Button";
 import { useState } from "react";
 import { Send, X } from "lucide-react";
@@ -129,7 +129,7 @@ export const InviteModal = ({
   const { data: invitesData, refetch } = useQuery<Invite[]>({
     queryKey: ["inviteList", chatroomId],
     queryFn: () =>
-      verifiedQuery({
+      customQuery({
         fetchUrl: `${API_URL}/api/invites/${chatroomId}`,
       }),
     enabled: !!inviteModalOpen,
@@ -137,7 +137,7 @@ export const InviteModal = ({
     staleTime: 0,
   });
   const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: verifiedMutation<ConfirmationResponse>,
+    mutationFn: customMutation<ConfirmationResponse>,
     onSuccess: () => {
       refetch();
     },

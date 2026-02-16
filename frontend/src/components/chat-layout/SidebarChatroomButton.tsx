@@ -10,7 +10,7 @@ import type { Chatroom } from "../../types/REST-types/Chatroom";
 import type React from "react";
 import { useChatroomsStore } from "../../hooks/useStores";
 import { useMutation } from "@tanstack/react-query";
-import { verifiedMutation } from "../../hooks/useCustomMutation";
+import { customMutation } from "../../hooks/useCustomMutation";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { useEffect } from "react";
 import { API_URL } from "../../env";
@@ -135,7 +135,7 @@ const SidebarChatroomButton = ({
     (state) => state.swapChatroomOrder,
   );
   const { mutate, isSuccess, isError } = useMutation({
-    mutationFn: verifiedMutation<ConfirmationResponse>,
+    mutationFn: customMutation<ConfirmationResponse>,
     onSuccess: () => console.log("chatrooms swapped"),
     onError: () => console.log("chatroom swap error"),
   });

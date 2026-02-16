@@ -9,56 +9,34 @@ export interface MutationArgs {
   reqBody?: {};
 }
 
-export const nonVerifiedMutation = async <T>({
-  fetchUrl,
-  method,
-  reqBody = {},
-}: MutationArgs) => {
-  const res = await fetch(fetchUrl, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(reqBody),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "mutation error");
-  }
-
-  return data as Promise<T>;
-};
-
-export const verifiedMutation = async <T>({
+export const customMutation = async <T>({
   fetchUrl,
   method,
   reqBody = {},
 }: MutationArgs): Promise<T> => {
   const { user, handleSignIn, handleLogOut } = useAuthStore.getState();
-  if (!user || !user.userId) {
-    throw new Error("not authenticated");
+
+  const headers = new Headers();
+  headers.append("Content-Type", "application/json");
+
+  if (user.token) {
+    headers.append("authorization", "Bearer " + user.token);
   }
-  const res = await fetch(fetchUrl, {
+
+  let res = await fetch(fetchUrl, {
     method,
-    headers: {
-      "Content-Type": "application/json",
-      authorization: "Bearer " + user.token,
-    },
+    headers,
+    credentials: "include",
     body: JSON.stringify(reqBody),
   });
-
-  const data = await res.json();
+  let data = await res.json();
 
   if (!res.ok) {
     if (res.status === 401) {
       const newToken = await fetch(`${API_URL}/api/auth/refresh`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: "Bearer " + user.token,
-        },
+        headers,
+        credentials: "include",
       });
       const newTokenData = await newToken.json();
 
@@ -68,14 +46,28 @@ export const verifiedMutation = async <T>({
       }
 
       if (newTokenData.token) {
-        console.log("token refreshed");
+        headers.set("authorization", "Bearer " + newTokenData.token);
+
         handleSignIn({ ...user, token: newTokenData.token });
-        return verifiedMutation<T>({ fetchUrl, method });
+        const fetchWithNewToken = await fetch(fetchUrl, {
+          method,
+          headers,
+          credentials: "include",
+          body: JSON.stringify(reqBody),
+        });
+
+        data = await fetchWithNewToken.json();
+
+        if (!fetchWithNewToken.ok) {
+          throw new Error(data.message || "Unauthorized");
+        }
+
+        return data as T;
       }
       throw new Error("Unauthorized");
     }
-    throw new Error(data.message || "mutation error");
+    throw new Error(data.message || "Query error");
   }
 
-  return data as Promise<T>;
+  return data as T;
 };

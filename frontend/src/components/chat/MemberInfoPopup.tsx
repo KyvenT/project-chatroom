@@ -3,7 +3,7 @@ import type {
   ChatroomMember,
   ChatroomMemberDetails,
 } from "../../types/REST-types/ChatroomMember";
-import { verifiedQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../hooks/useCustomQuery";
 import { useAuthStore } from "../../hooks/useStores";
 import { useParams } from "react-router";
 import { css, useTheme } from "@emotion/react";
@@ -13,7 +13,7 @@ import { useMembersStore } from "../../hooks/useStores";
 import Button from "../Button";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import { useOutsideClick } from "../../hooks/useHandleOutsideClick";
@@ -126,13 +126,13 @@ export const MemberInfo = ({
   const popupRef = useRef<HTMLDivElement>(null);
 
   const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: verifiedMutation,
+    mutationFn: customMutation,
   });
 
   const { data } = useQuery<ChatroomMemberDetails>({
     queryKey: [member.memberId],
     queryFn: () =>
-      verifiedQuery({
+      customQuery({
         fetchUrl: `${API_URL}/api/members/${chatroomId}/${member.memberId}`,
       }),
   });

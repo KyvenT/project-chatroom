@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useChatroomsStore } from "../../hooks/useStores";
 import Modal, { closeButtonStyles } from "../Modal";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
@@ -128,7 +128,7 @@ export const PinChatroomsModal = ({
   const [enableTitleEdit, setEnableTitleEdit] = useState<boolean>(false);
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
   const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: verifiedMutation<ConfirmationResponse>,
+    mutationFn: customMutation<ConfirmationResponse>,
     onSuccess: () => {
       console.log("chatroom pinned successfully");
     },

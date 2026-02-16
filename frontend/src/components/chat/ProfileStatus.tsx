@@ -3,7 +3,7 @@ import { useAuthStore } from "../../hooks/useStores";
 import type { Theme } from "@emotion/react";
 import { useMutation } from "@tanstack/react-query";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type { StatusUpdate } from "../../types/REST-types/User";
@@ -71,7 +71,7 @@ const ProfileStatus = ({ status }: ProfileStatusProps) => {
   const user = useAuthStore((state) => state.user);
   const statusRef = useRef<HTMLSelectElement>(null);
   const mutation = useMutation<StatusUpdate, Error, MutationArgs>({
-    mutationFn: verifiedMutation<StatusUpdate>,
+    mutationFn: customMutation<StatusUpdate>,
   });
 
   const handleSubmit = () => {

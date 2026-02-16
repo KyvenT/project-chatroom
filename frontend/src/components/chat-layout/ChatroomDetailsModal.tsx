@@ -10,14 +10,14 @@ import type { Theme } from "@emotion/react";
 import Button from "../Button";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { SquarePen, X } from "lucide-react";
 import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import useToggle from "../../hooks/useToggle";
-import { verifiedQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../hooks/useCustomQuery";
 import { API_URL } from "../../env";
 import { mq } from "../../styles/breakpoints";
 
@@ -146,7 +146,7 @@ export const ChatroomDetailsModal = ({
   const { data: chatroomData, refetch } = useQuery<ChatroomDetails>({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
-      verifiedQuery({
+      customQuery({
         fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
       }),
     enabled: !!chatroomId,
@@ -165,7 +165,7 @@ export const ChatroomDetailsModal = ({
     Error,
     MutationArgs
   >({
-    mutationFn: verifiedMutation<ConfirmationResponse>,
+    mutationFn: customMutation<ConfirmationResponse>,
   });
 
   const handleLeave = () => {

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { verifiedQuery } from "../../../hooks/useCustomQuery";
+import { customQuery } from "../../../hooks/useCustomQuery";
 import { useAuthStore } from "../../../hooks/useStores";
 import { type UserDetails } from "../../../types/REST-types/User";
 import { css, useTheme } from "@emotion/react";
@@ -51,7 +51,7 @@ export const AccountProfilePage = () => {
   const { data } = useQuery<UserDetails>({
     queryKey: [],
     queryFn: () =>
-      verifiedQuery({
+      customQuery({
         fetchUrl: `${API_URL}/api/users/me`,
       }),
     staleTime: 0,

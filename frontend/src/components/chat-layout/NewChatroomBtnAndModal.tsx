@@ -3,7 +3,7 @@ import useToggle from "../../hooks/useToggle";
 import Button from "../Button";
 import { useMutation } from "@tanstack/react-query";
 import {
-  verifiedMutation,
+  customMutation,
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
@@ -130,7 +130,7 @@ const NewChatButton = () => {
     },
   });
   const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: verifiedMutation<ConfirmationResponse>,
+    mutationFn: customMutation<ConfirmationResponse>,
   });
   const theme = useTheme();
 

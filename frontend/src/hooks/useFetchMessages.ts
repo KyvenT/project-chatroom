@@ -4,7 +4,7 @@ import {
   type UseQueryOptions,
 } from "@tanstack/react-query";
 
-import { verifiedQuery } from "./useCustomQuery";
+import { customQuery } from "./useCustomQuery";
 import { useAuthStore } from "./useStores";
 import type { Message } from "../types/REST-types/Message";
 import { API_URL } from "../env";
@@ -19,7 +19,7 @@ export const useFetchMessages = (
   return useQuery<Message[]>({
     queryKey: [chatroomId, user.userId, getBefore?.toISOString()],
     queryFn: () =>
-      verifiedQuery<Message[]>({
+      customQuery<Message[]>({
         fetchUrl: `${API_URL}/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
       }),
     enabled: !!getBefore,
@@ -47,7 +47,7 @@ export const useFetchMessagesMultiple = (
     queries: chatroomIds.map((chatroomId) => ({
       queryKey: [chatroomId, user.userId, getBefore?.toISOString()],
       queryFn: () =>
-        verifiedQuery<Message[]>({
+        customQuery<Message[]>({
           fetchUrl: `${API_URL}/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
         }),
       enabled: !!getBefore,
