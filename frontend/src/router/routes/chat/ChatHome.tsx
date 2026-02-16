@@ -91,22 +91,28 @@ const styles = css(
 );
 
 const colors = (theme: Theme) =>
-  css({
-    backgroundColor: theme.colors.black,
-    color: theme.colors.white,
-
-    ".pinned-group": {
-      color: theme.colors.white,
-    },
-
-    ".pinned-group:hover": {
+  css(
+    mq({
       backgroundColor: theme.colors.black,
-    },
-
-    ".title": {
       color: theme.colors.white,
-    },
-  });
+      scrollbarColor: `transparent transparent`,
+      "&:hover": {
+        scrollbarColor: `${theme.colors.white} transparent`,
+      },
+
+      ".pinned-group": {
+        color: theme.colors.white,
+      },
+
+      ".pinned-group:hover": {
+        backgroundColor: theme.colors.black,
+      },
+
+      ".title": {
+        color: theme.colors.white,
+      },
+    }),
+  );
 
 const ChatHome = () => {
   const theme = useTheme();
@@ -120,6 +126,7 @@ const ChatHome = () => {
       customQuery<PinnedGroup[]>({
         fetchUrl: `${API_URL}/api/pinned/me`,
       }),
+    enabled: !!user.userId,
     staleTime: 0,
   });
 

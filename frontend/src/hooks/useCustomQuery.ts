@@ -23,7 +23,7 @@ export const customQuery = async <T>({ fetchUrl }: QueryArgs): Promise<T> => {
   let data = await res.json();
 
   if (!res.ok) {
-    if (res.status === 401) {
+    if (res.status === 401 && user.token) {
       const newToken = await fetch(`${API_URL}/api/auth/refresh`, {
         method: "POST",
         headers,

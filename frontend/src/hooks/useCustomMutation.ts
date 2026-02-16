@@ -1,11 +1,9 @@
 import { API_URL } from "../env";
-import type { UserAuth } from "../types/REST-types/User";
 import { useAuthStore } from "./useStores";
 
 export interface MutationArgs {
   fetchUrl: string;
   method: "GET" | "POST" | "UPDATE" | "PATCH" | "DELETE";
-  user?: UserAuth;
   reqBody?: {};
 }
 
@@ -32,7 +30,7 @@ export const customMutation = async <T>({
   let data = await res.json();
 
   if (!res.ok) {
-    if (res.status === 401) {
+    if (res.status === 401 && user.token) {
       const newToken = await fetch(`${API_URL}/api/auth/refresh`, {
         method: "POST",
         headers,
