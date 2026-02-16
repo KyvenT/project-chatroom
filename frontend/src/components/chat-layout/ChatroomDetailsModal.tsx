@@ -20,6 +20,7 @@ import useToggle from "../../hooks/useToggle";
 import { customQuery } from "../../hooks/useCustomQuery";
 import { API_URL } from "../../env";
 import { mq } from "../../styles/breakpoints";
+import { Loader } from "../Loader";
 
 const chatroomDetailsModalStyles = (theme: Theme) =>
   css(
@@ -143,13 +144,18 @@ export const ChatroomDetailsModal = ({
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useToggle(false);
   const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
 
-  const { data: chatroomData, refetch } = useQuery<ChatroomDetails>({
+  const {
+    data: chatroomData,
+    refetch,
+    isLoading,
+    isError,
+  } = useQuery<ChatroomDetails>({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
       customQuery({
         fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
       }),
-    enabled: !!chatroomId,
+    enabled: !!chatroomId && open,
     staleTime: 0,
   });
 
@@ -207,6 +213,30 @@ export const ChatroomDetailsModal = ({
   };
 
   const isOwner = chatroomData?.ownerId === user.userId;
+
+  if (isLoading) {
+    return (
+      <Modal
+        open={open}
+        onClose={onClose}
+        modalStyles={chatroomDetailsModalStyles(theme)}
+      >
+        <Loader /> <p>Loading chatroom details...</p>
+      </Modal>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Modal
+        open={open}
+        onClose={onClose}
+        modalStyles={chatroomDetailsModalStyles(theme)}
+      >
+        <p>Failed to load chatroom details</p>
+      </Modal>
+    );
+  }
 
   return (
     <>

@@ -18,6 +18,7 @@ import { useState } from "react";
 import { Send, X } from "lucide-react";
 import { API_URL } from "../../env";
 import { mq } from "../../styles/breakpoints";
+import { Loader } from "../Loader";
 
 const dialogStyles = (theme: Theme) =>
   css(
@@ -136,9 +137,14 @@ export const InviteModal = ({
     refetchOnWindowFocus: false,
     staleTime: 0,
   });
-  const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
+  const { mutate, isPending } = useMutation<
+    ConfirmationResponse,
+    Error,
+    MutationArgs
+  >({
     mutationFn: customMutation<ConfirmationResponse>,
     onSuccess: () => {
+      setInviteError("");
       refetch();
     },
     onError: (err) => {
@@ -183,6 +189,7 @@ export const InviteModal = ({
           <Send size="1rem" />
         </Button>
       </form>
+      {isPending && <Loader />}
       <span className="inviteErrorMessage">{inviteError}</span>
       <div css={[inviteListStyles, inviteListColors(theme)]}>
         <h5>Invited users: </h5>
