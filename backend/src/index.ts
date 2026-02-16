@@ -7,6 +7,7 @@ import cors from "cors";
 import { corsPreflightMiddleware } from "./middleware/corsPreflightMiddleware.js";
 import { startWSS } from "./wss/wss.js";
 import { rateLimitMiddleware } from "./middleware/rateLimitMiddleware.js";
+import cookieParser from "cookie-parser";
 
 /*
 const corsOptions = {
@@ -31,6 +32,7 @@ const pathToStaticFiles = path.join(__dirname, "../frontend");
 app.use(express.json());
 //app.use(corsPreflightMiddleware);
 app.use(rateLimitMiddleware);
+app.use(cookieParser());
 
 // routes
 app.use("/api", apiRouter);
