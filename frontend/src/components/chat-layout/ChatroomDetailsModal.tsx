@@ -15,7 +15,7 @@ import {
 } from "../../hooks/useCustomMutation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { SquarePen, X } from "lucide-react";
-import useAuthContext from "../../hooks/useAuthContext";
+import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import useToggle from "../../hooks/useToggle";
 import { verifiedQuery } from "../../hooks/useCustomQuery";
 import { API_URL } from "../../env";
@@ -141,14 +141,13 @@ export const ChatroomDetailsModal = ({
   const theme = useTheme();
   const [enableTitleEdit, setEnableTitleEdit] = useToggle(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useToggle(false);
-  const { isLoggedIn } = useAuthContext();
+  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
 
   const { data: chatroomData, refetch } = useQuery<ChatroomDetails>({
     queryKey: ["active-chatroom", chatroomId],
     queryFn: () =>
       verifiedQuery({
         fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
-        user,
       }),
     enabled: !!chatroomId,
     staleTime: 0,
@@ -173,7 +172,6 @@ export const ChatroomDetailsModal = ({
     chatroomMutation.mutate({
       fetchUrl: `${API_URL}/api/members/${chatroomId}`,
       method: "DELETE",
-      user,
       reqBody: {
         memberId: user.userId,
       },
@@ -186,7 +184,6 @@ export const ChatroomDetailsModal = ({
     chatroomMutation.mutate({
       fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
       method: "DELETE",
-      user,
     });
     onClose();
   };
@@ -200,7 +197,6 @@ export const ChatroomDetailsModal = ({
     chatroomMutation.mutate({
       fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
       method: "PATCH",
-      user,
       reqBody: {
         title,
         privacy,

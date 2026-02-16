@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { verifiedQuery } from "../../../hooks/useCustomQuery";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { useAuthStore } from "../../../hooks/useStores";
 import { type UserDetails } from "../../../types/REST-types/User";
 import { css, useTheme } from "@emotion/react";
 import { mq } from "../../../styles/breakpoints";
@@ -46,13 +46,13 @@ const styles = (theme: Theme) =>
 
 export const AccountProfilePage = () => {
   const theme = useTheme();
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
+
   const { data } = useQuery<UserDetails>({
     queryKey: [],
     queryFn: () =>
       verifiedQuery({
         fetchUrl: `${API_URL}/api/users/me`,
-        user,
       }),
     staleTime: 0,
   });

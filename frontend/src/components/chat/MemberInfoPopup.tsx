@@ -4,7 +4,7 @@ import type {
   ChatroomMemberDetails,
 } from "../../types/REST-types/ChatroomMember";
 import { verifiedQuery } from "../../hooks/useCustomQuery";
-import useAuthContext from "../../hooks/useAuthContext";
+import { useAuthStore } from "../../hooks/useStores";
 import { useParams } from "react-router";
 import { css, useTheme } from "@emotion/react";
 import { mq } from "../../styles/breakpoints";
@@ -121,7 +121,8 @@ export const MemberInfo = ({
   const { chatroomId } = useParams();
   const theme = useTheme();
   const members = useMembersStore((state) => state.members);
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
+
   const popupRef = useRef<HTMLDivElement>(null);
 
   const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
@@ -133,7 +134,6 @@ export const MemberInfo = ({
     queryFn: () =>
       verifiedQuery({
         fetchUrl: `${API_URL}/api/members/${chatroomId}/${member.memberId}`,
-        user,
       }),
   });
 
@@ -143,7 +143,6 @@ export const MemberInfo = ({
     mutation.mutate({
       fetchUrl: `${API_URL}/api/members/${chatroomId}`,
       method: "DELETE",
-      user,
       reqBody: {
         memberId: member.memberId,
       },

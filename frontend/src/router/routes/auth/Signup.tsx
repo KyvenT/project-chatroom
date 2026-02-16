@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import type { UserAuth } from "../../../types/REST-types/User";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { useAuthStore } from "../../../hooks/useStores";
 import { authPageStyles, type LoginCredentials } from "./Login";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../components/Button";
@@ -15,7 +15,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const { ws, setWs } = useWebSocketContext();
   const [error, setError] = useState<String>("");
-  const { handleSignIn } = useAuthContext();
+  const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const [isRevealingPassword, setIsRevealingPassword] =
     useState<boolean>(false);
   const theme = useTheme();

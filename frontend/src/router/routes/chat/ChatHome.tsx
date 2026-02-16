@@ -7,7 +7,7 @@ import {
   type MutationArgs,
 } from "../../../hooks/useCustomMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { useAuthStore } from "../../../hooks/useStores";
 import { type PinnedGroup } from "../../../types/REST-types/Chatroom";
 import { verifiedQuery } from "../../../hooks/useCustomQuery";
 import { mq } from "../../../styles/breakpoints";
@@ -110,7 +110,7 @@ const colors = (theme: Theme) =>
 
 const ChatHome = () => {
   const theme = useTheme();
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
   const [openedPinGroupId, setOpenedPinGroupId] = useState<string | null>(null);
   const [pinnedGroups, setPinnedGroups] = useState<PinnedGroup[]>([]);
 
@@ -119,7 +119,6 @@ const ChatHome = () => {
     queryFn: () =>
       verifiedQuery<PinnedGroup[]>({
         fetchUrl: `${API_URL}/api/pinned/me`,
-        user,
       }),
     staleTime: 0,
   });
@@ -137,7 +136,6 @@ const ChatHome = () => {
     mutate({
       fetchUrl: `${API_URL}/api/pinned`,
       method: "POST",
-      user,
     });
   };
 

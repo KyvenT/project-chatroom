@@ -15,7 +15,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   jwt.verify(token, env.JWT_SECRET, (err: any, decoded: any) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
-        res.status(400).json({ error: "Expired token" });
+        res.status(401).json({ error: "Expired token" });
         return;
       }
       res.status(401).json({ err });
@@ -23,7 +23,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (!decoded.userId) {
-      res.status(400).json({ error: "Error decrypting token" });
+      res.status(401).json({ error: "Error decrypting token" });
       return;
     }
 

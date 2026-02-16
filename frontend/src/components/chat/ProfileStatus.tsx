@@ -1,5 +1,5 @@
 import { css, useTheme } from "@emotion/react";
-import useAuthContext from "../../hooks/useAuthContext";
+import { useAuthStore } from "../../hooks/useStores";
 import type { Theme } from "@emotion/react";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -68,7 +68,7 @@ interface ProfileStatusProps {
 
 const ProfileStatus = ({ status }: ProfileStatusProps) => {
   const theme = useTheme();
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
   const statusRef = useRef<HTMLSelectElement>(null);
   const mutation = useMutation<StatusUpdate, Error, MutationArgs>({
     mutationFn: verifiedMutation<StatusUpdate>,
@@ -80,7 +80,6 @@ const ProfileStatus = ({ status }: ProfileStatusProps) => {
     mutation.mutate({
       fetchUrl: `${API_URL}/api/users/me`,
       method: "PATCH",
-      user,
       reqBody: { status: newStatus },
     });
   };

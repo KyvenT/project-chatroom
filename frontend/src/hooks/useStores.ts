@@ -4,6 +4,7 @@ import type { Message } from "../types/REST-types/Message";
 import type { Invite } from "../types/REST-types/Invite";
 import type { ChatroomMember } from "../types/REST-types/ChatroomMember";
 import type { TypingPresence } from "../types/ws-messages";
+import type { UserAuth } from "../types/REST-types/User";
 
 interface ChatroomListState {
   chatrooms: Chatroom[];
@@ -15,7 +16,7 @@ interface ChatroomListState {
   updateChatroom: (updatedChatroom: Chatroom) => void;
   swapChatroomOrder: (
     firstChatroom: Chatroom,
-    secondChatroom: Chatroom
+    secondChatroom: Chatroom,
   ) => void;
 }
 
@@ -26,7 +27,7 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
   removeChatroom: (chatroomId: string) =>
     set((state) => ({
       chatrooms: state.chatrooms.filter(
-        (chatroom) => chatroom.chatroomId !== chatroomId
+        (chatroom) => chatroom.chatroomId !== chatroomId,
       ),
     })),
   emptyChatroomList: () => set({ chatrooms: [] }),
@@ -153,7 +154,7 @@ export const useTypingPresenceStore = create<TypingPresenceState>((set) => ({
   removeTypingPresence: (userId) =>
     set((state) => ({
       typingUsers: state.typingUsers.filter(
-        (typingUser) => typingUser.userId !== userId
+        (typingUser) => typingUser.userId !== userId,
       ),
     })),
   popTypingUser: () => {
@@ -162,3 +163,18 @@ export const useTypingPresenceStore = create<TypingPresenceState>((set) => ({
     }));
   },
 }));
+
+interface AuthState {
+  user: UserAuth;
+  handleSignIn: (user: UserAuth) => void;
+  handleLogOut: () => void;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
+  user: { userId: "", username: "", token: "", isGuest: true },
+  handleSignIn: (user) => set({ user }),
+  handleLogOut: () =>
+    set({ user: { userId: "", username: "", token: "", isGuest: true } }),
+}));
+
+export const isLoggedInSelector = (state: AuthState) => !!state.user.userId;

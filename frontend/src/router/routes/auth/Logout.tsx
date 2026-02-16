@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { useAuthStore } from "../../../hooks/useStores";
 import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 
 const Logout = () => {
-  const { handleLogOut } = useAuthContext();
+  const handleLogOut = useAuthStore((state) => state.handleLogOut);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 

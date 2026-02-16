@@ -2,7 +2,7 @@ import { css, useTheme } from "@emotion/react";
 import { Link, useParams } from "react-router";
 import Modal from "../Modal";
 import useToggle from "../../hooks/useToggle";
-import useAuthContext from "../../hooks/useAuthContext";
+import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import { ArrowLeftIcon } from "lucide-react";
 import type { UserAuth } from "../../types/REST-types/User";
 import React, { useRef } from "react";
@@ -111,11 +111,12 @@ interface privacyDataType {
 
 const AuthGuard = () => {
   const [toggleContinueAsGuest, setToggleContinueAsGuest] = useToggle(false);
-  const { isLoggedIn, handleSignIn } = useAuthContext();
+  const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const { ws, setWs } = useWebSocketContext();
   const { chatroomId } = useParams();
   const guestNameRef = useRef<HTMLInputElement>(null);
   const theme = useTheme();
+  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
 
   const { data: privacyData } = useQuery<privacyDataType>({
     queryKey: ["chatroom-privacy", chatroomId],

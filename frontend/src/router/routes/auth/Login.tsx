@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import useAuthContext from "../../../hooks/useAuthContext";
+import { useAuthStore } from "../../../hooks/useStores";
 import type { UserAuth } from "../../../types/REST-types/User";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
@@ -114,7 +114,7 @@ export type LoginCredentials = {
 const Login = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<String>("");
-  const { handleSignIn } = useAuthContext();
+  const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const { ws, setWs } = useWebSocketContext();
   const [isRevealingPassword, setIsRevealingPassword] =
     useState<boolean>(false);

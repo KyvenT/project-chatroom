@@ -9,7 +9,6 @@ import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import type { PinnedGroup } from "../../types/REST-types/Chatroom";
-import useAuthContext from "../../hooks/useAuthContext";
 import { API_URL } from "../../env";
 import { Check, Pencil, X } from "lucide-react";
 import { useRef, useState } from "react";
@@ -126,7 +125,6 @@ export const PinChatroomsModal = ({
   setPinnedGroups,
 }: pinChatroomsModalProps) => {
   const theme = useTheme();
-  const { user } = useAuthContext();
   const [enableTitleEdit, setEnableTitleEdit] = useState<boolean>(false);
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
   const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
@@ -146,7 +144,6 @@ export const PinChatroomsModal = ({
     mutate({
       fetchUrl: `${API_URL}/api/pinned/${chatroomId}/pin`,
       method: "PATCH",
-      user,
       reqBody: {
         pin: pin,
         pinGroupId: pinnedGroup.id,
@@ -176,7 +173,6 @@ export const PinChatroomsModal = ({
     mutate({
       fetchUrl: `${API_URL}/api/pinned/${pinnedGroupId}`,
       method: "PATCH",
-      user,
       reqBody: {
         name,
       },

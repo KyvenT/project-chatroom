@@ -4,7 +4,7 @@ import { NavLink } from "react-router";
 import useToggle from "../../hooks/useToggle";
 import Button from "../Button";
 import { UserRoundPlus } from "lucide-react";
-import useAuthContext from "../../hooks/useAuthContext";
+import { useAuthStore } from "../../hooks/useStores";
 import { InviteModal } from "./InviteModal";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
 import type React from "react";
@@ -126,7 +126,8 @@ const SidebarChatroomButton = ({
     chatroom: { ownerId, privacy, title },
   } = chatroom;
   const theme = useTheme();
-  const { user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
+
   const [isHovered, setHovered] = useToggle(false);
   const [inviteModalOpen, setInviteModalOpen] = useToggle(false);
   const [isDraggedOver, setIsDraggedOver] = useToggle(false);
@@ -173,7 +174,6 @@ const SidebarChatroomButton = ({
 
     mutate({
       fetchUrl: `${API_URL}/api/chatrooms/reorder`,
-      user,
       method: "PATCH",
       reqBody: {
         firstChatroomId: firstChatroom.chatroomId,

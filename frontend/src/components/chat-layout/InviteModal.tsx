@@ -121,7 +121,6 @@ export const InviteModal = ({
   title,
   onClose,
   canInvite,
-  user,
   chatroomId,
 }: InviteModalProps) => {
   const { register, handleSubmit } = useForm<inviteFormInput>();
@@ -132,8 +131,6 @@ export const InviteModal = ({
     queryFn: () =>
       verifiedQuery({
         fetchUrl: `${API_URL}/api/invites/${chatroomId}`,
-        method: "GET",
-        user,
       }),
     enabled: !!inviteModalOpen,
     refetchOnWindowFocus: false,
@@ -157,7 +154,6 @@ export const InviteModal = ({
     mutate({
       fetchUrl: `${API_URL}/api/invites/`,
       method: "POST",
-      user,
       reqBody: {
         receiverUsername: username,
         chatroomId,
