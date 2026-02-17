@@ -47,15 +47,31 @@ export const createInvite = async (
 ) => {
   const { receiverUsername, chatroomId } = data;
 
-  const verifyUser = await Prisma.user.findUnique({
+  const verifyUserPromise = Prisma.chatroomMember.findUnique({
     where: {
-      id: senderId,
+      chatroomId_memberId: {
+        chatroomId,
+        memberId: senderId,
+      },
+    },
+    include: {
+      member: {
+        select: {
+          isGuest: true,
+        },
+      },
     },
   });
 
-  if (verifyUser?.isGuest === true) {
-    throw new Error("Only users can send invites");
-  }
+  const chatroomPrivacyPromise = Prisma.chatroom.findUnique({
+    where: {
+      id: chatroomId,
+    },
+    select: {
+      privacy: true,
+      ownerId: true,
+    },
+  });
 
   const receiverPromise = Prisma.user.findUnique({
     where: {
@@ -63,10 +79,67 @@ export const createInvite = async (
     },
     select: {
       id: true,
+      isGuest: true,
     },
   });
 
-  const checkExistingPromise = Prisma.invite.findMany({
+  const [verifyUser, chatroomPrivacy, receiver] = await Promise.all([
+    verifyUserPromise,
+    chatroomPrivacyPromise,
+    receiverPromise,
+  ]);
+
+  if (verifyUser?.member.isGuest === true) {
+    throw new Error("Only users can send invites");
+  }
+
+  if (!receiver) {
+    throw new Error("User not found");
+  }
+
+  const checkMembership = await Prisma.chatroomMember.findUnique({
+    where: {
+      chatroomId_memberId: {
+        chatroomId,
+        memberId: receiver.id,
+      },
+    },
+  });
+
+  if (checkMembership) {
+    throw new Error("User is already a member of this chatroom");
+  }
+
+  let canInvite: boolean = false;
+
+  switch (chatroomPrivacy?.privacy) {
+    case "INVITE_ONLY":
+      canInvite = chatroomPrivacy.ownerId === senderId;
+      break;
+    case "INVITE_PLUS":
+      const memberRecord = await Prisma.chatroomMember.findUnique({
+        where: {
+          chatroomId_memberId: {
+            chatroomId,
+            memberId: senderId,
+          },
+        },
+      });
+      canInvite = !!memberRecord;
+      break;
+    case "JOINABLE":
+      if (receiver?.isGuest) canInvite = false;
+      break;
+    case "PUBLIC":
+      canInvite = true;
+      break;
+  }
+
+  if (!canInvite) {
+    throw new Error("User does not have permission to invite to this chatroom");
+  }
+
+  const checkExisting = await Prisma.invite.findMany({
     where: {
       receiver: {
         username: receiverUsername,
@@ -75,16 +148,7 @@ export const createInvite = async (
     },
   });
 
-  const [receiver, checkExisting] = await Promise.all([
-    receiverPromise,
-    checkExistingPromise,
-  ]);
-
-  if (!receiver) {
-    throw new Error("User not found");
-  }
-
-  if (checkExisting) {
+  if (checkExisting.length > 0) {
     await Prisma.invite.deleteMany({
       where: {
         receiver: {

@@ -31,8 +31,28 @@ export const createInvite = async (req: Request, res: Response) => {
     await inviteService.createInvite(senderId, data);
     res.status(201).json({ message: "Invite sent successfully" });
   } catch (err: any) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
+    switch (err.message) {
+      case "Chatroom not found":
+        res.status(404).json({ message: err.message });
+        break;
+      case "User not found":
+        res.status(404).json({ message: err.message });
+        break;
+      case "Only users can send invites":
+        res.status(403).json({ message: err.message });
+        break;
+      case "User is already a member of this chatroom":
+        res.status(400).json({ message: err.message });
+        break;
+      case "User does not have permission to invite to this chatroom":
+        res.status(403).json({ message: err.message });
+        break;
+      default:
+        console.error("Invite creation error", err);
+        res
+          .status(500)
+          .json({ message: "Server error occurred while creating invite" });
+    }
   }
 };
 
