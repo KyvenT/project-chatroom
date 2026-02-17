@@ -1,0 +1,16 @@
+Future work
+
+- Add auto-login using refresh token
+- Add pinned chatroom reordering drag and drop
+- Add pinned group reordering drag and drop + backend api
+- Redesign typing presence message, profile dropdown, (empty) inbox
+- Rework chatrooms to not use their database ID to join, use key 
+    that can be regenerated
+- Joinable QR code
+- Join chatroom page using id/key/short string?
+- Voice calls (WebRTC)
+- Stylized text and emojis
+- OAuth
+- Displayed public chatrooms
+- Profile pictures
+- Member banning (temp/perma)

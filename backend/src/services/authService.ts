@@ -11,6 +11,34 @@ import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.j
 
 export const REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
+// helpers
+const getNewAccessToken = (userId: string, isGuest: boolean): string => {
+  const token = jwt.sign({ userId, isGuest }, env.JWT_SECRET, {
+    expiresIn: env.JWT_EXPIRATION as StringValue,
+  });
+  return token;
+};
+
+const hashRefreshToken = (refreshToken: string): string => {
+  return crypto.createHash("sha256").update(refreshToken).digest("hex");
+};
+
+const revokeSession = async (refreshToken: string) => {
+  try {
+    await Prisma.session.update({
+      where: {
+        refreshToken: hashRefreshToken(refreshToken),
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
+  } catch (error: any) {
+    console.error("Failed to revoke session:", error);
+    throw new Error("Failed to revoke session");
+  }
+};
+
 export const createUser = async (
   data: z.infer<typeof userSchema>,
 ): Promise<AuthPayload> => {
@@ -33,7 +61,7 @@ export const createUser = async (
     throw new Error("Failed to create user");
   }
 
-  const session = await createSession(user.id);
+  const session = await createSession(user.id, user.isGuest);
 
   return {
     token: session.accessToken,
@@ -64,7 +92,7 @@ export const loginUser = async (
     throw new Error("Invalid password");
   }
 
-  const session = await createSession(user.id);
+  const session = await createSession(user.id, user.isGuest);
 
   return {
     token: session.accessToken,
@@ -122,7 +150,7 @@ export const createGuest = async (
     throw new Error("Failed to add guest to chatroom");
   }
 
-  const session = await createSession(guest.id);
+  const session = await createSession(guest.id, guest.isGuest);
 
   sendUpdateChatrooms(chatroomId, guest.id, "JOIN");
 
@@ -135,22 +163,19 @@ export const createGuest = async (
   };
 };
 
-const getNewAccessToken = (userId: string): string => {
-  const token = jwt.sign({ userId }, env.JWT_SECRET, {
-    expiresIn: env.JWT_EXPIRATION as StringValue,
-  });
-  return token;
-};
-
-const hashRefreshToken = (refreshToken: string): string => {
-  return crypto.createHash("sha256").update(refreshToken).digest("hex");
-};
-
 export const useRefreshToken = async (refreshToken: string) => {
   try {
     const token = await Prisma.session.findUnique({
       where: {
         refreshToken: hashRefreshToken(refreshToken),
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+            isGuest: true,
+          },
+        },
       },
     });
 
@@ -179,7 +204,7 @@ export const useRefreshToken = async (refreshToken: string) => {
       }),
     ]);
 
-    const accessToken = getNewAccessToken(token.userId);
+    const accessToken = getNewAccessToken(token.userId, token.user.isGuest);
 
     return { accessToken, refreshToken: newRefreshToken };
   } catch (error) {
@@ -187,7 +212,7 @@ export const useRefreshToken = async (refreshToken: string) => {
   }
 };
 
-export const createSession = async (userId: string) => {
+export const createSession = async (userId: string, isGuest: boolean) => {
   const refreshToken = crypto.randomBytes(32).toString("hex");
   const hashedRefreshToken = hashRefreshToken(refreshToken);
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION);
@@ -200,25 +225,9 @@ export const createSession = async (userId: string) => {
     },
   });
 
-  const accessToken = getNewAccessToken(userId);
+  const accessToken = getNewAccessToken(userId, isGuest);
 
   return { refreshToken, accessToken };
-};
-
-const revokeSession = async (refreshToken: string) => {
-  try {
-    await Prisma.session.update({
-      where: {
-        refreshToken: hashRefreshToken(refreshToken),
-      },
-      data: {
-        revokedAt: new Date(),
-      },
-    });
-  } catch (error: any) {
-    console.error("Failed to revoke session:", error);
-    throw new Error("Failed to revoke session");
-  }
 };
 
 export const logoutUser = async (refreshToken: string) => {
