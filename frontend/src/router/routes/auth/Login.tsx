@@ -77,6 +77,7 @@ export const authPageStyles = (theme: Theme) =>
         },
 
         ".submitBtn": {
+          color: "black",
           cursor: "pointer",
           width: "fit-content",
           fontSize: "1.1rem",
@@ -107,7 +108,9 @@ export const authPageStyles = (theme: Theme) =>
           color: theme.colors.grey,
         },
 
-        ".eyeIcon": {},
+        ".eyeIcon": {
+          color: "black",
+        },
       },
     }),
   );

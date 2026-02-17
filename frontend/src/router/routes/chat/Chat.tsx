@@ -5,7 +5,7 @@ import { useOutletContext, useParams } from "react-router";
 import MembersPanel from "../../../components/chat/MembersPanel";
 import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
 import useWebSocketContext from "../../../hooks/useWebSocketContext";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import type { OutletContextType } from "./ChatLayout";
 import { useTypingPresenceStore } from "../../../hooks/useStores";
 import { sendChatMessage } from "../../../ws-router/out-going-ws-messages/chat-message";
@@ -47,7 +47,8 @@ function Chat() {
     };
   }, [typingUsers]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     if (!isLoggedIn || !messageInput.current || !chatroomId || !ws) return;
 
     sendChatMessage(ws, messageInput.current.value, chatroomId);

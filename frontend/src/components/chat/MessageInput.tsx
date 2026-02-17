@@ -79,7 +79,7 @@ const colors = (theme: Theme) =>
   });
 
 interface MessageInputProps {
-  handleSubmit: () => void;
+  handleSubmit: (event: React.FormEvent) => void;
   messageInputRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
@@ -96,7 +96,7 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (messageInputRef.current.value === "") return;
-      handleSubmit();
+      handleSubmit(event);
       setHeight(1);
     } else if (event.key === "Enter" && event.shiftKey) {
       setHeight((prevHeight) => prevHeight + 1);
