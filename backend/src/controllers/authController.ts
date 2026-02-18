@@ -75,13 +75,16 @@ export const useRefreshToken = async (req: Request, res: Response) => {
   }
 
   try {
-    const { refreshToken: newRefreshToken, accessToken } =
-      await authService.useRefreshToken(refreshToken);
+    const {
+      refreshToken: newRefreshToken,
+      accessToken,
+      username,
+    } = await authService.useRefreshToken(refreshToken);
     res.header(
       "Set-Cookie",
       `refreshToken=${newRefreshToken}; HttpOnly; Path=/; Max-Age=${authService.REFRESH_TOKEN_EXPIRATION}`,
     );
-    res.status(200).json({ accessToken });
+    res.status(200).json({ token: accessToken, username });
   } catch (error: any) {
     console.error("Failed to refresh access token:", error);
     return res.status(401).json({ message: error.message });

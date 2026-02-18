@@ -16,7 +16,7 @@ export const closeWs = () => {
 };
 
 export const startWSConnection = () => {
-  const newWs = new WebSocket(`ws://${API_URL}`);
+  const newWs = new WebSocket(`wss://${API_URL}`);
 
   newWs.onopen = () => {
     console.log("WebSocket connection established");
