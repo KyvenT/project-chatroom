@@ -177,4 +177,4 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: { userId: "", username: "", token: "", isGuest: true } }),
 }));
 
-export const isLoggedInSelector = (state: AuthState) => !!state.user.userId;
+export const isLoggedInSelector = (state: AuthState) => !!state.user.token;

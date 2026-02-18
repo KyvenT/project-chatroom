@@ -92,7 +92,7 @@ function ChatLayout() {
   const [sidebarToggled, setSidebarToggled] = useToggle(false);
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
+  const isLoggedIn = useAuthStore(isLoggedInSelector);
   const { chatroomId } = useParams();
   const theme = useTheme();
   const chatrooms = useChatroomsStore((state) => state.chatrooms);

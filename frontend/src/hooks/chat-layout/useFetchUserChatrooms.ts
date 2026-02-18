@@ -9,7 +9,7 @@ import { API_URL } from "../../env";
 export const useFetchUserChatrooms = () => {
   const setChatroomList = useChatroomsStore((state) => state.setChatroomList);
   const user = useAuthStore((state) => state.user);
-  const isLoggedIn = isLoggedInSelector(useAuthStore());
+  const isLoggedIn = useAuthStore(isLoggedInSelector);
 
   const { data: chatroomsData } = useQuery<Chatroom[], Error>({
     queryKey: ["chatrooms", user.userId],

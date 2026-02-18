@@ -1,20 +1,16 @@
-export const handleWSAuth = (
-  ws: WebSocket | null,
-  setWs: (ws: WebSocket) => void,
-  token: string,
-) => {
-  if (ws) {
-    ws.close();
-  }
-  const newWs = new WebSocket(`wss://${window.location.host}`);
+import { getWs } from "../ws";
 
-  newWs.onopen = () => {
-    newWs.send(
-      JSON.stringify({
-        type: "auth",
-        token,
-      }),
-    );
-    setWs(newWs);
-  };
+export const handleWSAuth = (token: string) => {
+  const ws = getWs();
+
+  if (!ws) {
+    console.error("WebSocket connection not established");
+    return;
+  }
+  ws.send(
+    JSON.stringify({
+      type: "auth",
+      token,
+    }),
+  );
 };

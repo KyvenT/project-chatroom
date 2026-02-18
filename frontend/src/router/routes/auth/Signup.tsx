@@ -7,7 +7,6 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../components/Button";
 import { Eye, EyeClosed } from "lucide-react";
 import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
-import useWebSocketContext from "../../../hooks/useWebSocketContext";
 import { useTheme } from "@emotion/react";
 import { API_URL } from "../../../env";
 import {
@@ -19,7 +18,6 @@ import { Loader } from "../../../components/Loader";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { ws, setWs } = useWebSocketContext();
   const [error, setError] = useState<String>("");
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const [isRevealingPassword, setIsRevealingPassword] =
@@ -38,7 +36,7 @@ const Signup = () => {
         return;
       }
       handleSignIn(loginResponse);
-      handleWSAuth(ws, setWs, loginResponse.token);
+      handleWSAuth(loginResponse.token);
       navigate("/chat");
     },
   });

@@ -126,7 +126,7 @@ const ChatHome = () => {
       customQuery<PinnedGroup[]>({
         fetchUrl: `${API_URL}/api/pinned/me`,
       }),
-    enabled: !!user.userId,
+    enabled: !!user.token,
     staleTime: 0,
   });
 

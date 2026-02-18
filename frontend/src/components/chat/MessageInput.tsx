@@ -1,9 +1,7 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import { SendHorizonal } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import useWebSocketContext from "../../hooks/useWebSocketContext";
 import { useParams } from "react-router";
-import useToggle from "../../hooks/useToggle";
 import { sendTypingPresence } from "../../ws-router/out-going-ws-messages/typing-presence";
 
 const styles = css({
@@ -86,13 +84,11 @@ interface MessageInputProps {
 const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
   const theme = useTheme();
   const [height, setHeight] = useState(1);
-  const { ws } = useWebSocketContext();
   const { chatroomId } = useParams();
-
-  const [hasTyped, setHasTyped] = useToggle(false);
+  const [hasTyped, setHasTyped] = useState<boolean>(false);
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!messageInputRef.current || !chatroomId || !ws) return;
+    if (!messageInputRef.current || !chatroomId) return;
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (messageInputRef.current.value === "") return;
@@ -106,7 +102,7 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
 
     if (!hasTyped) {
       setHasTyped(true);
-      sendTypingPresence(ws, chatroomId);
+      sendTypingPresence(chatroomId);
     }
   };
 

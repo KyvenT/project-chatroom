@@ -6,7 +6,6 @@ import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import { ArrowLeftIcon } from "lucide-react";
 import type { UserAuth } from "../../types/REST-types/User";
 import React, { useRef } from "react";
-import useWebSocketContext from "../../hooks/useWebSocketContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
 import { customQuery } from "../../hooks/useCustomQuery";
@@ -112,11 +111,10 @@ interface privacyDataType {
 const AuthGuard = () => {
   const [toggleContinueAsGuest, setToggleContinueAsGuest] = useToggle(false);
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
-  const { ws, setWs } = useWebSocketContext();
   const { chatroomId } = useParams();
   const guestNameRef = useRef<HTMLInputElement>(null);
   const theme = useTheme();
-  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
+  const isLoggedIn = useAuthStore(isLoggedInSelector);
 
   const { data: privacyData } = useQuery<privacyDataType>({
     queryKey: ["chatroom-privacy", chatroomId],
@@ -133,7 +131,7 @@ const AuthGuard = () => {
     onSuccess: (guestAuthData) => {
       if (!guestAuthData) return;
       handleSignIn(guestAuthData);
-      handleWSAuth(ws, setWs, guestAuthData.token);
+      handleWSAuth(guestAuthData.token);
     },
   });
 

@@ -1,14 +1,15 @@
 import { useEffect } from "react";
-import useWebSocketContext from "../useWebSocketContext";
 import { useParams } from "react-router";
 import { useAuthStore, isLoggedInSelector } from "../useStores";
+import { getWs } from "../../ws-router/ws";
 
 export const useUpdateActiveChatroom = () => {
-  const { ws } = useWebSocketContext();
   const { chatroomId } = useParams();
-  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
+  const isLoggedIn = useAuthStore(isLoggedInSelector);
 
   useEffect(() => {
+    const ws = getWs();
+
     if (isLoggedIn && ws) {
       if (chatroomId) {
         ws.send(
@@ -26,5 +27,5 @@ export const useUpdateActiveChatroom = () => {
         );
       }
     }
-  }, [isLoggedIn, ws, chatroomId]);
+  }, [isLoggedIn, chatroomId]);
 };

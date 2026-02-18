@@ -22,7 +22,7 @@ export const useFetchMessages = (
   const enabled =
     chatroomId !== undefined &&
     chatroom !== undefined &&
-    !!user.userId &&
+    !!user.token &&
     !!getBefore;
 
   return useQuery<Message[]>({
@@ -53,7 +53,7 @@ export const useFetchMessagesMultiple = (
 ) => {
   const user = useAuthStore((state) => state.user);
 
-  let enabled = !!user.userId && !!getBefore;
+  let enabled = !!user.token && !!getBefore;
 
   chatroomIds.forEach((chatroomId) => {
     const chatroom = useChatroomsStore((state) =>

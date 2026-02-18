@@ -92,12 +92,12 @@ const MembersPanel = () => {
   const isMobile = useIsMobile();
 
   const { data } = useQuery<ChatroomMember[]>({
-    queryKey: [user.userId, chatroomId],
+    queryKey: ["members", user.userId, chatroomId],
     queryFn: () =>
       customQuery<ChatroomMember[]>({
         fetchUrl: `${API_URL}/api/members/${chatroomId}`,
       }),
-    enabled: !!user.userId,
+    enabled: !!user.token,
     staleTime: 0,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -118,7 +118,7 @@ const MembersPanel = () => {
     setClickedMember({ member, button: event.target as HTMLButtonElement });
   };
 
-  const { statusLists, status } = useMemo(() => {
+  const { statusLists } = useMemo(() => {
     const onlineList = members.filter(
       (member) => member.member.status === "ONLINE",
     );
@@ -128,11 +128,19 @@ const MembersPanel = () => {
     const offlineList = members.filter(
       (member) => member.member.status === "OFFLINE",
     );
-    const status = members.find((member) => member.memberId === user.userId)
-      ?.member.status;
 
-    return { statusLists: [onlineList, awayList, offlineList], status };
+    return {
+      statusLists: [
+        { status: "ONLINE", members: onlineList },
+        { status: "AWAY", members: awayList },
+        { status: "OFFLINE", members: offlineList },
+      ],
+    };
   }, [members]);
+
+  const status =
+    members.find((member) => member.memberId === user.userId)?.member.status ||
+    "OFFLINE";
 
   return (
     <>
@@ -140,11 +148,11 @@ const MembersPanel = () => {
         <div css={membersListStyles}>
           {statusLists.map((statusList) => (
             <>
-              {statusList.length > 0 && (
-                <div>
-                  <h3 className="status">{statusList[0].member.status}</h3>
+              {statusList.members.length > 0 && (
+                <div key={statusList.status}>
+                  <h3 className="status">{statusList.status}</h3>
                   <ul>
-                    {statusList.map((member) => (
+                    {statusList.members.map((member) => (
                       <li key={member.memberId}>
                         <Button
                           variant="icon"
@@ -161,7 +169,7 @@ const MembersPanel = () => {
             </>
           ))}
         </div>
-        <ProfileStatus status={status || "OFFLINE"} />
+        <ProfileStatus status={status} />
       </div>
       {clickedMember && (
         <MemberInfo

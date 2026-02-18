@@ -122,7 +122,7 @@ interface CreateChatroomFormInput {
 
 const NewChatButton = () => {
   const [isToggled, setToggle] = useToggle(false);
-  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
+  const isLoggedIn = useAuthStore(isLoggedInSelector);
   const { register, handleSubmit, reset } = useForm<CreateChatroomFormInput>({
     defaultValues: {
       title: "",

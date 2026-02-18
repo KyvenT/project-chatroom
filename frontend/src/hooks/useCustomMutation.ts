@@ -1,4 +1,5 @@
-import { API_URL } from "../env";
+import { fetchRefresh } from "../utils/fetchRefresh";
+import { makeHeaders } from "./useCustomQuery";
 import { useAuthStore } from "./useStores";
 
 export interface MutationArgs {
@@ -12,18 +13,11 @@ export const customMutation = async <T>({
   method,
   reqBody = {},
 }: MutationArgs): Promise<T> => {
-  const { user, handleSignIn, handleLogOut } = useAuthStore.getState();
-
-  const headers = new Headers();
-  headers.append("Content-Type", "application/json");
-
-  if (user.token) {
-    headers.append("authorization", "Bearer " + user.token);
-  }
+  const { user } = useAuthStore.getState();
 
   let res = await fetch(fetchUrl, {
     method,
-    headers,
+    headers: makeHeaders(),
     credentials: "include",
     body: JSON.stringify(reqBody),
   });
@@ -31,40 +25,26 @@ export const customMutation = async <T>({
 
   if (!res.ok) {
     if (res.status === 401 && user.token) {
-      const newToken = await fetch(`${API_URL}/api/auth/refresh`, {
-        method: "POST",
-        headers,
+      const result = await fetchRefresh();
+      if (!result.ok) {
+        throw new Error("Unauthorized");
+      }
+
+      const fetchWithNewToken = await fetch(fetchUrl, {
+        method: "GET",
+        headers: makeHeaders(),
         credentials: "include",
       });
-      const newTokenData = await newToken.json();
 
-      if (!newToken.ok) {
-        handleLogOut();
-        throw new Error(newTokenData.message || "Unauthorized");
+      data = await fetchWithNewToken.json();
+
+      if (!fetchWithNewToken.ok) {
+        throw new Error(data.message || "Unauthorized");
       }
 
-      if (newTokenData.token) {
-        headers.set("authorization", "Bearer " + newTokenData.token);
-
-        handleSignIn({ ...user, token: newTokenData.token });
-        const fetchWithNewToken = await fetch(fetchUrl, {
-          method,
-          headers,
-          credentials: "include",
-          body: JSON.stringify(reqBody),
-        });
-
-        data = await fetchWithNewToken.json();
-
-        if (!fetchWithNewToken.ok) {
-          throw new Error(data.message || "Unauthorized");
-        }
-
-        return data as T;
-      }
-      throw new Error("Unauthorized");
+      return data as T;
     }
-    throw new Error(data.message || "Query error");
+    throw new Error(data.message || "Mutation error");
   }
 
   return data as T;

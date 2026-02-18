@@ -18,7 +18,6 @@ import { updateLastViewedAt } from "./out-going-ws-messages/update-last-viewed-a
 import { handleUpdateInvites } from "./ws-routes/update-invites";
 
 export const wsMessageRouter = (
-  ws: WebSocket,
   message: any,
   chatroomId: string | undefined,
   navigate: NavigateFunction,
@@ -51,7 +50,7 @@ export const wsMessageRouter = (
       break;
     case "update-last-viewed-at":
       if (!chatroomId) return;
-      updateLastViewedAt(ws, chatroomId);
+      updateLastViewedAt(chatroomId);
       break;
     case "update-invites":
       handleUpdateInvites(message as UpdateInvitesMessage);
