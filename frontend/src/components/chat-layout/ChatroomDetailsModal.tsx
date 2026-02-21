@@ -142,7 +142,7 @@ export const ChatroomDetailsModal = ({
   const theme = useTheme();
   const [enableTitleEdit, setEnableTitleEdit] = useToggle(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useToggle(false);
-  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
+  const isLoggedIn = useAuthStore(isLoggedInSelector);
 
   const {
     data: chatroomData,

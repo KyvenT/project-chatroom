@@ -1,5 +1,5 @@
 import { css, useTheme } from "@emotion/react";
-import { useAuthStore } from "../../hooks/useStores";
+import { useAuthStore, useMembersStore } from "../../hooks/useStores";
 import type { Theme } from "@emotion/react";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -7,7 +7,6 @@ import {
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type { StatusUpdate } from "../../types/REST-types/User";
-import { useRef } from "react";
 import { API_URL } from "../../env";
 
 export type Status = "ONLINE" | "AWAY" | "OFFLINE";
@@ -69,29 +68,35 @@ interface ProfileStatusProps {
 const ProfileStatus = ({ status }: ProfileStatusProps) => {
   const theme = useTheme();
   const user = useAuthStore((state) => state.user);
-  const statusRef = useRef<HTMLSelectElement>(null);
   const mutation = useMutation<StatusUpdate, Error, MutationArgs>({
     mutationFn: customMutation<StatusUpdate>,
   });
+  const member = useMembersStore((state) =>
+    state.members.find((m) => m.memberId === user.userId),
+  );
+  const updateMember = useMembersStore((state) => state.updateMember);
 
-  const handleSubmit = () => {
-    const newStatus = statusRef.current?.value;
+  const handleSubmit = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!member) return;
 
     mutation.mutate({
       fetchUrl: `${API_URL}/api/users/me`,
       method: "PATCH",
-      reqBody: { status: newStatus },
+      reqBody: { status: event.target.value },
+    });
+    updateMember({
+      memberId: member?.memberId,
+      role: member?.role,
+      member: {
+        status: event.target.value as Status,
+        username: member.member.username,
+      },
     });
   };
 
   return (
     <div css={[styles(status), colors(theme)]}>
-      <select
-        ref={statusRef}
-        className="status"
-        onChange={handleSubmit}
-        defaultValue={status}
-      >
+      <select className="status" onChange={handleSubmit} value={status}>
         <option
           className="statusOption"
           onMouseOver={() => {}}

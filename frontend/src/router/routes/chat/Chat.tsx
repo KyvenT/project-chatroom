@@ -4,11 +4,11 @@ import MessageInput from "../../../components/chat/MessageInput";
 import { useOutletContext, useParams } from "react-router";
 import MembersPanel from "../../../components/chat/MembersPanel";
 import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
-import useWebSocketContext from "../../../hooks/useWebSocketContext";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import type { OutletContextType } from "./ChatLayout";
 import { useTypingPresenceStore } from "../../../hooks/useStores";
-import { sendChatMessage } from "../../../ws-router/out-going-ws-messages/chat-message";
+import { getWs } from "../../../ws-router/ws";
+import { sendWSMessage } from "../../../ws-router/sender";
 
 const chatStyles = css({
   height: "100%",
@@ -30,8 +30,7 @@ const colors = (theme: Theme) =>
 function Chat() {
   const theme = useTheme();
   const { chatroomId } = useParams();
-  const isLoggedIn = isLoggedInSelector(useAuthStore.getState());
-  const { ws } = useWebSocketContext();
+  const isLoggedIn = useAuthStore(isLoggedInSelector);
   const messageInput = useRef<HTMLTextAreaElement>(null);
   const { showMembersList } = useOutletContext<OutletContextType>();
   const typingUsers = useTypingPresenceStore((state) => state.typingUsers);
@@ -47,10 +46,16 @@ function Chat() {
     };
   }, [typingUsers]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const ws = getWs();
     if (!isLoggedIn || !messageInput.current || !chatroomId || !ws) return;
 
-    sendChatMessage(ws, messageInput.current.value, chatroomId);
+    sendWSMessage({
+      type: "message",
+      content: messageInput.current.value,
+      chatroomId,
+    });
 
     messageInput.current.value = "";
     messageInput.current.focus();

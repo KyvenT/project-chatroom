@@ -22,12 +22,13 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    if (!decoded.userId) {
+    if (!decoded.userId && !decoded.isGuest) {
       res.status(401).json({ error: "Error decrypting token" });
       return;
     }
 
     req.userId = decoded.userId;
+    req.isGuest = decoded.isGuest;
     next();
   });
 };

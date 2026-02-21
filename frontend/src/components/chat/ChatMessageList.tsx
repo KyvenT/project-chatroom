@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useMessagesStore } from "../../hooks/useStores";
 import { useFetchMessages } from "../../hooks/useFetchMessages";
-import { updateLastViewedAt } from "../../ws-router/out-going-ws-messages/update-last-viewed-at";
-import useWebSocketContext from "../../hooks/useWebSocketContext";
+import { sendWSMessage } from "../../ws-router/sender";
 
 const styles = css({
   width: "100%",
@@ -37,7 +36,6 @@ const ChatMessageList = () => {
   const chatRef = useRef<HTMLDivElement>(null);
   const [getBefore, setBefore] = useState<Date>(new Date());
   const { data } = useFetchMessages(chatroomId, getBefore, 25);
-  const { ws } = useWebSocketContext();
 
   useEffect(() => {
     clearMessages();
@@ -49,8 +47,8 @@ const ChatMessageList = () => {
   }, [data, addPrevMessages]);
 
   useEffect(() => {
-    if (!chatroomId || !ws) return;
-    updateLastViewedAt(ws, chatroomId);
+    if (!chatroomId) return;
+    sendWSMessage({ type: "update-last-viewed-at", chatroomId });
   }, [messages]);
 
   const getHistoricalMessages = () => {

@@ -57,6 +57,7 @@ export const startWSS = (
 
       if (!userId && validated.data.type !== WSMessageTypes.Auth) {
         console.error("unauthorized ws message");
+        ws.send("Unauthorized: Must authenticate before sending messages");
         return;
       }
 

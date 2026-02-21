@@ -6,6 +6,7 @@ import { useIsMobile } from "../../../hooks/useIsMobile";
 import Button from "../../../components/Button";
 import { useEffect } from "react";
 import useToggle from "../../../hooks/useToggle";
+import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
 
 const styles = css(
   mq({
@@ -122,6 +123,7 @@ const styles = css(
 const LandingPage = () => {
   const isMobile = useIsMobile();
   const [mobileNavOpen, setMobileNavOpen] = useToggle(false);
+  const isLoggedIn = useAuthStore(isLoggedInSelector);
 
   // reset state to false when window size grows beyond mobile
   useEffect(() => {
@@ -176,13 +178,21 @@ const LandingPage = () => {
               */}
               </ul>
               <p>
-                <Link to="/login" className="navLink">
-                  Log In
-                </Link>{" "}
-                /{" "}
-                <Link to="/register" className="navLink">
-                  Register
-                </Link>
+                {isLoggedIn ? (
+                  <Link to="/chat" className="navLink">
+                    Start Chatting
+                  </Link>
+                ) : (
+                  <>
+                    <Link to="/login" className="navLink">
+                      Log In
+                    </Link>{" "}
+                    /{" "}
+                    <Link to="/register" className="navLink">
+                      Register
+                    </Link>
+                  </>
+                )}
               </p>
             </>
           )}

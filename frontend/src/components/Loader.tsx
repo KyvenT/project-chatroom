@@ -9,7 +9,7 @@ const loaderStyles = (theme: Theme) =>
       width: "20px",
       height: "20px",
       border: "3px solid transparent",
-      borderTop: `3px solid ${theme.colors.white}`,
+      borderTop: `3px solid ${theme.colors.light_grey}`,
       borderRadius: "50%",
     }),
   );

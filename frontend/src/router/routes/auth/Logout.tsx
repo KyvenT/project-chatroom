@@ -21,6 +21,11 @@ const Logout = () => {
       handleLogOut();
       navigate("/login");
     },
+    onError: (error) => {
+      if (error.message === "input validation error") {
+        navigate("/login");
+      }
+    },
   });
 
   useEffect(() => {
@@ -28,7 +33,7 @@ const Logout = () => {
       fetchUrl: `${API_URL}/api/auth/logout`,
       method: "POST",
     });
-  }, []);
+  }, [mutate]);
 
   return (
     <div>

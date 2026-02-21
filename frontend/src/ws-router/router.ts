@@ -14,11 +14,10 @@ import { handleUpdateChatrooms } from "./ws-routes/update-chatrooms";
 import { handleUpdateMembers } from "./ws-routes/update-members";
 import { handleStatusUpdate } from "./ws-routes/status-update";
 import { handleTypingPresence } from "./ws-routes/typing-presence";
-import { updateLastViewedAt } from "./out-going-ws-messages/update-last-viewed-at";
 import { handleUpdateInvites } from "./ws-routes/update-invites";
+import { sendWSMessage } from "./sender";
 
 export const wsMessageRouter = (
-  ws: WebSocket,
   message: any,
   chatroomId: string | undefined,
   navigate: NavigateFunction,
@@ -51,7 +50,7 @@ export const wsMessageRouter = (
       break;
     case "update-last-viewed-at":
       if (!chatroomId) return;
-      updateLastViewedAt(ws, chatroomId);
+      sendWSMessage({ type: "update-last-viewed-at", chatroomId });
       break;
     case "update-invites":
       handleUpdateInvites(message as UpdateInvitesMessage);

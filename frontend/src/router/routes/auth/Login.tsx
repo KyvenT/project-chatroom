@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuthStore } from "../../../hooks/useStores";
 import type { UserAuth } from "../../../types/REST-types/User";
-import useWebSocketContext from "../../../hooks/useWebSocketContext";
-import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import { mq } from "../../../styles/breakpoints";
@@ -77,6 +75,7 @@ export const authPageStyles = (theme: Theme) =>
         },
 
         ".submitBtn": {
+          color: "black",
           cursor: "pointer",
           width: "fit-content",
           fontSize: "1.1rem",
@@ -107,7 +106,9 @@ export const authPageStyles = (theme: Theme) =>
           color: theme.colors.grey,
         },
 
-        ".eyeIcon": {},
+        ".eyeIcon": {
+          color: "black",
+        },
       },
     }),
   );
@@ -121,7 +122,6 @@ const Login = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<String>("");
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
-  const { ws, setWs } = useWebSocketContext();
   const [isRevealingPassword, setIsRevealingPassword] =
     useState<boolean>(false);
   const theme = useTheme();
@@ -138,7 +138,6 @@ const Login = () => {
         return;
       }
       handleSignIn(loginResponse);
-      handleWSAuth(ws, setWs, loginResponse.token);
       navigate("/chat");
     },
   });
