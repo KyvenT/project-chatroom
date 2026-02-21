@@ -6,7 +6,6 @@ import { authPageStyles, type LoginCredentials } from "./Login";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../components/Button";
 import { Eye, EyeClosed } from "lucide-react";
-import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
 import { useTheme } from "@emotion/react";
 import { API_URL } from "../../../env";
 import {
@@ -36,7 +35,6 @@ const Signup = () => {
         return;
       }
       handleSignIn(loginResponse);
-      handleWSAuth(loginResponse.token);
       navigate("/chat");
     },
   });

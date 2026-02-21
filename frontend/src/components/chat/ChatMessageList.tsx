@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useMessagesStore } from "../../hooks/useStores";
 import { useFetchMessages } from "../../hooks/useFetchMessages";
-import { updateLastViewedAt } from "../../ws-router/out-going-ws-messages/update-last-viewed-at";
+import { sendWSMessage } from "../../ws-router/sender";
 
 const styles = css({
   width: "100%",
@@ -48,7 +48,7 @@ const ChatMessageList = () => {
 
   useEffect(() => {
     if (!chatroomId) return;
-    updateLastViewedAt(chatroomId);
+    sendWSMessage({ type: "update-last-viewed-at", chatroomId });
   }, [messages]);
 
   const getHistoricalMessages = () => {

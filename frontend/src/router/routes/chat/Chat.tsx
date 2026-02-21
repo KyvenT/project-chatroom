@@ -7,8 +7,8 @@ import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
 import React, { useEffect, useRef } from "react";
 import type { OutletContextType } from "./ChatLayout";
 import { useTypingPresenceStore } from "../../../hooks/useStores";
-import { sendChatMessage } from "../../../ws-router/out-going-ws-messages/chat-message";
 import { getWs } from "../../../ws-router/ws";
+import { sendWSMessage } from "../../../ws-router/sender";
 
 const chatStyles = css({
   height: "100%",
@@ -51,7 +51,11 @@ function Chat() {
     const ws = getWs();
     if (!isLoggedIn || !messageInput.current || !chatroomId || !ws) return;
 
-    sendChatMessage(messageInput.current.value, chatroomId);
+    sendWSMessage({
+      type: "message",
+      content: messageInput.current.value,
+      chatroomId,
+    });
 
     messageInput.current.value = "";
     messageInput.current.focus();

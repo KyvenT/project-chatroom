@@ -2,7 +2,7 @@ import { css, useTheme, type Theme } from "@emotion/react";
 import { SendHorizonal } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { sendTypingPresence } from "../../ws-router/out-going-ws-messages/typing-presence";
+import { sendWSMessage } from "../../ws-router/sender";
 
 const styles = css({
   width: "100%",
@@ -102,7 +102,7 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
 
     if (!hasTyped) {
       setHasTyped(true);
-      sendTypingPresence(chatroomId);
+      sendWSMessage({ type: "typing-presence", chatroomId });
     }
   };
 

@@ -8,7 +8,7 @@ type RefreshResponse = {
 
 let refreshPromise: Promise<RefreshResponse> | null = null;
 
-export const fetchRefresh = async (): Promise<RefreshResponse> => {
+export const useRefreshToken = async (): Promise<RefreshResponse> => {
   if (refreshPromise) {
     return refreshPromise;
   }

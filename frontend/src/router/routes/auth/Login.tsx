@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuthStore } from "../../../hooks/useStores";
 import type { UserAuth } from "../../../types/REST-types/User";
-import { handleWSAuth } from "../../../ws-router/out-going-ws-messages/auth";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import { mq } from "../../../styles/breakpoints";
@@ -139,7 +138,6 @@ const Login = () => {
         return;
       }
       handleSignIn(loginResponse);
-      handleWSAuth(loginResponse.token);
       navigate("/chat");
     },
   });

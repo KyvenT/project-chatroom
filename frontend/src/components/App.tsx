@@ -1,11 +1,11 @@
 import { css, Global, ThemeProvider } from "@emotion/react";
 import Router from "../router/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import WebSocketContextProvider from "../contexts/WebSocketContextProvider";
 import { useEffect } from "react";
-import { fetchRefresh } from "../utils/fetchRefresh";
-import { handleWSAuth } from "../ws-router/out-going-ws-messages/auth";
+import { useRefreshToken } from "../utils/useRefreshToken";
 import { useAuthStore } from "../hooks/useStores";
+import { closeWs, startWSConnection } from "../ws-router/ws";
+import { sendWSMessage } from "../ws-router/sender";
 
 const theme = {
   colors: {
@@ -36,25 +36,36 @@ function App() {
 
   useEffect(() => {
     const autoSignIn = async () => {
-      const { ok } = await fetchRefresh();
+      const { ok } = await useRefreshToken();
       if (!ok) {
         console.log("No valid refresh token, user remains logged out");
         return;
       }
-      if (ok) handleWSAuth(user.token);
     };
 
     autoSignIn();
   }, []);
 
+  useEffect(() => {
+    if (!user.token) {
+      console.log("User not logged in, not establishing WebSocket connection");
+      return;
+    }
+    startWSConnection();
+    console.log("WebSocket connection established, sending auth message");
+    sendWSMessage({ type: "auth", token: user.token });
+
+    return () => {
+      closeWs();
+    };
+  }, [user.token]);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <WebSocketContextProvider>
-        <ThemeProvider theme={theme}>
-          <Global styles={globalStyles} />
-          <Router />
-        </ThemeProvider>
-      </WebSocketContextProvider>
+      <ThemeProvider theme={theme}>
+        <Global styles={globalStyles} />
+        <Router />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

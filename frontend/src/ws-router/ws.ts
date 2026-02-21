@@ -1,4 +1,4 @@
-import { API_URL } from "../env";
+import { WS_URL } from "../env";
 
 let ws: WebSocket | null = null;
 
@@ -11,20 +11,24 @@ export const setWs = (newWs: WebSocket) => {
 export const closeWs = () => {
   if (ws) {
     ws.close();
-    ws = null;
   }
 };
 
 export const startWSConnection = () => {
-  const newWs = new WebSocket(`wss://${API_URL}`);
+  if (ws) {
+    console.log("WebSocket connection already exists");
+    return;
+  }
 
-  newWs.onopen = () => {
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
     console.log("WebSocket connection established");
   };
-  newWs.onerror = (error) => {
+  ws.onerror = (error) => {
     console.error(`WebSocket error: ${error}`);
   };
-  newWs.onclose = () => {
+  ws.onclose = () => {
     ws = null;
     console.log("WebSocket connection closed");
   };

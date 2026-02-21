@@ -14,7 +14,6 @@ import {
   type MutationArgs,
 } from "../../hooks/useCustomMutation";
 import type { Theme } from "@emotion/react";
-import { handleWSAuth } from "../../ws-router/out-going-ws-messages/auth";
 import { API_URL } from "../../env";
 
 const styles = (theme: Theme) =>
@@ -131,7 +130,6 @@ const AuthGuard = () => {
     onSuccess: (guestAuthData) => {
       if (!guestAuthData) return;
       handleSignIn(guestAuthData);
-      handleWSAuth(guestAuthData.token);
     },
   });
 
