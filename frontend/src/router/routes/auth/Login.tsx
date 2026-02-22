@@ -13,8 +13,10 @@ import { useMutation } from "@tanstack/react-query";
 import {
   customMutation,
   type MutationArgs,
-} from "../../../hooks/useCustomMutation";
+} from "../../../utils/customMutation";
 import { Loader } from "../../../components/Loader";
+import { startWSConnection } from "../../../ws-router/ws";
+import { sendWSMessage } from "../../../ws-router/sender";
 
 export const authPageStyles = (theme: Theme) =>
   css(
@@ -138,6 +140,9 @@ const Login = () => {
         return;
       }
       handleSignIn(loginResponse);
+      startWSConnection();
+      console.log("WebSocket connection established, sending auth message");
+      sendWSMessage({ type: "auth", token: loginResponse.token });
       navigate("/chat");
     },
   });

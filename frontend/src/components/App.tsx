@@ -32,33 +32,31 @@ const globalStyles = css({
 const queryClient = new QueryClient();
 
 function App() {
-  const user = useAuthStore((state) => state.user);
+  const handleSignIn = useAuthStore((state) => state.handleSignIn);
 
   useEffect(() => {
     const autoSignIn = async () => {
-      const { ok } = await useRefreshToken();
-      if (!ok) {
+      const result = await useRefreshToken();
+      if (!result.ok) {
         console.log("No valid refresh token, user remains logged out");
         return;
       }
+      handleSignIn(result);
+      startWSConnection();
+      console.log(
+        "WebSocket connection established, sending auth message",
+        "token:",
+        result.token,
+      );
+      sendWSMessage({ type: "auth", token: result.token });
     };
 
     autoSignIn();
-  }, []);
-
-  useEffect(() => {
-    if (!user.token) {
-      console.log("User not logged in, not establishing WebSocket connection");
-      return;
-    }
-    startWSConnection();
-    console.log("WebSocket connection established, sending auth message");
-    sendWSMessage({ type: "auth", token: user.token });
 
     return () => {
       closeWs();
     };
-  }, [user.token]);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

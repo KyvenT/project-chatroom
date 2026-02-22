@@ -8,11 +8,8 @@ import type { UserAuth } from "../../types/REST-types/User";
 import React, { useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
-import { customQuery } from "../../hooks/useCustomQuery";
-import {
-  customMutation,
-  type MutationArgs,
-} from "../../hooks/useCustomMutation";
+import { customQuery } from "../../utils/customQuery";
+import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import type { Theme } from "@emotion/react";
 import { API_URL } from "../../env";
 

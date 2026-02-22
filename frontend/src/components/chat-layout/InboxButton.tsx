@@ -1,12 +1,9 @@
 import React, { useEffect } from "react";
 import { useAuthStore } from "../../hooks/useStores";
-import { customQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../utils/customQuery";
 import type { Invite, InviteResponse } from "../../types/REST-types/Invite";
 import DropdownButton from "../DropdownButton";
-import {
-  customMutation,
-  type MutationArgs,
-} from "../../hooks/useCustomMutation";
+import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Mail } from "lucide-react";
 import { css, type Theme } from "@emotion/react";

@@ -49,7 +49,7 @@ const ChatMessageList = () => {
   useEffect(() => {
     if (!chatroomId) return;
     sendWSMessage({ type: "update-last-viewed-at", chatroomId });
-  }, [messages]);
+  }, [messages, chatroomId]);
 
   const getHistoricalMessages = () => {
     const chatMessagesContainer = chatRef.current;

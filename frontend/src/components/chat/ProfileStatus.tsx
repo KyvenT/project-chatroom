@@ -2,10 +2,7 @@ import { css, useTheme } from "@emotion/react";
 import { useAuthStore, useMembersStore } from "../../hooks/useStores";
 import type { Theme } from "@emotion/react";
 import { useMutation } from "@tanstack/react-query";
-import {
-  customMutation,
-  type MutationArgs,
-} from "../../hooks/useCustomMutation";
+import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import type { StatusUpdate } from "../../types/REST-types/User";
 import { API_URL } from "../../env";
 

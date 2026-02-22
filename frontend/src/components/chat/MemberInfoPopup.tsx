@@ -3,7 +3,7 @@ import type {
   ChatroomMember,
   ChatroomMemberDetails,
 } from "../../types/REST-types/ChatroomMember";
-import { customQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../utils/customQuery";
 import { useAuthStore } from "../../hooks/useStores";
 import { useParams } from "react-router";
 import { css, useTheme } from "@emotion/react";
@@ -12,10 +12,7 @@ import type { Theme } from "@emotion/react";
 import { useMembersStore } from "../../hooks/useStores";
 import Button from "../Button";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
-import {
-  customMutation,
-  type MutationArgs,
-} from "../../hooks/useCustomMutation";
+import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import { useOutsideClick } from "../../hooks/useHandleOutsideClick";
 import { useRef } from "react";
 import { createPortal } from "react-dom";

@@ -4,10 +4,9 @@ import MessageInput from "../../../components/chat/MessageInput";
 import { useOutletContext, useParams } from "react-router";
 import MembersPanel from "../../../components/chat/MembersPanel";
 import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import type { OutletContextType } from "./ChatLayout";
 import { useTypingPresenceStore } from "../../../hooks/useStores";
-import { getWs } from "../../../ws-router/ws";
 import { sendWSMessage } from "../../../ws-router/sender";
 
 const chatStyles = css({
@@ -46,20 +45,22 @@ function Chat() {
     };
   }, [typingUsers]);
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    const ws = getWs();
-    if (!isLoggedIn || !messageInput.current || !chatroomId || !ws) return;
+  const handleSubmit = useCallback(
+    (event: React.FormEvent) => {
+      event.preventDefault();
+      if (!isLoggedIn || !messageInput.current || !chatroomId) return;
 
-    sendWSMessage({
-      type: "message",
-      content: messageInput.current.value,
-      chatroomId,
-    });
+      sendWSMessage({
+        type: "message",
+        content: messageInput.current.value,
+        chatroomId,
+      });
 
-    messageInput.current.value = "";
-    messageInput.current.focus();
-  };
+      messageInput.current.value = "";
+      messageInput.current.focus();
+    },
+    [isLoggedIn, chatroomId, messageInput],
+  );
 
   return (
     <div css={[chatStyles, colors(theme)]}>
@@ -68,9 +69,13 @@ function Chat() {
           <ChatMessageList key={chatroomId} />
           {typingUsers.length > 0 && (
             <>
-              {typingUsers.map((typingUser) => (
-                <span key={typingUser.userId}>{typingUser.username}</span>
-              ))}
+              {typingUsers.map((typingUser, index) =>
+                index === typingUsers.length - 1 ? (
+                  <span key={typingUser.userId}>{typingUser.username}</span>
+                ) : (
+                  <span key={typingUser.userId}>{typingUser.username}, </span>
+                ),
+              )}
               <p> is typing...</p>
             </>
           )}

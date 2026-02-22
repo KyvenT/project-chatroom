@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { customQuery } from "../../../hooks/useCustomQuery";
+import { customQuery } from "../../../utils/customQuery";
 import { useAuthStore } from "../../../hooks/useStores";
 import { type UserDetails } from "../../../types/REST-types/User";
 import { css, useTheme } from "@emotion/react";

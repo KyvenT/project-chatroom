@@ -2,7 +2,7 @@ import { useAuthStore } from "../../hooks/useStores";
 import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
 import { useParams } from "react-router";
 import { useEffect, useMemo, useState } from "react";
-import { customQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../utils/customQuery";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import ProfileStatus from "./ProfileStatus";

@@ -5,13 +5,14 @@ export const createUser = async (req: Request, res: Response) => {
   const { data } = req;
 
   try {
-    const { refreshToken, ...userData } = await authService.createUser(data);
+    const { refreshToken, ...userAuthDetails } =
+      await authService.createUser(data);
     res.header(
       "Set-Cookie",
       `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=${authService.REFRESH_TOKEN_EXPIRATION}`,
     );
-    res.status(201).json({ ...userData });
-    console.log(`User registered: ${userData.username}`);
+    res.status(201).json({ ...userAuthDetails });
+    console.log(`User registered: ${userAuthDetails.username}`);
   } catch (error: any) {
     if (error.message === "Username already exists") {
       return res.status(409).json({ message: error.message });
@@ -25,13 +26,14 @@ export const authenticateUser = async (req: Request, res: Response) => {
   const { data } = req;
 
   try {
-    const { refreshToken, ...userData } = await authService.loginUser(data);
+    const { refreshToken, ...userAuthDetails } =
+      await authService.loginUser(data);
     res.header(
       "Set-Cookie",
       `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=${authService.REFRESH_TOKEN_EXPIRATION}`,
     );
-    res.status(200).json({ ...userData });
-    console.log(`User logged in: ${userData.username}`);
+    res.status(200).json({ ...userAuthDetails });
+    console.log(`User logged in: ${userAuthDetails.username}`);
   } catch (error: any) {
     console.error("Login error:", error);
     if (
@@ -48,13 +50,14 @@ export const createGuest = async (req: Request, res: Response) => {
   const { data } = req;
 
   try {
-    const { refreshToken, ...guestData } = await authService.createGuest(data);
+    const { refreshToken, ...guestAuthDetails } =
+      await authService.createGuest(data);
     res.header(
       "Set-Cookie",
       `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=${authService.REFRESH_TOKEN_EXPIRATION}`,
     );
-    res.status(201).json({ ...guestData });
-    console.log(`Guest created: ${guestData.username}`);
+    res.status(201).json({ ...guestAuthDetails });
+    console.log(`Guest created: ${guestAuthDetails.username}`);
   } catch (error: any) {
     switch (error.message) {
       case "Username already exists":
@@ -75,16 +78,13 @@ export const useRefreshToken = async (req: Request, res: Response) => {
   }
 
   try {
-    const {
-      refreshToken: newRefreshToken,
-      accessToken,
-      username,
-    } = await authService.useRefreshToken(refreshToken);
+    const { refreshToken: newRefreshToken, ...authDetails } =
+      await authService.useRefreshToken(refreshToken);
     res.header(
       "Set-Cookie",
       `refreshToken=${newRefreshToken}; HttpOnly; Path=/; Max-Age=${authService.REFRESH_TOKEN_EXPIRATION}`,
     );
-    res.status(200).json({ token: accessToken, username });
+    res.status(200).json({ ...authDetails });
   } catch (error: any) {
     console.error("Failed to refresh access token:", error);
     return res.status(401).json({ message: error.message });

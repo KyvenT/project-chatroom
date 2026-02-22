@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   customMutation,
   type MutationArgs,
-} from "../../../hooks/useCustomMutation";
+} from "../../../utils/customMutation";
 import type { ConfirmationResponse } from "../../../types/REST-types/Invite";
 import { Loader } from "../../../components/Loader";
 import { API_URL } from "../../../env";

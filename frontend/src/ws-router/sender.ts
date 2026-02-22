@@ -11,8 +11,16 @@ export const sendWSMessage = (message: WSMessage) => {
     return;
   }
 
-  if (!ws.readyState || ws.readyState !== WebSocket.OPEN) {
-    console.warn("WebSocket not open, queuing message");
+  if (
+    ws.readyState === WebSocket.CLOSED ||
+    ws.readyState === WebSocket.CLOSING
+  ) {
+    console.error("WebSocket connection closed, cannot send message");
+    return;
+  }
+
+  if (!ws.readyState || ws.readyState === WebSocket.CONNECTING) {
+    console.warn("WebSocket connecting, queuing message");
     messageQueue.push(message);
     ws.onopen = () => {
       console.log("WebSocket connection opened, sending queued messages");
