@@ -2,10 +2,7 @@ import { css, useTheme } from "@emotion/react";
 import useToggle from "../../hooks/useToggle";
 import Button from "../Button";
 import { useMutation } from "@tanstack/react-query";
-import {
-  customMutation,
-  type MutationArgs,
-} from "../../hooks/useCustomMutation";
+import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
 import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import { useForm } from "react-hook-form";

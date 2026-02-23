@@ -207,9 +207,11 @@ export const useRefreshToken = async (refreshToken: string) => {
     const accessToken = getNewAccessToken(token.userId, token.user.isGuest);
 
     return {
-      accessToken,
+      token: accessToken,
       refreshToken: newRefreshToken,
       username: token.user.username,
+      userId: token.userId,
+      isGuest: token.user.isGuest,
     };
   } catch (error) {
     throw new Error("Invalid refresh token");

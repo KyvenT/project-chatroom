@@ -7,7 +7,6 @@ import type {
   UpdateInvitesMessage,
   UpdateMembersMessage,
 } from "../types/ws-messages";
-import type { NavigateFunction } from "react-router";
 import { handleChatMessage } from "./ws-routes/chat-message";
 import { handleNewNotification } from "./ws-routes/notification";
 import { handleUpdateChatrooms } from "./ws-routes/update-chatrooms";
@@ -15,16 +14,16 @@ import { handleUpdateMembers } from "./ws-routes/update-members";
 import { handleStatusUpdate } from "./ws-routes/status-update";
 import { handleTypingPresence } from "./ws-routes/typing-presence";
 import { handleUpdateInvites } from "./ws-routes/update-invites";
-import { sendWSMessage } from "./sender";
+import { useActiveChatroomStore } from "../hooks/useStores";
+import { setWsAuthenticated } from "./ws";
 
-export const wsMessageRouter = (
-  message: any,
-  chatroomId: string | undefined,
-  navigate: NavigateFunction,
-) => {
+export const wsMessageRouter = (message: any) => {
+  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
+
   switch (message.type) {
     case "auth":
       console.log("Authentication message received");
+      setWsAuthenticated(true);
       break;
     case "chat-message":
       handleChatMessage(message as ChatMessage, chatroomId);
@@ -33,11 +32,7 @@ export const wsMessageRouter = (
       handleNewNotification(message as NotificationMessage);
       break;
     case "update-chatrooms":
-      handleUpdateChatrooms(
-        message as UpdateChatroomsMessage,
-        chatroomId,
-        navigate,
-      );
+      handleUpdateChatrooms(message as UpdateChatroomsMessage, chatroomId);
       break;
     case "update-members":
       handleUpdateMembers(message as UpdateMembersMessage, chatroomId);
@@ -47,10 +42,6 @@ export const wsMessageRouter = (
       break;
     case "typing-presence":
       handleTypingPresence(message as TypingPresenceMessage, chatroomId);
-      break;
-    case "update-last-viewed-at":
-      if (!chatroomId) return;
-      sendWSMessage({ type: "update-last-viewed-at", chatroomId });
       break;
     case "update-invites":
       handleUpdateInvites(message as UpdateInvitesMessage);

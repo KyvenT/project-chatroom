@@ -11,7 +11,7 @@ import { API_URL } from "../../../env";
 import {
   customMutation,
   type MutationArgs,
-} from "../../../hooks/useCustomMutation";
+} from "../../../utils/customMutation";
 import { useMutation } from "@tanstack/react-query";
 import { Loader } from "../../../components/Loader";
 

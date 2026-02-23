@@ -13,7 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   customMutation,
   type MutationArgs,
-} from "../../../hooks/useCustomMutation";
+} from "../../../utils/customMutation";
 import { Loader } from "../../../components/Loader";
 
 export const authPageStyles = (theme: Theme) =>

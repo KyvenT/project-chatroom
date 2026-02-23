@@ -1,25 +1,25 @@
-import { useRefreshToken } from "../utils/useRefreshToken";
-import { makeHeaders } from "./useCustomQuery";
-import { useAuthStore } from "./useStores";
+import { useRefreshToken } from "./useRefreshToken";
+import { useAuthStore } from "../hooks/useStores";
 
-export interface MutationArgs {
+export interface QueryArgs {
   fetchUrl: string;
-  method: "GET" | "POST" | "UPDATE" | "PATCH" | "DELETE";
-  reqBody?: {};
 }
 
-export const customMutation = async <T>({
-  fetchUrl,
-  method,
-  reqBody = {},
-}: MutationArgs): Promise<T> => {
-  const { user } = useAuthStore.getState();
+export const makeHeaders = () => {
+  const user = useAuthStore.getState().user;
+  const headers = new Headers();
+  headers.append("Content-Type", "application/json");
+  if (user.token) headers.append("authorization", "Bearer " + user.token);
+  return headers;
+};
+
+export const customQuery = async <T>({ fetchUrl }: QueryArgs): Promise<T> => {
+  const { user, handleSignIn } = useAuthStore.getState();
 
   let res = await fetch(fetchUrl, {
-    method,
+    method: "GET",
     headers: makeHeaders(),
     credentials: "include",
-    body: JSON.stringify(reqBody),
   });
   let data = await res.json();
 
@@ -29,6 +29,7 @@ export const customMutation = async <T>({
       if (!result.ok) {
         throw new Error("Unauthorized");
       }
+      handleSignIn(result);
 
       const fetchWithNewToken = await fetch(fetchUrl, {
         method: "GET",
@@ -44,7 +45,7 @@ export const customMutation = async <T>({
 
       return data as T;
     }
-    throw new Error(data.message || "Mutation error");
+    throw new Error(data.message || "Query error");
   }
 
   return data as T;

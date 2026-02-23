@@ -1,10 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useChatroomsStore } from "../../hooks/useStores";
 import Modal, { closeButtonStyles } from "../Modal";
-import {
-  customMutation,
-  type MutationArgs,
-} from "../../hooks/useCustomMutation";
+import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";

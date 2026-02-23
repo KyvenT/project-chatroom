@@ -5,14 +5,11 @@ import type {
   ConfirmationResponse,
   Invite,
 } from "../../types/REST-types/Invite";
-import {
-  customMutation,
-  type MutationArgs,
-} from "../../hooks/useCustomMutation";
+import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import { css, useTheme } from "@emotion/react";
 import type { UserAuth } from "../../types/REST-types/User";
 import type { Theme } from "@emotion/react";
-import { customQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../utils/customQuery";
 import Button from "../Button";
 import { useState } from "react";
 import { Send, X } from "lucide-react";

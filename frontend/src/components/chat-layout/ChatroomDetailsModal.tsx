@@ -9,15 +9,12 @@ import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import Button from "../Button";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
-import {
-  customMutation,
-  type MutationArgs,
-} from "../../hooks/useCustomMutation";
+import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { SquarePen, X } from "lucide-react";
 import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import useToggle from "../../hooks/useToggle";
-import { customQuery } from "../../hooks/useCustomQuery";
+import { customQuery } from "../../utils/customQuery";
 import { API_URL } from "../../env";
 import { mq } from "../../styles/breakpoints";
 import { Loader } from "../Loader";
@@ -137,11 +134,11 @@ export const ChatroomDetailsModal = ({
   open,
   onClose,
   chatroomId,
-  user,
 }: ChatroomDetailsProps) => {
   const theme = useTheme();
   const [enableTitleEdit, setEnableTitleEdit] = useToggle(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useToggle(false);
+  const user = useAuthStore((state) => state.user);
   const isLoggedIn = useAuthStore(isLoggedInSelector);
 
   const {

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { isLoggedInSelector, useChatroomsStore } from "../useStores";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
-import { customQuery } from "../useCustomQuery";
+import { customQuery } from "../../utils/customQuery";
 import { useEffect } from "react";
 import { useAuthStore } from "../useStores";
 import { API_URL } from "../../env";

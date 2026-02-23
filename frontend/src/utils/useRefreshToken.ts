@@ -1,10 +1,17 @@
 import { API_URL } from "../env";
-import { useAuthStore } from "../hooks/useStores";
 
-type RefreshResponse = {
-  ok: boolean;
-  message?: string;
-};
+type RefreshResponse =
+  | {
+      ok: false;
+      message: string;
+    }
+  | {
+      ok: true;
+      userId: string;
+      isGuest: boolean;
+      token: string;
+      username: string;
+    };
 
 let refreshPromise: Promise<RefreshResponse> | null = null;
 
@@ -12,8 +19,6 @@ export const useRefreshToken = async (): Promise<RefreshResponse> => {
   if (refreshPromise) {
     return refreshPromise;
   }
-
-  const { user, handleSignIn, handleLogOut } = useAuthStore.getState();
 
   refreshPromise = (async () => {
     try {
@@ -27,21 +32,19 @@ export const useRefreshToken = async (): Promise<RefreshResponse> => {
       const newTokenData = await newToken.json();
 
       if (!newToken.ok) {
-        handleLogOut();
         throw new Error(newTokenData.message || "Unauthorized");
       }
 
       if (!newTokenData.token || !newTokenData.username)
         throw new Error("Invalid token data received");
 
-      handleSignIn({
-        userId: user.userId,
-        isGuest: user.isGuest,
+      return {
+        ok: true,
+        userId: newTokenData.userId,
+        isGuest: newTokenData.isGuest,
         token: newTokenData.token,
         username: newTokenData.username,
-      });
-
-      return { ok: true };
+      };
     } catch (error: any) {
       console.error("Failed to refresh access token:", error);
       return { ok: false, message: error.message };

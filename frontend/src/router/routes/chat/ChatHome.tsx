@@ -5,11 +5,11 @@ import { Loader2, Pin, Plus } from "lucide-react";
 import {
   customMutation,
   type MutationArgs,
-} from "../../../hooks/useCustomMutation";
+} from "../../../utils/customMutation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../../hooks/useStores";
 import { type PinnedGroup } from "../../../types/REST-types/Chatroom";
-import { customQuery } from "../../../hooks/useCustomQuery";
+import { customQuery } from "../../../utils/customQuery";
 import { mq } from "../../../styles/breakpoints";
 import { PinnedChatroomsList } from "../../../components/chat-home/pinnedChatroomsList";
 import { PinChatroomsModal } from "../../../components/chat-home/pinChatroomsModal";

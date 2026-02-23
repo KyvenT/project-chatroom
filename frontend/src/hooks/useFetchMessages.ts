@@ -4,7 +4,7 @@ import {
   type UseQueryOptions,
 } from "@tanstack/react-query";
 
-import { customQuery } from "./useCustomQuery";
+import { customQuery } from "../utils/customQuery";
 import { useAuthStore, useChatroomsStore } from "./useStores";
 import type { Message } from "../types/REST-types/Message";
 import { API_URL } from "../env";
