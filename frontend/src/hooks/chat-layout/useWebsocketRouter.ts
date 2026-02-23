@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { wsMessageRouter } from "../../ws-router/router";
 import { useParams } from "react-router";
 import { getWs } from "../../ws-router/ws";
 
@@ -13,7 +12,7 @@ export const useWebsocketRouter = () => {
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
         console.log("Message from server: ", message);
-        wsMessageRouter(message, chatroomId);
+        //wsMessageRouter(message);
       };
     }
   }, [chatroomId, getWs]);

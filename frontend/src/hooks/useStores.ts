@@ -178,3 +178,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 }));
 
 export const isLoggedInSelector = (state: AuthState) => !!state.user.token;
+
+interface ActiveChatroomState {
+  activeChatroomId: string | undefined;
+  setActiveChatroomId: (chatroomId: string | undefined) => void;
+}
+
+export const useActiveChatroomStore = create<ActiveChatroomState>((set) => ({
+  activeChatroomId: undefined,
+  setActiveChatroomId: (chatroomId) => set({ activeChatroomId: chatroomId }),
+}));

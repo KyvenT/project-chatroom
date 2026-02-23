@@ -4,8 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useRefreshToken } from "../utils/useRefreshToken";
 import { useAuthStore } from "../hooks/useStores";
-import { closeWs, startWSConnection } from "../ws-router/ws";
-import { sendWSMessage } from "../ws-router/sender";
+import { closeWs } from "../ws-router/ws";
 
 const theme = {
   colors: {
@@ -42,13 +41,6 @@ function App() {
         return;
       }
       handleSignIn(result);
-      startWSConnection();
-      console.log(
-        "WebSocket connection established, sending auth message",
-        "token:",
-        result.token,
-      );
-      sendWSMessage({ type: "auth", token: result.token });
     };
 
     autoSignIn();

@@ -7,7 +7,11 @@ import DropdownButton from "../../../components/DropdownButton";
 import { Link, useNavigate, useParams } from "react-router";
 import InboxButton from "../../../components/chat-layout/InboxButton";
 import { ArrowLeftToLine, MenuIcon, User, Users } from "lucide-react";
-import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
+import {
+  isLoggedInSelector,
+  useActiveChatroomStore,
+  useAuthStore,
+} from "../../../hooks/useStores";
 import type { Theme } from "@emotion/react";
 import Button, { iconBtnStyles } from "../../../components/Button";
 import { useChatroomsStore } from "../../../hooks/useStores";
@@ -16,8 +20,9 @@ import AuthGuard from "../../../components/chat/AuthGuard";
 import { mq } from "../../../styles/breakpoints";
 import { useChatroomTitle } from "../../../hooks/chat-layout/useChatroomTitle";
 import { useFetchUserChatrooms } from "../../../hooks/chat-layout/useFetchUserChatrooms";
-import { useWebsocketRouter } from "../../../hooks/chat-layout/useWebsocketRouter";
-import { useUpdateActiveChatroom } from "../../../hooks/chat-layout/useUpdateActiveChatroom";
+import { useEffect } from "react";
+import { closeWs, startWSConnection } from "../../../ws-router/ws";
+import { sendWSMessage } from "../../../ws-router/sender";
 
 const styles = css({
   height: "100%",
@@ -99,9 +104,29 @@ function ChatLayout() {
   const [openChatroomDetails, setOpenChatroomDetails] = useToggle(false);
   const [showMembersList, setShowMembersList] = useToggle(true);
   const chatroomTitle = useChatroomTitle();
+  const setActiveChatroom = useActiveChatroomStore(
+    (state) => state.setActiveChatroomId,
+  );
   useFetchUserChatrooms();
-  useWebsocketRouter();
-  useUpdateActiveChatroom();
+  //useUpdateActiveChatroom();
+
+  useEffect(() => {
+    if (user.token) {
+      startWSConnection();
+      //sendWSMessage({ type: "auth", token: user.token });
+    } else closeWs();
+    return () => {
+      closeWs();
+    };
+  }, [user.userId]);
+
+  useEffect(() => {
+    setActiveChatroom(chatroomId);
+    sendWSMessage({
+      type: "update-active-chatroom",
+      chatroomId: chatroomId ? chatroomId : "home",
+    });
+  }, [chatroomId]);
 
   const outletContext = {
     showMembersList,

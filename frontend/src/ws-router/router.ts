@@ -14,14 +14,16 @@ import { handleUpdateMembers } from "./ws-routes/update-members";
 import { handleStatusUpdate } from "./ws-routes/status-update";
 import { handleTypingPresence } from "./ws-routes/typing-presence";
 import { handleUpdateInvites } from "./ws-routes/update-invites";
+import { useActiveChatroomStore } from "../hooks/useStores";
+import { setWsAuthenticated } from "./ws";
 
-export const wsMessageRouter = (
-  message: any,
-  chatroomId: string | undefined,
-) => {
+export const wsMessageRouter = (message: any) => {
+  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
+
   switch (message.type) {
     case "auth":
       console.log("Authentication message received");
+      setWsAuthenticated(true);
       break;
     case "chat-message":
       handleChatMessage(message as ChatMessage, chatroomId);

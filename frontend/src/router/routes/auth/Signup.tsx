@@ -14,8 +14,6 @@ import {
 } from "../../../utils/customMutation";
 import { useMutation } from "@tanstack/react-query";
 import { Loader } from "../../../components/Loader";
-import { startWSConnection } from "../../../ws-router/ws";
-import { sendWSMessage } from "../../../ws-router/sender";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -37,9 +35,6 @@ const Signup = () => {
         return;
       }
       handleSignIn(loginResponse);
-      startWSConnection();
-      console.log("WebSocket connection established, sending auth message");
-      sendWSMessage({ type: "auth", token: loginResponse.token });
       navigate("/chat");
     },
   });
