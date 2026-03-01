@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useMessagesStore } from "../../hooks/useStores";
 import { useFetchMessages } from "../../hooks/useFetchMessages";
-import { sendWSMessage } from "../../ws-router/sender";
+import { sendWSMessage } from "../../ws-router/ws";
 
 const styles = css({
   width: "100%",

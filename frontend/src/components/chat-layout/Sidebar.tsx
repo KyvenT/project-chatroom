@@ -47,6 +47,10 @@ const sidebarStyles = css(
     ".homeBtn": {
       padding: "2px",
     },
+
+    ".chatrooms": {
+      overflowY: "auto",
+    },
   }),
 );
 
@@ -63,6 +67,14 @@ const colors = (theme: Theme) =>
         color: theme.colors.white,
         backgroundColor: theme.colors.grey,
       },
+    },
+
+    ".chatrooms": {
+      scrollbarColor: `transparent transparent`,
+    },
+
+    ".chatrooms:hover": {
+      scrollbarColor: `${theme.colors.white} transparent`,
     },
   });
 
@@ -88,7 +100,7 @@ const Sidebar = ({ chatrooms }: SidebarProps) => {
         <h2>Chats</h2>
         <NewChatButton />
       </div>
-      <ul>
+      <ul className="chatrooms">
         {chatrooms &&
           chatrooms.map((chatroom) => {
             return (

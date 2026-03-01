@@ -96,3 +96,20 @@ export interface UpdateInvitesMessage {
   invite?: Invite;
   inviteId?: string;
 }
+
+export interface AuthMessage {
+  type: "auth";
+  success: boolean;
+  error?: string;
+}
+
+export type WSMessage =
+  | AuthMessage
+  | ChatMessage
+  | NotificationMessage
+  | UpdateChatroomsMessage
+  | UpdateMembersMessage
+  | StatusMessage
+  | TypingPresenceMessage
+  | UpdateInvitesMessage
+  | FeedbackMessage;

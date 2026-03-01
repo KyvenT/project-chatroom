@@ -2,7 +2,7 @@ import { css, useTheme, type Theme } from "@emotion/react";
 import { SendHorizonal } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { sendWSMessage } from "../../ws-router/sender";
+import { sendWSMessage } from "../../ws-router/ws";
 
 const styles = css({
   width: "100%",

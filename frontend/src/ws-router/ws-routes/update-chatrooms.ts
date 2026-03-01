@@ -1,12 +1,14 @@
-import { useChatroomsStore } from "../../hooks/useStores";
+import {
+  useActiveChatroomStore,
+  useChatroomsStore,
+} from "../../hooks/useStores";
 import type { UpdateChatroomsMessage } from "../../types/ws-messages";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
 import { redirect } from "react-router";
 
-export const handleUpdateChatrooms = (
-  message: UpdateChatroomsMessage,
-  chatroomId: string | undefined,
-) => {
+export const handleUpdateChatrooms = (message: UpdateChatroomsMessage) => {
+  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
+
   switch (message.action) {
     case "JOIN":
       if (!message.chatroom) return;

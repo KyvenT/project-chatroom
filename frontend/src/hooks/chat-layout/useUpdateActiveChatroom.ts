@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useParams } from "react-router";
 import { useAuthStore, isLoggedInSelector } from "../useStores";
-import { sendWSMessage } from "../../ws-router/sender";
+import { sendWSMessage } from "../../ws-router/ws";
 
 export const useUpdateActiveChatroom = () => {
   const { chatroomId } = useParams();
@@ -11,16 +11,9 @@ export const useUpdateActiveChatroom = () => {
     if (!isLoggedIn) {
       return;
     }
-    if (chatroomId) {
-      sendWSMessage({
-        type: "update-active-chatroom",
-        chatroomId,
-      });
-    } else {
-      sendWSMessage({
-        type: "update-active-chatroom",
-        chatroomId: "home",
-      });
-    }
+    sendWSMessage({
+      type: "update-active-chatroom",
+      chatroomId: chatroomId ? chatroomId : "home",
+    });
   }, [isLoggedIn, chatroomId]);
 };

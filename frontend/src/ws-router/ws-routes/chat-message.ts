@@ -1,13 +1,13 @@
 import {
+  useActiveChatroomStore,
   useMessagesStore,
   useTypingPresenceStore,
 } from "../../hooks/useStores";
 import type { ChatMessage } from "../../types/ws-messages";
 
-export const handleChatMessage = (
-  message: ChatMessage,
-  chatroomId: string | undefined,
-) => {
+export const handleChatMessage = (message: ChatMessage) => {
+  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
+
   console.log(message);
   if (message.message.chatroomId !== chatroomId) {
     console.error("received message from different chatroom");

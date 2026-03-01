@@ -21,8 +21,7 @@ import { mq } from "../../../styles/breakpoints";
 import { useChatroomTitle } from "../../../hooks/chat-layout/useChatroomTitle";
 import { useFetchUserChatrooms } from "../../../hooks/chat-layout/useFetchUserChatrooms";
 import { useEffect } from "react";
-import { closeWs, startWSConnection } from "../../../ws-router/ws";
-import { sendWSMessage } from "../../../ws-router/sender";
+import { sendWSMessage } from "../../../ws-router/ws";
 
 const styles = css({
   height: "100%",
@@ -108,19 +107,12 @@ function ChatLayout() {
     (state) => state.setActiveChatroomId,
   );
   useFetchUserChatrooms();
-  //useUpdateActiveChatroom();
 
   useEffect(() => {
-    if (user.token) {
-      startWSConnection();
-      //sendWSMessage({ type: "auth", token: user.token });
-    } else closeWs();
-    return () => {
-      closeWs();
-    };
-  }, [user.userId]);
-
-  useEffect(() => {
+    console.log(
+      "ChatLayout mounted, updating active chatroom to: ",
+      chatroomId,
+    );
     setActiveChatroom(chatroomId);
     sendWSMessage({
       type: "update-active-chatroom",
