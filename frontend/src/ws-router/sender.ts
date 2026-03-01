@@ -1,5 +1,5 @@
 import type { WSMessage } from "../types/outgoing-ws-messages";
-import { getWs, isWsAuthenticated } from "./ws";
+import { getWs } from "./ws";
 
 let messageQueue: WSMessage[] = [];
 
@@ -21,8 +21,8 @@ export const sendWSMessage = (message: WSMessage) => {
 
   if (
     !ws.readyState ||
-    ws.readyState === WebSocket.CONNECTING ||
-    !isWsAuthenticated()
+    ws.readyState === WebSocket.CONNECTING
+    // || !isWsAuthenticated()
   ) {
     console.warn("WebSocket connecting, queuing message");
     messageQueue.push(message);
