@@ -7,7 +7,7 @@ import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
 import React, { useCallback, useEffect, useRef } from "react";
 import type { OutletContextType } from "./ChatLayout";
 import { useTypingPresenceStore } from "../../../hooks/useStores";
-import { sendWSMessage } from "../../../ws-router/sender";
+import { sendWSMessage } from "../../../ws-router/ws";
 
 const chatStyles = css({
   height: "100%",

@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useRefreshToken } from "../utils/useRefreshToken";
 import { useAuthStore } from "../hooks/useStores";
-import { closeWs } from "../ws-router/ws";
+import { closeWs, startWSConnection } from "../ws-router/ws";
 
 const theme = {
   colors: {
@@ -32,6 +32,7 @@ const queryClient = new QueryClient();
 
 function App() {
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     const autoSignIn = async () => {
@@ -44,11 +45,16 @@ function App() {
     };
 
     autoSignIn();
+  }, []);
 
+  useEffect(() => {
+    if (user.token) {
+      startWSConnection();
+    }
     return () => {
       closeWs();
     };
-  }, []);
+  }, [user.userId]);
 
   return (
     <QueryClientProvider client={queryClient}>

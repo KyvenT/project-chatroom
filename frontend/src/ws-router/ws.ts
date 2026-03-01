@@ -1,7 +1,7 @@
 import { WS_URL } from "../env";
 import { useAuthStore } from "../hooks/useStores";
+import type { WSMessage } from "../types/outgoing-ws-messages";
 import { wsMessageRouter } from "./router";
-import { sendWSMessage } from "./sender";
 
 let ws: WebSocket | null = null;
 
@@ -20,9 +20,7 @@ export const setWsAuthenticated = (authenticated: boolean) => {
 };
 
 export const closeWs = () => {
-  if (ws) {
-    ws.close();
-  }
+  ws?.close();
 };
 
 export const startWSConnection = () => {
@@ -36,7 +34,7 @@ export const startWSConnection = () => {
   ws.onopen = () => {
     console.log("WebSocket connection established");
     const user = useAuthStore.getState().user;
-    sendWSMessage({ type: "auth", token: user.token });
+    ws?.send(JSON.stringify({ type: "auth", token: user.token }));
   };
   ws.onmessage = (event) => {
     const message = JSON.parse(event.data);
@@ -51,4 +49,49 @@ export const startWSConnection = () => {
     setWsAuthenticated(false);
     console.log("WebSocket connection closed");
   };
+};
+
+let messageQueue: WSMessage[] = [];
+
+export const sendWSMessage = (message: WSMessage) => {
+  if (!ws) {
+    console.error("WebSocket connection not established, cannot send message");
+  }
+
+  if (
+    ws?.readyState === WebSocket.CLOSED ||
+    ws?.readyState === WebSocket.CLOSING
+  ) {
+    console.error("WebSocket connection closed, cannot send message");
+    return;
+  }
+
+  if (ws?.readyState === WebSocket.CONNECTING || !isWsAuthenticated()) {
+    console.log("ws auth state: ", isWsAuthenticated());
+    console.warn("WebSocket connecting, queuing message");
+    messageQueue.push(message);
+    return;
+  }
+
+  ws?.send(JSON.stringify(message));
+};
+
+export const sendQueuedMessages = () => {
+  if (!ws) {
+    console.error(
+      "WebSocket connection not established, cannot send queued messages",
+    );
+    return;
+  }
+
+  if (ws.readyState !== WebSocket.OPEN) {
+    console.error("WebSocket connection not open, cannot send queued messages");
+    return;
+  }
+
+  messageQueue.forEach((queuedMessage) => {
+    console.log("Sending queued message: ", queuedMessage);
+    ws?.send(JSON.stringify(queuedMessage));
+  });
+  messageQueue = [];
 };

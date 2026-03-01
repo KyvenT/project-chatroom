@@ -13,15 +13,27 @@ export const authenticateSocket = (message: AuthMessage, ws: WebSocket) => {
   jwt.verify(message.token, env.JWT_SECRET, (err: any, decoded: any) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
-        ws.send(JSON.stringify({ error: "Expired token" }));
+        ws.send(
+          JSON.stringify({
+            type: "auth",
+            success: false,
+            error: "Expired token",
+          }),
+        );
         return;
       }
-      ws.send(JSON.stringify({ error: err }));
+      ws.send(JSON.stringify({ type: "auth", success: false, error: err }));
       return;
     }
 
     if (!decoded.userId) {
-      ws.send(JSON.stringify({ error: "Error decrypting token" }));
+      ws.send(
+        JSON.stringify({
+          type: "auth",
+          success: false,
+          error: "Error decrypting token",
+        }),
+      );
       return;
     }
 
@@ -29,5 +41,6 @@ export const authenticateSocket = (message: AuthMessage, ws: WebSocket) => {
 
     console.log("websocket jwt verified: " + userId);
     socketMap.set(userId, ws);
+    ws.send(JSON.stringify({ type: "auth", success: true }));
   });
 };

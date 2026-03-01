@@ -1,12 +1,4 @@
-import type {
-  ChatMessage,
-  NotificationMessage,
-  StatusMessage,
-  TypingPresenceMessage,
-  UpdateChatroomsMessage,
-  UpdateInvitesMessage,
-  UpdateMembersMessage,
-} from "../types/ws-messages";
+import type { WSMessage } from "../types/ws-messages";
 import { handleChatMessage } from "./ws-routes/chat-message";
 import { handleNewNotification } from "./ws-routes/notification";
 import { handleUpdateChatrooms } from "./ws-routes/update-chatrooms";
@@ -14,37 +6,38 @@ import { handleUpdateMembers } from "./ws-routes/update-members";
 import { handleStatusUpdate } from "./ws-routes/status-update";
 import { handleTypingPresence } from "./ws-routes/typing-presence";
 import { handleUpdateInvites } from "./ws-routes/update-invites";
-import { useActiveChatroomStore } from "../hooks/useStores";
-import { setWsAuthenticated } from "./ws";
+import { sendQueuedMessages, setWsAuthenticated } from "./ws";
 
-export const wsMessageRouter = (message: any) => {
-  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
-
+export const wsMessageRouter = (message: WSMessage) => {
   switch (message.type) {
     case "auth":
-      console.log("Authentication message received");
-      setWsAuthenticated(true);
+      console.log(
+        `WS auth ${message.success ? "succeeded" : "failed"}: ${message.error || ""}`,
+      );
+      console.log("setting ws auth state to: ", message.success);
+      setWsAuthenticated(message.success);
+      if (message.success) sendQueuedMessages();
       break;
     case "chat-message":
-      handleChatMessage(message as ChatMessage, chatroomId);
+      handleChatMessage(message);
       break;
     case "notification":
-      handleNewNotification(message as NotificationMessage);
+      handleNewNotification(message);
       break;
     case "update-chatrooms":
-      handleUpdateChatrooms(message as UpdateChatroomsMessage, chatroomId);
+      handleUpdateChatrooms(message);
       break;
     case "update-members":
-      handleUpdateMembers(message as UpdateMembersMessage, chatroomId);
+      handleUpdateMembers(message);
       break;
     case "status-update":
-      handleStatusUpdate(message as StatusMessage, chatroomId);
+      handleStatusUpdate(message);
       break;
     case "typing-presence":
-      handleTypingPresence(message as TypingPresenceMessage, chatroomId);
+      handleTypingPresence(message);
       break;
     case "update-invites":
-      handleUpdateInvites(message as UpdateInvitesMessage);
+      handleUpdateInvites(message);
       break;
     default:
       console.log("Unknown message type: " + message.type);

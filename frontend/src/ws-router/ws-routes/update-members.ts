@@ -1,10 +1,9 @@
-import { useMembersStore } from "../../hooks/useStores";
+import { useActiveChatroomStore, useMembersStore } from "../../hooks/useStores";
 import type { UpdateMembersMessage } from "../../types/ws-messages";
 
-export const handleUpdateMembers = (
-  message: UpdateMembersMessage,
-  chatroomId: string | undefined,
-) => {
+export const handleUpdateMembers = (message: UpdateMembersMessage) => {
+  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
+
   if (message.chatroomId !== chatroomId) {
     console.error("received update members message for wrong chatroom");
     return;

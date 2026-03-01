@@ -1,10 +1,12 @@
-import { useTypingPresenceStore } from "../../hooks/useStores";
+import {
+  useActiveChatroomStore,
+  useTypingPresenceStore,
+} from "../../hooks/useStores";
 import type { TypingPresenceMessage } from "../../types/ws-messages";
 
-export const handleTypingPresence = (
-  message: TypingPresenceMessage,
-  chatroomId: string | undefined,
-) => {
+export const handleTypingPresence = (message: TypingPresenceMessage) => {
+  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
+
   if (message.chatroomId !== chatroomId) {
     console.error("received typing presence from different chatroom");
     return;
