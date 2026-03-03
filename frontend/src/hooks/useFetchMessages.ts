@@ -26,7 +26,7 @@ export const useFetchMessages = (
     !!getBefore;
 
   return useQuery<Message[]>({
-    queryKey: [chatroomId, user.userId, getBefore?.toISOString()],
+    queryKey: ["messages", chatroomId, user.userId, getBefore?.toISOString()],
     queryFn: () =>
       customQuery<Message[]>({
         fetchUrl: `${API_URL}/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
@@ -53,24 +53,14 @@ export const useFetchMessagesMultiple = (
 ) => {
   const user = useAuthStore((state) => state.user);
 
-  let enabled = !!user.token && !!getBefore;
-
-  chatroomIds.forEach((chatroomId) => {
-    const chatroom = useChatroomsStore((state) =>
-      state.chatrooms.find((c) => c.chatroomId === chatroomId),
-    );
-
-    if (!chatroomId || !chatroom) enabled = false;
-  });
-
-  const data = useQueries<MessageQueries>({
+  return useQueries<MessageQueries>({
     queries: chatroomIds.map((chatroomId) => ({
-      queryKey: [chatroomId, user.userId, getBefore?.toISOString()],
+      queryKey: ["messages", chatroomId, user.userId, getBefore?.toISOString()],
       queryFn: () =>
         customQuery<Message[]>({
           fetchUrl: `${API_URL}/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
         }),
-      enabled,
+      enabled: !!user.token && !!getBefore && !!chatroomId,
       staleTime: Infinity,
       retryDelay: 1000,
       retry: (failureCount, error) => {
@@ -81,5 +71,4 @@ export const useFetchMessagesMultiple = (
       },
     })),
   });
-  return data;
 };

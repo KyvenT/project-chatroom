@@ -1,11 +1,10 @@
 import type { PinnedGroup } from "../../types/REST-types/Chatroom";
 import { useFetchMessagesMultiple } from "../../hooks/useFetchMessages";
-import ChatMessage from "../chat/ChatMessage";
 import { useState } from "react";
 import { css, useTheme } from "@emotion/react";
 import { mq } from "../../styles/breakpoints";
 import type { Theme } from "@emotion/react";
-import { useNavigate } from "react-router";
+import { PinnedChatroom } from "./PinnedChatroom";
 
 interface pinnedChatroomsListProps {
   pinnedGroup: PinnedGroup;
@@ -85,7 +84,6 @@ export const PinnedChatroomsList = ({
 }: pinnedChatroomsListProps) => {
   const [getBefore] = useState<Date>(new Date());
   const theme = useTheme();
-  const navigate = useNavigate();
 
   const results = useFetchMessagesMultiple(
     pinnedGroup.chatrooms.map((chatroom) => chatroom.chatroomId),
@@ -93,33 +91,14 @@ export const PinnedChatroomsList = ({
     5,
   );
 
-  const handleClick = (chatroomId: string) => {
-    navigate(`/chat/${chatroomId}`);
-  };
-
   return (
     <ul css={[styles, colors(theme)]}>
       {pinnedGroup.chatrooms.map((chatroom, i) => (
-        <li
-          className="pinned-chatroom"
+        <PinnedChatroom
           key={chatroom.chatroomId}
-          onClick={() => handleClick(chatroom.chatroomId)}
-        >
-          <div className="chatroom-title-area">
-            <h4 className="chatroom-title">{chatroom.chatroom.title}</h4>
-          </div>
-          <ul className="messages">
-            {results[i].data?.map((message) => (
-              <ChatMessage
-                key={message.id}
-                id={message.id}
-                content={message.content}
-                sender={message.senderUser || "Unnamed User"}
-                timestamp={new Date(message.createdAt)}
-              />
-            ))}
-          </ul>
-        </li>
+          chatroom={chatroom}
+          messages={results[i].data || []}
+        />
       ))}
     </ul>
   );
