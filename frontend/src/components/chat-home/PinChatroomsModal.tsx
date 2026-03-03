@@ -147,8 +147,10 @@ export const PinChatroomsModal = ({
       },
     });
     setPinnedGroups((prev) =>
-      prev?.map((group) => {
-        if (group.id === pinnedGroup.id) {
+      prev.map((group) => {
+        if (group.id !== pinnedGroup.id) return group;
+
+        if (pin) {
           return {
             ...group,
             chatrooms: [
@@ -161,7 +163,11 @@ export const PinChatroomsModal = ({
             ],
           };
         }
-        return group;
+
+        return {
+          ...group,
+          chatrooms: group.chatrooms.filter((c) => c.chatroomId !== chatroomId),
+        };
       }),
     );
   };
@@ -184,14 +190,11 @@ export const PinChatroomsModal = ({
     );
   };
 
-  const pinnedIds = pinnedGroup.chatrooms.map(
-    (chatroom) => chatroom.chatroomId,
-  );
-  const pinnedChatrooms = chatrooms.filter((chatroom) =>
-    pinnedIds.includes(chatroom.chatroomId),
-  );
+  const pinnedSet = new Set(pinnedGroup.chatrooms.map((c) => c.chatroomId));
+
+  const pinnedChatrooms = chatrooms.filter((c) => pinnedSet.has(c.chatroomId));
   const unpinnedChatrooms = chatrooms.filter(
-    (chatroom) => !pinnedIds.includes(chatroom.chatroomId),
+    (c) => !pinnedSet.has(c.chatroomId),
   );
 
   return (
