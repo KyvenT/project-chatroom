@@ -3,25 +3,25 @@ import Sidebar from "../../../components/chat-layout/Sidebar";
 import { Outlet } from "react-router";
 import useToggle from "../../../hooks/useToggle";
 import Header from "../../../components/chat-layout/Header";
-import DropdownButton from "../../../components/DropdownButton";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import InboxButton from "../../../components/chat-layout/InboxButton";
-import { ArrowLeftToLine, MenuIcon, User, Users } from "lucide-react";
 import {
   isLoggedInSelector,
   useActiveChatroomStore,
   useAuthStore,
 } from "../../../hooks/useStores";
 import type { Theme } from "@emotion/react";
-import Button, { iconBtnStyles } from "../../../components/Button";
+import { iconBtnStyles } from "../../../components/Button";
 import { useChatroomsStore } from "../../../hooks/useStores";
-import { ChatroomDetailsModal } from "../../../components/chat-layout/ChatroomDetailsModal";
 import AuthGuard from "../../../components/chat/AuthGuard";
 import { mq } from "../../../styles/breakpoints";
-import { useChatroomTitle } from "../../../hooks/chat-layout/useChatroomTitle";
 import { useFetchUserChatrooms } from "../../../hooks/chat-layout/useFetchUserChatrooms";
 import { useEffect } from "react";
 import { sendWSMessage } from "../../../ws-router/ws";
+import { ProfileButton } from "../../../components/chat-layout/ProfileButton";
+import { ShowMembersListBtn } from "../../../components/chat-layout/ShowMembersListBtn";
+import { ChatroomTitle } from "../../../components/chat-layout/ChatroomTitle";
+import { SidebarToggleBtn } from "../../../components/chat-layout/SidebarToggleBtn";
 
 const styles = css({
   height: "100%",
@@ -94,15 +94,11 @@ export type OutletContextType = {
 
 function ChatLayout() {
   const [sidebarToggled, setSidebarToggled] = useToggle(false);
-  const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
   const isLoggedIn = useAuthStore(isLoggedInSelector);
   const { chatroomId } = useParams();
   const theme = useTheme();
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
-  const [openChatroomDetails, setOpenChatroomDetails] = useToggle(false);
   const [showMembersList, setShowMembersList] = useToggle(true);
-  const chatroomTitle = useChatroomTitle();
   const setActiveChatroom = useActiveChatroomStore(
     (state) => state.setActiveChatroomId,
   );
@@ -130,57 +126,20 @@ function ChatLayout() {
       {sidebarToggled && <Sidebar chatrooms={chatrooms} />}
       <div className="container">
         <Header>
-          <Button
-            variant="icon"
-            className="sidebarToggleBtn"
-            onClick={() => setSidebarToggled()}
-            aria-label="Toggle sidebar"
-          >
-            {sidebarToggled ? (
-              <ArrowLeftToLine className="headerIconBtn" />
-            ) : (
-              <MenuIcon className="headerIconBtn" />
-            )}
-          </Button>
-          {chatroomTitle && chatroomId ? (
-            <>
-              <Button
-                onClick={() => setOpenChatroomDetails(true)}
-                variant="icon"
-                className="title chatroom-details-btn"
-                aria-label="Open chatroom details"
-              >
-                {chatroomTitle}
-              </Button>
-              {openChatroomDetails && (
-                <ChatroomDetailsModal
-                  open={openChatroomDetails}
-                  onClose={() => setOpenChatroomDetails(false)}
-                  chatroomId={chatroomId}
-                  user={user}
-                  key={chatroomId}
-                />
-              )}
-            </>
-          ) : (
-            <h1 className="title">Home</h1>
-          )}
+          <SidebarToggleBtn
+            sidebarToggled={sidebarToggled}
+            setSidebarToggled={setSidebarToggled}
+          />
+          <ChatroomTitle />
           <div className="blankSpace"></div>
           {isLoggedIn ? (
             <>
               <InboxButton />
-              <DropdownButton
-                buttonText={<User className="headerIconBtn" />}
-                buttonVariant="icon"
-              >
-                <h3>{user.username}</h3>
-                <Link to="/account">Account</Link>
-                <Button onClick={() => navigate("/logout")}>Log Out</Button>
-              </DropdownButton>
+              <ProfileButton />
               {chatroomId && (
-                <Button onClick={() => setShowMembersList()} variant="icon">
-                  <Users className="headerIconBtn" />
-                </Button>
+                <ShowMembersListBtn
+                  setShowMembersList={() => setShowMembersList()}
+                />
               )}
             </>
           ) : (
