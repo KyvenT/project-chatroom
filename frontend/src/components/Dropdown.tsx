@@ -1,36 +1,39 @@
-import { css, useTheme, type Theme } from "@emotion/react";
+import { css, type SerializedStyles, type Theme } from "@emotion/react";
 import React, { useRef } from "react";
 import { useOutsideClick } from "../hooks/useHandleOutsideClick";
+import type { DropdownPosition } from "./DropdownButton";
 
 interface DropdownProps {
   children: React.ReactNode;
   onClose: () => void;
+  dropdownStyles?: SerializedStyles;
+  position?: DropdownPosition;
 }
 
-const defaultDropdownStyles = css({
-  position: "absolute",
-  top: "55px",
-  right: 0,
-  border: "1px solid black",
-  padding: "10px",
-  borderRadius: "5px",
-  zIndex: "2",
-});
-
-const colors = (theme: Theme) =>
+const defaultDropdownStyles = (position: DropdownPosition) =>
   css({
-    backgroundColor: theme.colors.white,
-    color: theme.colors.dark_grey,
+    position: "absolute",
+    top: "55px",
+    right: position === "right" ? 0 : "auto",
+    left: position === "left" ? 0 : "auto",
+    zIndex: "2",
   });
 
-const Dropdown = ({ children, onClose }: DropdownProps) => {
-  const theme = useTheme();
+const Dropdown = ({
+  children,
+  onClose,
+  dropdownStyles,
+  position = "right",
+}: DropdownProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useOutsideClick({ callbackFn: onClose, elementRef: dropdownRef });
 
   return (
-    <div ref={dropdownRef} css={[defaultDropdownStyles, colors(theme)]}>
+    <div
+      ref={dropdownRef}
+      css={[defaultDropdownStyles(position), dropdownStyles]}
+    >
       {children}
     </div>
   );

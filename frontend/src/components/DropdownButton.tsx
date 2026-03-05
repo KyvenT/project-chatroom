@@ -5,11 +5,15 @@ import React, { useRef } from "react";
 import type { SerializedStyles, Theme } from "@emotion/react";
 import { iconBtnStyles } from "./Button";
 
+export type DropdownPosition = "left" | "right";
+
 interface DropdownButtonProps {
   buttonText: string | React.ReactElement;
   children: React.ReactNode;
   buttonStyles?: SerializedStyles;
   buttonVariant?: "default" | "icon";
+  dropdownStyles?: SerializedStyles;
+  dropdownPosition?: DropdownPosition;
 }
 
 const containerStyles = css({
@@ -21,6 +25,8 @@ const DropdownButton = ({
   children,
   buttonStyles,
   buttonVariant,
+  dropdownStyles,
+  dropdownPosition,
 }: DropdownButtonProps) => {
   const [isToggled, setToggled] = useToggle();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -36,7 +42,13 @@ const DropdownButton = ({
         {buttonText}
       </button>
       {isToggled && (
-        <Dropdown onClose={() => setToggled(false)}>{children}</Dropdown>
+        <Dropdown
+          dropdownStyles={dropdownStyles}
+          onClose={() => setToggled(false)}
+          position={dropdownPosition}
+        >
+          {children}
+        </Dropdown>
       )}
     </div>
   );
