@@ -180,6 +180,8 @@ const SidebarChatroomButton = ({
         secondChatroomId: chatroomId,
       },
     });
+
+    handleDragOverEnd();
   };
 
   useEffect(() => {
