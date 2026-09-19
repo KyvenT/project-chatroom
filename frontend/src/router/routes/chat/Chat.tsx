@@ -19,11 +19,26 @@ const chatStyles = css({
     display: "flex",
     flexDirection: "column",
   },
+
+  ".typingIndicator": {
+    display: "flex",
+    flexWrap: "wrap",
+    padding: "0 24px",
+    minHeight: "1.25rem",
+    fontSize: "0.8rem",
+    fontStyle: "italic",
+    p: {
+      whiteSpace: "pre",
+    },
+  },
 });
 
 const colors = (theme: Theme) =>
   css({
-    color: theme.colors.dark_grey,
+    color: theme.colors.white,
+    ".typingIndicator": {
+      color: theme.colors.light_grey,
+    },
   });
 
 function Chat() {
@@ -68,7 +83,7 @@ function Chat() {
         <div className="chatContainer">
           <ChatMessageList key={chatroomId} />
           {typingUsers.length > 0 && (
-            <>
+            <div className="typingIndicator">
               {typingUsers.map((typingUser, index) =>
                 index === typingUsers.length - 1 ? (
                   <span key={typingUser.userId}>{typingUser.username}</span>
@@ -77,7 +92,7 @@ function Chat() {
                 ),
               )}
               <p> is typing...</p>
-            </>
+            </div>
           )}
           <MessageInput
             messageInputRef={messageInput}

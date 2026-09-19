@@ -14,7 +14,8 @@ const styles = css({
   flexDirection: "column-reverse",
   overflowY: "scroll",
   scrollBehavior: "smooth",
-  gap: "10px",
+  gap: "2px",
+  padding: "12px 0",
   border: 0,
 });
 

@@ -47,8 +47,8 @@ const styles = (
             left: button.getBoundingClientRect().right,
           }),
 
-      border: `1px solid ${theme.colors.white}`,
-      borderRadius: "4px",
+      border: `1px solid ${theme.colors.borderStrong}`,
+      borderRadius: "6px",
       padding: "8px",
       color: theme.colors.white,
       backgroundColor: theme.colors.dark_grey,
@@ -71,10 +71,10 @@ const styles = (
 
       ".kickBtn": {
         backgroundColor: "transparent",
-        border: `1px solid ${theme.colors.white}`,
+        border: `1px solid ${theme.colors.borderStrong}`,
         color: theme.colors.white,
         padding: "4px 8px",
-        borderRadius: "4px",
+        borderRadius: "6px",
         fontSize: "1.05rem",
         cursor: "pointer",
       },

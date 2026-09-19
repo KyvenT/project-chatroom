@@ -70,7 +70,7 @@ const colors = (theme: Theme) =>
       },
 
       ".pinned-chatroom:hover": {
-        border: `1px solid ${theme.colors.white}`,
+        border: `1px solid ${theme.colors.borderStrong}`,
         scrollbarColor: `${theme.colors.white} transparent`,
       },
 

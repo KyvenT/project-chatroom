@@ -118,8 +118,8 @@ export const createChatroom = async (
     throw new Error("Only users can create chatrooms");
   }
 
-  if (!title) {
-    throw new Error("Tried to create chatroom with empty title");
+  if (!title || !privacy) {
+    throw new Error("Missing chatroom title or privacy");
   }
 
   const existingChatroomIndex = await Prisma.chatroomMember.findFirst({
@@ -142,17 +142,14 @@ export const createChatroom = async (
     },
   });
 
-  const ownerJoin = (await Prisma.chatroomMember.create({
+  await Prisma.chatroomMember.create({
     data: {
       memberId: userId,
       chatroomId: chatroom.id,
       role: ChatroomRoles.OWNER,
       chatroomIndex: (existingChatroomIndex?.chatroomIndex || 0) + 1,
     },
-    omit: {
-      lastViewedAt: true,
-    },
-  })) as JoinChatroomPayload;
+  });
 
   sendUpdateChatrooms(chatroom.id, userId, "JOIN");
 };

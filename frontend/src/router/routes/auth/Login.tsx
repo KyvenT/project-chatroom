@@ -19,79 +19,91 @@ import { Loader } from "../../../components/Loader";
 export const authPageStyles = (theme: Theme) =>
   css(
     mq({
-      height: "100%",
-      width: "100%",
+      width: ["90dvw", "420px"],
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
-      alignItems: "center",
-      gap: "16px",
-      padding: "20px",
-      backgroundColor: "white",
-      borderRadius: "10px",
-      boxShadow: "0 2px 2px rgba(0,0,0,0.1)",
+      alignItems: "stretch",
+      gap: "8px",
+      padding: "32px",
+      backgroundColor: theme.colors.dark_grey,
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: theme.radius.lg,
+      boxShadow: theme.shadow.popup,
+      color: theme.colors.white,
       textAlign: "center",
 
       h1: {
         cursor: "default",
-        fontSize: "1.75rem",
-        fontWeight: "500",
+        fontSize: "1.5rem",
+        fontWeight: 600,
+        letterSpacing: "-0.02em",
       },
 
       ".authForm": {
-        width: ["80dvw", "70dvw", "50dvw", "25dvw"],
+        width: "100%",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        padding: "0.5rem 3rem 1.5rem",
+        alignItems: "stretch",
+        padding: "12px 0 0",
         gap: "12px",
 
         ".textInput": {
-          fontSize: "1.25rem",
+          fontSize: "0.95rem",
           minWidth: 0,
-          width: "90%",
+          width: "100%",
           outline: "none",
+          color: theme.colors.white,
+          backgroundColor: theme.colors.black,
+          "&::placeholder": {
+            color: theme.colors.light_grey,
+          },
+        },
+
+        ".passwordContainer, .usernameInput": {
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: theme.radius.md,
+          backgroundColor: theme.colors.black,
+          transition: "border-color 0.15s ease",
         },
 
         ".passwordContainer": {
-          width: "90%",
+          width: "100%",
           display: "flex",
-          border: `1px solid ${theme.colors.grey}`,
-          borderRadius: "4px",
           alignItems: "center",
-          padding: "4px",
+          padding: "0 6px 0 0",
         },
 
         ".usernameInput": {
-          borderRadius: "4px",
-          border: `1px solid ${theme.colors.grey}`,
-          padding: "4px",
+          padding: "10px 12px",
         },
 
         ".passwordInput": {
           flex: 1,
           border: 0,
-          borderRadius: "4px 0 0 4px",
+          padding: "10px 12px",
+          borderRadius: theme.radius.md,
+        },
+
+        ".passwordContainer:focus-within, .usernameInput:focus": {
+          borderColor: theme.colors.accent,
         },
 
         ".submitBtn": {
-          color: "black",
+          color: theme.colors.onAccent,
           cursor: "pointer",
-          width: "fit-content",
-          fontSize: "1.1rem",
-          padding: "4px 8px",
-          backgroundColor: theme.colors.white,
-          border: `1px solid ${theme.colors.dark_grey}`,
-          borderRadius: "4px",
-          boxShadow: `1px 1px 2px 1px ${theme.colors.light_grey}`,
+          width: "100%",
+          fontSize: "0.95rem",
+          fontWeight: 500,
+          padding: "10px 16px",
+          backgroundColor: theme.colors.accent,
+          border: 0,
+          borderRadius: theme.radius.md,
+          transition: "background-color 0.15s ease",
         },
 
         ".submitBtn:hover": {
-          backgroundColor: "white",
-        },
-
-        ".submitBtn:active": {
-          boxShadow: `inset 1px 1px 2px 1px ${theme.colors.light_grey}`,
+          backgroundColor: theme.colors.accentHover,
         },
 
         ".revealPasswordBtn": {
@@ -100,14 +112,28 @@ export const authPageStyles = (theme: Theme) =>
           display: "flex",
           alignItems: "center",
           border: 0,
+          color: theme.colors.light_grey,
         },
 
         ".revealPasswordBtn:hover": {
-          color: theme.colors.grey,
+          color: theme.colors.white,
         },
 
         ".eyeIcon": {
-          color: "black",
+          color: "inherit",
+        },
+
+        "> p": {
+          color: theme.colors.danger,
+          fontSize: "0.85rem",
+        },
+
+        "> span": {
+          alignSelf: "center",
+        },
+
+        "> a": {
+          fontSize: "0.85rem",
         },
       },
     }),
@@ -191,9 +217,9 @@ const Login = () => {
             onClick={handleRevealPasswordClick}
           >
             {isRevealingPassword ? (
-              <EyeClosed className="eyeIcon" size="1.5rem" />
+              <EyeClosed className="eyeIcon" size="1.25rem" />
             ) : (
-              <Eye className="eyeIcon" size="1.5rem" />
+              <Eye className="eyeIcon" size="1.25rem" />
             )}
           </Button>
         </div>{" "}

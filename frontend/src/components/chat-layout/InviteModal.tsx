@@ -25,9 +25,9 @@ const dialogStyles = (theme: Theme) =>
       flexDirection: "column",
       gap: "4px",
       backgroundColor: theme.colors.dark_grey,
-      borderRadius: "10px",
+      borderRadius: "12px",
       padding: "30px",
-      border: `1px solid ${theme.colors.white}`,
+      border: `1px solid ${theme.colors.borderStrong}`,
 
       "h3, h5": {
         color: theme.colors.white,
@@ -45,7 +45,7 @@ const dialogStyles = (theme: Theme) =>
 
       "#inviteForm": {
         display: "flex",
-        border: `1px solid ${theme.colors.white}`,
+        border: `1px solid ${theme.colors.borderStrong}`,
         padding: "4px",
         borderRadius: "8px",
 
@@ -66,7 +66,7 @@ const dialogStyles = (theme: Theme) =>
       },
 
       ".inviteErrorMessage": {
-        color: "red",
+        color: theme.colors.danger,
       },
     }),
   );
@@ -89,7 +89,7 @@ const inviteListStyles = css({
 const inviteListColors = (theme: Theme) =>
   css({
     ul: {
-      border: `1px solid ${theme.colors.white}`,
+      border: `1px solid ${theme.colors.borderStrong}`,
       color: theme.colors.light_grey,
       scrollbarColor: `${theme.colors.light_grey} transparent`,
 

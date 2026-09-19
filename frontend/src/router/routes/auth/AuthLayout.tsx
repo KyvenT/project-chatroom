@@ -18,8 +18,9 @@ const styles = css(
 );
 
 const colors = (theme: Theme) => ({
-  backgroundColor: theme.colors.light_grey,
-  color: theme.colors.dark_grey,
+  backgroundColor: theme.colors.black,
+  backgroundImage: `radial-gradient(60% 50% at 50% 0%, ${theme.colors.accentSoft}, transparent)`,
+  color: theme.colors.white,
 });
 
 function AuthLayout() {

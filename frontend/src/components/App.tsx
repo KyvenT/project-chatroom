@@ -5,28 +5,52 @@ import { useEffect } from "react";
 import { useRefreshToken } from "../utils/useRefreshToken";
 import { useAuthStore } from "../hooks/useStores";
 import { closeWs, startWSConnection } from "../ws-router/ws";
+import { theme } from "../styles/theme";
 
-const theme = {
-  colors: {
-    dark_grey: "#2f2f2f",
-    light_grey: "#bcbcbc",
-    white: "#f1f1f1",
-    black: "#0a0a0a",
-    grey: "#525252",
-  },
-};
+const globalStyles = (t: typeof theme) =>
+  css({
+    "*": {
+      boxSizing: "border-box",
+      margin: 0,
+      scrollbarWidth: "thin",
+      scrollbarColor: `${t.colors.borderStrong} transparent`,
+      fontFamily:
+        "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    },
 
-const globalStyles = css({
-  "*": {
-    boxSizing: "border-box",
-    margin: 0,
-    fontFamily: "Inter, sans-serif",
-  },
+    "*::before, *::after": {
+      boxSizing: "border-box",
+    },
 
-  "*::before, *::after": {
-    boxSizing: "border-box",
-  },
-});
+    body: {
+      backgroundColor: t.colors.black,
+      color: t.colors.white,
+      fontSize: "15px",
+      lineHeight: 1.5,
+      WebkitFontSmoothing: "antialiased",
+      MozOsxFontSmoothing: "grayscale",
+    },
+
+    a: {
+      color: t.colors.accentHover,
+      textDecoration: "none",
+      "&:hover": { textDecoration: "underline" },
+    },
+
+    "input, textarea, select, button": {
+      font: "inherit",
+    },
+
+    "button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible":
+      {
+        outline: `2px solid ${t.colors.accent}`,
+        outlineOffset: "2px",
+      },
+
+    "::selection": {
+      backgroundColor: t.colors.accentSoft,
+    },
+  });
 
 const queryClient = new QueryClient();
 
@@ -59,7 +83,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
-        <Global styles={globalStyles} />
+        <Global styles={globalStyles(theme)} />
         <Router />
       </ThemeProvider>
     </QueryClientProvider>

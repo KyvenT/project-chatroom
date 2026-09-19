@@ -1,13 +1,6 @@
 import "@emotion/react";
+import type { AppTheme } from "../styles/theme";
 
 declare module "@emotion/react" {
-  export interface Theme {
-    colors: {
-      dark_grey: string;
-      light_grey: string;
-      white: string;
-      black: string;
-      grey: string;
-    };
-  }
+  export interface Theme extends AppTheme {}
 }

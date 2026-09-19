@@ -88,9 +88,9 @@ const Signup = () => {
             onClick={handleRevealPasswordClick}
           >
             {isRevealingPassword ? (
-              <EyeClosed size="1.5rem" />
+              <EyeClosed size="1.25rem" />
             ) : (
-              <Eye size="1.5rem" />
+              <Eye size="1.25rem" />
             )}
           </Button>
         </div>{" "}

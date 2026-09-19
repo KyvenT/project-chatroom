@@ -13,12 +13,14 @@ export const iconBtnStyles = (theme: Theme) =>
     color: theme.colors.light_grey,
     display: "grid",
     placeItems: "center",
-    borderRadius: "5px",
+    borderRadius: theme.radius.sm,
     cursor: "pointer",
     userSelect: "none",
+    transition: "color 0.15s ease, background-color 0.15s ease",
 
     "&:hover": {
       color: theme.colors.white,
+      backgroundColor: theme.colors.grey,
     },
   });
 
