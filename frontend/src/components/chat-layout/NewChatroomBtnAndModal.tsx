@@ -135,7 +135,6 @@ const NewChatButton = () => {
     if (!isLoggedIn) return;
 
     const { title, privacy } = data;
-    console.log(title, ": ", privacy);
     setToggle(false);
     mutation.mutate({
       fetchUrl: `${API_URL}/api/chatrooms/create`,
