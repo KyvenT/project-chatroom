@@ -1,4 +1,4 @@
-import { css } from "@emotion/react";
+import { css, useTheme, type Theme } from "@emotion/react";
 import { Link } from "react-router";
 import { mq } from "../../../styles/breakpoints";
 import { Menu } from "lucide-react";
@@ -8,119 +8,172 @@ import { useEffect } from "react";
 import useToggle from "../../../hooks/useToggle";
 import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
 
-const styles = css(
-  mq({
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-
-    ".brandTitle": {
-      cursor: "default",
-      fontSize: ["1.5rem", "1.75rem"],
-    },
-
-    ".navBarContainer": {
-      position: "sticky",
-      width: "100%",
-      height: ["15%", "15%", "10%"],
-    },
-
-    ".navBar": {
+const styles = (theme: Theme) =>
+  css(
+    mq({
       height: "100%",
-      width: "100%",
-      padding: ["4px", "8px"],
       display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      backgroundColor: "white",
-      textWrap: "nowrap",
-    },
+      flexDirection: "column",
+      backgroundColor: theme.colors.black,
+      color: theme.colors.white,
 
-    ".authLink": {},
+      ".brandTitle": {
+        cursor: "default",
+        fontSize: ["1.1rem", "1.25rem"],
+        fontWeight: 700,
+        letterSpacing: "-0.02em",
+      },
 
-    ".navLink": {
-      fontSize: "1.1rem",
-      textDecoration: "none",
-      color: "black",
-      textAlign: "center",
-      width: "100%",
-    },
+      ".navBarContainer": {
+        position: "sticky",
+        top: 0,
+        width: "100%",
+        height: "64px",
+        flex: "0 0 auto",
+        zIndex: 2,
+      },
 
-    ".centerNavLink": {
-      padding: ["16px", "16px", "8px"],
-      borderTop: ["1px solid black", "1px solid black", 0],
-      borderBottom: ["1px solid black", "1px solid black", 0],
-    },
+      ".navBar": {
+        height: "100%",
+        width: "100%",
+        padding: ["0 12px", "0 32px"],
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        backgroundColor: theme.colors.black,
+        borderBottom: `1px solid ${theme.colors.border}`,
+        textWrap: "nowrap",
+      },
 
-    ".navLink:hover": {
-      textDecoration: "underline",
-      backgroundColor: "#BBB",
-    },
+      ".navLink": {
+        fontSize: "0.9rem",
+        textDecoration: "none",
+        color: theme.colors.light_grey,
+        textAlign: "center",
+        padding: "6px 10px",
+        borderRadius: theme.radius.sm,
+        transition: "color 0.15s ease, background-color 0.15s ease",
+      },
 
-    ".centerNavLinks": {
-      position: ["absolute", "absolute", "static"],
-      left: 0,
-      bottom: 0,
-      transform: ["translateY(100%)", "translateY(100%)", "translateY(0)"],
-      width: ["100dvw", "100dvw", "30%"],
-      minWidth: "fit-content",
-      display: "flex",
-      backgroundColor: ["#DDD", "#DDD", "transparent"],
-      flexDirection: ["column", "column", "row"],
-      justifyContent: "space-evenly",
-      alignItems: "center",
-      listStyle: "none",
-      padding: 0,
-    },
+      ".navLink:hover": {
+        textDecoration: "none",
+        color: theme.colors.white,
+        backgroundColor: theme.colors.grey,
+      },
 
-    ".content": {
-      color: "white",
-      height: "100%",
-      backgroundColor: "black",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    },
+      ".navCta": {
+        backgroundColor: theme.colors.accent,
+        color: theme.colors.onAccent,
+        fontWeight: 500,
+      },
 
-    ".card": {
-      width: "70%",
-      display: "flex",
-      flexDirection: ["column", "row"],
-      border: "1px solid grey",
-      padding: "10px",
-      borderRadius: "6px",
-    },
+      ".navCta:hover": {
+        backgroundColor: theme.colors.accentHover,
+        color: theme.colors.onAccent,
+      },
 
-    ".cardSection": {
-      flex: 1,
-    },
+      ".authLinks": {
+        display: "flex",
+        alignItems: "center",
+        gap: "4px",
+      },
 
-    ".mobileNavToggleBtn": {
-      color: "black",
-    },
+      ".centerNavLink": {
+        width: "100%",
+        padding: ["16px", "16px", "6px 10px"],
+        borderTop: [
+          `1px solid ${theme.colors.border}`,
+          `1px solid ${theme.colors.border}`,
+          0,
+        ],
+      },
 
-    ".mobileNavToggleBtn:hover": {
-      color: "#444444",
-    },
+      ".centerNavLinks": {
+        position: ["absolute", "absolute", "static"],
+        left: 0,
+        bottom: 0,
+        transform: ["translateY(100%)", "translateY(100%)", "translateY(0)"],
+        width: ["100dvw", "100dvw", "auto"],
+        minWidth: "fit-content",
+        display: "flex",
+        backgroundColor: [
+          theme.colors.dark_grey,
+          theme.colors.dark_grey,
+          "transparent",
+        ],
+        flexDirection: ["column", "column", "row"],
+        justifyContent: "space-evenly",
+        alignItems: "center",
+        listStyle: "none",
+        padding: 0,
+      },
 
-    ".brandArea": {
-      display: "flex",
-      minWidth: "fit-content",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: "4px",
-    },
+      ".content": {
+        flex: 1,
+        minHeight: 0,
+        overflowY: "auto",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "24px 16px",
+        backgroundImage: `radial-gradient(60% 50% at 50% 0%, ${theme.colors.accentSoft}, transparent)`,
+      },
 
-    ".sampleImage": {
-      width: "100%",
-      height: "auto",
-      border: "1px solid grey",
-      borderRadius: "6px",
-    },
-  }),
-);
+      ".card": {
+        width: ["100%", "100%", "min(1100px, 90%)"],
+        display: "flex",
+        flexDirection: ["column", "column", "row"],
+        alignItems: "center",
+        gap: ["24px", "48px"],
+        padding: ["20px", "40px"],
+        backgroundColor: theme.colors.dark_grey,
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: theme.radius.lg,
+        boxShadow: theme.shadow.popup,
+      },
+
+      ".cardSection": {
+        flex: 1,
+        minWidth: 0,
+      },
+
+      ".cardSection h2": {
+        fontSize: ["1.6rem", "2.1rem"],
+        lineHeight: 1.2,
+        fontWeight: 700,
+        letterSpacing: "-0.03em",
+        marginBottom: "12px",
+      },
+
+      ".cardSection p": {
+        color: theme.colors.light_grey,
+        fontSize: "1.05rem",
+      },
+
+      ".mobileNavToggleBtn": {
+        color: theme.colors.light_grey,
+      },
+
+      ".brandArea": {
+        display: "flex",
+        minWidth: "fit-content",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "8px",
+      },
+
+      ".sampleImage": {
+        width: "100%",
+        height: "auto",
+        display: "block",
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: theme.radius.md,
+      },
+    }),
+  );
 
 const LandingPage = () => {
+  const theme = useTheme();
   const isMobile = useIsMobile();
   const [mobileNavOpen, setMobileNavOpen] = useToggle(false);
   const isLoggedIn = useAuthStore(isLoggedInSelector);
@@ -132,7 +185,7 @@ const LandingPage = () => {
   }, [isMobile]);
 
   return (
-    <div css={styles}>
+    <div css={styles(theme)}>
       <div className="navBarContainer">
         <nav className="navBar">
           <div className="brandArea">
@@ -142,7 +195,7 @@ const LandingPage = () => {
                 className="mobileNavToggleBtn"
                 onClick={() => setMobileNavOpen()}
               >
-                <Menu size="2rem" />
+                <Menu size="1.5rem" />
               </Button>
             )}
             <h1 className="brandTitle">Project Chatroom</h1>
@@ -177,23 +230,22 @@ const LandingPage = () => {
               </Link>
               */}
               </ul>
-              <p>
+              <div className="authLinks">
                 {isLoggedIn ? (
-                  <Link to="/chat" className="navLink">
+                  <Link to="/chat" className="navLink navCta">
                     Start Chatting
                   </Link>
                 ) : (
                   <>
                     <Link to="/login" className="navLink">
                       Log In
-                    </Link>{" "}
-                    /{" "}
-                    <Link to="/register" className="navLink">
+                    </Link>
+                    <Link to="/register" className="navLink navCta">
                       Register
                     </Link>
                   </>
                 )}
-              </p>
+              </div>
             </>
           )}
         </nav>

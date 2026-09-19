@@ -6,10 +6,10 @@ const loaderStyles = (theme: Theme) =>
   css(
     mq({
       display: "inline-block",
-      width: "20px",
-      height: "20px",
-      border: "3px solid transparent",
-      borderTop: `3px solid ${theme.colors.light_grey}`,
+      width: "18px",
+      height: "18px",
+      border: `2px solid ${theme.colors.border}`,
+      borderTop: `2px solid ${theme.colors.accent}`,
       borderRadius: "50%",
     }),
   );

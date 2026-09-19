@@ -34,8 +34,8 @@ const dialogStyles = (theme: Theme) =>
       gap: "10px",
       backgroundColor: theme.colors.dark_grey,
       color: theme.colors.white,
-      border: `1px solid ${theme.colors.light_grey}`,
-      borderRadius: "10px",
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: "12px",
       padding: "30px",
 
       h2: {
@@ -56,9 +56,9 @@ const dialogStyles = (theme: Theme) =>
         flex: 1,
         minWidth: 0,
         fontSize: "1rem",
-        borderRadius: "4px",
+        borderRadius: "6px",
         padding: "4px",
-        border: `1px solid ${theme.colors.white}`,
+        border: `1px solid ${theme.colors.borderStrong}`,
         backgroundColor: "transparent",
         color: theme.colors.white,
       },
@@ -77,12 +77,12 @@ const dialogStyles = (theme: Theme) =>
 
       ".submit-btn": {
         fontSize: "1rem",
-        borderRadius: "4px",
+        borderRadius: "6px",
         width: "fit-content",
         padding: "4px 8px",
         backgroundColor: "transparent",
         color: theme.colors.white,
-        border: `1px solid ${theme.colors.white}`,
+        border: `1px solid ${theme.colors.borderStrong}`,
         cursor: "pointer",
       },
 
@@ -96,9 +96,9 @@ const dialogStyles = (theme: Theme) =>
         fontSize: "1rem",
         backgroundColor: "transparent",
         color: theme.colors.white,
-        border: `1px solid ${theme.colors.white}`,
+        border: `1px solid ${theme.colors.borderStrong}`,
         padding: "4px",
-        borderRadius: "4px",
+        borderRadius: "6px",
         cursor: "pointer",
       },
 
@@ -135,6 +135,7 @@ const NewChatButton = () => {
     if (!isLoggedIn) return;
 
     const { title, privacy } = data;
+    console.log(title, ": ", privacy);
     setToggle(false);
     mutation.mutate({
       fetchUrl: `${API_URL}/api/chatrooms/create`,

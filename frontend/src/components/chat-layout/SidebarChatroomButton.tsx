@@ -26,33 +26,36 @@ const styles = css({
 
   div: {
     width: "100%",
-    padding: "4px",
-    borderRadius: "4px",
+    padding: "0 8px 0 10px",
+    borderRadius: "8px",
     display: "flex",
     alignItems: "center",
-    height: "2rem",
+    gap: "6px",
+    height: "2.25rem",
     borderStyle: "solid",
-    borderWidth: "3px",
+    borderWidth: "1px",
+    transition: "background-color 0.12s ease",
   },
 
   ".chatroomLink": {
     flex: 1,
     textDecoration: "none",
     userSelect: "none",
-    fontSize: "1.25rem",
+    fontSize: "0.95rem",
+    lineHeight: "2.25rem",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
   },
 
   ".unreadBadge": {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    aspectRatio: 1,
-    borderRadius: "50%",
-    fontSize: "1rem",
-    width: "1rem",
+    minWidth: "1.25rem",
+    height: "1.25rem",
+    padding: "0 6px",
+    borderRadius: "999px",
+    fontSize: "0.7rem",
+    fontWeight: 600,
+    lineHeight: "1.25rem",
     textAlign: "center",
     userSelect: "none",
   },
@@ -74,40 +77,39 @@ const dynamicStyles = (
 ) =>
   css({
     div: {
-      backgroundColor: isActive ? theme.colors.white : "inherit",
-      borderColor: isDraggedOver
-        ? "green"
-        : isActive
-          ? theme.colors.white
-          : "transparent",
+      backgroundColor: isActive ? theme.colors.accentSoft : "transparent",
+      borderColor: isDraggedOver ? theme.colors.accent : "transparent",
     },
 
     "div:hover": {
-      backgroundColor: isActive ? theme.colors.light_grey : theme.colors.grey,
+      backgroundColor: isActive ? theme.colors.accentSoft : theme.colors.grey,
     },
 
     ".chatroomLink": {
-      color: isActive ? theme.colors.black : theme.colors.light_grey,
+      color: isActive ? theme.colors.white : theme.colors.light_grey,
+      fontWeight: isActive ? 600 : 400,
       "&:hover": {
-        color: isActive ? theme.colors.black : theme.colors.white,
+        color: theme.colors.white,
+        textDecoration: "none",
       },
     },
 
     ".unreadBadge": {
-      backgroundColor: "red",
-      color: theme.colors.white,
+      backgroundColor: theme.colors.accent,
+      color: theme.colors.onAccent,
     },
   });
 
-const inviteBtnStyles = (theme: Theme, isActive: boolean) =>
+const inviteBtnStyles = (theme: Theme) =>
   css({
-    color: isActive ? theme.colors.grey : theme.colors.dark_grey,
+    color: theme.colors.light_grey,
     aspectRatio: 1,
-    height: "100%",
+    height: "1.75rem",
     textAlign: "center",
 
     "&:hover": {
-      color: isActive ? theme.colors.black : theme.colors.white,
+      color: theme.colors.white,
+      backgroundColor: theme.colors.borderStrong,
     },
   });
 
@@ -216,7 +218,7 @@ const SidebarChatroomButton = ({
             <Button
               onClick={() => setInviteModalOpen()}
               variant="icon"
-              otherStyles={inviteBtnStyles(theme, isActive)}
+              otherStyles={inviteBtnStyles(theme)}
               aria-label="Open member invite modal"
             >
               {<UserRoundPlus size="1.25rem" />}

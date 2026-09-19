@@ -13,7 +13,7 @@ interface DropdownProps {
 const defaultDropdownStyles = (position: DropdownPosition) =>
   css({
     position: "absolute",
-    top: "55px",
+    top: "calc(100% + 8px)",
     right: position === "right" ? 0 : "auto",
     left: position === "left" ? 0 : "auto",
     zIndex: "2",

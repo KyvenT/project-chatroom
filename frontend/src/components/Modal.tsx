@@ -1,5 +1,5 @@
 import type { Theme } from "@emotion/react";
-import { css, type SerializedStyles } from "@emotion/react";
+import { css, useTheme, type SerializedStyles } from "@emotion/react";
 import type React from "react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -21,20 +21,25 @@ export const closeButtonStyles = (theme: Theme) =>
     border: "none",
     cursor: "pointer",
     fontSize: "1rem",
-    color: theme.colors.white,
+    color: theme.colors.light_grey,
     "&:hover": {
-      opacity: 0.7,
+      color: theme.colors.white,
     },
   });
 
-const dialogStyles = (variant: ModalVariant) =>
+const dialogStyles = (variant: ModalVariant, theme: Theme) =>
   css({
     position: "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
     padding: 0,
-    border: 0,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: theme.radius.lg,
+    boxShadow: theme.shadow.popup,
+    backgroundColor: theme.colors.dark_grey,
+    color: theme.colors.white,
+    overflow: "hidden",
     zIndex: variant === "requiredInteraction" ? 9999 : 1,
   });
 
@@ -44,7 +49,8 @@ const backdropStyles = (variant: ModalVariant) =>
     top: 0,
     left: 0,
     backgroundColor:
-      variant === "requiredInteraction" ? "rgba(50,50,50,0.2)" : "transparent",
+      variant === "requiredInteraction" ? "rgba(6,8,12,0.6)" : "transparent",
+    backdropFilter: variant === "requiredInteraction" ? "blur(3px)" : "none",
     height: "100dvh",
     width: "100dvw",
   });
@@ -57,6 +63,7 @@ const Modal = ({
   variant = "default",
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const theme = useTheme();
 
   useEffect(() => {
     if (open) {
@@ -85,7 +92,7 @@ const Modal = ({
         onKeyDown={handleESCPress}
         /* @ts-ignore */
         closedBy="none"
-        css={[dialogStyles(variant), modalStyles]}
+        css={[dialogStyles(variant, theme), modalStyles]}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

@@ -20,9 +20,9 @@ const styles = css(
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    width: ["100%", "100%", "25%", "15%"],
-    fontSize: ["2rem", "1rem"],
-    padding: "4px 2px",
+    width: ["100%", "100%", "240px", "240px"],
+    fontSize: ["2rem", "0.95rem"],
+    padding: "12px 8px",
 
     ul: {
       padding: 0,
@@ -30,9 +30,9 @@ const styles = css(
 
     li: {
       listStyle: "none",
-      borderRadius: "2px",
-      margin: "4px",
-      padding: "2px",
+      borderRadius: "6px",
+      margin: "2px 0",
+      padding: "4px 8px",
     },
 
     ".memberBtn": {
@@ -46,21 +46,23 @@ const styles = css(
     },
 
     ".status": {
-      fontSize: ".8rem",
+      fontSize: "0.7rem",
       userSelect: "none",
-      fontWeight: 500,
+      fontWeight: 600,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em",
+      padding: "12px 8px 4px",
     },
   }),
 );
 
 const colors = (theme: Theme) =>
   css({
-    backgroundColor: theme.colors.black,
-    borderLeft: `1px solid ${theme.colors.dark_grey}`,
-    borderBottom: `1px solid ${theme.colors.dark_grey}`,
+    backgroundColor: theme.colors.dark_grey,
+    borderLeft: `1px solid ${theme.colors.border}`,
 
     ".status": {
-      color: theme.colors.grey,
+      color: theme.colors.light_grey,
     },
 
     li: {
@@ -68,7 +70,7 @@ const colors = (theme: Theme) =>
     },
 
     "li:hover": {
-      backgroundColor: theme.colors.dark_grey,
+      backgroundColor: theme.colors.grey,
     },
   });
 

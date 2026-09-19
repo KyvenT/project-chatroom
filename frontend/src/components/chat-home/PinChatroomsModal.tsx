@@ -24,7 +24,7 @@ const styles = (theme: Theme) =>
       width: ["80%", "80%", "40%"],
       backgroundColor: theme.colors.dark_grey,
       color: theme.colors.white,
-      border: `1px solid ${theme.colors.light_grey}`,
+      border: `1px solid ${theme.colors.border}`,
       borderRadius: "8px",
       padding: "30px",
 
@@ -74,8 +74,8 @@ const styles = (theme: Theme) =>
           fontWeight: 400,
           backgroundColor: theme.colors.grey,
           color: theme.colors.white,
-          border: `1px solid ${theme.colors.white}`,
-          borderRadius: "4px",
+          border: `1px solid ${theme.colors.borderStrong}`,
+          borderRadius: "6px",
           padding: "4px",
         },
       },
@@ -102,8 +102,8 @@ const styles = (theme: Theme) =>
 
       ".chatroom-list": {
         marginBottom: "20px",
-        border: `1px solid ${theme.colors.light_grey}`,
-        borderRadius: "4px",
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: "6px",
         padding: "12px",
         height: ["60px", "60px", "100px"],
         overflowY: "scroll",

@@ -24,10 +24,10 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
     mq({
       width: ["80%", "60%", "40%", "30%"],
       padding: "30px",
-      borderRadius: "5px",
+      borderRadius: "6px",
       backgroundColor: theme.colors.dark_grey,
       color: theme.colors.white,
-      border: `1px solid ${theme.colors.light_grey}`,
+      border: `1px solid ${theme.colors.border}`,
       display: "flex",
       justifyContent: "center",
 
@@ -45,10 +45,10 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
           flex: 1,
           fontWeight: 400,
           margin: 0,
-          borderRadius: "4px",
+          borderRadius: "6px",
           backgroundColor: theme.colors.grey,
           color: theme.colors.white,
-          border: `1px solid ${theme.colors.white}`,
+          border: `1px solid ${theme.colors.borderStrong}`,
         },
       },
 
@@ -72,9 +72,9 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
         fontSize: "1rem",
         color: theme.colors.white,
         backgroundColor: "transparent",
-        border: `1px solid ${theme.colors.white}`,
+        border: `1px solid ${theme.colors.borderStrong}`,
         padding: "6px 10px",
-        borderRadius: "5px",
+        borderRadius: "6px",
         cursor: "pointer",
       },
 
@@ -92,8 +92,8 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
           backgroundColor: "transparent",
           color: theme.colors.white,
           padding: "6px",
-          borderRadius: "4px",
-          border: `1px solid ${theme.colors.white}`,
+          borderRadius: "6px",
+          border: `1px solid ${theme.colors.borderStrong}`,
           cursor: "pointer",
 
           option: {

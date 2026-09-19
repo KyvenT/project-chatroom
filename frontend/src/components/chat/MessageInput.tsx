@@ -9,16 +9,17 @@ const styles = css({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  margin: "10px 0",
+  padding: "8px 24px 20px",
 
   form: {
-    width: "97%",
+    width: "100%",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    border: 0,
-    padding: "6px",
-    borderRadius: "4px",
+    gap: "8px",
+    padding: "8px 8px 8px 16px",
+    borderRadius: "12px",
+    transition: "border-color 0.15s ease",
   },
 
   textarea: {
@@ -27,19 +28,22 @@ const styles = css({
     backgroundColor: "inherit",
     border: 0,
     outlineStyle: "none",
-    fontSize: "1rem",
+    fontSize: "0.95rem",
+    lineHeight: 1.5,
     wordBreak: "break-all",
     resize: "none",
+    padding: "4px 0",
   },
 
   button: {
-    width: "fit-content",
-    height: "100%",
-    fontSize: "1rem",
-    borderRadius: "4px",
-    padding: "4px",
-    backgroundColor: "inherit",
-    transition: "background-color 0.1s ease",
+    width: "2.25rem",
+    height: "2.25rem",
+    flex: "0 0 auto",
+    display: "grid",
+    placeItems: "center",
+    borderRadius: "8px",
+    border: 0,
+    transition: "background-color 0.15s ease",
   },
 
   "button:hover": {
@@ -54,6 +58,11 @@ const colors = (theme: Theme) =>
 
     form: {
       backgroundColor: theme.colors.dark_grey,
+      border: `1px solid ${theme.colors.border}`,
+    },
+
+    "form:focus-within": {
+      borderColor: theme.colors.accent,
     },
 
     textarea: {
@@ -61,14 +70,12 @@ const colors = (theme: Theme) =>
     },
 
     button: {
-      color: theme.colors.white,
-      border: `1px solid ${theme.colors.dark_grey}`,
+      color: theme.colors.onAccent,
+      backgroundColor: theme.colors.accent,
     },
 
     "button:hover": {
-      backgroundColor: theme.colors.white,
-      color: theme.colors.dark_grey,
-      fontWeight: 500,
+      backgroundColor: theme.colors.accentHover,
     },
 
     "textarea::placeholder": {

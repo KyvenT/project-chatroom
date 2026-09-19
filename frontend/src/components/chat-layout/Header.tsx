@@ -2,16 +2,18 @@ import { css, useTheme, type Theme } from "@emotion/react";
 
 const headerStyles = css({
   width: "100%",
+  height: "56px",
+  flex: "0 0 auto",
   display: "flex",
   alignItems: "center",
-  padding: "0 10px",
-  gap: "10px",
+  padding: "0 12px",
+  gap: "8px",
 });
 
 const headerColors = (theme: Theme) => ({
-  backgroundColor: theme.colors.dark_grey,
+  backgroundColor: theme.colors.black,
   color: theme.colors.white,
-  borderBottom: `2px solid ${theme.colors.dark_grey}`,
+  borderBottom: `1px solid ${theme.colors.border}`,
 });
 
 interface HeaderProps {

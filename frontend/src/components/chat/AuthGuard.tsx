@@ -44,7 +44,7 @@ const styles = (theme: Theme) =>
       input: {
         fontSize: "1rem",
         background: theme.colors.grey,
-        border: `1px solid ${theme.colors.white}`,
+        border: `1px solid ${theme.colors.borderStrong}`,
         borderRadius: "2px",
         padding: "2px",
         color: theme.colors.white,
@@ -78,10 +78,10 @@ const styles = (theme: Theme) =>
 
     ".guestSubmitBtn": {
       backgroundColor: "transparent",
-      border: `1px solid ${theme.colors.white}`,
+      border: `1px solid ${theme.colors.borderStrong}`,
       color: theme.colors.white,
       padding: "8px",
-      borderRadius: "4px",
+      borderRadius: "6px",
     },
 
     ".guestSubmitBtn:hover": {
@@ -89,15 +89,15 @@ const styles = (theme: Theme) =>
     },
 
     ".errorMessage": {
-      color: "#ff4d4d",
+      color: theme.colors.danger,
       fontSize: "0.9rem",
     },
   });
 
 const modalStyles = (theme: Theme) =>
   css({
-    borderRadius: "10px",
-    border: `1px solid ${theme.colors.white}`,
+    borderRadius: "12px",
+    border: `1px solid ${theme.colors.borderStrong}`,
   });
 
 interface privacyDataType {

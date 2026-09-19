@@ -7,66 +7,72 @@ import { HomeIcon, Settings } from "lucide-react";
 import { iconBtnStyles } from "../Button";
 import { mq } from "../../styles/breakpoints";
 
-const sidebarStyles = css(
-  mq({
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    flex: "0 0 auto",
-    width: ["80%", "50%", "25%", "20%", "15%"],
-
-    ul: {
-      listStyle: "none",
-      flex: 1,
-      padding: "20px 10px",
+const sidebarStyles = (theme: Theme) =>
+  css(
+    mq({
+      height: "100%",
       display: "flex",
       flexDirection: "column",
-      gap: "4px",
-    },
+      flex: "0 0 auto",
+      width: ["80%", "50%", "280px", "280px", "280px"],
 
-    ".chatsHeader": {
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      margin: "0 4px",
-
-      h2: {
-        userSelect: "none",
-        fontSize: "1.75rem",
-        fontWeight: "400",
+      ul: {
+        listStyle: "none",
+        flex: 1,
+        padding: "8px 10px 16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "4px",
       },
-    },
 
-    ".topSection": {
-      display: "flex",
-      alignItems: "center",
-      padding: "4px",
-    },
+      ".chatsHeader": {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        margin: "12px 14px 4px",
 
-    ".homeBtn": {
-      padding: "2px",
-    },
+        h2: {
+          userSelect: "none",
+          fontSize: "0.75rem",
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+        },
+      },
 
-    ".chatrooms": {
-      overflowY: "auto",
-    },
-  }),
-);
+      ".topSection": {
+        display: "flex",
+        alignItems: "center",
+        gap: "4px",
+        height: "56px",
+        padding: "0 12px",
+        borderBottom: `1px solid ${theme.colors.border}`,
+      },
+
+      ".homeBtn": {
+        padding: "0",
+      },
+
+      ".chatrooms": {
+        overflowY: "auto",
+      },
+    }),
+  );
 
 const colors = (theme: Theme) =>
   css({
-    backgroundColor: theme.colors.black,
+    backgroundColor: theme.colors.dark_grey,
     color: theme.colors.white,
-    borderRight: `2px solid ${theme.colors.dark_grey}`,
+    borderRight: `1px solid ${theme.colors.border}`,
 
-    ".homeBtn": {
+    ".chatsHeader h2": {
       color: theme.colors.light_grey,
+    },
 
-      "&:hover": {
-        color: theme.colors.white,
-        backgroundColor: theme.colors.grey,
-      },
+    ".topSection a": {
+      width: "2.25rem",
+      height: "2.25rem",
     },
 
     ".chatrooms": {
@@ -74,7 +80,7 @@ const colors = (theme: Theme) =>
     },
 
     ".chatrooms:hover": {
-      scrollbarColor: `${theme.colors.white} transparent`,
+      scrollbarColor: `${theme.colors.borderStrong} transparent`,
     },
   });
 
@@ -87,13 +93,13 @@ const Sidebar = ({ chatrooms }: SidebarProps) => {
   const { chatroomId } = useParams();
 
   return (
-    <div css={[sidebarStyles, colors(theme)]}>
+    <div css={[sidebarStyles(theme), colors(theme)]}>
       <div className="topSection">
         <Link to="/chat" className="homeBtn" css={iconBtnStyles(theme)}>
-          <HomeIcon className="homeIcon" size="2.25rem" />
+          <HomeIcon className="homeIcon" size="1.25rem" />
         </Link>
         <Link to="/settings" css={iconBtnStyles(theme)}>
-          <Settings size="2.25rem" />
+          <Settings size="1.25rem" />
         </Link>
       </div>
       <div className="chatsHeader">

@@ -27,7 +27,6 @@ const styles = css({
   height: "100%",
   width: "100%",
   display: "flex",
-  backgroundColor: "red",
 
   ".container": {
     height: "100%",
@@ -48,13 +47,12 @@ const styles = css({
 
   h1: {
     userSelect: "none",
-    fontSize: "2.5rem",
-    fontWeight: "450",
   },
 
   ".headerIconBtn": {
-    width: "2.5rem",
-    height: "2.5rem",
+    width: "2.25rem",
+    height: "2.25rem",
+    padding: "7px",
   },
 });
 
@@ -66,24 +64,23 @@ const colors = (theme: Theme) =>
       },
 
       ".headerIconBtn": {
-        color: theme.colors.light_grey,
-        "&:hover": {
-          color: theme.colors.white,
-        },
+        color: "inherit",
+        borderRadius: theme.radius.sm,
       },
 
       ".title": {
-        fontSize: ["1.25rem", "2.5rem"],
-        fontWeight: "450",
-        padding: 0,
-        color: theme.colors.light_grey,
+        fontSize: ["1rem", "1.1rem"],
+        fontWeight: 600,
+        letterSpacing: "-0.01em",
+        padding: "6px 10px",
+        color: theme.colors.white,
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
       },
 
       ".chatroom-details-btn:hover": {
-        color: theme.colors.white,
+        backgroundColor: theme.colors.grey,
       },
     }),
   );
@@ -143,7 +140,24 @@ function ChatLayout() {
               )}
             </>
           ) : (
-            <Link to="/login" css={iconBtnStyles(theme)}>
+            <Link
+              to="/login"
+              css={[
+                iconBtnStyles(theme),
+                {
+                  padding: "6px 14px",
+                  backgroundColor: theme.colors.accent,
+                  color: theme.colors.onAccent,
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  "&:hover": {
+                    backgroundColor: theme.colors.accentHover,
+                    color: theme.colors.onAccent,
+                    textDecoration: "none",
+                  },
+                },
+              ]}
+            >
               Sign In
             </Link>
           )}

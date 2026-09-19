@@ -9,9 +9,9 @@ import { API_URL } from "../../env";
 export type Status = "ONLINE" | "AWAY" | "OFFLINE";
 
 const STATUS_COLORS = {
-  ["ONLINE"]: "green",
-  ["AWAY"]: "orange",
-  ["OFFLINE"]: "grey",
+  ["ONLINE"]: "#3ecf8e",
+  ["AWAY"]: "#f5a524",
+  ["OFFLINE"]: "#5b6274",
 };
 
 const styles = (status: Status) =>

@@ -17,24 +17,25 @@ const styles = css({
   flexDirection: "column",
   width: "100%",
   height: "auto",
-  padding: "10px",
-  borderRadius: "0 8px 8px 0",
-  backgroundClip: "padding-box",
+  padding: "8px 24px",
+  gap: "2px",
 
   strong: {
-    fontWeight: "500",
+    fontWeight: 600,
   },
 
   ".content": {
     width: "100%",
     overflowWrap: "break-word",
+    lineHeight: 1.55,
+    whiteSpace: "pre-wrap",
   },
 
   ".userBtn": {
     backgroundColor: "transparent",
     border: 0,
     textAlign: "left",
-    fontSize: "1rem",
+    fontSize: "0.95rem",
     padding: 0,
     cursor: "pointer",
   },
@@ -47,7 +48,10 @@ const styles = css({
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
+    fontSize: "0.75rem",
+    alignSelf: "center",
   },
+
 });
 
 const colors = (theme: Theme) =>
@@ -60,13 +64,18 @@ const colors = (theme: Theme) =>
       backgroundColor: theme.colors.dark_grey,
     },
 
+    ".content": {
+      color: theme.colors.white,
+    },
+
     ".timeStamp": {
       color: theme.colors.light_grey,
     },
 
     ".messageHeader": {
       display: "flex",
-      gap: "4px",
+      gap: "8px",
+      alignItems: "baseline",
     },
 
     ".userBtn": {
@@ -83,7 +92,7 @@ const ChatMessage = ({ id, content, sender, timestamp }: ChatMessageProps) => {
   } | null>(null);
 
   const onMemberClick = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     const member = members.find((mem) => mem.memberId === sender.id);
     if (!member) return;
