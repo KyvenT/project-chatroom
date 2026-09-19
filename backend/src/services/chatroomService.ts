@@ -4,15 +4,18 @@ import {
   ChatroomDetailsPayload,
   ChatroomPayload,
   JoinChatroomPayload,
+  JoinInfoPayload,
 } from "../types/payloads.js";
 import {
   chatroomIdSchema,
+  joinKeySchema,
   chatroomModifyOptionsSchema,
   chatroomSetOptionsSchema,
   swapChatroomIndexesSchema,
 } from "../validators/chatrooms/chatroomValidation.js";
 import z from "zod";
 import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.js";
+import { generateJoinKey } from "../lib/joinKey.js";
 
 export const getUserChatrooms = async (
   userId: string,
@@ -76,6 +79,7 @@ export const getChatroomDetails = async (
   const chatroomDetails = await Prisma.chatroom.findUnique({
     select: {
       id: true,
+      joinKey: true,
       title: true,
       privacy: true,
       ownerId: true,
@@ -95,7 +99,11 @@ export const getChatroomDetails = async (
     throw new Error("Could not find chatroom details");
   }
 
-  return chatroomDetails;
+  // only the owner gets to see (and share) the join key
+  const { joinKey, ...details } = chatroomDetails;
+  return chatroomDetails.ownerId === userId
+    ? { ...details, joinKey }
+    : details;
 };
 
 export const createChatroom = async (
@@ -139,6 +147,7 @@ export const createChatroom = async (
       title,
       ownerId: userId,
       privacy,
+      joinKey: generateJoinKey(),
     },
   });
 
@@ -233,25 +242,62 @@ export const deleteChatroom = async (
   });
 };
 
-export const getChatroomPrivacy = async (
+export const getJoinInfo = async (
+  data: z.infer<typeof joinKeySchema>,
+): Promise<JoinInfoPayload> => {
+  const { joinKey } = data;
+
+  const chatroom = await Prisma.chatroom.findUnique({
+    where: {
+      joinKey,
+    },
+    select: {
+      id: true,
+      title: true,
+      privacy: true,
+    },
+  });
+
+  if (!chatroom) {
+    throw new Error("Invalid or expired join link");
+  }
+
+  return {
+    chatroomId: chatroom.id,
+    title: chatroom.title,
+    privacy: chatroom.privacy,
+  };
+};
+
+export const regenerateJoinKey = async (
+  userId: string,
   data: z.infer<typeof chatroomIdSchema>,
-): Promise<ChatroomPrivacy> => {
+): Promise<string> => {
   const { chatroomId } = data;
 
   const chatroom = await Prisma.chatroom.findUnique({
     where: {
       id: chatroomId,
     },
+  });
+
+  if (chatroom?.ownerId !== userId) {
+    throw new Error("Not detected as owner of chatroom");
+  }
+
+  const updated = await Prisma.chatroom.update({
+    where: {
+      id: chatroomId,
+    },
+    data: {
+      joinKey: generateJoinKey(),
+    },
     select: {
-      privacy: true,
+      joinKey: true,
     },
   });
 
-  if (!chatroom) {
-    throw new Error("Could not find chatroom privacy");
-  }
-
-  return chatroom.privacy;
+  return updated.joinKey;
 };
 
 export const swapChatroomIndexes = async (

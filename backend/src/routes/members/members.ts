@@ -10,6 +10,7 @@ import { validationMiddleware } from "../../middleware/validationMiddleware.js";
 import {
   chatroomIdSchema,
   chatroomModifyIndexSchema,
+  joinKeySchema,
 } from "../../validators/chatrooms/chatroomValidation.js";
 import { chatroomMemberSchema } from "../../validators/members/memberValidation.js";
 
@@ -29,8 +30,8 @@ membersRouter.delete(
   removeMemberFromChatroom,
 );
 membersRouter.post(
-  "/:chatroomId",
-  validationMiddleware(chatroomIdSchema, (req) => req.params),
+  "/join",
+  validationMiddleware(joinKeySchema, (req) => req.body),
   joinChatroom,
 );
 membersRouter.patch(

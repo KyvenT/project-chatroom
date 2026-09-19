@@ -16,6 +16,12 @@ export type ChatroomPrivacy =
   | "JOINABLE"
   | "PUBLIC";
 
+export interface JoinInfo {
+  chatroomId: string;
+  title: string;
+  privacy: ChatroomPrivacy;
+}
+
 export interface JoinChatroom {
   joinedAt: Date;
   chatroomId: string;
@@ -25,6 +31,7 @@ export interface JoinChatroom {
 
 export interface ChatroomDetails {
   id: string;
+  joinKey?: string; // only sent to the chatroom owner
   title: string;
   ownerId: string;
   privacy: ChatroomPrivacy;

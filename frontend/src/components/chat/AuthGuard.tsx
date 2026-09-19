@@ -1,17 +1,8 @@
 import { css, useTheme } from "@emotion/react";
-import { Link, useParams } from "react-router";
+import { Link } from "react-router";
 import Modal from "../Modal";
-import useToggle from "../../hooks/useToggle";
 import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
-import { ArrowLeftIcon } from "lucide-react";
-import type { UserAuth } from "../../types/REST-types/User";
-import React, { useRef } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
-import { customQuery } from "../../utils/customQuery";
-import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import type { Theme } from "@emotion/react";
-import { API_URL } from "../../env";
 
 const styles = (theme: Theme) =>
   css({
@@ -100,51 +91,9 @@ const modalStyles = (theme: Theme) =>
     border: `1px solid ${theme.colors.borderStrong}`,
   });
 
-interface privacyDataType {
-  privacy: ChatroomPrivacy;
-}
-
 const AuthGuard = () => {
-  const [toggleContinueAsGuest, setToggleContinueAsGuest] = useToggle(false);
-  const handleSignIn = useAuthStore((state) => state.handleSignIn);
-  const { chatroomId } = useParams();
-  const guestNameRef = useRef<HTMLInputElement>(null);
   const theme = useTheme();
   const isLoggedIn = useAuthStore(isLoggedInSelector);
-
-  const { data: privacyData } = useQuery<privacyDataType>({
-    queryKey: ["chatroom-privacy", chatroomId],
-    queryFn: () =>
-      customQuery({
-        fetchUrl: `${API_URL}/api/chatroomsPublic/${chatroomId}`,
-      }),
-    enabled: !!chatroomId,
-    staleTime: Infinity,
-  });
-
-  const { mutate, error } = useMutation<UserAuth, Error, MutationArgs>({
-    mutationFn: customMutation<UserAuth>,
-    onSuccess: (guestAuthData) => {
-      if (!guestAuthData) return;
-      handleSignIn(guestAuthData);
-    },
-  });
-
-  const handleGuestCreation = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (privacyData?.privacy !== "PUBLIC") return;
-
-    const username = guestNameRef.current?.value;
-    if (!username) return;
-    mutate({
-      fetchUrl: `${API_URL}/api/auth/create-guest`,
-      method: "POST",
-      reqBody: { username, chatroomId },
-    });
-  };
-
-  const chatroomJoinable: boolean = privacyData?.privacy === "PUBLIC";
-  const errorMessage: string = error?.message || "";
 
   return (
     <Modal
@@ -153,47 +102,11 @@ const AuthGuard = () => {
       variant="requiredInteraction"
     >
       <div css={styles(theme)}>
-        {toggleContinueAsGuest ? (
-          <div className="subpageContainer">
-            <a
-              className="backBtn"
-              onClick={() => setToggleContinueAsGuest(false)}
-            >
-              <ArrowLeftIcon />
-            </a>
-            <h3>Create a Guest User</h3>
-            <form id="createGuest" onSubmit={handleGuestCreation}>
-              <div className="guestNameInputSection">
-                <label htmlFor="usernameInput">Username: </label>
-                <input
-                  id="usernameInput"
-                  placeholder="Bob..."
-                  ref={guestNameRef}
-                ></input>
-              </div>
-            </form>
-            <span className="errorMessage">{errorMessage}</span>
-            <button className="guestSubmitBtn" type="submit" form="createGuest">
-              Join as Guest
-            </button>
-          </div>
-        ) : (
-          <div className="subpageContainer">
-            <h3>You are currently not logged in</h3>
-            <Link to="/login">Sign in to chat</Link>
-            {chatroomJoinable && (
-              <>
-                <p>or</p>
-                <button
-                  className="toggleCreateGuestBtn"
-                  onClick={() => setToggleContinueAsGuest(true)}
-                >
-                  Join chatroom as Guest
-                </button>
-              </>
-            )}
-          </div>
-        )}
+        <div className="subpageContainer">
+          <h3>You are currently not logged in</h3>
+          <Link to="/login">Sign in to chat</Link>
+          <p>Have an invite link? Open it to join as a guest.</p>
+        </div>
       </div>
     </Modal>
   );

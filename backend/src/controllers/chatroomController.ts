@@ -94,15 +94,34 @@ export const deleteChatroom = async (req: Request, res: Response) => {
   }
 };
 
-export const getChatroomPrivacy = async (req: Request, res: Response) => {
+export const getJoinInfo = async (req: Request, res: Response) => {
   const { data } = req;
 
   try {
-    const privacy = await chatroomService.getChatroomPrivacy(data);
-    res.status(200).json({ privacy });
+    const joinInfo = await chatroomService.getJoinInfo(data);
+    res.status(200).json(joinInfo);
   } catch (err: any) {
-    console.error("couldnt fetch chatroom privacy", err);
-    res.status(500).json({ message: err.message });
+    console.error("couldnt fetch join info", err);
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const regenerateJoinKey = async (req: Request, res: Response) => {
+  const { userId, data } = req;
+
+  if (!userId) {
+    res
+      .status(400)
+      .json({ message: "Must be signed in to regenerate a join key" });
+    return;
+  }
+
+  try {
+    const joinKey = await chatroomService.regenerateJoinKey(userId, data);
+    res.status(200).json({ joinKey });
+  } catch (err: any) {
+    console.error("couldnt regenerate join key", err);
+    res.status(403).json({ message: err.message });
   }
 };
 

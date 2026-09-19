@@ -106,18 +106,20 @@ export const loginUser = async (
 export const createGuest = async (
   data: z.infer<typeof guestSchema>,
 ): Promise<AuthPayload> => {
-  const { chatroomId, username } = data;
+  const { joinKey, username } = data;
   const randomlyGeneratedPassword = crypto.randomBytes(32).toString("hex");
 
-  const verifyPrivacy = await Prisma.chatroom.findUnique({
+  const chatroom = await Prisma.chatroom.findUnique({
     where: {
-      id: chatroomId,
+      joinKey,
     },
   });
 
-  if (verifyPrivacy?.privacy !== "PUBLIC") {
+  if (chatroom?.privacy !== "PUBLIC") {
     throw new Error("Guests are not allowed to join this chatroom");
   }
+
+  const chatroomId = chatroom.id;
 
   const passwordHash = await bcrypt.hash(randomlyGeneratedPassword, 12);
 

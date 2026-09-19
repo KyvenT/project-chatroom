@@ -11,7 +11,7 @@ import Button from "../Button";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { SquarePen, X } from "lucide-react";
+import { Check, Copy, RefreshCw, SquarePen, X } from "lucide-react";
 import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import useToggle from "../../hooks/useToggle";
 import { customQuery } from "../../utils/customQuery";
@@ -110,6 +110,42 @@ const chatroomDetailsModalStyles = (theme: Theme) =>
         },
       },
 
+      ".joinLinkSection": {
+        display: "flex",
+        flexDirection: "column",
+        gap: "6px",
+        width: "100%",
+
+        label: {
+          fontSize: "0.85rem",
+          color: theme.colors.light_grey,
+        },
+
+        ".joinLinkRow": {
+          display: "flex",
+          gap: "6px",
+          alignItems: "center",
+        },
+
+        input: {
+          flex: 1,
+          minWidth: 0,
+          fontSize: "0.85rem",
+          padding: "6px 8px",
+          borderRadius: "6px",
+          backgroundColor: theme.colors.black,
+          color: theme.colors.white,
+          border: `1px solid ${theme.colors.border}`,
+        },
+
+        ".joinLinkBtn": {
+          width: "2rem",
+          height: "2rem",
+          padding: "6px",
+          flex: "0 0 auto",
+        },
+      },
+
       ".actionBtns": {
         display: "flex",
         justifyContent: "center",
@@ -189,6 +225,40 @@ export const ChatroomDetailsModal = ({
       method: "DELETE",
     });
     onClose();
+  };
+
+  const [linkCopied, setLinkCopied] = useToggle(false);
+
+  const regenerateMutation = useMutation<
+    { joinKey: string },
+    Error,
+    MutationArgs
+  >({
+    mutationFn: customMutation<{ joinKey: string }>,
+    onSuccess: () => refetch(),
+  });
+
+  const handleRegenerateKey = () => {
+    if (
+      !window.confirm(
+        "Regenerate the join link? The current link will stop working.",
+      )
+    )
+      return;
+    regenerateMutation.mutate({
+      fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}/join-key`,
+      method: "POST",
+    });
+  };
+
+  const handleCopyLink = async (link: string) => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 1500);
+    } catch {
+      // clipboard unavailable; the link is still selectable in the input
+    }
   };
 
   const handleUpdate: SubmitHandler<ChatroomFormInput> = (data) => {
@@ -293,6 +363,43 @@ export const ChatroomDetailsModal = ({
                     <option value="PUBLIC">Guests can join by link</option>
                   </select>
                 </div>
+                {chatroomData.joinKey &&
+                  (chatroomData.privacy === "JOINABLE" ||
+                    chatroomData.privacy === "PUBLIC") && (
+                    <div className="joinLinkSection">
+                      <label htmlFor="joinLink">Join link</label>
+                      <div className="joinLinkRow">
+                        <input
+                          id="joinLink"
+                          readOnly
+                          value={`${window.location.origin}/join/${chatroomData.joinKey}`}
+                          onFocus={(e) => e.currentTarget.select()}
+                        />
+                        <Button
+                          variant="icon"
+                          type="button"
+                          className="joinLinkBtn"
+                          aria-label="Copy join link"
+                          onClick={() =>
+                            handleCopyLink(
+                              `${window.location.origin}/join/${chatroomData.joinKey}`,
+                            )
+                          }
+                        >
+                          {linkCopied ? <Check /> : <Copy />}
+                        </Button>
+                        <Button
+                          variant="icon"
+                          type="button"
+                          className="joinLinkBtn"
+                          aria-label="Regenerate join link"
+                          onClick={handleRegenerateKey}
+                        >
+                          <RefreshCw />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 <div className="actionBtns">
                   <Button className="actionBtn" type="submit">
                     Save

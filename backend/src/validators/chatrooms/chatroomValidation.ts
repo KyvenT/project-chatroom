@@ -6,6 +6,10 @@ export const chatroomSetOptionsSchema = z.object({
   privacy: z.enum(ChatroomPrivacy),
 });
 
+export const joinKeySchema = z.object({
+  joinKey: z.string().regex(/^[A-Za-z0-9_-]{16}$/),
+});
+
 export const chatroomIdSchema = z.object({
   chatroomId: z.uuid(),
 });

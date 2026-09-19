@@ -44,6 +44,12 @@ export interface ChatroomPayload {
   };
 }
 
+export interface JoinInfoPayload {
+  chatroomId: string;
+  title: string;
+  privacy: ChatroomPrivacy;
+}
+
 export interface JoinChatroomPayload {
   joinedAt: Date;
   chatroomId: string;
@@ -53,6 +59,7 @@ export interface JoinChatroomPayload {
 
 export interface ChatroomDetailsPayload {
   id: string;
+  joinKey?: string; // only present for the chatroom owner
   title: string;
   ownerId: string;
   privacy: ChatroomPrivacy;

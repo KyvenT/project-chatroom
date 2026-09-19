@@ -6,7 +6,7 @@ export const userSchema = z.object({
 });
 
 export const guestSchema = z.object({
-  chatroomId: z.string(),
+  joinKey: z.string(),
   username: z.string(),
 });
 
