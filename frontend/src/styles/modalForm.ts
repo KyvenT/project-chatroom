@@ -70,7 +70,7 @@ export const modalButtonStyles = (theme: Theme) =>
       color: theme.colors.danger,
       borderColor: theme.colors.borderStrong,
       "&:hover:enabled": {
-        backgroundColor: "rgba(239, 90, 90, 0.1)",
+        backgroundColor: theme.colors.dangerSoft,
         borderColor: theme.colors.danger,
       },
     },
@@ -78,7 +78,7 @@ export const modalButtonStyles = (theme: Theme) =>
     ".btnDangerSolid": {
       backgroundColor: theme.colors.danger,
       color: theme.colors.onAccent,
-      "&:hover:enabled": { backgroundColor: "#f26f6f" },
+      "&:hover:enabled": { backgroundColor: theme.colors.dangerHover },
     },
   });
 
@@ -233,12 +233,12 @@ export const modalSectionStyles = (theme: Theme) =>
 
     ".badgeSuccess": {
       color: theme.colors.success,
-      backgroundColor: "rgba(62, 207, 142, 0.12)",
+      backgroundColor: theme.colors.successSoft,
     },
 
     ".badgeDanger": {
       color: theme.colors.danger,
-      backgroundColor: "rgba(239, 90, 90, 0.12)",
+      backgroundColor: theme.colors.dangerSoft,
     },
   });
 

@@ -76,13 +76,13 @@ const dialogStyles = (variant: ModalVariant, theme: Theme) =>
     zIndex: variant === "requiredInteraction" ? 9999 : 1,
   });
 
-const backdropStyles = (variant: ModalVariant) =>
+const backdropStyles = (variant: ModalVariant, theme: Theme) =>
   css({
     position: "absolute",
     top: 0,
     left: 0,
     backgroundColor:
-      variant === "requiredInteraction" ? "rgba(6,8,12,0.6)" : "transparent",
+      variant === "requiredInteraction" ? theme.colors.backdrop : "transparent",
     backdropFilter: variant === "requiredInteraction" ? "blur(3px)" : "none",
     height: "100dvh",
     width: "100dvw",
@@ -119,7 +119,7 @@ const Modal = ({
   };
 
   return createPortal(
-    <div css={backdropStyles(variant)} onClick={onClose}>
+    <div css={backdropStyles(variant, theme)} onClick={onClose}>
       <dialog
         ref={dialogRef}
         onKeyDown={handleESCPress}
