@@ -65,4 +65,20 @@ describe("MessageInput", () => {
       screen.getByRole("button", { name: "Send message" }),
     ).toBeInTheDocument();
   });
+
+  it("stops at the server's length limit and counts down near it", () => {
+    const { textarea } = setup();
+    expect(textarea).toHaveAttribute("maxLength", "60");
+    expect(screen.queryByLabelText(/characters left/)).toBeNull();
+
+    fireEvent.input(textarea, { target: { value: "x".repeat(50) } });
+    expect(screen.getByLabelText("10 characters left")).toBeInTheDocument();
+  });
+
+  it("clears the countdown after sending", () => {
+    const { textarea } = setup();
+    fireEvent.input(textarea, { target: { value: "x".repeat(50) } });
+    fireEvent.keyDown(textarea, { key: "Enter" });
+    expect(screen.queryByLabelText(/characters left/)).toBeNull();
+  });
 });
