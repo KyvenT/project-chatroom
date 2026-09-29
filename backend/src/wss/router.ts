@@ -12,23 +12,34 @@ import {
 } from "../types/ws-messages.js";
 import { handleTypingPresence } from "./incoming-message-routes/typing-presence.js";
 import { handleUpdateLastViewedAt } from "./incoming-message-routes/update-last-viewed-at.js";
+import { updateWatchedChatrooms } from "./incoming-message-routes/update-watched-chatrooms.js";
+
+// handlers are async; an error in one is logged instead of becoming an
+// unhandled rejection, which would take the server down
+const run = (handler: unknown) =>
+  Promise.resolve(handler).catch((err) =>
+    console.error("websocket handler error", err),
+  );
 
 export const wsMessageRouter = (message: WSMessage, ws: WebSocket) => {
   switch (message.type) {
     case "auth":
-      authenticateSocket(message, ws);
+      run(authenticateSocket(message, ws));
       break;
     case "message":
-      handleChatMessage(message, ws);
+      run(handleChatMessage(message, ws));
       break;
     case "update-active-chatroom":
-      updateActiveChatroom(message, ws);
+      run(updateActiveChatroom(message, ws));
       break;
     case "typing-presence":
-      handleTypingPresence(message, ws);
+      run(handleTypingPresence(message, ws));
       break;
     case "update-last-viewed-at":
-      handleUpdateLastViewedAt(message, ws);
+      run(handleUpdateLastViewedAt(message, ws));
+      break;
+    case "update-watched-chatrooms":
+      run(updateWatchedChatrooms(message, ws));
       break;
     default:
       console.log("uncaught message: ", message);

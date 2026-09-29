@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
 import { UpdateActiveChatroomMessage } from "../../types/ws-messages.js";
-import Prisma from "../../prisma.js";
+import { isChatroomMember } from "../membership.js";
 
 export const updateActiveChatroom = async (
   message: UpdateActiveChatroomMessage,
@@ -15,33 +15,20 @@ export const updateActiveChatroom = async (
     }
     const { chatroomId } = message;
 
-    const prevChatroom = userActiveChatroomMap.getByKey(userId);
+    // "home" (no chatroom open) is always allowed; a chatroom has to be one
+    // the user is in, or they'd get its messages live
+    if (chatroomId !== "home" && !(await isChatroomMember(userId, chatroomId))) {
+      userActiveChatroomMap.deleteByKey(userId);
+      ws.send(
+        JSON.stringify({
+          type: "feedback",
+          message: "Not a member of chatroom " + chatroomId,
+        }),
+      );
+      return;
+    }
+
     userActiveChatroomMap.set(userId, chatroomId);
-
-    if (!prevChatroom) return;
-
-    const verifyPrevPromise = Prisma.chatroomMember.findUnique({
-      where: {
-        chatroomId_memberId: {
-          chatroomId: prevChatroom,
-          memberId: userId,
-        },
-      },
-    });
-
-    const verifyNextPromise = Prisma.chatroomMember.findUnique({
-      where: {
-        chatroomId_memberId: {
-          chatroomId,
-          memberId: userId,
-        },
-      },
-    });
-
-    const [verifyPrev, verifyNext] = await Promise.all([
-      verifyPrevPromise,
-      verifyNextPromise,
-    ]);
 
     console.log(
       "Updated active chatroom for user " + userId + " to " + chatroomId,

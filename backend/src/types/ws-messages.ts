@@ -5,6 +5,7 @@ import {
   TypingPresenceMessageSchema,
   UpdateActiveChatroomMessageSchema,
   UpdateLastViewedAtMessageSchema,
+  UpdateWatchedChatroomsMessageSchema,
   WSMessageSchema,
 } from "../validators/ws/wsValidation.js";
 
@@ -14,6 +15,7 @@ export enum WSMessageTypes {
   UpdateActiveChatroom = "update-active-chatroom",
   TypingPresence = "typing-presence",
   UpdateLastViewedAt = "update-last-viewed-at",
+  UpdateWatchedChatrooms = "update-watched-chatrooms",
 }
 
 export type AuthMessage = z.infer<typeof AuthMessageSchema>;
@@ -28,6 +30,10 @@ export type TypingPresenceMessage = z.infer<typeof TypingPresenceMessageSchema>;
 
 export type UpdateLastViewedAtMessage = z.infer<
   typeof UpdateLastViewedAtMessageSchema
+>;
+
+export type UpdateWatchedChatroomsMessage = z.infer<
+  typeof UpdateWatchedChatroomsMessageSchema
 >;
 
 export type WSMessage = z.infer<typeof WSMessageSchema>;

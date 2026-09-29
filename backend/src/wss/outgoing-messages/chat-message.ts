@@ -1,4 +1,8 @@
-import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
+import {
+  socketMap,
+  userActiveChatroomMap,
+  userWatchedChatroomsMap,
+} from "../../lib/socketMaps.js";
 import { MessagePayload } from "../../types/payloads.js";
 import { handleNewNotification } from "./notification.js";
 import { sendUpdateUnreadMessage } from "./update-unread-count.js";
@@ -6,12 +10,15 @@ import Prisma from "../../prisma.js";
 
 export const sendChatMessage = async (message: MessagePayload) => {
   try {
-    const activeRecipients = userActiveChatroomMap.getByValue(
-      message.chatroomId,
-    );
+    // users with the chatroom open, or watching it (e.g. in a pop-out), get
+    // the message live and don't count it as unread
+    const activeRecipients = new Set([
+      ...(userActiveChatroomMap.getByValue(message.chatroomId) ?? []),
+      ...userWatchedChatroomsMap.getWatchers(message.chatroomId),
+    ]);
 
     console.log("activeRecipients before filter: ", activeRecipients);
-    activeRecipients?.forEach((activeUserId) => {
+    activeRecipients.forEach((activeUserId) => {
       const recipientSocket = socketMap.getByKey(activeUserId);
       if (!recipientSocket) return;
       console.log(
@@ -33,7 +40,7 @@ export const sendChatMessage = async (message: MessagePayload) => {
     });
     const nonActiveRecipients = new Set(recipients);
     nonActiveRecipients.forEach((activeUserId) => {
-      if (activeRecipients?.has(activeUserId.memberId)) {
+      if (activeRecipients.has(activeUserId.memberId)) {
         nonActiveRecipients.delete(activeUserId);
       }
     });

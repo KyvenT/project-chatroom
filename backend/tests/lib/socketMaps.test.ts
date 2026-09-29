@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   BidirectionalGroupedMap,
   BidirectionalMap,
+  WatchedChatroomsMap,
 } from "../../src/lib/socketMaps.js";
 
 describe("BidirectionalMap", () => {
@@ -64,5 +65,36 @@ describe("BidirectionalGroupedMap", () => {
     map.deleteByKey("u1");
     expect(map.hasValue("room1")).toBe(false);
     expect(map.getByValueAsArray("room1")).toBeUndefined();
+  });
+});
+
+describe("WatchedChatroomsMap", () => {
+  it("tracks which users watch which chatrooms", () => {
+    const map = new WatchedChatroomsMap();
+    map.set("u1", ["c1", "c2"]);
+    map.set("u2", ["c2"]);
+
+    expect([...map.getWatchers("c2")].sort()).toEqual(["u1", "u2"]);
+    expect([...map.getWatched("u1")].sort()).toEqual(["c1", "c2"]);
+    expect(map.getWatchers("c3").size).toBe(0);
+  });
+
+  it("replaces a user's watched chatrooms", () => {
+    const map = new WatchedChatroomsMap();
+    map.set("u1", ["c1", "c2"]);
+    map.set("u1", ["c3"]);
+
+    expect(map.getWatchers("c1").size).toBe(0);
+    expect([...map.getWatchers("c3")]).toEqual(["u1"]);
+  });
+
+  it("forgets a user", () => {
+    const map = new WatchedChatroomsMap();
+    map.set("u1", ["c1"]);
+    map.set("u2", ["c1"]);
+    map.deleteUser("u1");
+
+    expect([...map.getWatchers("c1")]).toEqual(["u2"]);
+    expect(map.getWatched("u1").size).toBe(0);
   });
 });

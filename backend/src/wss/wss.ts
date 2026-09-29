@@ -1,5 +1,9 @@
 import { WebSocketServer } from "ws";
-import { socketMap, userActiveChatroomMap } from "../lib/socketMaps.js";
+import {
+  socketMap,
+  userActiveChatroomMap,
+  userWatchedChatroomsMap,
+} from "../lib/socketMaps.js";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { wsMessageRouter } from "./router.js";
 import { WSMessageSchema } from "../validators/ws/wsValidation.js";
@@ -75,6 +79,7 @@ export const startWSS = (
           // updateLastViewedAt(chatroom, userId);
           userActiveChatroomMap.deleteByKey(userId);
         }
+        userWatchedChatroomsMap.deleteUser(userId);
         socketMap.deleteByValue(ws);
         console.log("socket logged out: " + userId);
       }
