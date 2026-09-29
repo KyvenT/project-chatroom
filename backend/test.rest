@@ -25,7 +25,7 @@ Content-Type: application/json
 
 {
     "username": "guest123",
-    "chatroomId": "8a0c0962-a48c-429e-a15c-b41ffc43e465"
+    "joinKey": "replace-with-join-key"
 }
 
 ### create chatroom 

@@ -3,6 +3,7 @@ import { css, useTheme, type SerializedStyles } from "@emotion/react";
 import type React from "react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 
 type ModalVariant = "default" | "requiredInteraction";
 
@@ -12,20 +13,52 @@ export interface ModalProps extends React.DialogHTMLAttributes<HTMLDialogElement
   onClose?: () => void;
 }
 
-export const closeButtonStyles = (theme: Theme) =>
+const closeButtonStyles = (theme: Theme) =>
   css({
     position: "absolute",
-    top: "10px",
-    right: "10px",
+    top: "16px",
+    right: "16px",
+    width: "2rem",
+    height: "2rem",
+    display: "grid",
+    placeItems: "center",
+    padding: 0,
     backgroundColor: "transparent",
     border: "none",
+    borderRadius: theme.radius.sm,
     cursor: "pointer",
-    fontSize: "1rem",
     color: theme.colors.light_grey,
+    transition: "color 0.15s ease, background-color 0.15s ease",
     "&:hover": {
       color: theme.colors.white,
+      backgroundColor: theme.colors.grey,
+    },
+    "&:focus-visible": {
+      outline: `2px solid ${theme.colors.accent}`,
+      outlineOffset: "2px",
     },
   });
+
+export const ModalCloseButton = ({
+  onClose,
+  label = "Close",
+}: {
+  onClose: () => void;
+  label?: string;
+}) => {
+  const theme = useTheme();
+
+  return (
+    <button
+      type="button"
+      css={closeButtonStyles(theme)}
+      onClick={onClose}
+      aria-label={label}
+    >
+      <X size="1.25rem" />
+    </button>
+  );
+};
 
 const dialogStyles = (variant: ModalVariant, theme: Theme) =>
   css({
@@ -43,13 +76,13 @@ const dialogStyles = (variant: ModalVariant, theme: Theme) =>
     zIndex: variant === "requiredInteraction" ? 9999 : 1,
   });
 
-const backdropStyles = (variant: ModalVariant) =>
+const backdropStyles = (variant: ModalVariant, theme: Theme) =>
   css({
     position: "absolute",
     top: 0,
     left: 0,
     backgroundColor:
-      variant === "requiredInteraction" ? "rgba(6,8,12,0.6)" : "transparent",
+      variant === "requiredInteraction" ? theme.colors.backdrop : "transparent",
     backdropFilter: variant === "requiredInteraction" ? "blur(3px)" : "none",
     height: "100dvh",
     width: "100dvw",
@@ -86,7 +119,7 @@ const Modal = ({
   };
 
   return createPortal(
-    <div css={backdropStyles(variant)} onClick={onClose}>
+    <div css={backdropStyles(variant, theme)} onClick={onClose}>
       <dialog
         ref={dialogRef}
         onKeyDown={handleESCPress}

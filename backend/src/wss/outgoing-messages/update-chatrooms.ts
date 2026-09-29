@@ -23,6 +23,8 @@ export const sendUpdateChatrooms = async (
         select: {
           chatroomId: true,
           lastViewedAt: true,
+          chatroomIndex: true,
+          folderId: true,
           chatroom: {
             select: {
               title: true,

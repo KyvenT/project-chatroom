@@ -11,6 +11,7 @@ import ChatHome from "./routes/chat/ChatHome";
 import Logout from "./routes/auth/Logout";
 import { AccountProfilePage } from "./routes/utility/AccountProfile";
 import { SettingsPage } from "./routes/utility/Settings";
+import JoinChatroom from "./routes/join/JoinChatroom";
 
 const Router = () => {
   const router = useMemo(() => {
@@ -36,6 +37,7 @@ const Router = () => {
           { path: "login", Component: Login },
           { path: "register", Component: Signup },
           { path: "logout", Component: Logout },
+          { path: "join/:joinKey", Component: JoinChatroom },
         ],
       },
       {

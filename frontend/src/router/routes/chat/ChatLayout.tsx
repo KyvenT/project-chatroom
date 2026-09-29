@@ -22,6 +22,9 @@ import { ProfileButton } from "../../../components/chat-layout/ProfileButton";
 import { ShowMembersListBtn } from "../../../components/chat-layout/ShowMembersListBtn";
 import { ChatroomTitle } from "../../../components/chat-layout/ChatroomTitle";
 import { SidebarToggleBtn } from "../../../components/chat-layout/SidebarToggleBtn";
+import { PopoutDock } from "../../../components/popout/PopoutDock";
+import { PopoutWindow } from "../../../components/popout/PopoutWindow";
+import { PopoutButton } from "../../../components/popout/PopoutButton";
 
 const styles = css({
   height: "100%",
@@ -131,6 +134,16 @@ function ChatLayout() {
           <div className="blankSpace"></div>
           {isLoggedIn ? (
             <>
+              {chatroomId && (
+                <PopoutButton
+                  chatroomId={chatroomId}
+                  title={
+                    chatrooms.find((c) => c.chatroomId === chatroomId)?.chatroom
+                      .title ?? "chat"
+                  }
+                  iconClassName="headerIconBtn"
+                />
+              )}
               <InboxButton />
               <ProfileButton />
               {chatroomId && (
@@ -166,6 +179,12 @@ function ChatLayout() {
           <Outlet context={outletContext} />
         </div>
       </div>
+      {isLoggedIn && (
+        <>
+          <PopoutDock />
+          <PopoutWindow />
+        </>
+      )}
     </div>
   );
 }

@@ -3,6 +3,8 @@ export interface Chatroom {
   lastViewedAt: Date;
   unreadMessages: number;
   chatroomIndex: number;
+  // the user's sidebar folder for this chatroom; null shows it under Chats
+  folderId: string | null;
   chatroom: {
     title: string;
     privacy: ChatroomPrivacy;
@@ -11,10 +13,13 @@ export interface Chatroom {
 }
 
 export type ChatroomPrivacy =
-  | "INVITE_ONLY"
-  | "INVITE_PLUS"
-  | "JOINABLE"
-  | "PUBLIC";
+  "INVITE_ONLY" | "INVITE_PLUS" | "JOINABLE" | "PUBLIC";
+
+export interface JoinInfo {
+  chatroomId: string;
+  title: string;
+  privacy: ChatroomPrivacy;
+}
 
 export interface JoinChatroom {
   joinedAt: Date;
@@ -25,6 +30,7 @@ export interface JoinChatroom {
 
 export interface ChatroomDetails {
   id: string;
+  joinKey?: string; // only sent to the chatroom owner
   title: string;
   ownerId: string;
   privacy: ChatroomPrivacy;
@@ -48,4 +54,10 @@ export interface PinnedChatroom {
     title: string;
   };
   pinnedIndex: number;
+}
+
+export interface SidebarFolder {
+  id: string;
+  name: string;
+  index: number;
 }

@@ -7,18 +7,20 @@ import type { ChatroomPrivacy } from "../../types/REST-types/Chatroom";
 import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
-import Modal, { closeButtonStyles } from "../Modal";
+import Modal, { ModalCloseButton } from "../Modal";
 import type { Theme } from "@emotion/react";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { API_URL } from "../../env";
-import { mq } from "../../styles/breakpoints";
-import { X } from "lucide-react";
+import { fieldStyles, formModalStyles } from "../../styles/modalForm";
+import { privacyHint, privacyOptions } from "../../utils/chatroomPrivacy";
+import { Plus } from "lucide-react";
 
 const buttonStyles = (theme: Theme) =>
   css({
-    fontSize: "1.75rem",
-    width: "fit-content",
-    aspectRatio: "1",
+    // same square as the sidebar's home and settings buttons
+    width: "2.25rem",
+    height: "2.25rem",
+    padding: 0,
     color: theme.colors.light_grey,
 
     "&:hover": {
@@ -27,90 +29,10 @@ const buttonStyles = (theme: Theme) =>
     },
   });
 
-const dialogStyles = (theme: Theme) =>
-  css(
-    mq({
-      width: ["80%", "60%", "40%", "30%"],
-      gap: "10px",
-      backgroundColor: theme.colors.dark_grey,
-      color: theme.colors.white,
-      border: `1px solid ${theme.colors.border}`,
-      borderRadius: "12px",
-      padding: "30px",
-
-      h2: {
-        fontWeight: "500",
-        color: theme.colors.white,
-        cursor: "default",
-      },
-
-      "#new-chat-form": {
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "5px",
-      },
-
-      "#title": {
-        flex: 1,
-        minWidth: 0,
-        fontSize: "1rem",
-        borderRadius: "6px",
-        padding: "4px",
-        border: `1px solid ${theme.colors.borderStrong}`,
-        backgroundColor: "transparent",
-        color: theme.colors.white,
-      },
-
-      "#title:focus": {
-        outline: "none",
-      },
-
-      ".form-group": {
-        width: "100%",
-        fontSize: "1rem",
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-      },
-
-      ".submit-btn": {
-        fontSize: "1rem",
-        borderRadius: "6px",
-        width: "fit-content",
-        padding: "4px 8px",
-        backgroundColor: "transparent",
-        color: theme.colors.white,
-        border: `1px solid ${theme.colors.borderStrong}`,
-        cursor: "pointer",
-      },
-
-      ".submit-btn:hover": {
-        backgroundColor: theme.colors.grey,
-      },
-
-      "#privacy": {
-        flex: 1,
-        minWidth: 0,
-        fontSize: "1rem",
-        backgroundColor: "transparent",
-        color: theme.colors.white,
-        border: `1px solid ${theme.colors.borderStrong}`,
-        padding: "4px",
-        borderRadius: "6px",
-        cursor: "pointer",
-      },
-
-      "#privacy:hover": {
-        backgroundColor: theme.colors.grey,
-      },
-
-      "#privacy option": {
-        backgroundColor: theme.colors.dark_grey,
-      },
-    }),
-  );
+const formStyles = css({
+  display: "flex",
+  flexDirection: "column",
+});
 
 interface CreateChatroomFormInput {
   title: string;
@@ -120,12 +42,13 @@ interface CreateChatroomFormInput {
 const NewChatButton = () => {
   const [isToggled, setToggle] = useToggle(false);
   const isLoggedIn = useAuthStore(isLoggedInSelector);
-  const { register, handleSubmit, reset } = useForm<CreateChatroomFormInput>({
-    defaultValues: {
-      title: "",
-      privacy: "INVITE_ONLY",
-    },
-  });
+  const { register, handleSubmit, reset, watch } =
+    useForm<CreateChatroomFormInput>({
+      defaultValues: {
+        title: "",
+        privacy: "INVITE_ONLY",
+      },
+    });
   const mutation = useMutation<ConfirmationResponse, Error, MutationArgs>({
     mutationFn: customMutation<ConfirmationResponse>,
   });
@@ -155,47 +78,75 @@ const NewChatButton = () => {
         css={buttonStyles(theme)}
         aria-label="Open create chatroom modal"
       >
-        +
+        <Plus size="1.5rem" />
       </Button>
       {isToggled && (
         <Modal
-          modalStyles={dialogStyles(theme)}
+          modalStyles={formModalStyles(theme)}
           open={isToggled}
           onClose={() => setToggle(false)}
         >
-          <form id="new-chat-form" onSubmit={handleSubmit(onSubmit)}>
-            <h2>Create Chatroom</h2>
-            <div className="form-group chatroom-title-group">
-              <label htmlFor="title">Chatroom name: </label>
-              <input
-                {...register("title")}
-                id="title"
-                type="text"
-                placeholder="Title..."
-                maxLength={20}
-                required
-              />
+          <form css={formStyles} onSubmit={handleSubmit(onSubmit)}>
+            <div className="header">
+              <h2>Create chatroom</h2>
+              <p className="subtitle">
+                You can change these settings later from the chatroom details.
+              </p>
             </div>
-            <div className="form-group">
-              <label htmlFor="privacy">Privacy:</label>
-              <select {...register("privacy")} id="privacy">
-                <option value="INVITE_ONLY">Only owner can invite</option>
-                <option value="INVITE_PLUS">Members can invite</option>
-                <option value="JOINABLE">Any user can join by link</option>
-                <option value="PUBLIC">Guests can join by link</option>
-              </select>
+            <div className="body">
+              <div className="field">
+                <label htmlFor="title">Name</label>
+                <input
+                  {...register("title")}
+                  id="title"
+                  css={fieldStyles(theme)}
+                  type="text"
+                  placeholder="e.g. Study group"
+                  maxLength={20}
+                  required
+                  autoFocus
+                />
+                <p className="hint">Up to 20 characters.</p>
+              </div>
+              <div className="field">
+                <label htmlFor="privacy">Who can join</label>
+                <select
+                  {...register("privacy")}
+                  id="privacy"
+                  css={fieldStyles(theme)}
+                >
+                  {privacyOptions.map(({ value, label }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <p className="hint">{privacyHint(watch("privacy"))}</p>
+              </div>
             </div>
-            <button className="submit-btn" type="submit" disabled={!isLoggedIn}>
-              Create
-            </button>
+            <div className="footer">
+              <div className="footerEnd">
+                <button
+                  type="button"
+                  className="btn btnSecondary"
+                  onClick={() => setToggle(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btnPrimary"
+                  type="submit"
+                  disabled={!isLoggedIn}
+                >
+                  Create chatroom
+                </button>
+              </div>
+            </div>
           </form>
-          <button
-            css={closeButtonStyles(theme)}
-            onClick={() => setToggle(false)}
-            aria-label="Close create chatroom modal"
-          >
-            <X />
-          </button>
+          <ModalCloseButton
+            onClose={() => setToggle(false)}
+            label="Close create chatroom modal"
+          />
         </Modal>
       )}
     </>

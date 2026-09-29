@@ -29,10 +29,17 @@ export const UpdateLastViewedAtMessageSchema = z.object({
   chatroomId: z.string(),
 });
 
+// the chatrooms a client has open besides its active one (chat pop-outs)
+export const UpdateWatchedChatroomsMessageSchema = z.object({
+  type: z.literal(WSMessageTypes.UpdateWatchedChatrooms),
+  chatroomIds: z.array(z.string()).max(10),
+});
+
 export const WSMessageSchema = z.discriminatedUnion("type", [
   AuthMessageSchema,
   ChatMessageSchema,
   UpdateActiveChatroomMessageSchema,
   TypingPresenceMessageSchema,
   UpdateLastViewedAtMessageSchema,
+  UpdateWatchedChatroomsMessageSchema,
 ]);

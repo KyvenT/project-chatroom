@@ -1,135 +1,147 @@
-import { useMutation } from "@tanstack/react-query";
 import { useChatroomsStore } from "../../hooks/useStores";
-import Modal, { closeButtonStyles } from "../Modal";
-import { customMutation, type MutationArgs } from "../../utils/customMutation";
-import type { ConfirmationResponse } from "../../types/REST-types/Invite";
+import Modal, { ModalCloseButton } from "../Modal";
+import Button from "../Button";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import type { PinnedGroup } from "../../types/REST-types/Chatroom";
-import { API_URL } from "../../env";
-import { Check, Pencil, X } from "lucide-react";
+import { useHomeGroups } from "../../hooks/useHomeGroups";
+import { useFolders } from "../../hooks/useFolders";
+import { ConfirmModal } from "../ConfirmModal";
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  GripVertical,
+  Pin,
+  PinOff,
+  SquarePen,
+  X,
+} from "lucide-react";
+import { useDragReorder } from "../../hooks/useDragReorder";
+import { shiftId } from "../../utils/reorder";
 import { useRef, useState } from "react";
-import { mq } from "../../styles/breakpoints";
+import { fieldStyles, formModalStyles } from "../../styles/modalForm";
 
 interface pinChatroomsModalProps {
   open: boolean;
   onClose: () => void;
   pinnedGroup: PinnedGroup;
-  setPinnedGroups: React.Dispatch<React.SetStateAction<PinnedGroup[]>>;
 }
 
 const styles = (theme: Theme) =>
-  css(
-    mq({
-      width: ["80%", "80%", "40%"],
-      backgroundColor: theme.colors.dark_grey,
-      color: theme.colors.white,
-      border: `1px solid ${theme.colors.border}`,
-      borderRadius: "8px",
-      padding: "30px",
+  css(formModalStyles(theme, "480px"), {
+    ".titleRow": {
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      minHeight: "2.25rem",
 
-      ul: {
-        listStyle: "none",
-        padding: 0,
+      h2: {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
       },
 
-      ".title-section": {
-        width: "100%",
-
-        h3: {
-          fontSize: "1.5rem",
-          margin: 0,
-          fontWeight: 400,
-        },
-
-        ".edit-title-section": {
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-        },
-
-        ".edit-title-btn": {
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-        },
-
-        ".edit-title-btn:hover": {
-          opacity: 0.7,
-        },
-
-        ".btn-icon": {
-          width: "1.25rem",
-          height: "1.25rem",
-          color: theme.colors.white,
-          cursor: "pointer",
-        },
-
-        input: {
-          flex: 1,
-          minWidth: 0,
-          fontSize: "1.5rem",
-          fontWeight: 400,
-          backgroundColor: theme.colors.grey,
-          color: theme.colors.white,
-          border: `1px solid ${theme.colors.borderStrong}`,
-          borderRadius: "6px",
-          padding: "4px",
-        },
+      input: {
+        flex: 1,
+        minWidth: 0,
+        fontSize: "1.1rem",
+        fontWeight: 500,
       },
+    },
 
-      ".unpinned-chatroom": {
-        button: {
-          fontSize: "1.1rem",
-          backgroundColor: "transparent",
-          color: theme.colors.white,
-          border: 0,
-          width: "100%",
-          cursor: "pointer",
-        },
+    ".titleBtn": {
+      flex: "0 0 auto",
+      width: "2rem",
+      height: "2rem",
+      padding: "7px",
+    },
 
-        "button:hover": {
-          backgroundColor: theme.colors.grey,
-        },
+    ".listRowTitle": {
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+
+    ".listRowAction": {
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+    },
+
+    ".pinnedRow": {
+      cursor: "grab",
+      paddingLeft: "6px",
+
+      "&.dragging": { opacity: 0.4 },
+      // a line where the dragged chatroom will land
+      "&.dropBefore": { boxShadow: `0 -2px 0 0 ${theme.colors.accent}` },
+      "&.dropAfter": { boxShadow: `0 2px 0 0 ${theme.colors.accent}` },
+    },
+
+    ".grip": {
+      flex: "0 0 auto",
+      color: theme.colors.light_grey,
+    },
+
+    ".pinnedRow .listRowTitle": {
+      flex: 1,
+    },
+
+    ".rowButtons": {
+      flex: "0 0 auto",
+      display: "flex",
+      alignItems: "center",
+      gap: "2px",
+    },
+
+    ".moveBtn": {
+      width: "1.75rem",
+      height: "1.75rem",
+      padding: 0,
+
+      "&:disabled": {
+        opacity: 0.35,
+        cursor: "default",
+        backgroundColor: "transparent",
       },
+    },
 
-      h5: {
-        fontSize: "1.2rem",
-        fontWeight: 400,
-      },
+    ".unpinBtn": {
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+      marginLeft: "4px",
+      padding: "4px 8px",
+      fontSize: "0.8rem",
+    },
 
-      ".chatroom-list": {
-        marginBottom: "20px",
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: "6px",
-        padding: "12px",
-        height: ["60px", "60px", "100px"],
-        overflowY: "scroll",
-        scrollbarColor: `transparent transparent`,
-        "&:hover": {
-          scrollbarColor: `${theme.colors.white} transparent`,
-        },
-      },
-    }),
-  );
+    ".currentFolder": {
+      marginRight: "6px",
+      fontStyle: "italic",
+    },
+  });
 
 export const PinChatroomsModal = ({
   open,
   onClose,
   pinnedGroup,
-  setPinnedGroups,
 }: pinChatroomsModalProps) => {
   const theme = useTheme();
   const [enableTitleEdit, setEnableTitleEdit] = useState<boolean>(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
-  const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: customMutation<ConfirmationResponse>,
-    onSuccess: () => {
-      console.log("chatroom pinned successfully");
-    },
-  });
+  const {
+    synced,
+    setPinned,
+    renameGroup,
+    deleteGroup,
+    reorderGroup,
+    actionError: error,
+  } = useHomeGroups();
+  const { data: folders } = useFolders();
+  const folderName = (folderId: string | null) =>
+    folders?.find((f) => f.id === folderId)?.name;
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const handleChatroomPin = (
@@ -137,157 +149,255 @@ export const PinChatroomsModal = ({
     chatroomTitle: string,
     pin: boolean,
   ) => {
-    console.log("pin ", pinnedGroup.id, ": ", chatroomId, ",", pin);
-    mutate({
-      fetchUrl: `${API_URL}/api/pinned/${chatroomId}/pin`,
-      method: "PATCH",
-      reqBody: {
-        pin: pin,
-        pinGroupId: pinnedGroup.id,
-      },
-    });
-    setPinnedGroups((prev) =>
-      prev.map((group) => {
-        if (group.id !== pinnedGroup.id) return group;
-
-        if (pin) {
-          return {
-            ...group,
-            chatrooms: [
-              ...group.chatrooms,
-              {
-                chatroomId,
-                chatroom: { title: chatroomTitle },
-                pinnedIndex: group.chatrooms.length,
-              },
-            ],
-          };
-        }
-
-        return {
-          ...group,
-          chatrooms: group.chatrooms.filter((c) => c.chatroomId !== chatroomId),
-        };
-      }),
-    );
+    setPinned(pinnedGroup.id, { chatroomId, title: chatroomTitle }, pin);
   };
 
-  const handleEditPinnedGroupName = (pinnedGroupId: string, name: string) => {
-    mutate({
-      fetchUrl: `${API_URL}/api/pinned/${pinnedGroupId}`,
-      method: "PATCH",
-      reqBody: {
-        name,
-      },
-    });
-    setPinnedGroups((prev) =>
-      prev?.map((group) => {
-        if (group.id === pinnedGroupId) {
-          return { ...group, name };
-        }
-        return group;
-      }),
-    );
+  const handleDeleteGroup = () => {
+    setConfirmDeleteOpen(false);
+    deleteGroup(pinnedGroup.id);
+    onClose();
   };
 
   const pinnedSet = new Set(pinnedGroup.chatrooms.map((c) => c.chatroomId));
 
-  const pinnedChatrooms = chatrooms.filter((c) => pinnedSet.has(c.chatroomId));
+  // in the group's own order, which can be changed by dragging
+  const pinnedChatrooms = pinnedGroup.chatrooms;
+  const pinnedIds = pinnedChatrooms.map((c) => c.chatroomId);
   const unpinnedChatrooms = chatrooms.filter(
     (c) => !pinnedSet.has(c.chatroomId),
   );
 
+  const reorder = (ids: string[]) => reorderGroup(pinnedGroup.id, ids);
+  const { itemProps, containerProps, itemState } = useDragReorder({
+    ids: pinnedIds,
+    axis: "y",
+    onReorder: reorder,
+  });
+
+  const handleSaveName = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = titleInputRef.current?.value.trim();
+    if (name && name !== pinnedGroup.name) renameGroup(pinnedGroup.id, name);
+    setEnableTitleEdit(false);
+  };
+
   return (
     <Modal modalStyles={styles(theme)} open={open} onClose={onClose}>
-      <div>
-        <div className="title-section">
-          <div className="edit-title-section">
-            {enableTitleEdit ? (
-              <>
-                <input
-                  type="text"
-                  placeholder={pinnedGroup.name}
-                  maxLength={20}
-                  defaultValue={pinnedGroup.name}
-                  ref={titleInputRef}
-                ></input>
-                <button
-                  className="edit-title-btn"
-                  onClick={() => {
-                    handleEditPinnedGroupName(
-                      pinnedGroup.id,
-                      titleInputRef.current?.value || pinnedGroup.name,
-                    );
-                    setEnableTitleEdit(false);
-                  }}
-                >
-                  <Check className="btn-icon" />
-                </button>
-                <button
-                  className="edit-title-btn"
-                  onClick={() => setEnableTitleEdit(false)}
-                >
-                  <X className="btn-icon" />
-                </button>
-              </>
-            ) : (
-              <>
-                <h3>{pinnedGroup.name}</h3>
-                <button
-                  className="edit-title-btn"
-                  aria-label="Edit pinned group name"
-                  onClick={() => setEnableTitleEdit((prev) => !prev)}
-                >
-                  <Pencil className="btn-icon" />
-                </button>
-              </>
-            )}
+      <div className="header">
+        <p className="eyebrow">{synced ? "Folder" : "Group"}</p>
+        {enableTitleEdit ? (
+          <form className="titleRow" onSubmit={handleSaveName}>
+            <input
+              css={fieldStyles(theme)}
+              type="text"
+              placeholder={pinnedGroup.name}
+              maxLength={30}
+              defaultValue={pinnedGroup.name}
+              ref={titleInputRef}
+              aria-label={synced ? "Folder name" : "Pinned group name"}
+              autoFocus
+            />
+            <Button
+              variant="icon"
+              type="submit"
+              className="titleBtn"
+              aria-label={synced ? "Save folder name" : "Save group name"}
+            >
+              <Check />
+            </Button>
+            <Button
+              variant="icon"
+              type="button"
+              className="titleBtn"
+              aria-label={
+                synced
+                  ? "Cancel editing folder name"
+                  : "Cancel editing group name"
+              }
+              onClick={() => setEnableTitleEdit(false)}
+            >
+              <X />
+            </Button>
+          </form>
+        ) : (
+          <div className="titleRow">
+            <h2>{pinnedGroup.name}</h2>
+            <Button
+              variant="icon"
+              type="button"
+              className="titleBtn"
+              aria-label={
+                synced ? "Edit folder name" : "Edit pinned group name"
+              }
+              onClick={() => setEnableTitleEdit(true)}
+            >
+              <SquarePen />
+            </Button>
           </div>
-          <button css={closeButtonStyles(theme)} onClick={onClose}>
-            <X />
+        )}
+      </div>
+
+      <div className="body">
+        {synced && (
+          <p className="hint">
+            Synced with your sidebar folders. A chatroom can be in one folder,
+            so adding one here moves it out of its current folder.
+          </p>
+        )}
+        <div className="field">
+          <p className="sectionLabel">{synced ? "In this folder" : "Pinned"}</p>
+          <ul className="list" {...containerProps}>
+            {pinnedChatrooms.length === 0 ? (
+              <li className="listEmpty">
+                {synced
+                  ? "No chatrooms in this folder yet. Add one from the list below."
+                  : "No pinned chatrooms yet. Pin one from the list below."}
+              </li>
+            ) : (
+              pinnedChatrooms.map((chatroom, i) => {
+                const title = chatroom.chatroom.title;
+                return (
+                  <li
+                    key={chatroom.chatroomId}
+                    className={`listRow pinnedRow ${itemState(chatroom.chatroomId)}`}
+                    {...itemProps(chatroom.chatroomId)}
+                  >
+                    <GripVertical
+                      className="grip"
+                      size="1rem"
+                      aria-hidden="true"
+                    />
+                    <span className="listRowTitle">{title}</span>
+                    <span className="rowButtons">
+                      <Button
+                        variant="icon"
+                        type="button"
+                        className="moveBtn"
+                        aria-label={`Move ${title} up`}
+                        disabled={i === 0}
+                        onClick={() =>
+                          reorder(shiftId(pinnedIds, chatroom.chatroomId, -1))
+                        }
+                      >
+                        <ChevronUp size="1rem" />
+                      </Button>
+                      <Button
+                        variant="icon"
+                        type="button"
+                        className="moveBtn"
+                        aria-label={`Move ${title} down`}
+                        disabled={i === pinnedChatrooms.length - 1}
+                        onClick={() =>
+                          reorder(shiftId(pinnedIds, chatroom.chatroomId, 1))
+                        }
+                      >
+                        <ChevronDown size="1rem" />
+                      </Button>
+                      <button
+                        type="button"
+                        className="btn btnSecondary unpinBtn"
+                        aria-label={`${synced ? "Remove" : "Unpin"} ${title}`}
+                        onClick={() =>
+                          handleChatroomPin(chatroom.chatroomId, title, false)
+                        }
+                      >
+                        <PinOff size="0.85rem" aria-hidden="true" />
+                        {synced ? "Remove" : "Unpin"}
+                      </button>
+                    </span>
+                  </li>
+                );
+              })
+            )}
+          </ul>
+          {pinnedChatrooms.length > 1 && (
+            <p className="hint">Drag chatrooms to change their order.</p>
+          )}
+        </div>
+
+        <div className="field">
+          <p className="sectionLabel">Your chatrooms</p>
+          <ul className="list">
+            {unpinnedChatrooms.length === 0 ? (
+              <li className="listEmpty">
+                {synced
+                  ? "All of your chatrooms are in this folder."
+                  : "All of your chatrooms are pinned."}
+              </li>
+            ) : (
+              unpinnedChatrooms.map((chatroom) => (
+                <li key={chatroom.chatroomId}>
+                  <button
+                    type="button"
+                    className="listRow"
+                    onClick={() =>
+                      handleChatroomPin(
+                        chatroom.chatroomId,
+                        chatroom.chatroom.title,
+                        true,
+                      )
+                    }
+                  >
+                    <span className="listRowTitle">
+                      {chatroom.chatroom.title}
+                    </span>
+                    <span className="listRowAction">
+                      {synced && chatroom.folderId && (
+                        <span className="currentFolder">
+                          in {folderName(chatroom.folderId) ?? "a folder"}
+                        </span>
+                      )}
+                      <Pin size="0.9rem" /> {synced ? "Add" : "Pin"}
+                    </span>
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+          {error && <p className="errorText">{error.message}</p>}
+        </div>
+      </div>
+
+      <div className="footer">
+        <button
+          type="button"
+          className="btn btnDanger"
+          onClick={() => setConfirmDeleteOpen(true)}
+        >
+          {synced ? "Delete folder" : "Delete group"}
+        </button>
+        <div className="footerEnd">
+          <button type="button" className="btn btnPrimary" onClick={onClose}>
+            Done
           </button>
         </div>
-        <h5>Pinned Chatrooms</h5>
-        <ul className="chatroom-list">
-          {pinnedChatrooms.length === 0 ? (
-            <p>No pinned chatrooms</p>
-          ) : (
-            pinnedChatrooms.map((chatroom) => (
-              <li key={chatroom.chatroomId} className="unpinned-chatroom">
-                <button
-                  onClick={() =>
-                    handleChatroomPin(
-                      chatroom.chatroomId,
-                      chatroom.chatroom.title,
-                      false,
-                    )
-                  }
-                >
-                  {chatroom.chatroom.title}
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
-        <h5>Pin chatrooms</h5>
-        <ul className="chatroom-list">
-          {unpinnedChatrooms.map((chatroom) => (
-            <li key={chatroom.chatroomId} className="unpinned-chatroom">
-              <button
-                onClick={() =>
-                  handleChatroomPin(
-                    chatroom.chatroomId,
-                    chatroom.chatroom.title,
-                    true,
-                  )
-                }
-              >
-                {chatroom.chatroom.title}
-              </button>
-            </li>
-          ))}
-        </ul>
       </div>
+      <ModalCloseButton
+        onClose={onClose}
+        label={synced ? "Close folder" : "Close pinned group"}
+      />
+      {confirmDeleteOpen && (
+        <ConfirmModal
+          open={confirmDeleteOpen}
+          title={synced ? "Delete folder?" : "Delete group?"}
+          confirmLabel={synced ? "Delete folder" : "Delete group"}
+          danger
+          onConfirm={handleDeleteGroup}
+          onCancel={() => setConfirmDeleteOpen(false)}
+        >
+          {synced ? (
+            <>
+              <strong>{pinnedGroup.name}</strong> will be removed from your
+              sidebar and home page. Its chatrooms move back to Chats.
+            </>
+          ) : (
+            <>
+              <strong>{pinnedGroup.name}</strong> will be removed from your home
+              page. Its chatrooms are only unpinned, not deleted or left.
+            </>
+          )}
+        </ConfirmModal>
+      )}
     </Modal>
   );
 };

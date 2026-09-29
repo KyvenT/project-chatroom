@@ -8,6 +8,7 @@ import { messagesRouter } from "./messages/messages.js";
 import { membersRouter } from "./members/members.js";
 import { publicChatroomRouter } from "./chatrooms/public-chatroom-routes.js";
 import { pinnedGroupsRouter } from "./pinned-groups/pinnedGroupsRoutes.js";
+import { foldersRouter } from "./folders/folderRoutes.js";
 
 const apiRouter = Router();
 
@@ -19,6 +20,7 @@ apiRouter
   .use("/invites", authMiddleware, invitesRouter)
   .use("/messages", authMiddleware, messagesRouter)
   .use("/members", authMiddleware, membersRouter)
-  .use("/pinned", authMiddleware, pinnedGroupsRouter);
+  .use("/pinned", authMiddleware, pinnedGroupsRouter)
+  .use("/folders", authMiddleware, foldersRouter);
 
 export default apiRouter;

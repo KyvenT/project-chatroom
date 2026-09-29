@@ -3,6 +3,7 @@ import { SendHorizonal } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { sendWSMessage } from "../../ws-router/ws";
+import { COUNTDOWN_FROM, MAX_MESSAGE_LENGTH } from "../../utils/messageLimits";
 
 const styles = css({
   width: "100%",
@@ -49,6 +50,11 @@ const styles = css({
   "button:hover": {
     cursor: "pointer",
   },
+
+  ".charCount": {
+    flex: "0 0 auto",
+    fontSize: "0.75rem",
+  },
 });
 
 const colors = (theme: Theme) =>
@@ -81,6 +87,10 @@ const colors = (theme: Theme) =>
     "textarea::placeholder": {
       color: theme.colors.light_grey,
     },
+
+    ".charCount": {
+      color: theme.colors.light_grey,
+    },
   });
 
 interface MessageInputProps {
@@ -93,6 +103,8 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
   const [height, setHeight] = useState(1);
   const { chatroomId } = useParams();
   const [hasTyped, setHasTyped] = useState<boolean>(false);
+  const [length, setLength] = useState(0);
+  const remaining = MAX_MESSAGE_LENGTH - length;
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!messageInputRef.current || !chatroomId) return;
@@ -101,6 +113,7 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
       if (messageInputRef.current.value === "") return;
       handleSubmit(event);
       setHeight(1);
+      setLength(0);
     } else if (event.key === "Enter" && event.shiftKey) {
       setHeight((prevHeight) => prevHeight + 1);
       //messageInputRef.current.value += "\n";
@@ -127,16 +140,33 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
 
   return (
     <div css={[styles, colors(theme)]}>
-      <form onSubmit={handleSubmit} id="message-form">
+      <form
+        onSubmit={(event) => {
+          handleSubmit(event);
+          setLength(0);
+        }}
+        id="message-form"
+      >
         <textarea
           ref={messageInputRef}
           placeholder="Message..."
           rows={height}
           onKeyDown={handleKeyPress}
+          onInput={(event) => setLength(event.currentTarget.value.length)}
+          maxLength={MAX_MESSAGE_LENGTH}
           id="message"
           required
           autoFocus
         />
+        {remaining <= COUNTDOWN_FROM && (
+          <span
+            className="charCount"
+            aria-live="polite"
+            aria-label={`${remaining} characters left`}
+          >
+            {remaining}
+          </span>
+        )}
         <button type="submit" form="message-form" aria-label="Send message">
           <SendHorizonal size="1.25rem" />
         </button>

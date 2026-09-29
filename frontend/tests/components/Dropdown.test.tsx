@@ -35,4 +35,37 @@ describe("DropdownButton", () => {
     fireEvent.mouseDown(screen.getByText("outside"));
     expect(screen.queryByText("dropdown content")).not.toBeInTheDocument();
   });
+
+  it("closes when the button is clicked again", () => {
+    setup();
+    const button = screen.getByRole("button", { name: "Menu" });
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.mouseDown(button);
+    fireEvent.click(button);
+    expect(screen.queryByText("dropdown content")).not.toBeInTheDocument();
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("closes on Escape and returns focus to the button", () => {
+    setup();
+    const button = screen.getByRole("button", { name: "Menu" });
+    fireEvent.click(button);
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByText("dropdown content")).not.toBeInTheDocument();
+    expect(button).toHaveFocus();
+  });
+
+  it("closes when a link in the menu is followed", () => {
+    renderWithProviders(
+      <DropdownButton buttonText="Menu" aria-label="Open menu">
+        <a href="#account">Account</a>
+      </DropdownButton>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    fireEvent.click(screen.getByText("Account"));
+    expect(screen.queryByText("Account")).not.toBeInTheDocument();
+  });
 });

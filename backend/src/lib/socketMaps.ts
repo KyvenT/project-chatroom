@@ -138,3 +138,42 @@ export const userActiveChatroomMap = new BidirectionalGroupedMap<
   string,
   string
 >();
+
+// Chatrooms each user is watching besides their active one (e.g. chat
+// pop-outs), so they get that chatroom's messages live too
+export class WatchedChatroomsMap {
+  private byUser = new Map<string, Set<string>>();
+  private byChatroom = new Map<string, Set<string>>();
+
+  set(userId: string, chatroomIds: Iterable<string>) {
+    this.deleteUser(userId);
+    const watched = new Set(chatroomIds);
+    if (watched.size === 0) return;
+
+    this.byUser.set(userId, watched);
+    watched.forEach((chatroomId) => {
+      const watchers = this.byChatroom.get(chatroomId) ?? new Set<string>();
+      watchers.add(userId);
+      this.byChatroom.set(chatroomId, watchers);
+    });
+  }
+
+  deleteUser(userId: string) {
+    this.byUser.get(userId)?.forEach((chatroomId) => {
+      const watchers = this.byChatroom.get(chatroomId);
+      watchers?.delete(userId);
+      if (watchers?.size === 0) this.byChatroom.delete(chatroomId);
+    });
+    this.byUser.delete(userId);
+  }
+
+  getWatchers(chatroomId: string): Set<string> {
+    return this.byChatroom.get(chatroomId) ?? new Set();
+  }
+
+  getWatched(userId: string): Set<string> {
+    return this.byUser.get(userId) ?? new Set();
+  }
+}
+
+export const userWatchedChatroomsMap = new WatchedChatroomsMap();

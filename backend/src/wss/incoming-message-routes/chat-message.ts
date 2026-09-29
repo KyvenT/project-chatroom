@@ -5,6 +5,7 @@ import { socketMap } from "../../lib/socketMaps.js";
 import { type Message } from "@prisma/client";
 import { MessagePayload } from "../../types/payloads.js";
 import { sendChatMessage } from "../outgoing-messages/chat-message.js";
+import { isChatroomMember } from "../membership.js";
 
 const createMessage = async (
   userId: string,
@@ -62,6 +63,16 @@ export const handleChatMessage = async (
     console.error("uh oh socket not mapped to a user");
     return;
   }
+  if (!(await isChatroomMember(user, message.chatroomId))) {
+    ws.send(
+      JSON.stringify({
+        type: "feedback",
+        message: "message failed to send (not a member of the chatroom)",
+      }),
+    );
+    return;
+  }
+
   const createdMessage = await createMessage(user, message, ws);
   if (!createdMessage) {
     console.error("message creation failed");

@@ -8,13 +8,14 @@ import { API_URL } from "../../env";
 
 export type Status = "ONLINE" | "AWAY" | "OFFLINE";
 
-const STATUS_COLORS = {
-  ["ONLINE"]: "#3ecf8e",
-  ["AWAY"]: "#f5a524",
-  ["OFFLINE"]: "#5b6274",
-};
+const statusColor = (theme: Theme, status: Status) =>
+  ({
+    ONLINE: theme.colors.statusOnline,
+    AWAY: theme.colors.statusAway,
+    OFFLINE: theme.colors.statusOffline,
+  })[status];
 
-const styles = (status: Status) =>
+const styles = (theme: Theme, status: Status) =>
   css({
     display: "flex",
     alignItems: "center",
@@ -25,7 +26,7 @@ const styles = (status: Status) =>
       aspectRatio: 1,
       width: "1.2rem",
       appearance: "none",
-      backgroundColor: STATUS_COLORS[status],
+      backgroundColor: statusColor(theme, status),
 
       option: {
         fontSize: "1rem",
@@ -92,7 +93,7 @@ const ProfileStatus = ({ status }: ProfileStatusProps) => {
   };
 
   return (
-    <div css={[styles(status), colors(theme)]}>
+    <div css={[styles(theme, status), colors(theme)]}>
       <select className="status" onChange={handleSubmit} value={status}>
         <option
           className="statusOption"

@@ -37,11 +37,18 @@ export interface ChatroomPayload {
   lastViewedAt: Date;
   unreadMessages: number;
   chatroomIndex: number;
+  folderId: string | null;
   chatroom: {
     title: string;
     privacy: ChatroomPrivacy;
     ownerId: string;
   };
+}
+
+export interface JoinInfoPayload {
+  chatroomId: string;
+  title: string;
+  privacy: ChatroomPrivacy;
 }
 
 export interface JoinChatroomPayload {
@@ -53,6 +60,7 @@ export interface JoinChatroomPayload {
 
 export interface ChatroomDetailsPayload {
   id: string;
+  joinKey?: string; // only present for the chatroom owner
   title: string;
   ownerId: string;
   privacy: ChatroomPrivacy;
@@ -118,4 +126,10 @@ export interface UserDetailsPayload {
 export interface ChatroomMemberDetailsPayload {
   joinedAt: Date;
   member: UserDetailsPayload;
+}
+
+export interface FolderPayload {
+  id: string;
+  name: string;
+  index: number;
 }

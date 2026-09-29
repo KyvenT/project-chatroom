@@ -3,11 +3,11 @@ import z from "zod";
 import {
   chatroomIdSchema,
   chatroomModifyIndexSchema,
+  joinKeySchema,
 } from "../validators/chatrooms/chatroomValidation.js";
 import { ChatroomPrivacy } from "@prisma/client";
 import {
   ChatroomMemberDetailsPayload,
-  JoinChatroomPayload,
   MembersPayload,
   UserDetailsPayload,
 } from "../types/payloads.js";
@@ -16,9 +16,9 @@ import { chatroomMemberSchema } from "../validators/members/memberValidation.js"
 
 export const joinChatroom = async (
   userId: string,
-  data: z.infer<typeof chatroomIdSchema>,
-) => {
-  const { chatroomId } = data;
+  data: z.infer<typeof joinKeySchema>,
+): Promise<string> => {
+  const { joinKey } = data;
 
   const verifyUser = await Prisma.user.findUnique({
     where: {
@@ -28,24 +28,36 @@ export const joinChatroom = async (
 
   const chatroom = await Prisma.chatroom.findUnique({
     where: {
-      id: chatroomId,
+      joinKey,
     },
   });
 
   if (!chatroom) {
-    throw new Error("Chatroom not found");
+    throw new Error("Invalid or expired join link");
   }
 
   if (verifyUser?.isGuest === true) {
     if (chatroom.privacy !== ChatroomPrivacy.PUBLIC) {
       throw new Error("Only users can join this chatroom");
     }
-  } else {
-    if (
-      chatroom.privacy !== (ChatroomPrivacy.JOINABLE || ChatroomPrivacy.PUBLIC)
-    ) {
-      throw new Error("Joining this chatroom requires an invite");
-    }
+  } else if (
+    chatroom.privacy !== ChatroomPrivacy.JOINABLE &&
+    chatroom.privacy !== ChatroomPrivacy.PUBLIC
+  ) {
+    throw new Error("Joining this chatroom requires an invite");
+  }
+
+  const existingMembership = await Prisma.chatroomMember.findUnique({
+    where: {
+      chatroomId_memberId: {
+        chatroomId: chatroom.id,
+        memberId: userId,
+      },
+    },
+  });
+
+  if (existingMembership) {
+    return chatroom.id;
   }
 
   const existingChatroomIndex = await Prisma.chatroomMember.findFirst({
@@ -60,19 +72,25 @@ export const joinChatroom = async (
     },
   });
 
-  const join = (await Prisma.chatroomMember.create({
-    data: {
-      memberId: userId,
-      chatroomId,
-      chatroomIndex: (existingChatroomIndex?.chatroomIndex || 0) + 1,
-    },
-    omit: {
-      lastViewedAt: true,
-      role: true,
-    },
-  })) as JoinChatroomPayload;
+  try {
+    await Prisma.chatroomMember.create({
+      data: {
+        memberId: userId,
+        chatroomId: chatroom.id,
+        chatroomIndex: (existingChatroomIndex?.chatroomIndex || 0) + 1,
+      },
+    });
+  } catch (error: any) {
+    // a concurrent join request already created the membership
+    if (error.code === "P2002") {
+      return chatroom.id;
+    }
+    throw error;
+  }
 
   sendUpdateChatrooms(chatroom.id, userId, "JOIN");
+
+  return chatroom.id;
 };
 
 export const reorderChatrooms = async (

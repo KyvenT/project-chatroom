@@ -3,9 +3,14 @@ import { css, useTheme } from "@emotion/react";
 import { NavLink } from "react-router";
 import useToggle from "../../hooks/useToggle";
 import Button from "../Button";
-import { UserRoundPlus } from "lucide-react";
+import { FolderInput, Pin, UserRoundPlus } from "lucide-react";
 import { useAuthStore } from "../../hooks/useStores";
 import { InviteModal } from "./InviteModal";
+import { PinToGroupsModal } from "../chat-home/PinToGroupsModal";
+import { MoveToFolderModal } from "./folders/MoveToFolderModal";
+import { useFolderActions } from "../../hooks/useFolders";
+import { usePreferencesStore } from "../../hooks/usePreferencesStore";
+import { readDraggedChatroom, setDraggedChatroom } from "./chatroomDrag";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
 import type React from "react";
 import { useChatroomsStore } from "../../hooks/useStores";
@@ -24,7 +29,7 @@ const styles = css({
   position: "relative",
   width: "100%",
 
-  div: {
+  "& > div": {
     width: "100%",
     padding: "0 8px 0 10px",
     borderRadius: "8px",
@@ -76,12 +81,12 @@ const dynamicStyles = (
   isDraggedOver: boolean,
 ) =>
   css({
-    div: {
+    "& > div": {
       backgroundColor: isActive ? theme.colors.accentSoft : "transparent",
       borderColor: isDraggedOver ? theme.colors.accent : "transparent",
     },
 
-    "div:hover": {
+    "& > div:hover": {
       backgroundColor: isActive ? theme.colors.accentSoft : theme.colors.grey,
     },
 
@@ -123,7 +128,6 @@ const SidebarChatroomButton = ({
 }: SidebarChatroomButtonProps) => {
   const {
     chatroomId,
-    chatroomIndex,
     unreadMessages,
     chatroom: { ownerId, privacy, title },
   } = chatroom;
@@ -132,6 +136,13 @@ const SidebarChatroomButton = ({
 
   const [isHovered, setHovered] = useToggle(false);
   const [inviteModalOpen, setInviteModalOpen] = useToggle(false);
+  const [pinModalOpen, setPinModalOpen] = useToggle(false);
+  const [folderModalOpen, setFolderModalOpen] = useToggle(false);
+  const { moveChatroom } = useFolderActions();
+  // with folders synced to the home page, pinning is done with folders
+  const syncedWithHome = usePreferencesStore(
+    (state) => state.syncFoldersWithHome,
+  );
   const [isDraggedOver, setIsDraggedOver] = useToggle(false);
   const swapChatroomOrder = useChatroomsStore(
     (state) => state.swapChatroomOrder,
@@ -148,12 +159,7 @@ const SidebarChatroomButton = ({
   );
 
   const handleDragStart = (event: React.DragEvent) => {
-    event.dataTransfer.setData(
-      "application/json",
-      JSON.stringify({
-        firstChatroom: chatroom,
-      }),
-    );
+    setDraggedChatroom(event, chatroom);
   };
 
   const handleDragOver = (event: React.DragEvent) => {
@@ -166,12 +172,26 @@ const SidebarChatroomButton = ({
   };
 
   const handleDrop = (event: React.DragEvent) => {
-    const data = event.dataTransfer.getData("application/json");
-    const { firstChatroom } = JSON.parse(data);
-    console.log("origin chatroom:", firstChatroom.chatroomId);
-    console.log("target chatroom:", chatroomId, " ", chatroomIndex);
+    // handled here, not by the section the row is in
+    event.preventDefault();
+    event.stopPropagation();
+    handleDragOverEnd();
 
-    // do swap update here
+    const dragged = readDraggedChatroom(event);
+    if (!dragged || dragged.chatroomId === chatroomId) return;
+
+    // use the store's copy; the dragged data is a snapshot from drag start
+    const firstChatroom =
+      useChatroomsStore
+        .getState()
+        .chatrooms.find((c) => c.chatroomId === dragged.chatroomId) ?? dragged;
+
+    // dropped from another section: move it into this row's folder
+    if ((firstChatroom.folderId ?? null) !== (chatroom.folderId ?? null)) {
+      moveChatroom(firstChatroom.chatroomId, chatroom.folderId ?? null);
+      return;
+    }
+
     swapChatroomOrder(firstChatroom, chatroom);
 
     mutate({
@@ -182,8 +202,6 @@ const SidebarChatroomButton = ({
         secondChatroomId: chatroomId,
       },
     });
-
-    handleDragOverEnd();
   };
 
   useEffect(() => {
@@ -214,6 +232,28 @@ const SidebarChatroomButton = ({
           {unreadMessages > 0 && (
             <span className="unreadBadge">{unreadMessages}</span>
           )}
+          {(isActive || isHovered) && !user.isGuest && !syncedWithHome && (
+            <Button
+              onClick={() => setPinModalOpen(true)}
+              variant="icon"
+              otherStyles={inviteBtnStyles(theme)}
+              aria-label="Pin chatroom to a group"
+              title="Pin to group"
+            >
+              <Pin size="1.1rem" />
+            </Button>
+          )}
+          {(isActive || isHovered) && !user.isGuest && (
+            <Button
+              onClick={() => setFolderModalOpen(true)}
+              variant="icon"
+              otherStyles={inviteBtnStyles(theme)}
+              aria-label="Move chatroom to a folder"
+              title="Move to folder"
+            >
+              <FolderInput size="1.1rem" />
+            </Button>
+          )}
           {(isActive || isHovered) && canInvite && (
             <Button
               onClick={() => setInviteModalOpen()}
@@ -226,6 +266,20 @@ const SidebarChatroomButton = ({
           )}
         </div>
       </li>
+      {folderModalOpen && (
+        <MoveToFolderModal
+          open={folderModalOpen}
+          onClose={() => setFolderModalOpen(false)}
+          chatroom={{ chatroomId, title }}
+        />
+      )}
+      {pinModalOpen && (
+        <PinToGroupsModal
+          open={pinModalOpen}
+          onClose={() => setPinModalOpen(false)}
+          chatroom={{ chatroomId, title }}
+        />
+      )}
       {inviteModalOpen && (
         <InviteModal
           inviteModalOpen={inviteModalOpen}

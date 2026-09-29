@@ -4,6 +4,7 @@ import {
   deleteChatroom,
   getChatroomDetails,
   getUserChatrooms,
+  regenerateJoinKey,
   swapChatroomIndexes,
   updateChatroom,
 } from "../../controllers/chatroomController.js";
@@ -32,6 +33,11 @@ chatroomRouter.get(
   "/:chatroomId",
   validationMiddleware(chatroomIdSchema, (req) => req.params),
   getChatroomDetails,
+);
+chatroomRouter.post(
+  "/:chatroomId/join-key",
+  validationMiddleware(chatroomIdSchema, (req) => req.params),
+  regenerateJoinKey,
 );
 chatroomRouter.patch(
   "/:chatroomId",

@@ -1,4 +1,5 @@
 import z from "zod";
+import { joinKeySchema } from "../chatrooms/chatroomValidation.js";
 
 export const userSchema = z.object({
   username: z.string().min(3).max(20),
@@ -6,8 +7,8 @@ export const userSchema = z.object({
 });
 
 export const guestSchema = z.object({
-  chatroomId: z.string(),
-  username: z.string(),
+  joinKey: joinKeySchema.shape.joinKey,
+  username: z.string().min(3).max(20),
 });
 
 export const refreshTokenSchema = z.object({
