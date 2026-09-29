@@ -7,6 +7,7 @@ import { useAuthStore } from "../hooks/useStores";
 import { closeWs, startWSConnection } from "../ws-router/ws";
 import { buildTheme, type AppTheme } from "../styles/theme";
 import { useThemeStore } from "../hooks/useThemeStore";
+import { usePreventScrollChaining } from "../hooks/usePreventScrollChaining";
 
 const globalStyles = (t: AppTheme) =>
   css({
@@ -61,6 +62,7 @@ function App() {
   const user = useAuthStore((state) => state.user);
   const colorOverrides = useThemeStore((state) => state.overrides);
   const theme = useMemo(() => buildTheme(colorOverrides), [colorOverrides]);
+  usePreventScrollChaining();
 
   useEffect(() => {
     const autoSignIn = async () => {
