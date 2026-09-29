@@ -56,6 +56,7 @@ const queryClient = new QueryClient();
 
 function App() {
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
+  const setSessionChecked = useAuthStore((state) => state.setSessionChecked);
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
@@ -63,9 +64,10 @@ function App() {
       const result = await useRefreshToken();
       if (!result.ok) {
         console.log("No valid refresh token, user remains logged out");
-        return;
+      } else {
+        handleSignIn(result);
       }
-      handleSignIn(result);
+      setSessionChecked();
     };
 
     autoSignIn();

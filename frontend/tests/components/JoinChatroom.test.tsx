@@ -39,6 +39,7 @@ describe("JoinChatroom", () => {
 
   beforeEach(() => {
     useAuthStore.getState().handleLogOut();
+    useAuthStore.setState({ sessionChecked: true });
     fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
   });
@@ -114,6 +115,39 @@ describe("JoinChatroom", () => {
     expect(
       screen.getByPlaceholderText("Guest username..."),
     ).toBeInTheDocument();
+  });
+
+  it("waits for the startup sign in before offering sign in or guest access", async () => {
+    useAuthStore.setState({ sessionChecked: false });
+    fetchMock.mockReturnValue(
+      jsonResponse({ chatroomId: "c1", title: "Room", privacy: "PUBLIC" }),
+    );
+    renderJoin();
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(screen.queryByText("Sign in to join")).not.toBeInTheDocument();
+
+    signIn();
+    useAuthStore.getState().setSessionChecked();
+
+    expect(
+      await screen.findByRole("button", { name: "Join chatroom" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("Guest username..."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("sends signed-out users back to the join link after signing in", async () => {
+    fetchMock.mockReturnValue(
+      jsonResponse({ chatroomId: "c1", title: "Room", privacy: "JOINABLE" }),
+    );
+    renderJoin();
+
+    expect(await screen.findByText("Sign in to join")).toHaveAttribute(
+      "href",
+      `/login?next=${encodeURIComponent("/join/abcDEF123_-xyz09")}`,
+    );
   });
 
   it("does not offer guest access on JOINABLE chatrooms", async () => {

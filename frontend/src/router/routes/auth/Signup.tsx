@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import type { UserAuth } from "../../../types/REST-types/User";
 import { useAuthStore } from "../../../hooks/useStores";
 import { authPageStyles, type LoginCredentials } from "./Login";
@@ -14,9 +14,12 @@ import {
 } from "../../../utils/customMutation";
 import { useMutation } from "@tanstack/react-query";
 import { Loader } from "../../../components/Loader";
+import { getSafeRedirect } from "../../../utils/safeRedirect";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const next = searchParams.get("next");
   const [error, setError] = useState<String>("");
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const [isRevealingPassword, setIsRevealingPassword] =
@@ -35,7 +38,7 @@ const Signup = () => {
         return;
       }
       handleSignIn(loginResponse);
-      navigate("/chat");
+      navigate(getSafeRedirect(next));
     },
   });
 
@@ -99,7 +102,9 @@ const Signup = () => {
         <button className="submitBtn" type="submit">
           Register
         </button>
-        <Link to="/login">Already have an account?</Link>
+        <Link to={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}>
+          Already have an account?
+        </Link>
       </form>
     </div>
   );

@@ -121,6 +121,15 @@ describe("joinChatroom (by join key)", () => {
     expect(db.chatroomMember.create).not.toHaveBeenCalled();
     expect(sendUpdateChatrooms).not.toHaveBeenCalled();
   });
+
+  it("treats a concurrent duplicate join as already joined", async () => {
+    db.user.findUnique.mockResolvedValue({ isGuest: false });
+    db.chatroom.findUnique.mockResolvedValue(chatroom("JOINABLE"));
+    db.chatroomMember.create.mockRejectedValue({ code: "P2002" });
+
+    expect(await joinChatroom("u1", { joinKey: "k" })).toBe("c1");
+    expect(sendUpdateChatrooms).not.toHaveBeenCalled();
+  });
 });
 
 describe("regenerateJoinKey", () => {

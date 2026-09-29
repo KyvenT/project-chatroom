@@ -20,6 +20,7 @@ const JoinChatroom = () => {
   const { joinKey } = useParams();
   const isLoggedIn = useAuthStore(isLoggedInSelector);
   const isGuest = useAuthStore((state) => state.user.isGuest);
+  const sessionChecked = useAuthStore((state) => state.sessionChecked);
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const guestNameRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +72,9 @@ const JoinChatroom = () => {
     });
   };
 
-  if (isLoading) {
+  // wait for the startup refresh-token sign in, otherwise a signed-in user
+  // briefly looks signed out and could create a guest account by mistake
+  if (isLoading || !sessionChecked) {
     return (
       <div css={authPageStyles(theme)}>
         <Loader />
@@ -116,7 +119,9 @@ const JoinChatroom = () => {
 
       {!isLoggedIn && openToUsers && (
         <form className="authForm" onSubmit={handleGuestJoin}>
-          <Link to="/login">Sign in to join</Link>
+          <Link to={`/login?next=${encodeURIComponent(`/join/${joinKey}`)}`}>
+            Sign in to join
+          </Link>
           {openToGuests && (
             <>
               <p>or continue as a guest</p>

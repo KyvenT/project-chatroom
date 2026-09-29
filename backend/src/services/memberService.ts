@@ -8,7 +8,6 @@ import {
 import { ChatroomPrivacy } from "@prisma/client";
 import {
   ChatroomMemberDetailsPayload,
-  JoinChatroomPayload,
   MembersPayload,
   UserDetailsPayload,
 } from "../types/payloads.js";
@@ -73,13 +72,21 @@ export const joinChatroom = async (
     },
   });
 
-  await Prisma.chatroomMember.create({
-    data: {
-      memberId: userId,
-      chatroomId: chatroom.id,
-      chatroomIndex: (existingChatroomIndex?.chatroomIndex || 0) + 1,
-    },
-  });
+  try {
+    await Prisma.chatroomMember.create({
+      data: {
+        memberId: userId,
+        chatroomId: chatroom.id,
+        chatroomIndex: (existingChatroomIndex?.chatroomIndex || 0) + 1,
+      },
+    });
+  } catch (error: any) {
+    // a concurrent join request already created the membership
+    if (error.code === "P2002") {
+      return chatroom.id;
+    }
+    throw error;
+  }
 
   sendUpdateChatrooms(chatroom.id, userId, "JOIN");
 

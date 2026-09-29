@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useAuthStore } from "../../../hooks/useStores";
 import type { UserAuth } from "../../../types/REST-types/User";
 import { css, useTheme } from "@emotion/react";
@@ -15,6 +15,7 @@ import {
   type MutationArgs,
 } from "../../../utils/customMutation";
 import { Loader } from "../../../components/Loader";
+import { getSafeRedirect } from "../../../utils/safeRedirect";
 
 export const authPageStyles = (theme: Theme) =>
   css(
@@ -146,6 +147,8 @@ export type LoginCredentials = {
 
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const next = searchParams.get("next");
   const [error, setError] = useState<String>("");
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const [isRevealingPassword, setIsRevealingPassword] =
@@ -164,7 +167,7 @@ const Login = () => {
         return;
       }
       handleSignIn(loginResponse);
-      navigate("/chat");
+      navigate(getSafeRedirect(next));
     },
   });
 
@@ -228,7 +231,11 @@ const Login = () => {
         <button className="submitBtn" type="submit">
           Login
         </button>
-        <Link to="/register">Don't have an account?</Link>
+        <Link
+          to={next ? `/register?next=${encodeURIComponent(next)}` : "/register"}
+        >
+          Don't have an account?
+        </Link>
       </form>
     </div>
   );

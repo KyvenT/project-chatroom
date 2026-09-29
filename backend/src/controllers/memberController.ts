@@ -69,11 +69,15 @@ export const joinChatroom = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Chatroom joined", chatroomId });
   } catch (error: any) {
     console.error("Chatroom join error:", error);
-    if (error.message === "Invalid or expired join link") {
-      res.status(404).json({ message: error.message });
-      return;
+    switch (error.message) {
+      case "Invalid or expired join link":
+        return res.status(404).json({ message: error.message });
+      case "Only users can join this chatroom":
+      case "Joining this chatroom requires an invite":
+        return res.status(403).json({ message: error.message });
+      default:
+        return res.status(500).json({ message: error.message });
     }
-    res.status(500).json({ message: error.message });
   }
 };
 

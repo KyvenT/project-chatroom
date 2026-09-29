@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import type {
   ChatroomDetails,
   ChatroomPrivacy,
@@ -227,7 +228,10 @@ export const ChatroomDetailsModal = ({
     onClose();
   };
 
-  const [linkCopied, setLinkCopied] = useToggle(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const linkCopiedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(linkCopiedTimeout.current), []);
 
   const regenerateMutation = useMutation<
     { joinKey: string },
@@ -255,7 +259,8 @@ export const ChatroomDetailsModal = ({
     try {
       await navigator.clipboard.writeText(link);
       setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 1500);
+      clearTimeout(linkCopiedTimeout.current);
+      linkCopiedTimeout.current = setTimeout(() => setLinkCopied(false), 1500);
     } catch {
       // clipboard unavailable; the link is still selectable in the input
     }
@@ -265,18 +270,18 @@ export const ChatroomDetailsModal = ({
     if (!isLoggedIn || !isOwner) return;
 
     const { title, privacy } = data;
-    console.log("update chatroom to: ", title, privacy);
 
-    chatroomMutation.mutate({
-      fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
-      method: "PATCH",
-      reqBody: {
-        title,
-        privacy,
+    chatroomMutation.mutate(
+      {
+        fetchUrl: `${API_URL}/api/chatrooms/${chatroomId}`,
+        method: "PATCH",
+        reqBody: {
+          title,
+          privacy,
+        },
       },
-    });
-
-    refetch();
+      { onSuccess: () => refetch() },
+    );
   };
 
   const isOwner = chatroomData?.ownerId === user.userId;
@@ -398,6 +403,12 @@ export const ChatroomDetailsModal = ({
                           <RefreshCw />
                         </Button>
                       </div>
+                      {regenerateMutation.error && (
+                        <p>
+                          Couldn't regenerate link:{" "}
+                          {regenerateMutation.error.message}
+                        </p>
+                      )}
                     </div>
                   )}
                 <div className="actionBtns">

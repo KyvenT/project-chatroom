@@ -47,8 +47,11 @@ describe("auth schemas", () => {
   });
 
   it("requires guest and refresh token fields", () => {
-    ok(guestSchema, { joinKey: "k", username: "u" });
-    bad(guestSchema, { username: "u" });
+    ok(guestSchema, { joinKey: "abcDEF123_-xyz09", username: "guest" });
+    bad(guestSchema, { username: "guest" });
+    bad(guestSchema, { joinKey: "short", username: "guest" });
+    bad(guestSchema, { joinKey: "abcDEF123_-xyz09", username: "ab" });
+    bad(guestSchema, { joinKey: "abcDEF123_-xyz09", username: "x".repeat(21) });
     ok(refreshTokenSchema, { refreshToken: "t" });
     bad(refreshTokenSchema, {});
   });

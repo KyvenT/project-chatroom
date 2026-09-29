@@ -102,7 +102,12 @@ export const getJoinInfo = async (req: Request, res: Response) => {
     res.status(200).json(joinInfo);
   } catch (err: any) {
     console.error("couldnt fetch join info", err);
-    res.status(404).json({ message: err.message });
+    switch (err.message) {
+      case "Invalid or expired join link":
+        return res.status(404).json({ message: err.message });
+      default:
+        return res.status(500).json({ message: err.message });
+    }
   }
 };
 
@@ -121,7 +126,12 @@ export const regenerateJoinKey = async (req: Request, res: Response) => {
     res.status(200).json({ joinKey });
   } catch (err: any) {
     console.error("couldnt regenerate join key", err);
-    res.status(403).json({ message: err.message });
+    switch (err.message) {
+      case "Not detected as owner of chatroom":
+        return res.status(403).json({ message: err.message });
+      default:
+        return res.status(500).json({ message: err.message });
+    }
   }
 };
 

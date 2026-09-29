@@ -166,15 +166,20 @@ export const useTypingPresenceStore = create<TypingPresenceState>((set) => ({
 
 interface AuthState {
   user: UserAuth;
+  // true once the startup refresh-token sign in has finished (either way)
+  sessionChecked: boolean;
   handleSignIn: (user: UserAuth) => void;
   handleLogOut: () => void;
+  setSessionChecked: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: { userId: "", username: "", token: "", isGuest: true },
+  sessionChecked: false,
   handleSignIn: (user) => set({ user }),
   handleLogOut: () =>
     set({ user: { userId: "", username: "", token: "", isGuest: true } }),
+  setSessionChecked: () => set({ sessionChecked: true }),
 }));
 
 export const isLoggedInSelector = (state: AuthState) => !!state.user.token;
