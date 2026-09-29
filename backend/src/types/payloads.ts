@@ -37,6 +37,7 @@ export interface ChatroomPayload {
   lastViewedAt: Date;
   unreadMessages: number;
   chatroomIndex: number;
+  folderId: string | null;
   chatroom: {
     title: string;
     privacy: ChatroomPrivacy;
@@ -125,4 +126,10 @@ export interface UserDetailsPayload {
 export interface ChatroomMemberDetailsPayload {
   joinedAt: Date;
   member: UserDetailsPayload;
+}
+
+export interface FolderPayload {
+  id: string;
+  name: string;
+  index: number;
 }

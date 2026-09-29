@@ -27,6 +27,12 @@ import {
   WSMessageSchema,
 } from "../../src/validators/ws/wsValidation.js";
 
+import {
+  folderNameSchema,
+  moveChatroomToFolderSchema,
+  renameFolderSchema,
+} from "../../src/validators/folders/folderValidation.js";
+
 const uuid = "3f2b8c1e-5d4a-4f6b-8a9c-1b2c3d4e5f60";
 const ok = (
   schema: { safeParse: (d: unknown) => { success: boolean } },
@@ -149,5 +155,23 @@ describe("websocket schemas", () => {
     ok(WSMessageSchema, { type: "typing-presence", chatroomId: "c" });
     bad(WSMessageSchema, { type: "unknown" });
     bad(WSMessageSchema, { type: "auth" });
+  });
+});
+
+describe("folder schemas", () => {
+  it("requires a trimmed name of 1-30 characters", () => {
+    ok(folderNameSchema, { name: "Work" });
+    bad(folderNameSchema, { name: "" });
+    bad(folderNameSchema, { name: "   " });
+    bad(folderNameSchema, { name: "x".repeat(31) });
+    ok(renameFolderSchema, { folderId: uuid, name: "Work" });
+    bad(renameFolderSchema, { folderId: "nope", name: "Work" });
+  });
+
+  it("moves a chatroom into a folder or out with null", () => {
+    ok(moveChatroomToFolderSchema, { chatroomId: uuid, folderId: uuid });
+    ok(moveChatroomToFolderSchema, { chatroomId: uuid, folderId: null });
+    bad(moveChatroomToFolderSchema, { chatroomId: uuid });
+    bad(moveChatroomToFolderSchema, { chatroomId: uuid, folderId: "nope" });
   });
 });
