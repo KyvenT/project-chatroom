@@ -14,9 +14,12 @@ vi.mock("../../src/prisma.js", () => ({
     },
     memberPinnedGroups: {
       findFirst: vi.fn(),
+      findMany: vi.fn(),
       create: vi.fn(),
+      update: vi.fn((args) => args),
       deleteMany: vi.fn(),
     },
+    $transaction: vi.fn(),
   },
 }));
 
@@ -27,6 +30,7 @@ import {
   editPinnedGroup,
   getPinnedGroups,
   pinChatroom,
+  setPinnedGroupOrder,
 } from "../../src/services/pinnedGroupsService.js";
 
 const db = Prisma as any;
@@ -158,5 +162,59 @@ describe("deletePinnedGroup", () => {
       "Not detected as owner of pin group",
     );
     expect(db.pinGroup.delete).not.toHaveBeenCalled();
+  });
+});
+
+describe("setPinnedGroupOrder", () => {
+  beforeEach(() => {
+    db.pinGroup.findUnique.mockResolvedValue({ id: "g1", userId: "u1" });
+    db.memberPinnedGroups.findMany.mockResolvedValue([
+      { chatroomId: "a" },
+      { chatroomId: "b" },
+      { chatroomId: "c" },
+    ]);
+  });
+
+  it("numbers the group's chatrooms in the new order", async () => {
+    await setPinnedGroupOrder("u1", {
+      pinGroupId: "g1",
+      chatroomIds: ["c", "a", "b"],
+    });
+
+    const updates = db.$transaction.mock.calls[0][0];
+    expect(
+      updates.map((u: any) => [
+        u.where.chatroomId_pinGroupId.chatroomId,
+        u.data.pinnedIndex,
+      ]),
+    ).toEqual([
+      ["c", 1],
+      ["a", 2],
+      ["b", 3],
+    ]);
+  });
+
+  it("rejects an order that leaves out or adds a chatroom", async () => {
+    await expect(
+      setPinnedGroupOrder("u1", { pinGroupId: "g1", chatroomIds: ["a", "b"] }),
+    ).rejects.toThrow("Order doesn't match the group's pinned chatrooms");
+    await expect(
+      setPinnedGroupOrder("u1", {
+        pinGroupId: "g1",
+        chatroomIds: ["a", "b", "x"],
+      }),
+    ).rejects.toThrow("Order doesn't match the group's pinned chatrooms");
+    expect(db.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("rejects someone else's group", async () => {
+    db.pinGroup.findUnique.mockResolvedValue({ id: "g1", userId: "other" });
+    await expect(
+      setPinnedGroupOrder("u1", {
+        pinGroupId: "g1",
+        chatroomIds: ["a", "b", "c"],
+      }),
+    ).rejects.toThrow("Not detected as owner of pin group");
+    expect(db.$transaction).not.toHaveBeenCalled();
   });
 });

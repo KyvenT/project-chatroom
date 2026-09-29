@@ -5,6 +5,7 @@ import {
   editPinnedGroup,
   getUserPinnedGroups,
   pinMemberChatroom,
+  setPinnedGroupOrder,
 } from "../../controllers/pinnedGroupsController.js";
 import { validationMiddleware } from "../../middleware/validationMiddleware.js";
 import {
@@ -12,6 +13,7 @@ import {
   editPinnedGroupSchema,
   PinnedGroupNameSchema,
   pinGroupIdSchema,
+  pinnedGroupOrderSchema,
 } from "../../validators/pinned-groups/pinnedGroupsValidation.js";
 
 export const pinnedGroupsRouter = Router();
@@ -42,4 +44,12 @@ pinnedGroupsRouter.delete(
   "/:pinGroupId",
   validationMiddleware(pinGroupIdSchema, (req) => req.params),
   deletePinnedGroup,
+);
+pinnedGroupsRouter.patch(
+  "/:pinGroupId/order",
+  validationMiddleware(pinnedGroupOrderSchema, (req) => ({
+    ...req.params,
+    ...req.body,
+  })),
+  setPinnedGroupOrder,
 );

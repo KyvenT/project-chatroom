@@ -4,6 +4,7 @@ import { FolderPayload } from "../types/payloads.js";
 import {
   folderIdSchema,
   folderNameSchema,
+  folderOrderSchema,
   moveChatroomToFolderSchema,
   renameFolderSchema,
 } from "../validators/folders/folderValidation.js";
@@ -143,4 +144,50 @@ export const moveChatroomToFolder = async (
       folderId,
     },
   });
+};
+
+// Reorders the chatrooms in a folder. They trade the sidebar positions they
+// already hold, so chatrooms outside the folder keep their places.
+export const setFolderOrder = async (
+  userId: string,
+  data: z.infer<typeof folderOrderSchema>,
+) => {
+  const { folderId, chatroomIds } = data;
+
+  await verifyFolderOwner(userId, folderId);
+
+  const members = await Prisma.chatroomMember.findMany({
+    where: { memberId: userId, folderId },
+    select: { chatroomId: true, chatroomIndex: true },
+  });
+
+  const current = members.map((m) => m.chatroomId);
+  if (
+    current.length !== chatroomIds.length ||
+    new Set([...current, ...chatroomIds]).size !== current.length
+  ) {
+    throw new Error("Order doesn't match the folder's chatrooms");
+  }
+
+  const positions = members.map((m) => m.chatroomIndex).sort((a, b) => a - b);
+  const where = (chatroomId: string) => ({
+    chatroomId_memberId: { chatroomId, memberId: userId },
+  });
+
+  // (memberId, chatroomIndex) is unique, so park them on unused negative
+  // indexes before giving each its new position
+  await Prisma.$transaction([
+    ...chatroomIds.map((chatroomId, i) =>
+      Prisma.chatroomMember.update({
+        where: where(chatroomId),
+        data: { chatroomIndex: -1_000_000 - i },
+      }),
+    ),
+    ...chatroomIds.map((chatroomId, i) =>
+      Prisma.chatroomMember.update({
+        where: where(chatroomId),
+        data: { chatroomIndex: positions[i] },
+      }),
+    ),
+  ]);
 };

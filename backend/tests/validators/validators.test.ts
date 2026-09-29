@@ -21,6 +21,7 @@ import { updateUserStatusSchema } from "../../src/validators/users/userValidatio
 import {
   PinnedGroupNameSchema,
   chatroomPinSchema,
+  pinnedGroupOrderSchema,
 } from "../../src/validators/pinned-groups/pinnedGroupsValidation.js";
 import {
   ChatMessageSchema,
@@ -29,6 +30,7 @@ import {
 
 import {
   folderNameSchema,
+  folderOrderSchema,
   moveChatroomToFolderSchema,
   renameFolderSchema,
 } from "../../src/validators/folders/folderValidation.js";
@@ -173,5 +175,23 @@ describe("folder schemas", () => {
     ok(moveChatroomToFolderSchema, { chatroomId: uuid, folderId: null });
     bad(moveChatroomToFolderSchema, { chatroomId: uuid });
     bad(moveChatroomToFolderSchema, { chatroomId: uuid, folderId: "nope" });
+  });
+});
+
+describe("order schemas", () => {
+  const other = "3f2b8c1e-5d4a-4f6b-8a9c-1b2c3d4e5f61";
+
+  it("takes a list of distinct chatroom ids", () => {
+    ok(pinnedGroupOrderSchema, {
+      pinGroupId: uuid,
+      chatroomIds: [uuid, other],
+    });
+    ok(folderOrderSchema, { folderId: uuid, chatroomIds: [uuid] });
+    bad(pinnedGroupOrderSchema, { pinGroupId: uuid, chatroomIds: [] });
+    bad(pinnedGroupOrderSchema, {
+      pinGroupId: uuid,
+      chatroomIds: [uuid, uuid],
+    });
+    bad(folderOrderSchema, { folderId: uuid, chatroomIds: ["nope"] });
   });
 });

@@ -5,6 +5,8 @@ const pinErrorStatus = (message: string) => {
   switch (message) {
     case "Pinned group not found":
       return 404;
+    case "Order doesn't match the group's pinned chatrooms":
+      return 409;
     case "Not detected as owner of pin group":
     case "Attempted pinning a chatroom that user is not a member of":
     case "Only users can create pinned groups":
@@ -108,6 +110,25 @@ export const deletePinnedGroup = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Pinned group deleted" });
   } catch (err: any) {
     console.error("delete pinned group error", err.message);
+    res.status(pinErrorStatus(err.message)).json({ message: err.message });
+  }
+};
+
+export const setPinnedGroupOrder = async (req: Request, res: Response) => {
+  const { userId, data } = req;
+
+  if (!userId) {
+    res
+      .status(401)
+      .json({ message: "Must be signed in to reorder pinned chatrooms" });
+    return;
+  }
+
+  try {
+    await pinnedGroupService.setPinnedGroupOrder(userId, data);
+    res.status(200).json({ message: "Pinned chatrooms reordered" });
+  } catch (err: any) {
+    console.error("pinned group order error", err.message);
     res.status(pinErrorStatus(err.message)).json({ message: err.message });
   }
 };

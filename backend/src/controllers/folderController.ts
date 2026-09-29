@@ -5,6 +5,8 @@ const folderErrorStatus = (message: string) => {
   switch (message) {
     case "Folder not found":
       return 404;
+    case "Order doesn't match the folder's chatrooms":
+      return 409;
     case "Not detected as owner of folder":
     case "Not a member of chatroom":
     case "Only users can create folders":
@@ -95,6 +97,23 @@ export const moveChatroomToFolder = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Chatroom moved" });
   } catch (err: any) {
     console.error("move chatroom to folder error", err.message);
+    res.status(folderErrorStatus(err.message)).json({ message: err.message });
+  }
+};
+
+export const setFolderOrder = async (req: Request, res: Response) => {
+  const { userId, data } = req;
+
+  if (!userId) {
+    res.status(401).json({ message: "Must be signed in to reorder a folder" });
+    return;
+  }
+
+  try {
+    await folderService.setFolderOrder(userId, data);
+    res.status(200).json({ message: "Folder reordered" });
+  } catch (err: any) {
+    console.error("folder order error", err.message);
     res.status(folderErrorStatus(err.message)).json({ message: err.message });
   }
 };

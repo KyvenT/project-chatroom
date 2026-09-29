@@ -3,7 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../../src/prisma.js", () => ({
   default: {
     user: { findUnique: vi.fn() },
-    chatroomMember: { findUnique: vi.fn(), update: vi.fn() },
+    chatroomMember: {
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn((args) => args),
+    },
+    $transaction: vi.fn(),
     sidebarFolder: {
       findMany: vi.fn(),
       findFirst: vi.fn(),
@@ -22,6 +27,7 @@ import {
   getFolders,
   moveChatroomToFolder,
   renameFolder,
+  setFolderOrder,
 } from "../../src/services/folderService.js";
 
 const db = Prisma as any;
@@ -156,5 +162,52 @@ describe("moveChatroomToFolder", () => {
       moveChatroomToFolder("u1", { chatroomId: "c1", folderId: null }),
     ).rejects.toThrow("Not a member of chatroom");
     expect(db.chatroomMember.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("setFolderOrder", () => {
+  beforeEach(() => {
+    db.sidebarFolder.findUnique.mockResolvedValue(ownFolder);
+    // sidebar positions 2, 5 and 9 belong to the folder's chatrooms
+    db.chatroomMember.findMany.mockResolvedValue([
+      { chatroomId: "a", chatroomIndex: 2 },
+      { chatroomId: "b", chatroomIndex: 5 },
+      { chatroomId: "c", chatroomIndex: 9 },
+    ]);
+  });
+
+  it("gives the folder's chatrooms their positions in the new order", async () => {
+    await setFolderOrder("u1", {
+      folderId: "f1",
+      chatroomIds: ["c", "a", "b"],
+    });
+
+    const updates = db.$transaction.mock.calls[0][0].map((u: any) => [
+      u.where.chatroomId_memberId.chatroomId,
+      u.data.chatroomIndex,
+    ]);
+    // parked on unused negative indexes first, then placed
+    expect(updates.slice(0, 3).every(([, i]: [string, number]) => i < 0)).toBe(
+      true,
+    );
+    expect(updates.slice(3)).toEqual([
+      ["c", 2],
+      ["a", 5],
+      ["b", 9],
+    ]);
+  });
+
+  it("rejects an order that doesn't match the folder", async () => {
+    await expect(
+      setFolderOrder("u1", { folderId: "f1", chatroomIds: ["a", "b"] }),
+    ).rejects.toThrow("Order doesn't match the folder's chatrooms");
+    expect(db.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("rejects someone else's folder", async () => {
+    db.sidebarFolder.findUnique.mockResolvedValue(othersFolder);
+    await expect(
+      setFolderOrder("u1", { folderId: "f1", chatroomIds: ["a", "b", "c"] }),
+    ).rejects.toThrow("Not detected as owner of folder");
   });
 });

@@ -5,6 +5,7 @@ import {
   editPinnedGroupSchema,
   PinnedGroupNameSchema,
   pinGroupIdSchema,
+  pinnedGroupOrderSchema,
   reorderPinnedGroupChatroomsSchema,
 } from "../validators/pinned-groups/pinnedGroupsValidation.js";
 import z from "zod";
@@ -265,4 +266,41 @@ export const swapPinnedChatrooms = async (
       },
     }),
   ]);
+};
+
+const sameIds = (a: string[], b: string[]) =>
+  a.length === b.length && new Set([...a, ...b]).size === a.length;
+
+export const setPinnedGroupOrder = async (
+  userId: string,
+  data: z.infer<typeof pinnedGroupOrderSchema>,
+) => {
+  const { pinGroupId, chatroomIds } = data;
+
+  await verifyPinGroupOwner(userId, pinGroupId);
+
+  const pinned = await Prisma.memberPinnedGroups.findMany({
+    where: { pinGroupId },
+    select: { chatroomId: true },
+  });
+
+  // the new order has to cover exactly what's pinned, so nothing is lost
+  // when a pin changed meanwhile
+  if (
+    !sameIds(
+      pinned.map((p) => p.chatroomId),
+      chatroomIds,
+    )
+  ) {
+    throw new Error("Order doesn't match the group's pinned chatrooms");
+  }
+
+  await Prisma.$transaction(
+    chatroomIds.map((chatroomId, i) =>
+      Prisma.memberPinnedGroups.update({
+        where: { chatroomId_pinGroupId: { chatroomId, pinGroupId } },
+        data: { pinnedIndex: i + 1 },
+      }),
+    ),
+  );
 };
