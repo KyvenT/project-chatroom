@@ -7,7 +7,18 @@ import type { PinnedGroup } from "../../types/REST-types/Chatroom";
 import { useHomeGroups } from "../../hooks/useHomeGroups";
 import { useFolders } from "../../hooks/useFolders";
 import { ConfirmModal } from "../ConfirmModal";
-import { Check, Pin, PinOff, SquarePen, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  GripVertical,
+  Pin,
+  PinOff,
+  SquarePen,
+  X,
+} from "lucide-react";
+import { useDragReorder } from "../../hooks/useDragReorder";
+import { shiftId } from "../../utils/reorder";
 import { useRef, useState } from "react";
 import { fieldStyles, formModalStyles } from "../../styles/modalForm";
 
@@ -58,6 +69,53 @@ const styles = (theme: Theme) =>
       gap: "4px",
     },
 
+    ".pinnedRow": {
+      cursor: "grab",
+      paddingLeft: "6px",
+
+      "&.dragging": { opacity: 0.4 },
+      // a line where the dragged chatroom will land
+      "&.dropBefore": { boxShadow: `0 -2px 0 0 ${theme.colors.accent}` },
+      "&.dropAfter": { boxShadow: `0 2px 0 0 ${theme.colors.accent}` },
+    },
+
+    ".grip": {
+      flex: "0 0 auto",
+      color: theme.colors.light_grey,
+    },
+
+    ".pinnedRow .listRowTitle": {
+      flex: 1,
+    },
+
+    ".rowButtons": {
+      flex: "0 0 auto",
+      display: "flex",
+      alignItems: "center",
+      gap: "2px",
+    },
+
+    ".moveBtn": {
+      width: "1.75rem",
+      height: "1.75rem",
+      padding: 0,
+
+      "&:disabled": {
+        opacity: 0.35,
+        cursor: "default",
+        backgroundColor: "transparent",
+      },
+    },
+
+    ".unpinBtn": {
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+      marginLeft: "4px",
+      padding: "4px 8px",
+      fontSize: "0.8rem",
+    },
+
     ".currentFolder": {
       marginRight: "6px",
       fontStyle: "italic",
@@ -78,6 +136,7 @@ export const PinChatroomsModal = ({
     setPinned,
     renameGroup,
     deleteGroup,
+    reorderGroup,
     actionError: error,
   } = useHomeGroups();
   const { data: folders } = useFolders();
@@ -101,10 +160,19 @@ export const PinChatroomsModal = ({
 
   const pinnedSet = new Set(pinnedGroup.chatrooms.map((c) => c.chatroomId));
 
-  const pinnedChatrooms = chatrooms.filter((c) => pinnedSet.has(c.chatroomId));
+  // in the group's own order, which can be changed by dragging
+  const pinnedChatrooms = pinnedGroup.chatrooms;
+  const pinnedIds = pinnedChatrooms.map((c) => c.chatroomId);
   const unpinnedChatrooms = chatrooms.filter(
     (c) => !pinnedSet.has(c.chatroomId),
   );
+
+  const reorder = (ids: string[]) => reorderGroup(pinnedGroup.id, ids);
+  const { itemProps, containerProps, itemState } = useDragReorder({
+    ids: pinnedIds,
+    axis: "y",
+    onReorder: reorder,
+  });
 
   const handleSaveName = (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,7 +246,7 @@ export const PinChatroomsModal = ({
         )}
         <div className="field">
           <p className="sectionLabel">{synced ? "In this folder" : "Pinned"}</p>
-          <ul className="list">
+          <ul className="list" {...containerProps}>
             {pinnedChatrooms.length === 0 ? (
               <li className="listEmpty">
                 {synced
@@ -186,30 +254,65 @@ export const PinChatroomsModal = ({
                   : "No pinned chatrooms yet. Pin one from the list below."}
               </li>
             ) : (
-              pinnedChatrooms.map((chatroom) => (
-                <li key={chatroom.chatroomId}>
-                  <button
-                    type="button"
-                    className="listRow"
-                    onClick={() =>
-                      handleChatroomPin(
-                        chatroom.chatroomId,
-                        chatroom.chatroom.title,
-                        false,
-                      )
-                    }
+              pinnedChatrooms.map((chatroom, i) => {
+                const title = chatroom.chatroom.title;
+                return (
+                  <li
+                    key={chatroom.chatroomId}
+                    className={`listRow pinnedRow ${itemState(chatroom.chatroomId)}`}
+                    {...itemProps(chatroom.chatroomId)}
                   >
-                    <span className="listRowTitle">
-                      {chatroom.chatroom.title}
+                    <GripVertical
+                      className="grip"
+                      size="1rem"
+                      aria-hidden="true"
+                    />
+                    <span className="listRowTitle">{title}</span>
+                    <span className="rowButtons">
+                      <Button
+                        variant="icon"
+                        type="button"
+                        className="moveBtn"
+                        aria-label={`Move ${title} up`}
+                        disabled={i === 0}
+                        onClick={() =>
+                          reorder(shiftId(pinnedIds, chatroom.chatroomId, -1))
+                        }
+                      >
+                        <ChevronUp size="1rem" />
+                      </Button>
+                      <Button
+                        variant="icon"
+                        type="button"
+                        className="moveBtn"
+                        aria-label={`Move ${title} down`}
+                        disabled={i === pinnedChatrooms.length - 1}
+                        onClick={() =>
+                          reorder(shiftId(pinnedIds, chatroom.chatroomId, 1))
+                        }
+                      >
+                        <ChevronDown size="1rem" />
+                      </Button>
+                      <button
+                        type="button"
+                        className="btn btnSecondary unpinBtn"
+                        aria-label={`${synced ? "Remove" : "Unpin"} ${title}`}
+                        onClick={() =>
+                          handleChatroomPin(chatroom.chatroomId, title, false)
+                        }
+                      >
+                        <PinOff size="0.85rem" aria-hidden="true" />
+                        {synced ? "Remove" : "Unpin"}
+                      </button>
                     </span>
-                    <span className="listRowAction">
-                      <PinOff size="0.9rem" /> {synced ? "Remove" : "Unpin"}
-                    </span>
-                  </button>
-                </li>
-              ))
+                  </li>
+                );
+              })
             )}
           </ul>
+          {pinnedChatrooms.length > 1 && (
+            <p className="hint">Drag chatrooms to change their order.</p>
+          )}
         </div>
 
         <div className="field">

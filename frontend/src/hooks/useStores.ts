@@ -19,6 +19,8 @@ interface ChatroomListState {
     secondChatroom: Chatroom,
   ) => void;
   setChatroomFolder: (chatroomId: string, folderId: string | null) => void;
+  // puts these chatrooms in this order, within the places they already hold
+  reorderChatrooms: (chatroomIds: string[]) => void;
   clearFolder: (folderId: string) => void;
 }
 
@@ -61,6 +63,22 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
           : chatroom,
       ),
     })),
+  reorderChatrooms: (chatroomIds) =>
+    set((state) => {
+      const moving = new Set(chatroomIds);
+      const byId = new Map(state.chatrooms.map((c) => [c.chatroomId, c]));
+      const slots = state.chatrooms
+        .filter((c) => moving.has(c.chatroomId))
+        .map((c) => c.chatroomIndex);
+      let next = 0;
+      return {
+        chatrooms: state.chatrooms.map((chatroom) => {
+          if (!moving.has(chatroom.chatroomId)) return chatroom;
+          const placed = byId.get(chatroomIds[next])!;
+          return { ...placed, chatroomIndex: slots[next++] };
+        }),
+      };
+    }),
   clearFolder: (folderId) =>
     set((state) => ({
       chatrooms: state.chatrooms.map((chatroom) =>

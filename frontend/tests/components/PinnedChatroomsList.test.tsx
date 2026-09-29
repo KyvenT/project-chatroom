@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PinnedChatroomsList } from "../../src/components/chat-home/PinnedChatroomsList";
-import { useAuthStore } from "../../src/hooks/useStores";
+import { useAuthStore, useChatroomsStore } from "../../src/hooks/useStores";
 import { renderWithProviders } from "../renderWithProviders";
 
 const jsonResponse = (body: unknown) =>
@@ -33,6 +33,8 @@ const group = {
   ],
 };
 
+const onReorder = vi.fn();
+
 const params = (call: unknown[]) =>
   new URL(call[0] as string, "http://localhost").searchParams;
 
@@ -62,7 +64,7 @@ describe("PinnedChatroomsList", () => {
           new QueryClient({ defaultOptions: { queries: { retry: false } } })
         }
       >
-        <PinnedChatroomsList pinnedGroup={group} />
+        <PinnedChatroomsList pinnedGroup={group} onReorder={onReorder} />
       </QueryClientProvider>,
     );
 
@@ -117,5 +119,26 @@ describe("PinnedChatroomsList", () => {
 
     expect(await screen.findByText("No messages yet")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("links the card title to the chatroom and shows its unread count", async () => {
+    useChatroomsStore.getState().setChatroomList([
+      {
+        chatroomId: "c1",
+        lastViewedAt: new Date(0),
+        unreadMessages: 4,
+        chatroomIndex: 1,
+        folderId: null,
+        chatroom: { title: "Room", privacy: "INVITE_ONLY", ownerId: "u1" },
+      },
+    ]);
+    fetchMock.mockReturnValueOnce(jsonResponse(makeMessages(20, 5)));
+    renderList();
+
+    expect(await screen.findByRole("link", { name: "Room" })).toHaveAttribute(
+      "href",
+      "/chat/c1",
+    );
+    expect(screen.getByLabelText("4 unread")).toHaveTextContent("4");
   });
 });

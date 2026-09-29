@@ -105,8 +105,30 @@ export const usePinnedGroupActions = () => {
     });
   };
 
+  const reorderGroup = (pinGroupId: string, chatroomIds: string[]) => {
+    updateGroups((groups) =>
+      groups.map((group) => {
+        if (group.id !== pinGroupId) return group;
+        const byId = new Map(group.chatrooms.map((c) => [c.chatroomId, c]));
+        return {
+          ...group,
+          chatrooms: chatroomIds.map((id, i) => ({
+            ...byId.get(id)!,
+            pinnedIndex: i + 1,
+          })),
+        };
+      }),
+    );
+    mutation.mutate({
+      fetchUrl: `${API_URL}/api/pinned/${pinGroupId}/order`,
+      method: "PATCH",
+      reqBody: { chatroomIds },
+    });
+  };
+
   return {
     setPinned,
+    reorderGroup,
     renameGroup,
     deleteGroup,
     createGroup: createMutation.mutateAsync,

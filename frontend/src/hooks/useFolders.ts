@@ -28,6 +28,7 @@ export const useFolderActions = () => {
     (state) => state.setChatroomFolder,
   );
   const clearFolder = useChatroomsStore((state) => state.clearFolder);
+  const reorderChatrooms = useChatroomsStore((state) => state.reorderChatrooms);
   const queryKey = foldersKey(userId);
 
   const updateFolders = (
@@ -79,6 +80,27 @@ export const useFolderActions = () => {
     moveMutation.mutate({ chatroomId, folderId, previous });
   };
 
+  // a failed reorder is undone by reloading the chatroom list's order
+  const orderMutation = useMutation<
+    unknown,
+    Error,
+    { folderId: string; chatroomIds: string[] }
+  >({
+    mutationFn: ({ folderId, chatroomIds }) =>
+      customMutation({
+        fetchUrl: `${API_URL}/api/folders/${folderId}/order`,
+        method: "PATCH",
+        reqBody: { chatroomIds },
+      }),
+    onError: () =>
+      queryClient.invalidateQueries({ queryKey: ["chatrooms", userId] }),
+  });
+
+  const reorderFolder = (folderId: string, chatroomIds: string[]) => {
+    reorderChatrooms(chatroomIds);
+    orderMutation.mutate({ folderId, chatroomIds });
+  };
+
   const renameFolder = (folderId: string, name: string) => {
     updateFolders((folders) =>
       folders.map((folder) =>
@@ -107,6 +129,11 @@ export const useFolderActions = () => {
     renameFolder,
     deleteFolder,
     moveChatroom,
-    error: mutation.error ?? moveMutation.error ?? createMutation.error,
+    reorderFolder,
+    error:
+      mutation.error ??
+      moveMutation.error ??
+      orderMutation.error ??
+      createMutation.error,
   };
 };

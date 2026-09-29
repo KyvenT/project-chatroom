@@ -116,9 +116,9 @@ describe("syncing sidebar folders with the home page", () => {
     renderWithProviders(withQueryClient(<ChatHome />));
 
     expect(
-      await screen.findByRole("button", { name: /Pinned stuff/ }),
+      await screen.findByRole("button", { name: /^Pinned stuff/ }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Work/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Work/ })).toBeNull();
   });
 
   it("shows sidebar folders and their chatrooms when sync is on", async () => {
@@ -126,11 +126,13 @@ describe("syncing sidebar folders with the home page", () => {
     renderWithProviders(withQueryClient(<ChatHome />));
 
     expect(
-      await screen.findByRole("button", { name: /Work/ }),
+      await screen.findByRole("button", { name: /^Work/ }),
     ).toBeInTheDocument();
     expect(screen.getByText("Standup")).toBeInTheDocument();
     expect(screen.queryByText("Pinned stuff")).not.toBeInTheDocument();
-    expect(screen.getByText("Edit folder")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Edit folder Work" }),
+    ).toBeInTheDocument();
     expect(
       screen.getByText("Showing your sidebar folders."),
     ).toBeInTheDocument();
@@ -139,7 +141,9 @@ describe("syncing sidebar folders with the home page", () => {
   it("moves chatrooms in and out of the folder from the home page", async () => {
     usePreferencesStore.getState().setPreference("syncFoldersWithHome", true);
     renderWithProviders(withQueryClient(<ChatHome />));
-    fireEvent.click(await screen.findByText("Edit folder"));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Edit folder Work" }),
+    );
 
     const folderOf = (id: string) =>
       useChatroomsStore.getState().chatrooms.find((c) => c.chatroomId === id)
@@ -157,7 +161,7 @@ describe("syncing sidebar folders with the home page", () => {
       .closest(".field") as HTMLElement;
     fireEvent.click(
       within(inFolder).getByRole("button", {
-        name: /Standup.*Remove/,
+        name: "Remove Standup",
         hidden: true,
       }),
     );

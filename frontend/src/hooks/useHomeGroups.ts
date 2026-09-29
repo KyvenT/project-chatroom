@@ -32,6 +32,7 @@ export const useHomeGroups = () => {
       setPinned: pinnedActions.setPinned,
       renameGroup: pinnedActions.renameGroup,
       deleteGroup: pinnedActions.deleteGroup,
+      reorderGroup: pinnedActions.reorderGroup,
     };
   }
 
@@ -65,5 +66,7 @@ export const useHomeGroups = () => {
       folderActions.moveChatroom(chatroom.chatroomId, pin ? folderId : null),
     renameGroup: folderActions.renameFolder,
     deleteGroup: folderActions.deleteFolder,
+    // reorders the folder's chatrooms in the sidebar too
+    reorderGroup: folderActions.reorderFolder,
   };
 };

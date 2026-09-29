@@ -11,201 +11,173 @@ import { useHomeGroups } from "../../../hooks/useHomeGroups";
 import { NewFolderModal } from "../../../components/chat-layout/folders/NewFolderModal";
 import { Link } from "react-router";
 import { useState } from "react";
+import type { PinnedGroup } from "../../../types/REST-types/Chatroom";
 import { useCollapsedIds } from "../../../hooks/useCollapsedIds";
 
-const styles = css(
-  mq({
-    height: "100%",
-    padding: "4px 8px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-    overflowY: "scroll",
-
-    ul: {
-      listStyle: "none",
-      padding: 0,
-      margin: 0,
-    },
-
-    ".pinned-group-carousel": {
-      width: "100%",
-      height: "80%",
-      display: "flex",
-    },
-
-    h6: {
-      fontSize: "1rem",
-      fontWeight: "300",
-    },
-
-    ".edit-pinned-chatrooms-btn": {
-      fontSize: "1rem",
-      textWrap: "wrap",
-      width: ["33%", "10%"],
-      height: "auto",
-      aspectRatio: 1,
-      // flex instead of the icon button's grid, whose rows stretch to fill
-      // the square and push the icon and text apart
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "4px",
-      textAlign: "center",
-
-      p: {
-        margin: 0,
-      },
-
-      ".btn-icon": {
-        flexShrink: 0,
-        width: "2.25rem",
-        height: "2.25rem",
-      },
-    },
-
-    ".pinned-group": {
-      width: "100%",
-      padding: "4px",
-    },
-
-    ".emptyState": {
-      maxWidth: "480px",
-      padding: "24px 4px 12px",
-
-      h3: {
-        fontSize: "1.25rem",
-        fontWeight: 600,
-        marginBottom: "6px",
-      },
-
-      p: {
-        fontSize: "0.95rem",
-        lineHeight: 1.5,
-      },
-    },
-
-    ".syncNote": {
-      padding: "4px",
-      fontSize: "0.85rem",
-    },
-
-    ".emptyGroup": {
-      flex: 1,
-      alignSelf: "center",
-      padding: "8px",
-      fontSize: "0.9rem",
-    },
-
-    ".pinned-groups": {
-      display: "flex",
-      flexDirection: "column",
-      width: "100%",
-    },
-
-    ".title": {
-      fontSize: "1.75rem",
-      fontWeight: "500",
-    },
-
-    ".collapse-btn": {
-      display: "flex",
-      alignItems: "center",
-      gap: "6px",
-      maxWidth: "100%",
-      padding: "4px 8px 4px 4px",
-      border: 0,
-      borderRadius: "6px",
-      backgroundColor: "transparent",
-      color: "inherit",
-      font: "inherit",
-      cursor: "pointer",
-    },
-
-    ".chevron": {
-      flex: "0 0 auto",
-      transition: "transform 0.15s ease",
-    },
-
-    ".chevron.collapsed": {
-      transform: "rotate(-90deg)",
-    },
-
-    ".pinned-count": {
-      flex: "0 0 auto",
-      fontSize: "0.75rem",
-      fontWeight: 600,
-      padding: "1px 7px",
-      borderRadius: "999px",
-    },
-
-    ".pinned-group-title-section": {
-      margin: 0,
-      fontSize: "inherit",
-      fontWeight: "inherit",
-    },
-
-    ".pinned-group-name": {
-      minWidth: 0,
-      fontWeight: "400",
-      fontSize: "1.25rem",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-    },
-
-    ".edit-title-btn": {
-      display: "inline",
-      minHeight: 0,
-      aspectRatio: 1,
-      padding: "auto 4px",
-    },
-  }),
-);
-
-const colors = (theme: Theme) =>
+const styles = (theme: Theme) =>
   css(
     mq({
+      height: "100%",
+      padding: ["16px 12px", "20px 24px"],
+      display: "flex",
+      flexDirection: "column",
+      gap: "20px",
+      overflowY: "auto",
       backgroundColor: theme.colors.black,
       color: theme.colors.white,
-      scrollbarColor: `transparent transparent`,
-      "&:hover": {
-        scrollbarColor: `${theme.colors.white} transparent`,
+
+      ".pinned-groups": {
+        display: "flex",
+        flexDirection: "column",
+        gap: "20px",
+        width: "100%",
       },
 
       ".pinned-group": {
-        color: theme.colors.white,
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        minWidth: 0,
       },
 
-      ".pinned-group:hover": {
-        backgroundColor: theme.colors.black,
-      },
-
-      ".title": {
-        color: theme.colors.white,
-      },
-
-      ".emptyState p, .emptyGroup, .syncNote": {
-        color: theme.colors.light_grey,
+      ".pinned-group-title-section": {
+        margin: 0,
+        fontSize: "inherit",
+        fontWeight: "inherit",
       },
 
       ".collapse-btn": {
-        "&:hover": {
-          backgroundColor: theme.colors.grey,
-        },
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "8px",
+        maxWidth: "100%",
+        padding: "4px 10px 4px 4px",
+        marginLeft: "-4px",
+        border: 0,
+        borderRadius: theme.radius.sm,
+        backgroundColor: "transparent",
+        color: "inherit",
+        font: "inherit",
+        cursor: "pointer",
+
+        "&:hover": { backgroundColor: theme.colors.dark_grey },
         "&:focus-visible": {
           outline: `2px solid ${theme.colors.accent}`,
           outlineOffset: "2px",
         },
       },
 
-      ".chevron, .pinned-count": {
+      ".chevron": {
+        flex: "0 0 auto",
         color: theme.colors.light_grey,
+        transition: "transform 0.15s ease",
+      },
+
+      ".chevron.collapsed": {
+        transform: "rotate(-90deg)",
+      },
+
+      ".pinned-group-name": {
+        minWidth: 0,
+        fontSize: "1.1rem",
+        fontWeight: 600,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
       },
 
       ".pinned-count": {
+        flex: "0 0 auto",
+        padding: "1px 8px",
+        borderRadius: "999px",
+        fontSize: "0.75rem",
+        fontWeight: 600,
+        color: theme.colors.light_grey,
         backgroundColor: theme.colors.grey,
+      },
+
+      ".pinned-group-carousel": {
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+      },
+
+      ".edit-group-btn": {
+        flex: "0 0 auto",
+        width: "4.5rem",
+        height: "4.5rem",
+        // lines up with the cards, not the scrollbar space under them
+        marginBottom: "8px",
+        padding: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "4px",
+        fontSize: "0.85rem",
+        fontWeight: 500,
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: theme.radius.lg,
+        backgroundColor: theme.colors.dark_grey,
+
+        "&:hover": {
+          borderColor: theme.colors.borderStrong,
+        },
+      },
+
+      ".emptyGroup": {
+        flex: "0 1 480px",
+        minHeight: "120px",
+        display: "grid",
+        placeItems: "center",
+        padding: "16px",
+        marginBottom: "8px",
+        textAlign: "center",
+        fontSize: "0.9rem",
+        color: theme.colors.light_grey,
+        border: `1px dashed ${theme.colors.borderStrong}`,
+        borderRadius: theme.radius.lg,
+      },
+
+      ".new-group-btn": {
+        alignSelf: "flex-start",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "8px",
+        padding: "10px 16px",
+        fontSize: "0.9rem",
+        fontWeight: 500,
+        border: `1px dashed ${theme.colors.borderStrong}`,
+        borderRadius: theme.radius.md,
+
+        "&:hover": {
+          color: theme.colors.white,
+          borderColor: theme.colors.accent,
+          backgroundColor: theme.colors.accentSoft,
+        },
+      },
+
+      ".emptyState": {
+        maxWidth: "480px",
+        padding: "8px 0",
+
+        h3: {
+          fontSize: "1.25rem",
+          fontWeight: 600,
+          marginBottom: "6px",
+        },
+
+        p: {
+          fontSize: "0.95rem",
+          lineHeight: 1.5,
+          color: theme.colors.light_grey,
+        },
+      },
+
+      ".syncNote": {
+        fontSize: "0.85rem",
+        color: theme.colors.light_grey,
       },
     }),
   );
@@ -224,15 +196,28 @@ const ChatHome = () => {
     isLoading,
     isError,
     error,
+    reorderGroup,
   } = useHomeGroups();
   const groupWord = synced ? "folder" : "group";
+
+  const editButton = (pinnedGroup: PinnedGroup) => (
+    <Button
+      className="edit-group-btn"
+      variant="icon"
+      aria-label={`Edit ${groupWord} ${pinnedGroup.name}`}
+      onClick={() => setOpenedPinGroupId(pinnedGroup.id)}
+    >
+      <SquarePen size="1.5rem" aria-hidden="true" />
+      <span>Edit</span>
+    </Button>
+  );
 
   const openedPinGroup =
     pinnedGroups?.find((group) => group.id === openedPinGroupId) || null;
 
   if (isLoading) {
     return (
-      <div css={[styles, colors(theme)]}>
+      <div css={styles(theme)}>
         <p>Loading...</p>
         <Loader2 />
       </div>
@@ -241,7 +226,7 @@ const ChatHome = () => {
 
   if (isError) {
     return (
-      <div css={[styles, colors(theme)]}>
+      <div css={styles(theme)}>
         <p>
           Failed to load {synced ? "folders" : "pinned groups"}:{" "}
           {error?.message}
@@ -252,7 +237,7 @@ const ChatHome = () => {
 
   return (
     <>
-      <div css={[styles, colors(theme)]}>
+      <div css={styles(theme)}>
         {synced && (
           <p className="syncNote">
             Showing your sidebar folders.{" "}
@@ -300,41 +285,39 @@ const ChatHome = () => {
                   </span>
                 </button>
               </h3>
-              {!isCollapsed(pinnedGroup.id) && (
-                <div
-                  className="pinned-group-carousel"
-                  id={`pinned-group-${pinnedGroup.id}`}
-                >
-                  {pinnedGroup.chatrooms.length > 0 ? (
-                    <PinnedChatroomsList pinnedGroup={pinnedGroup} />
-                  ) : (
-                    <p className="emptyGroup">
-                      No chatrooms in this {groupWord} yet. Use "Edit{" "}
-                      {groupWord}" to add some.
-                    </p>
-                  )}
-                  <Button
-                    className="pinned-chatroom edit-pinned-chatrooms-btn"
-                    variant="icon"
-                    onClick={() => setOpenedPinGroupId(pinnedGroup.id)}
+              {!isCollapsed(pinnedGroup.id) &&
+                (pinnedGroup.chatrooms.length > 0 ? (
+                  <PinnedChatroomsList
+                    pinnedGroup={pinnedGroup}
+                    id={`pinned-group-${pinnedGroup.id}`}
+                    onReorder={(ids) => reorderGroup(pinnedGroup.id, ids)}
                   >
-                    <SquarePen className="btn-icon" />
-                    <p>Edit {groupWord}</p>
-                  </Button>
-                </div>
-              )}
+                    {editButton(pinnedGroup)}
+                  </PinnedChatroomsList>
+                ) : (
+                  <div
+                    className="pinned-group-carousel"
+                    id={`pinned-group-${pinnedGroup.id}`}
+                  >
+                    <p className="emptyGroup">
+                      No chatrooms in this {groupWord} yet. Use the edit button
+                      to add some.
+                    </p>
+                    {editButton(pinnedGroup)}
+                  </div>
+                ))}
             </div>
           ))}
         </div>
 
         {!isGuest && (
           <Button
-            className="pinned-chatroom edit-pinned-chatrooms-btn"
+            className="new-group-btn"
             variant="icon"
             onClick={() => setNewGroupOpen(true)}
           >
-            <Plus className="btn-icon" />
-            <p>New {groupWord}</p>
+            <Plus size="1.1rem" aria-hidden="true" />
+            New {groupWord}
           </Button>
         )}
         {openedPinGroup && (

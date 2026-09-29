@@ -52,7 +52,7 @@ describe("ChatHome pinned groups", () => {
 
   it("collapses and expands a group from its header", async () => {
     renderHome();
-    const toggle = await screen.findByRole("button", { name: /Work/ });
+    const toggle = await screen.findByRole("button", { name: /^Work/ });
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("Standup")).toBeInTheDocument();
 
@@ -67,14 +67,13 @@ describe("ChatHome pinned groups", () => {
 
   it("remembers collapsed groups after a reload", async () => {
     const { unmount } = renderHome();
-    fireEvent.click(await screen.findByRole("button", { name: /Work/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /^Work/ }));
     unmount();
 
     renderHome();
-    expect(await screen.findByRole("button", { name: /Work/ })).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
+    expect(
+      await screen.findByRole("button", { name: /^Work/ }),
+    ).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByText("Standup")).not.toBeInTheDocument();
   });
 });

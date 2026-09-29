@@ -98,6 +98,30 @@ describe("useChatroomsStore", () => {
     expect(a.folderId).toBe("f1");
   });
 
+  it("reorders some chatrooms within the places they hold", () => {
+    useChatroomsStore
+      .getState()
+      .setChatroomList([
+        makeChatroom("a", 1),
+        makeChatroom("x", 2),
+        makeChatroom("b", 3),
+        makeChatroom("c", 4),
+      ]);
+
+    useChatroomsStore.getState().reorderChatrooms(["c", "a", "b"]);
+
+    expect(
+      useChatroomsStore
+        .getState()
+        .chatrooms.map((c) => [c.chatroomId, c.chatroomIndex]),
+    ).toEqual([
+      ["c", 1],
+      ["x", 2],
+      ["a", 3],
+      ["b", 4],
+    ]);
+  });
+
   it("moves chatrooms between folders and clears a deleted folder", () => {
     useChatroomsStore
       .getState()
