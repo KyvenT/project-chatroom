@@ -1,21 +1,14 @@
 import type { Theme } from "@emotion/react";
 import { css, useTheme } from "@emotion/react";
 import Button from "../../../components/Button";
-import { Loader2, Pin, Plus } from "lucide-react";
-import {
-  customMutation,
-  type MutationArgs,
-} from "../../../utils/customMutation";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Loader2, Plus, SquarePen } from "lucide-react";
 import { useAuthStore } from "../../../hooks/useStores";
-import { type PinnedGroup } from "../../../types/REST-types/Chatroom";
-import { customQuery } from "../../../utils/customQuery";
 import { mq } from "../../../styles/breakpoints";
 import { PinnedChatroomsList } from "../../../components/chat-home/PinnedChatroomsList";
 import { PinChatroomsModal } from "../../../components/chat-home/PinChatroomsModal";
-import type { ConfirmationResponse } from "../../../types/REST-types/Invite";
-import { useCallback, useEffect, useState } from "react";
-import { API_URL } from "../../../env";
+import { NewPinGroupModal } from "../../../components/chat-home/NewPinGroupModal";
+import { usePinnedGroups } from "../../../hooks/usePinnedGroups";
+import { useState } from "react";
 
 const styles = css(
   mq({
@@ -49,8 +42,21 @@ const styles = css(
       width: ["33%", "10%"],
       height: "auto",
       aspectRatio: 1,
+      // flex instead of the icon button's grid, whose rows stretch to fill
+      // the square and push the icon and text apart
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "4px",
+      textAlign: "center",
+
+      p: {
+        margin: 0,
+      },
 
       ".btn-icon": {
+        flexShrink: 0,
         width: "2.25rem",
         height: "2.25rem",
       },
@@ -59,6 +65,29 @@ const styles = css(
     ".pinned-group": {
       width: "100%",
       padding: "4px",
+    },
+
+    ".emptyState": {
+      maxWidth: "480px",
+      padding: "24px 4px 12px",
+
+      h3: {
+        fontSize: "1.25rem",
+        fontWeight: 600,
+        marginBottom: "6px",
+      },
+
+      p: {
+        fontSize: "0.95rem",
+        lineHeight: 1.5,
+      },
+    },
+
+    ".emptyGroup": {
+      flex: 1,
+      alignSelf: "center",
+      padding: "8px",
+      fontSize: "0.9rem",
     },
 
     ".pinned-groups": {
@@ -111,47 +140,23 @@ const colors = (theme: Theme) =>
       ".title": {
         color: theme.colors.white,
       },
+
+      ".emptyState p, .emptyGroup": {
+        color: theme.colors.light_grey,
+      },
     }),
   );
 
 const ChatHome = () => {
   const theme = useTheme();
-  const user = useAuthStore((state) => state.user);
+  const isGuest = useAuthStore((state) => state.user.isGuest);
   const [openedPinGroupId, setOpenedPinGroupId] = useState<string | null>(null);
-  const [pinnedGroups, setPinnedGroups] = useState<PinnedGroup[]>([]);
+  const [newGroupOpen, setNewGroupOpen] = useState(false);
 
-  const { data, refetch, isLoading, isError, error } = useQuery({
-    queryKey: ["pinnedChatrooms", user.userId],
-    queryFn: () =>
-      customQuery<PinnedGroup[]>({
-        fetchUrl: `${API_URL}/api/pinned/me`,
-      }),
-    enabled: !!user.token,
-    staleTime: 0,
-  });
-
-  useEffect(() => {
-    if (data) setPinnedGroups(data);
-  }, [data]);
-
-  const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: customMutation,
-    onSuccess: () => refetch(),
-  });
-
-  const handleAddPinnedGroupClick: () => void = () => {
-    mutate({
-      fetchUrl: `${API_URL}/api/pinned`,
-      method: "POST",
-    });
-  };
-
-  const handleEditBtnClick = useCallback((pinnedGroupId: string) => {
-    setOpenedPinGroupId(pinnedGroupId);
-  }, []);
+  const { data: pinnedGroups, isLoading, isError, error } = usePinnedGroups();
 
   const openedPinGroup =
-    pinnedGroups.find((group) => group.id === openedPinGroupId) || null;
+    pinnedGroups?.find((group) => group.id === openedPinGroupId) || null;
 
   if (isLoading) {
     return (
@@ -173,6 +178,16 @@ const ChatHome = () => {
   return (
     <>
       <div css={[styles, colors(theme)]}>
+        {pinnedGroups?.length === 0 && (
+          <div className="emptyState">
+            <h3>Nothing pinned yet</h3>
+            <p>
+              {isGuest
+                ? "Sign up for an account to pin chatrooms here."
+                : "Create a group, then pin chatrooms to it to see their latest messages here. You can also pin a chatroom from the pin button next to it in the sidebar."}
+            </p>
+          </div>
+        )}
         <div className="pinned-groups">
           {pinnedGroups?.map((pinnedGroup) => (
             <div key={pinnedGroup.id} className="pinned-group">
@@ -180,34 +195,48 @@ const ChatHome = () => {
                 <h3 className="pinned-group-name">{pinnedGroup.name}</h3>
               </div>
               <div className="pinned-group-carousel">
-                <PinnedChatroomsList pinnedGroup={pinnedGroup} />
+                {pinnedGroup.chatrooms.length > 0 ? (
+                  <PinnedChatroomsList pinnedGroup={pinnedGroup} />
+                ) : (
+                  <p className="emptyGroup">
+                    No chatrooms in this group yet. Use "Edit group" to pin
+                    some.
+                  </p>
+                )}
                 <Button
                   className="pinned-chatroom edit-pinned-chatrooms-btn"
                   variant="icon"
-                  onClick={() => handleEditBtnClick(pinnedGroup.id)}
+                  onClick={() => setOpenedPinGroupId(pinnedGroup.id)}
                 >
-                  <Pin className="btn-icon" />
-                  <p>Edit pinned chatrooms</p>
+                  <SquarePen className="btn-icon" />
+                  <p>Edit group</p>
                 </Button>
               </div>
             </div>
           ))}
         </div>
 
-        <Button
-          className="pinned-chatroom edit-pinned-chatrooms-btn"
-          variant="icon"
-          onClick={handleAddPinnedGroupClick}
-        >
-          <Plus className="btn-icon" />
-          Add new chatroom group
-        </Button>
-        {openedPinGroupId && openedPinGroup && (
+        {!isGuest && (
+          <Button
+            className="pinned-chatroom edit-pinned-chatrooms-btn"
+            variant="icon"
+            onClick={() => setNewGroupOpen(true)}
+          >
+            <Plus className="btn-icon" />
+            <p>New group</p>
+          </Button>
+        )}
+        {openedPinGroup && (
           <PinChatroomsModal
-            open={openedPinGroupId !== null}
+            open={!!openedPinGroup}
             onClose={() => setOpenedPinGroupId(null)}
             pinnedGroup={openedPinGroup}
-            setPinnedGroups={setPinnedGroups}
+          />
+        )}
+        {newGroupOpen && (
+          <NewPinGroupModal
+            open={newGroupOpen}
+            onClose={() => setNewGroupOpen(false)}
           />
         )}
       </div>

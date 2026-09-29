@@ -1,73 +1,81 @@
-import { User } from "lucide-react";
+import { LogOut, User, UserRound } from "lucide-react";
 import DropdownButton from "../DropdownButton";
-import { Link, useNavigate } from "react-router";
-import Button from "../Button";
+import { Link } from "react-router";
 import { useAuthStore } from "../../hooks/useStores";
 import { css, useTheme, type Theme } from "@emotion/react";
-import { mq } from "../../styles/breakpoints";
 
 const styles = (theme: Theme) =>
-  css(
-    mq({
+  css({
+    ".profile": {
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+    },
+
+    ".avatar": {
+      flex: "0 0 auto",
+      width: "2.25rem",
+      height: "2.25rem",
+      display: "grid",
+      placeItems: "center",
+      borderRadius: "50%",
+      fontWeight: 600,
+      textTransform: "uppercase",
+      color: theme.colors.onAccent,
+      backgroundColor: theme.colors.accent,
+    },
+
+    ".profileText": {
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
-      gap: "8px",
-      width: "fit-content",
-      minWidth: "180px",
-      backgroundColor: theme.colors.dark_grey,
-      padding: "16px",
-      borderRadius: theme.radius.lg,
-      color: theme.colors.white,
-      border: `1px solid ${theme.colors.border}`,
-      boxShadow: theme.shadow.popup,
+      minWidth: 0,
+    },
 
-      ".username": {
-        fontSize: "1rem",
-        fontWeight: 600,
-      },
+    ".username": {
+      fontSize: "0.95rem",
+      fontWeight: 600,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
 
-      ".accountDetailsLink": {
-        textWrap: "nowrap",
-        fontSize: "0.85rem",
-        color: theme.colors.light_grey,
-      },
-
-      ".logoutBtn": {
-        width: "100%",
-        fontSize: "0.9rem",
-        padding: "7px 12px",
-        borderRadius: theme.radius.sm,
-        backgroundColor: "transparent",
-        border: `1px solid ${theme.colors.borderStrong}`,
-        cursor: "pointer",
-        color: theme.colors.white,
-      },
-
-      ".logoutBtn:hover": {
-        backgroundColor: theme.colors.grey,
-      },
-    }),
-  );
+    ".accountType": {
+      fontSize: "0.8rem",
+      color: theme.colors.light_grey,
+    },
+  });
 
 export const ProfileButton = () => {
-  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const theme = useTheme();
 
   return (
     <DropdownButton
+      aria-label="Open profile menu"
       buttonText={<User className="headerIconBtn" />}
       buttonVariant="icon"
       dropdownStyles={styles(theme)}
     >
-      <h3 className="username">{user.username}</h3>
-      <Link to="/account" className="accountDetailsLink">
-        Account Details
+      <div className="menuHeader profile">
+        <span className="avatar" aria-hidden="true">
+          {user.username.charAt(0)}
+        </span>
+        <div className="profileText">
+          <span className="username">{user.username}</span>
+          <span className="accountType">
+            {user.isGuest ? "Guest" : "Account"}
+          </span>
+        </div>
+      </div>
+      <Link to="/account" className="menuItem">
+        <UserRound size="1rem" />
+        Account details
       </Link>
-      <Button onClick={() => navigate("/logout")} className="logoutBtn">
-        Log Out
-      </Button>
+      <div className="menuDivider" />
+      <Link to="/logout" className="menuItem menuItemDanger">
+        <LogOut size="1rem" />
+        Log out
+      </Link>
     </DropdownButton>
   );
 };

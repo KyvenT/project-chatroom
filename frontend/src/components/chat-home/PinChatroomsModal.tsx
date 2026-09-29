@@ -1,135 +1,74 @@
-import { useMutation } from "@tanstack/react-query";
 import { useChatroomsStore } from "../../hooks/useStores";
-import Modal, { closeButtonStyles } from "../Modal";
-import { customMutation, type MutationArgs } from "../../utils/customMutation";
-import type { ConfirmationResponse } from "../../types/REST-types/Invite";
+import Modal, { ModalCloseButton } from "../Modal";
+import Button from "../Button";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import type { PinnedGroup } from "../../types/REST-types/Chatroom";
-import { API_URL } from "../../env";
-import { Check, Pencil, X } from "lucide-react";
+import { usePinnedGroupActions } from "../../hooks/usePinnedGroups";
+import { ConfirmModal } from "../ConfirmModal";
+import { Check, Pin, PinOff, SquarePen, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { mq } from "../../styles/breakpoints";
+import { fieldStyles, formModalStyles } from "../../styles/modalForm";
 
 interface pinChatroomsModalProps {
   open: boolean;
   onClose: () => void;
   pinnedGroup: PinnedGroup;
-  setPinnedGroups: React.Dispatch<React.SetStateAction<PinnedGroup[]>>;
 }
 
 const styles = (theme: Theme) =>
-  css(
-    mq({
-      width: ["80%", "80%", "40%"],
-      backgroundColor: theme.colors.dark_grey,
-      color: theme.colors.white,
-      border: `1px solid ${theme.colors.border}`,
-      borderRadius: "8px",
-      padding: "30px",
+  css(formModalStyles(theme, "480px"), {
+    ".titleRow": {
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      minHeight: "2.25rem",
 
-      ul: {
-        listStyle: "none",
-        padding: 0,
+      h2: {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
       },
 
-      ".title-section": {
-        width: "100%",
-
-        h3: {
-          fontSize: "1.5rem",
-          margin: 0,
-          fontWeight: 400,
-        },
-
-        ".edit-title-section": {
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-        },
-
-        ".edit-title-btn": {
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-        },
-
-        ".edit-title-btn:hover": {
-          opacity: 0.7,
-        },
-
-        ".btn-icon": {
-          width: "1.25rem",
-          height: "1.25rem",
-          color: theme.colors.white,
-          cursor: "pointer",
-        },
-
-        input: {
-          flex: 1,
-          minWidth: 0,
-          fontSize: "1.5rem",
-          fontWeight: 400,
-          backgroundColor: theme.colors.grey,
-          color: theme.colors.white,
-          border: `1px solid ${theme.colors.borderStrong}`,
-          borderRadius: "6px",
-          padding: "4px",
-        },
+      input: {
+        flex: 1,
+        minWidth: 0,
+        fontSize: "1.1rem",
+        fontWeight: 500,
       },
+    },
 
-      ".unpinned-chatroom": {
-        button: {
-          fontSize: "1.1rem",
-          backgroundColor: "transparent",
-          color: theme.colors.white,
-          border: 0,
-          width: "100%",
-          cursor: "pointer",
-        },
+    ".titleBtn": {
+      flex: "0 0 auto",
+      width: "2rem",
+      height: "2rem",
+      padding: "7px",
+    },
 
-        "button:hover": {
-          backgroundColor: theme.colors.grey,
-        },
-      },
+    ".listRowTitle": {
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
 
-      h5: {
-        fontSize: "1.2rem",
-        fontWeight: 400,
-      },
-
-      ".chatroom-list": {
-        marginBottom: "20px",
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: "6px",
-        padding: "12px",
-        height: ["60px", "60px", "100px"],
-        overflowY: "scroll",
-        scrollbarColor: `transparent transparent`,
-        "&:hover": {
-          scrollbarColor: `${theme.colors.white} transparent`,
-        },
-      },
-    }),
-  );
+    ".listRowAction": {
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+    },
+  });
 
 export const PinChatroomsModal = ({
   open,
   onClose,
   pinnedGroup,
-  setPinnedGroups,
 }: pinChatroomsModalProps) => {
   const theme = useTheme();
   const [enableTitleEdit, setEnableTitleEdit] = useState<boolean>(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
-  const { mutate } = useMutation<ConfirmationResponse, Error, MutationArgs>({
-    mutationFn: customMutation<ConfirmationResponse>,
-    onSuccess: () => {
-      console.log("chatroom pinned successfully");
-    },
-  });
+  const { setPinned, renameGroup, deleteGroup, error } =
+    usePinnedGroupActions();
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const handleChatroomPin = (
@@ -137,57 +76,13 @@ export const PinChatroomsModal = ({
     chatroomTitle: string,
     pin: boolean,
   ) => {
-    console.log("pin ", pinnedGroup.id, ": ", chatroomId, ",", pin);
-    mutate({
-      fetchUrl: `${API_URL}/api/pinned/${chatroomId}/pin`,
-      method: "PATCH",
-      reqBody: {
-        pin: pin,
-        pinGroupId: pinnedGroup.id,
-      },
-    });
-    setPinnedGroups((prev) =>
-      prev.map((group) => {
-        if (group.id !== pinnedGroup.id) return group;
-
-        if (pin) {
-          return {
-            ...group,
-            chatrooms: [
-              ...group.chatrooms,
-              {
-                chatroomId,
-                chatroom: { title: chatroomTitle },
-                pinnedIndex: group.chatrooms.length,
-              },
-            ],
-          };
-        }
-
-        return {
-          ...group,
-          chatrooms: group.chatrooms.filter((c) => c.chatroomId !== chatroomId),
-        };
-      }),
-    );
+    setPinned(pinnedGroup.id, { chatroomId, title: chatroomTitle }, pin);
   };
 
-  const handleEditPinnedGroupName = (pinnedGroupId: string, name: string) => {
-    mutate({
-      fetchUrl: `${API_URL}/api/pinned/${pinnedGroupId}`,
-      method: "PATCH",
-      reqBody: {
-        name,
-      },
-    });
-    setPinnedGroups((prev) =>
-      prev?.map((group) => {
-        if (group.id === pinnedGroupId) {
-          return { ...group, name };
-        }
-        return group;
-      }),
-    );
+  const handleDeleteGroup = () => {
+    setConfirmDeleteOpen(false);
+    deleteGroup(pinnedGroup.id);
+    onClose();
   };
 
   const pinnedSet = new Set(pinnedGroup.chatrooms.map((c) => c.chatroomId));
@@ -197,97 +92,160 @@ export const PinChatroomsModal = ({
     (c) => !pinnedSet.has(c.chatroomId),
   );
 
+  const handleSaveName = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = titleInputRef.current?.value.trim();
+    if (name && name !== pinnedGroup.name) renameGroup(pinnedGroup.id, name);
+    setEnableTitleEdit(false);
+  };
+
   return (
     <Modal modalStyles={styles(theme)} open={open} onClose={onClose}>
-      <div>
-        <div className="title-section">
-          <div className="edit-title-section">
-            {enableTitleEdit ? (
-              <>
-                <input
-                  type="text"
-                  placeholder={pinnedGroup.name}
-                  maxLength={20}
-                  defaultValue={pinnedGroup.name}
-                  ref={titleInputRef}
-                ></input>
-                <button
-                  className="edit-title-btn"
-                  onClick={() => {
-                    handleEditPinnedGroupName(
-                      pinnedGroup.id,
-                      titleInputRef.current?.value || pinnedGroup.name,
-                    );
-                    setEnableTitleEdit(false);
-                  }}
-                >
-                  <Check className="btn-icon" />
-                </button>
-                <button
-                  className="edit-title-btn"
-                  onClick={() => setEnableTitleEdit(false)}
-                >
-                  <X className="btn-icon" />
-                </button>
-              </>
-            ) : (
-              <>
-                <h3>{pinnedGroup.name}</h3>
-                <button
-                  className="edit-title-btn"
-                  aria-label="Edit pinned group name"
-                  onClick={() => setEnableTitleEdit((prev) => !prev)}
-                >
-                  <Pencil className="btn-icon" />
-                </button>
-              </>
-            )}
+      <div className="header">
+        <p className="eyebrow">Group</p>
+        {enableTitleEdit ? (
+          <form className="titleRow" onSubmit={handleSaveName}>
+            <input
+              css={fieldStyles(theme)}
+              type="text"
+              placeholder={pinnedGroup.name}
+              maxLength={30}
+              defaultValue={pinnedGroup.name}
+              ref={titleInputRef}
+              aria-label="Pinned group name"
+              autoFocus
+            />
+            <Button
+              variant="icon"
+              type="submit"
+              className="titleBtn"
+              aria-label="Save group name"
+            >
+              <Check />
+            </Button>
+            <Button
+              variant="icon"
+              type="button"
+              className="titleBtn"
+              aria-label="Cancel editing group name"
+              onClick={() => setEnableTitleEdit(false)}
+            >
+              <X />
+            </Button>
+          </form>
+        ) : (
+          <div className="titleRow">
+            <h2>{pinnedGroup.name}</h2>
+            <Button
+              variant="icon"
+              type="button"
+              className="titleBtn"
+              aria-label="Edit pinned group name"
+              onClick={() => setEnableTitleEdit(true)}
+            >
+              <SquarePen />
+            </Button>
           </div>
-          <button css={closeButtonStyles(theme)} onClick={onClose}>
-            <X />
+        )}
+      </div>
+
+      <div className="body">
+        <div className="field">
+          <p className="sectionLabel">Pinned</p>
+          <ul className="list">
+            {pinnedChatrooms.length === 0 ? (
+              <li className="listEmpty">
+                No pinned chatrooms yet. Pin one from the list below.
+              </li>
+            ) : (
+              pinnedChatrooms.map((chatroom) => (
+                <li key={chatroom.chatroomId}>
+                  <button
+                    type="button"
+                    className="listRow"
+                    onClick={() =>
+                      handleChatroomPin(
+                        chatroom.chatroomId,
+                        chatroom.chatroom.title,
+                        false,
+                      )
+                    }
+                  >
+                    <span className="listRowTitle">
+                      {chatroom.chatroom.title}
+                    </span>
+                    <span className="listRowAction">
+                      <PinOff size="0.9rem" /> Unpin
+                    </span>
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+
+        <div className="field">
+          <p className="sectionLabel">Your chatrooms</p>
+          <ul className="list">
+            {unpinnedChatrooms.length === 0 ? (
+              <li className="listEmpty">All of your chatrooms are pinned.</li>
+            ) : (
+              unpinnedChatrooms.map((chatroom) => (
+                <li key={chatroom.chatroomId}>
+                  <button
+                    type="button"
+                    className="listRow"
+                    onClick={() =>
+                      handleChatroomPin(
+                        chatroom.chatroomId,
+                        chatroom.chatroom.title,
+                        true,
+                      )
+                    }
+                  >
+                    <span className="listRowTitle">
+                      {chatroom.chatroom.title}
+                    </span>
+                    <span className="listRowAction">
+                      <Pin size="0.9rem" /> Pin
+                    </span>
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+          {error && <p className="errorText">{error.message}</p>}
+        </div>
+      </div>
+
+      <div className="footer">
+        <button
+          type="button"
+          className="btn btnDanger"
+          onClick={() => setConfirmDeleteOpen(true)}
+        >
+          Delete group
+        </button>
+        <div className="footerEnd">
+          <button type="button" className="btn btnPrimary" onClick={onClose}>
+            Done
           </button>
         </div>
-        <h5>Pinned Chatrooms</h5>
-        <ul className="chatroom-list">
-          {pinnedChatrooms.length === 0 ? (
-            <p>No pinned chatrooms</p>
-          ) : (
-            pinnedChatrooms.map((chatroom) => (
-              <li key={chatroom.chatroomId} className="unpinned-chatroom">
-                <button
-                  onClick={() =>
-                    handleChatroomPin(
-                      chatroom.chatroomId,
-                      chatroom.chatroom.title,
-                      false,
-                    )
-                  }
-                >
-                  {chatroom.chatroom.title}
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
-        <h5>Pin chatrooms</h5>
-        <ul className="chatroom-list">
-          {unpinnedChatrooms.map((chatroom) => (
-            <li key={chatroom.chatroomId} className="unpinned-chatroom">
-              <button
-                onClick={() =>
-                  handleChatroomPin(
-                    chatroom.chatroomId,
-                    chatroom.chatroom.title,
-                    true,
-                  )
-                }
-              >
-                {chatroom.chatroom.title}
-              </button>
-            </li>
-          ))}
-        </ul>
       </div>
+      <ModalCloseButton onClose={onClose} label="Close pinned group" />
+      {confirmDeleteOpen && (
+        <ConfirmModal
+          open={confirmDeleteOpen}
+          title="Delete group?"
+          confirmLabel="Delete group"
+          danger
+          onConfirm={handleDeleteGroup}
+          onCancel={() => setConfirmDeleteOpen(false)}
+        >
+          <strong>{pinnedGroup.name}</strong> will be removed from your home
+          page. Its chatrooms are only unpinned, not deleted or left.
+        </ConfirmModal>
+      )}
     </Modal>
   );
 };

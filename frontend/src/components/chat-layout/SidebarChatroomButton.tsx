@@ -3,9 +3,10 @@ import { css, useTheme } from "@emotion/react";
 import { NavLink } from "react-router";
 import useToggle from "../../hooks/useToggle";
 import Button from "../Button";
-import { UserRoundPlus } from "lucide-react";
+import { Pin, UserRoundPlus } from "lucide-react";
 import { useAuthStore } from "../../hooks/useStores";
 import { InviteModal } from "./InviteModal";
+import { PinToGroupsModal } from "../chat-home/PinToGroupsModal";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
 import type React from "react";
 import { useChatroomsStore } from "../../hooks/useStores";
@@ -24,7 +25,7 @@ const styles = css({
   position: "relative",
   width: "100%",
 
-  div: {
+  "& > div": {
     width: "100%",
     padding: "0 8px 0 10px",
     borderRadius: "8px",
@@ -76,12 +77,12 @@ const dynamicStyles = (
   isDraggedOver: boolean,
 ) =>
   css({
-    div: {
+    "& > div": {
       backgroundColor: isActive ? theme.colors.accentSoft : "transparent",
       borderColor: isDraggedOver ? theme.colors.accent : "transparent",
     },
 
-    "div:hover": {
+    "& > div:hover": {
       backgroundColor: isActive ? theme.colors.accentSoft : theme.colors.grey,
     },
 
@@ -132,6 +133,7 @@ const SidebarChatroomButton = ({
 
   const [isHovered, setHovered] = useToggle(false);
   const [inviteModalOpen, setInviteModalOpen] = useToggle(false);
+  const [pinModalOpen, setPinModalOpen] = useToggle(false);
   const [isDraggedOver, setIsDraggedOver] = useToggle(false);
   const swapChatroomOrder = useChatroomsStore(
     (state) => state.swapChatroomOrder,
@@ -214,6 +216,17 @@ const SidebarChatroomButton = ({
           {unreadMessages > 0 && (
             <span className="unreadBadge">{unreadMessages}</span>
           )}
+          {(isActive || isHovered) && !user.isGuest && (
+            <Button
+              onClick={() => setPinModalOpen(true)}
+              variant="icon"
+              otherStyles={inviteBtnStyles(theme)}
+              aria-label="Pin chatroom to a group"
+              title="Pin to group"
+            >
+              <Pin size="1.1rem" />
+            </Button>
+          )}
           {(isActive || isHovered) && canInvite && (
             <Button
               onClick={() => setInviteModalOpen()}
@@ -226,6 +239,13 @@ const SidebarChatroomButton = ({
           )}
         </div>
       </li>
+      {pinModalOpen && (
+        <PinToGroupsModal
+          open={pinModalOpen}
+          onClose={() => setPinModalOpen(false)}
+          chatroom={{ chatroomId, title }}
+        />
+      )}
       {inviteModalOpen && (
         <InviteModal
           inviteModalOpen={inviteModalOpen}
