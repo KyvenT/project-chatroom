@@ -3,7 +3,8 @@ export type WSMessage =
   | WSChatMessage
   | WSTypingPresenceMessage
   | WSUpdateActiveChatroomMessage
-  | WSUpdateLastViewedAtMessage;
+  | WSUpdateLastViewedAtMessage
+  | WSUpdateWatchedChatroomsMessage;
 
 export type WSAuthMessage = {
   type: "auth";
@@ -29,4 +30,10 @@ export type WSUpdateActiveChatroomMessage = {
 export type WSUpdateLastViewedAtMessage = {
   type: "update-last-viewed-at";
   chatroomId: string;
+};
+
+// the chatrooms open in pop-outs, so their messages arrive live
+export type WSUpdateWatchedChatroomsMessage = {
+  type: "update-watched-chatrooms";
+  chatroomIds: string[];
 };

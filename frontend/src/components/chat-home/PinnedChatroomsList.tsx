@@ -2,9 +2,9 @@ import type {
   PinnedChatroom,
   PinnedGroup,
 } from "../../types/REST-types/Chatroom";
-import { useFetchMessageHistory } from "../../hooks/useFetchMessages";
-import { useCallback, useEffect, useRef } from "react";
-import { Loader } from "../Loader";
+import { useRef } from "react";
+import { MessageHistoryList } from "../chat/MessageHistoryList";
+import { PopoutButton } from "../popout/PopoutButton";
 import { useWheelScrollsHorizontally } from "../../hooks/useWheelScrollsHorizontally";
 import { useDragReorder } from "../../hooks/useDragReorder";
 import { css, useTheme, type Theme } from "@emotion/react";
@@ -114,85 +114,19 @@ const styles = (theme: Theme) =>
       backgroundColor: theme.colors.accent,
     },
 
+    ".cardPopoutBtn": {
+      flex: "0 0 auto",
+      width: "1.75rem",
+      height: "1.75rem",
+      padding: 0,
+    },
+
     ".openIcon": {
       flex: "0 0 auto",
       color: theme.colors.light_grey,
       transition: "color 0.15s ease",
     },
-
-    ".messages": {
-      listStyle: "none",
-      margin: 0,
-      flex: 1,
-      minHeight: 0,
-      display: "flex",
-      flexDirection: "column-reverse",
-      gap: "2px",
-      padding: "6px 0",
-      overflowY: "auto",
-      backgroundColor: theme.colors.black,
-      scrollbarColor: "transparent transparent",
-    },
-
-    ".pinned-chatroom:hover .messages": {
-      scrollbarColor: `${theme.colors.borderStrong} transparent`,
-    },
-
-    ".previewMessage": {
-      padding: "4px 12px",
-    },
-
-    ".previewMeta": {
-      display: "flex",
-      alignItems: "baseline",
-      gap: "6px",
-      minWidth: 0,
-    },
-
-    ".previewSender": {
-      fontSize: "0.8rem",
-      fontWeight: 600,
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-    },
-
-    ".previewTime": {
-      flex: "0 0 auto",
-      fontSize: "0.7rem",
-      color: theme.colors.light_grey,
-    },
-
-    ".previewContent": {
-      fontSize: "0.85rem",
-      lineHeight: 1.45,
-      color: theme.colors.white,
-      overflowWrap: "anywhere",
-      whiteSpace: "pre-wrap",
-      // long messages are cut to a few lines in the preview
-      display: "-webkit-box",
-      WebkitBoxOrient: "vertical",
-      WebkitLineClamp: 3,
-      overflow: "hidden",
-    },
-
-    ".history-status": {
-      display: "flex",
-      justifyContent: "center",
-      padding: "8px",
-      fontSize: "0.75rem",
-      color: theme.colors.light_grey,
-    },
   });
-
-// today's messages show the time, older ones the date
-const formatPreviewTime = (date: Date) =>
-  date.toDateString() === new Date().toDateString()
-    ? date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
-    : date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-
-// how close to the top (px) the preview is scrolled before older messages load
-const LOAD_THRESHOLD = 24;
 
 const PinnedChatroomCard = ({
   chatroom,
@@ -204,33 +138,11 @@ const PinnedChatroomCard = ({
   dragState: string;
 }) => {
   const navigate = useNavigate();
-  const messagesRef = useRef<HTMLUListElement>(null);
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useFetchMessageHistory(chatroom.chatroomId, 5, 15);
-
-  const messages = data?.pages.flat() ?? [];
   const unread = useChatroomsStore(
     (state) =>
       state.chatrooms.find((c) => c.chatroomId === chatroom.chatroomId)
         ?.unreadMessages ?? 0,
   );
-
-  const loadOlderIfAtTop = useCallback(() => {
-    const list = messagesRef.current;
-    if (!list || !hasNextPage || isFetchingNextPage) return;
-
-    // the list is column-reverse, so scrollTop is 0 at the bottom and grows
-    // negative towards the oldest message
-    const distanceFromTop =
-      list.scrollHeight - list.clientHeight + list.scrollTop;
-    if (distanceFromTop <= LOAD_THRESHOLD) fetchNextPage();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  // if the loaded messages don't fill the preview there's nothing to scroll,
-  // so keep loading until it overflows or history runs out
-  useEffect(() => {
-    loadOlderIfAtTop();
-  }, [data, loadOlderIfAtTop]);
 
   const chatroomPath = `/chat/${chatroom.chatroomId}`;
 
@@ -256,37 +168,19 @@ const PinnedChatroomCard = ({
             {unread}
           </span>
         )}
+        <PopoutButton
+          chatroomId={chatroom.chatroomId}
+          title={chatroom.chatroom.title}
+          className="cardPopoutBtn"
+        />
         <ArrowUpRight className="openIcon" size="1rem" aria-hidden="true" />
       </div>
-      <ul className="messages" ref={messagesRef} onScroll={loadOlderIfAtTop}>
-        {messages.map((message) => {
-          const sentAt = new Date(message.createdAt);
-          return (
-            <li key={message.id} className="previewMessage">
-              <div className="previewMeta">
-                <span className="previewSender">
-                  {message.senderUser?.username ?? "Unnamed User"}
-                </span>
-                <time className="previewTime" dateTime={sentAt.toISOString()}>
-                  {formatPreviewTime(sentAt)}
-                </time>
-              </div>
-              <p className="previewContent">{message.content}</p>
-            </li>
-          );
-        })}
-        {/* last in a column-reverse list, so shown above the oldest message */}
-        {isFetchingNextPage && (
-          <li className="history-status" aria-label="Loading older messages">
-            <Loader />
-          </li>
-        )}
-        {data && !hasNextPage && (
-          <li className="history-status">
-            {messages.length === 0 ? "No messages yet" : "Start of chat"}
-          </li>
-        )}
-      </ul>
+      <MessageHistoryList
+        chatroomId={chatroom.chatroomId}
+        firstPageSize={5}
+        pageSize={15}
+        clamp
+      />
     </li>
   );
 };
