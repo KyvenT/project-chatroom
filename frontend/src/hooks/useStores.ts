@@ -18,6 +18,8 @@ interface ChatroomListState {
     firstChatroom: Chatroom,
     secondChatroom: Chatroom,
   ) => void;
+  setChatroomFolder: (chatroomId: string, folderId: string | null) => void;
+  clearFolder: (folderId: string) => void;
 }
 
 export const useChatroomsStore = create<ChatroomListState>((set) => ({
@@ -41,14 +43,31 @@ export const useChatroomsStore = create<ChatroomListState>((set) => ({
         return chatroom;
       }),
     })),
+  // merged so fields the update doesn't carry (e.g. unreadMessages) are kept
   updateChatroom: (updatedChatroom) =>
     set((state) => ({
       chatrooms: state.chatrooms.map((chatroom) => {
         if (chatroom.chatroomId === updatedChatroom.chatroomId) {
-          return updatedChatroom;
+          return { ...chatroom, ...updatedChatroom };
         }
         return chatroom;
       }),
+    })),
+  setChatroomFolder: (chatroomId, folderId) =>
+    set((state) => ({
+      chatrooms: state.chatrooms.map((chatroom) =>
+        chatroom.chatroomId === chatroomId
+          ? { ...chatroom, folderId }
+          : chatroom,
+      ),
+    })),
+  clearFolder: (folderId) =>
+    set((state) => ({
+      chatrooms: state.chatrooms.map((chatroom) =>
+        chatroom.folderId === folderId
+          ? { ...chatroom, folderId: null }
+          : chatroom,
+      ),
     })),
   swapChatroomOrder: (firstChatroom, secondChatroom) =>
     set((state) => ({

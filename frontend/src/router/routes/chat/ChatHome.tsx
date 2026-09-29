@@ -1,14 +1,17 @@
 import type { Theme } from "@emotion/react";
 import { css, useTheme } from "@emotion/react";
 import Button from "../../../components/Button";
-import { Loader2, Plus, SquarePen } from "lucide-react";
+import { ChevronDown, Loader2, Plus, SquarePen } from "lucide-react";
 import { useAuthStore } from "../../../hooks/useStores";
 import { mq } from "../../../styles/breakpoints";
 import { PinnedChatroomsList } from "../../../components/chat-home/PinnedChatroomsList";
 import { PinChatroomsModal } from "../../../components/chat-home/PinChatroomsModal";
 import { NewPinGroupModal } from "../../../components/chat-home/NewPinGroupModal";
-import { usePinnedGroups } from "../../../hooks/usePinnedGroups";
+import { useHomeGroups } from "../../../hooks/useHomeGroups";
+import { NewFolderModal } from "../../../components/chat-layout/folders/NewFolderModal";
+import { Link } from "react-router";
 import { useState } from "react";
+import { useCollapsedIds } from "../../../hooks/useCollapsedIds";
 
 const styles = css(
   mq({
@@ -83,6 +86,11 @@ const styles = css(
       },
     },
 
+    ".syncNote": {
+      padding: "4px",
+      fontSize: "0.85rem",
+    },
+
     ".emptyGroup": {
       flex: 1,
       alignSelf: "center",
@@ -101,8 +109,45 @@ const styles = css(
       fontWeight: "500",
     },
 
+    ".collapse-btn": {
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      maxWidth: "100%",
+      padding: "4px 8px 4px 4px",
+      border: 0,
+      borderRadius: "6px",
+      backgroundColor: "transparent",
+      color: "inherit",
+      font: "inherit",
+      cursor: "pointer",
+    },
+
+    ".chevron": {
+      flex: "0 0 auto",
+      transition: "transform 0.15s ease",
+    },
+
+    ".chevron.collapsed": {
+      transform: "rotate(-90deg)",
+    },
+
+    ".pinned-count": {
+      flex: "0 0 auto",
+      fontSize: "0.75rem",
+      fontWeight: 600,
+      padding: "1px 7px",
+      borderRadius: "999px",
+    },
+
+    ".pinned-group-title-section": {
+      margin: 0,
+      fontSize: "inherit",
+      fontWeight: "inherit",
+    },
+
     ".pinned-group-name": {
-      display: "inline",
+      minWidth: 0,
       fontWeight: "400",
       fontSize: "1.25rem",
       whiteSpace: "nowrap",
@@ -141,8 +186,26 @@ const colors = (theme: Theme) =>
         color: theme.colors.white,
       },
 
-      ".emptyState p, .emptyGroup": {
+      ".emptyState p, .emptyGroup, .syncNote": {
         color: theme.colors.light_grey,
+      },
+
+      ".collapse-btn": {
+        "&:hover": {
+          backgroundColor: theme.colors.grey,
+        },
+        "&:focus-visible": {
+          outline: `2px solid ${theme.colors.accent}`,
+          outlineOffset: "2px",
+        },
+      },
+
+      ".chevron, .pinned-count": {
+        color: theme.colors.light_grey,
+      },
+
+      ".pinned-count": {
+        backgroundColor: theme.colors.grey,
       },
     }),
   );
@@ -152,8 +215,17 @@ const ChatHome = () => {
   const isGuest = useAuthStore((state) => state.user.isGuest);
   const [openedPinGroupId, setOpenedPinGroupId] = useState<string | null>(null);
   const [newGroupOpen, setNewGroupOpen] = useState(false);
+  const { isCollapsed, toggleCollapsed } =
+    useCollapsedIds("collapsedPinGroups");
 
-  const { data: pinnedGroups, isLoading, isError, error } = usePinnedGroups();
+  const {
+    synced,
+    groups: pinnedGroups,
+    isLoading,
+    isError,
+    error,
+  } = useHomeGroups();
+  const groupWord = synced ? "folder" : "group";
 
   const openedPinGroup =
     pinnedGroups?.find((group) => group.id === openedPinGroupId) || null;
@@ -170,7 +242,10 @@ const ChatHome = () => {
   if (isError) {
     return (
       <div css={[styles, colors(theme)]}>
-        <p>Failed to load pinned groups: {error.message}</p>
+        <p>
+          Failed to load {synced ? "folders" : "pinned groups"}:{" "}
+          {error?.message}
+        </p>
       </div>
     );
   }
@@ -178,40 +253,76 @@ const ChatHome = () => {
   return (
     <>
       <div css={[styles, colors(theme)]}>
+        {synced && (
+          <p className="syncNote">
+            Showing your sidebar folders.{" "}
+            <Link to="/settings">Change in settings</Link>
+          </p>
+        )}
         {pinnedGroups?.length === 0 && (
           <div className="emptyState">
-            <h3>Nothing pinned yet</h3>
+            <h3>{synced ? "No folders yet" : "Nothing pinned yet"}</h3>
             <p>
               {isGuest
                 ? "Sign up for an account to pin chatrooms here."
-                : "Create a group, then pin chatrooms to it to see their latest messages here. You can also pin a chatroom from the pin button next to it in the sidebar."}
+                : synced
+                  ? "Create a folder to see the latest messages of its chatrooms here. Folders you make here also appear in the sidebar."
+                  : "Create a group, then pin chatrooms to it to see their latest messages here. You can also pin a chatroom from the pin button next to it in the sidebar."}
             </p>
           </div>
         )}
         <div className="pinned-groups">
           {pinnedGroups?.map((pinnedGroup) => (
             <div key={pinnedGroup.id} className="pinned-group">
-              <div className="pinned-group-title-section">
-                <h3 className="pinned-group-name">{pinnedGroup.name}</h3>
-              </div>
-              <div className="pinned-group-carousel">
-                {pinnedGroup.chatrooms.length > 0 ? (
-                  <PinnedChatroomsList pinnedGroup={pinnedGroup} />
-                ) : (
-                  <p className="emptyGroup">
-                    No chatrooms in this group yet. Use "Edit group" to pin
-                    some.
-                  </p>
-                )}
-                <Button
-                  className="pinned-chatroom edit-pinned-chatrooms-btn"
-                  variant="icon"
-                  onClick={() => setOpenedPinGroupId(pinnedGroup.id)}
+              <h3 className="pinned-group-title-section">
+                <button
+                  type="button"
+                  className="collapse-btn"
+                  aria-expanded={!isCollapsed(pinnedGroup.id)}
+                  aria-controls={`pinned-group-${pinnedGroup.id}`}
+                  onClick={() => toggleCollapsed(pinnedGroup.id)}
                 >
-                  <SquarePen className="btn-icon" />
-                  <p>Edit group</p>
-                </Button>
-              </div>
+                  <ChevronDown
+                    className={
+                      isCollapsed(pinnedGroup.id)
+                        ? "chevron collapsed"
+                        : "chevron"
+                    }
+                    size="1.25rem"
+                    aria-hidden="true"
+                  />
+                  <span className="pinned-group-name">{pinnedGroup.name}</span>
+                  <span
+                    className="pinned-count"
+                    aria-label={`${pinnedGroup.chatrooms.length} ${synced ? "chatrooms" : "pinned"}`}
+                  >
+                    {pinnedGroup.chatrooms.length}
+                  </span>
+                </button>
+              </h3>
+              {!isCollapsed(pinnedGroup.id) && (
+                <div
+                  className="pinned-group-carousel"
+                  id={`pinned-group-${pinnedGroup.id}`}
+                >
+                  {pinnedGroup.chatrooms.length > 0 ? (
+                    <PinnedChatroomsList pinnedGroup={pinnedGroup} />
+                  ) : (
+                    <p className="emptyGroup">
+                      No chatrooms in this {groupWord} yet. Use "Edit{" "}
+                      {groupWord}" to add some.
+                    </p>
+                  )}
+                  <Button
+                    className="pinned-chatroom edit-pinned-chatrooms-btn"
+                    variant="icon"
+                    onClick={() => setOpenedPinGroupId(pinnedGroup.id)}
+                  >
+                    <SquarePen className="btn-icon" />
+                    <p>Edit {groupWord}</p>
+                  </Button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -223,7 +334,7 @@ const ChatHome = () => {
             onClick={() => setNewGroupOpen(true)}
           >
             <Plus className="btn-icon" />
-            <p>New group</p>
+            <p>New {groupWord}</p>
           </Button>
         )}
         {openedPinGroup && (
@@ -233,12 +344,18 @@ const ChatHome = () => {
             pinnedGroup={openedPinGroup}
           />
         )}
-        {newGroupOpen && (
-          <NewPinGroupModal
-            open={newGroupOpen}
-            onClose={() => setNewGroupOpen(false)}
-          />
-        )}
+        {newGroupOpen &&
+          (synced ? (
+            <NewFolderModal
+              open={newGroupOpen}
+              onClose={() => setNewGroupOpen(false)}
+            />
+          ) : (
+            <NewPinGroupModal
+              open={newGroupOpen}
+              onClose={() => setNewGroupOpen(false)}
+            />
+          ))}
       </div>
     </>
   );

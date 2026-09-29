@@ -1,10 +1,16 @@
 import { css, useTheme, type Theme } from "@emotion/react";
-import SidebarChatroomButton from "./SidebarChatroomButton";
 import NewChatButton from "./NewChatroomBtnAndModal";
 import { Link, useParams } from "react-router";
-import type { Chatroom } from "../../types/REST-types/Chatroom";
-import { HomeIcon, Settings } from "lucide-react";
-import { iconBtnStyles } from "../Button";
+import type { Chatroom, SidebarFolder } from "../../types/REST-types/Chatroom";
+import { Ellipsis, FolderPlus, HomeIcon, Settings } from "lucide-react";
+import Button, { iconBtnStyles } from "../Button";
+import { useState } from "react";
+import { useAuthStore } from "../../hooks/useStores";
+import { useFolderActions, useFolders } from "../../hooks/useFolders";
+import { useCollapsedIds } from "../../hooks/useCollapsedIds";
+import { SidebarSection } from "./SidebarSection";
+import { NewFolderModal } from "./folders/NewFolderModal";
+import { EditFolderModal } from "./folders/EditFolderModal";
 import { mq } from "../../styles/breakpoints";
 
 const sidebarStyles = (theme: Theme) =>
@@ -15,31 +21,6 @@ const sidebarStyles = (theme: Theme) =>
       flexDirection: "column",
       flex: "0 0 auto",
       width: ["80%", "50%", "280px", "280px", "280px"],
-
-      ul: {
-        listStyle: "none",
-        flex: 1,
-        padding: "8px 10px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "4px",
-      },
-
-      ".chatsHeader": {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        margin: "12px 14px 4px",
-
-        h2: {
-          userSelect: "none",
-          fontSize: "0.75rem",
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
-        },
-      },
 
       ".topSection": {
         display: "flex",
@@ -55,7 +36,13 @@ const sidebarStyles = (theme: Theme) =>
       },
 
       ".chatrooms": {
+        flex: 1,
+        minHeight: 0,
         overflowY: "auto",
+        padding: "8px 10px 16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
       },
     }),
   );
@@ -65,10 +52,6 @@ const colors = (theme: Theme) =>
     backgroundColor: theme.colors.dark_grey,
     color: theme.colors.white,
     borderRight: `1px solid ${theme.colors.border}`,
-
-    ".chatsHeader h2": {
-      color: theme.colors.light_grey,
-    },
 
     ".topSection a": {
       width: "2.25rem",
@@ -88,9 +71,27 @@ type SidebarProps = {
   chatrooms: Chatroom[] | undefined;
 };
 
-const Sidebar = ({ chatrooms }: SidebarProps) => {
+const CHATS_SECTION_ID = "chats";
+
+const Sidebar = ({ chatrooms = [] }: SidebarProps) => {
   const theme = useTheme();
   const { chatroomId } = useParams();
+  const isGuest = useAuthStore((state) => state.user.isGuest);
+  const { data: folders = [] } = useFolders();
+  const { moveChatroom } = useFolderActions();
+  const { isCollapsed, toggleCollapsed } = useCollapsedIds(
+    "collapsedSidebarSections",
+  );
+  const [newFolderOpen, setNewFolderOpen] = useState(false);
+  const [editedFolder, setEditedFolder] = useState<SidebarFolder | null>(null);
+
+  // a chatroom whose folder isn't known (e.g. just deleted) shows under Chats
+  const folderIds = new Set(folders.map((folder) => folder.id));
+  const inFolder = (folderId: string) =>
+    chatrooms.filter((c) => c.folderId === folderId);
+  const unfiled = chatrooms.filter(
+    (c) => !c.folderId || !folderIds.has(c.folderId),
+  );
 
   return (
     <div css={[sidebarStyles(theme), colors(theme)]}>
@@ -102,22 +103,75 @@ const Sidebar = ({ chatrooms }: SidebarProps) => {
           <Settings size="1.25rem" />
         </Link>
       </div>
-      <div className="chatsHeader">
-        <h2>Chats</h2>
-        <NewChatButton />
+      <div className="chatrooms">
+        {folders.map((folder) => (
+          <SidebarSection
+            key={folder.id}
+            id={folder.id}
+            title={folder.name}
+            chatrooms={inFolder(folder.id)}
+            activeChatroomId={chatroomId}
+            collapsed={isCollapsed(folder.id)}
+            onToggle={() => toggleCollapsed(folder.id)}
+            onDropChatroom={(id) => moveChatroom(id, folder.id)}
+            emptyText="Drag chatrooms here"
+            actionsOnHover
+            actions={
+              <Button
+                variant="icon"
+                aria-label={`Edit folder ${folder.name}`}
+                title="Edit folder"
+                onClick={() => setEditedFolder(folder)}
+              >
+                <Ellipsis size="1rem" />
+              </Button>
+            }
+          />
+        ))}
+        <SidebarSection
+          id={CHATS_SECTION_ID}
+          title="Chats"
+          chatrooms={unfiled}
+          activeChatroomId={chatroomId}
+          collapsed={isCollapsed(CHATS_SECTION_ID)}
+          onToggle={() => toggleCollapsed(CHATS_SECTION_ID)}
+          onDropChatroom={isGuest ? undefined : (id) => moveChatroom(id, null)}
+          emptyText={
+            chatrooms.length > 0
+              ? "Every chatroom is in a folder"
+              : "No chatrooms yet"
+          }
+          actions={
+            <>
+              {!isGuest && (
+                <Button
+                  variant="icon"
+                  aria-label="Create folder"
+                  title="New folder"
+                  onClick={() => setNewFolderOpen(true)}
+                >
+                  <FolderPlus size="1rem" />
+                </Button>
+              )}
+              <NewChatButton />
+            </>
+          }
+        />
       </div>
-      <ul className="chatrooms">
-        {chatrooms &&
-          chatrooms.map((chatroom) => {
-            return (
-              <SidebarChatroomButton
-                key={chatroom.chatroomId}
-                isActive={chatroomId === chatroom.chatroomId}
-                chatroom={chatroom}
-              />
-            );
-          })}
-      </ul>
+      {newFolderOpen && (
+        <NewFolderModal
+          open={newFolderOpen}
+          onClose={() => setNewFolderOpen(false)}
+        />
+      )}
+      {editedFolder && (
+        <EditFolderModal
+          open={!!editedFolder}
+          onClose={() => setEditedFolder(null)}
+          folder={editedFolder}
+          chatroomCount={inFolder(editedFolder.id).length}
+        />
+      )}
     </div>
   );
 };

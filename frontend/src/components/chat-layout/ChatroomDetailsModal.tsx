@@ -12,8 +12,19 @@ import Button from "../Button";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { Check, Copy, Pin, RefreshCw, SquarePen } from "lucide-react";
-import { isLoggedInSelector, useAuthStore } from "../../hooks/useStores";
+import {
+  Check,
+  Copy,
+  FolderInput,
+  Pin,
+  RefreshCw,
+  SquarePen,
+} from "lucide-react";
+import {
+  isLoggedInSelector,
+  useAuthStore,
+  useChatroomsStore,
+} from "../../hooks/useStores";
 import useToggle from "../../hooks/useToggle";
 import { customQuery } from "../../utils/customQuery";
 import { API_URL } from "../../env";
@@ -23,6 +34,9 @@ import { fieldStyles, formModalStyles } from "../../styles/modalForm";
 import { ConfirmModal } from "../ConfirmModal";
 import { PinToGroupsModal } from "../chat-home/PinToGroupsModal";
 import { usePinnedGroups } from "../../hooks/usePinnedGroups";
+import { usePreferencesStore } from "../../hooks/usePreferencesStore";
+import { useFolders } from "../../hooks/useFolders";
+import { MoveToFolderModal } from "./folders/MoveToFolderModal";
 import { privacyHint, privacyOptions } from "../../utils/chatroomPrivacy";
 
 const chatroomDetailsModalStyles = (theme: Theme) =>
@@ -273,6 +287,18 @@ export const ChatroomDetailsModal = ({
       group.chatrooms.some((c) => c.chatroomId === chatroomId),
     ) ?? [];
 
+  // with folders synced to the home page, the chatroom's folder is its group
+  const syncedWithHome = usePreferencesStore(
+    (state) => state.syncFoldersWithHome,
+  );
+  const [folderModalOpen, setFolderModalOpen] = useState(false);
+  const { data: folders } = useFolders();
+  const folderId = useChatroomsStore(
+    (state) =>
+      state.chatrooms.find((c) => c.chatroomId === chatroomId)?.folderId,
+  );
+  const currentFolder = folders?.find((f) => f.id === folderId);
+
   const joinLink = chatroomData?.joinKey
     ? `${window.location.origin}/join/${chatroomData.joinKey}`
     : "";
@@ -360,7 +386,27 @@ export const ChatroomDetailsModal = ({
 
             {(isOwner || !user.isGuest) && (
               <div className="body">
-                {!user.isGuest && (
+                {!user.isGuest && syncedWithHome && (
+                  <div className="field">
+                    <p className="sectionLabel">Folder</p>
+                    <div className="pinnedRow">
+                      <span className="hint">
+                        {currentFolder
+                          ? `${currentFolder.name} (also shown on your home page)`
+                          : "Not in a folder"}
+                      </span>
+                      <button
+                        type="button"
+                        className="btn btnSecondary smallBtn"
+                        onClick={() => setFolderModalOpen(true)}
+                      >
+                        <FolderInput size="0.9rem" />
+                        Move to folder
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {!user.isGuest && !syncedWithHome && (
                   <div className="field">
                     <p className="sectionLabel">Pinned in</p>
                     <div className="pinnedRow">
@@ -493,6 +539,13 @@ export const ChatroomDetailsModal = ({
               <strong>{chatroomData.title}</strong> and all of its messages will
               be permanently deleted for every member. This can't be undone.
             </ConfirmModal>
+          )}
+          {folderModalOpen && (
+            <MoveToFolderModal
+              open={folderModalOpen}
+              onClose={() => setFolderModalOpen(false)}
+              chatroom={{ chatroomId, title: chatroomData.title }}
+            />
           )}
           {pinModalOpen && (
             <PinToGroupsModal

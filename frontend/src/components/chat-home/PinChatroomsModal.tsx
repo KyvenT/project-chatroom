@@ -4,7 +4,8 @@ import Button from "../Button";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import type { PinnedGroup } from "../../types/REST-types/Chatroom";
-import { usePinnedGroupActions } from "../../hooks/usePinnedGroups";
+import { useHomeGroups } from "../../hooks/useHomeGroups";
+import { useFolders } from "../../hooks/useFolders";
 import { ConfirmModal } from "../ConfirmModal";
 import { Check, Pin, PinOff, SquarePen, X } from "lucide-react";
 import { useRef, useState } from "react";
@@ -56,6 +57,11 @@ const styles = (theme: Theme) =>
       alignItems: "center",
       gap: "4px",
     },
+
+    ".currentFolder": {
+      marginRight: "6px",
+      fontStyle: "italic",
+    },
   });
 
 export const PinChatroomsModal = ({
@@ -67,8 +73,16 @@ export const PinChatroomsModal = ({
   const [enableTitleEdit, setEnableTitleEdit] = useState<boolean>(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
-  const { setPinned, renameGroup, deleteGroup, error } =
-    usePinnedGroupActions();
+  const {
+    synced,
+    setPinned,
+    renameGroup,
+    deleteGroup,
+    actionError: error,
+  } = useHomeGroups();
+  const { data: folders } = useFolders();
+  const folderName = (folderId: string | null) =>
+    folders?.find((f) => f.id === folderId)?.name;
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const handleChatroomPin = (
@@ -102,7 +116,7 @@ export const PinChatroomsModal = ({
   return (
     <Modal modalStyles={styles(theme)} open={open} onClose={onClose}>
       <div className="header">
-        <p className="eyebrow">Group</p>
+        <p className="eyebrow">{synced ? "Folder" : "Group"}</p>
         {enableTitleEdit ? (
           <form className="titleRow" onSubmit={handleSaveName}>
             <input
@@ -112,14 +126,14 @@ export const PinChatroomsModal = ({
               maxLength={30}
               defaultValue={pinnedGroup.name}
               ref={titleInputRef}
-              aria-label="Pinned group name"
+              aria-label={synced ? "Folder name" : "Pinned group name"}
               autoFocus
             />
             <Button
               variant="icon"
               type="submit"
               className="titleBtn"
-              aria-label="Save group name"
+              aria-label={synced ? "Save folder name" : "Save group name"}
             >
               <Check />
             </Button>
@@ -127,7 +141,11 @@ export const PinChatroomsModal = ({
               variant="icon"
               type="button"
               className="titleBtn"
-              aria-label="Cancel editing group name"
+              aria-label={
+                synced
+                  ? "Cancel editing folder name"
+                  : "Cancel editing group name"
+              }
               onClick={() => setEnableTitleEdit(false)}
             >
               <X />
@@ -140,7 +158,9 @@ export const PinChatroomsModal = ({
               variant="icon"
               type="button"
               className="titleBtn"
-              aria-label="Edit pinned group name"
+              aria-label={
+                synced ? "Edit folder name" : "Edit pinned group name"
+              }
               onClick={() => setEnableTitleEdit(true)}
             >
               <SquarePen />
@@ -150,12 +170,20 @@ export const PinChatroomsModal = ({
       </div>
 
       <div className="body">
+        {synced && (
+          <p className="hint">
+            Synced with your sidebar folders. A chatroom can be in one folder,
+            so adding one here moves it out of its current folder.
+          </p>
+        )}
         <div className="field">
-          <p className="sectionLabel">Pinned</p>
+          <p className="sectionLabel">{synced ? "In this folder" : "Pinned"}</p>
           <ul className="list">
             {pinnedChatrooms.length === 0 ? (
               <li className="listEmpty">
-                No pinned chatrooms yet. Pin one from the list below.
+                {synced
+                  ? "No chatrooms in this folder yet. Add one from the list below."
+                  : "No pinned chatrooms yet. Pin one from the list below."}
               </li>
             ) : (
               pinnedChatrooms.map((chatroom) => (
@@ -175,7 +203,7 @@ export const PinChatroomsModal = ({
                       {chatroom.chatroom.title}
                     </span>
                     <span className="listRowAction">
-                      <PinOff size="0.9rem" /> Unpin
+                      <PinOff size="0.9rem" /> {synced ? "Remove" : "Unpin"}
                     </span>
                   </button>
                 </li>
@@ -188,7 +216,11 @@ export const PinChatroomsModal = ({
           <p className="sectionLabel">Your chatrooms</p>
           <ul className="list">
             {unpinnedChatrooms.length === 0 ? (
-              <li className="listEmpty">All of your chatrooms are pinned.</li>
+              <li className="listEmpty">
+                {synced
+                  ? "All of your chatrooms are in this folder."
+                  : "All of your chatrooms are pinned."}
+              </li>
             ) : (
               unpinnedChatrooms.map((chatroom) => (
                 <li key={chatroom.chatroomId}>
@@ -207,7 +239,12 @@ export const PinChatroomsModal = ({
                       {chatroom.chatroom.title}
                     </span>
                     <span className="listRowAction">
-                      <Pin size="0.9rem" /> Pin
+                      {synced && chatroom.folderId && (
+                        <span className="currentFolder">
+                          in {folderName(chatroom.folderId) ?? "a folder"}
+                        </span>
+                      )}
+                      <Pin size="0.9rem" /> {synced ? "Add" : "Pin"}
                     </span>
                   </button>
                 </li>
@@ -224,7 +261,7 @@ export const PinChatroomsModal = ({
           className="btn btnDanger"
           onClick={() => setConfirmDeleteOpen(true)}
         >
-          Delete group
+          {synced ? "Delete folder" : "Delete group"}
         </button>
         <div className="footerEnd">
           <button type="button" className="btn btnPrimary" onClick={onClose}>
@@ -232,18 +269,30 @@ export const PinChatroomsModal = ({
           </button>
         </div>
       </div>
-      <ModalCloseButton onClose={onClose} label="Close pinned group" />
+      <ModalCloseButton
+        onClose={onClose}
+        label={synced ? "Close folder" : "Close pinned group"}
+      />
       {confirmDeleteOpen && (
         <ConfirmModal
           open={confirmDeleteOpen}
-          title="Delete group?"
-          confirmLabel="Delete group"
+          title={synced ? "Delete folder?" : "Delete group?"}
+          confirmLabel={synced ? "Delete folder" : "Delete group"}
           danger
           onConfirm={handleDeleteGroup}
           onCancel={() => setConfirmDeleteOpen(false)}
         >
-          <strong>{pinnedGroup.name}</strong> will be removed from your home
-          page. Its chatrooms are only unpinned, not deleted or left.
+          {synced ? (
+            <>
+              <strong>{pinnedGroup.name}</strong> will be removed from your
+              sidebar and home page. Its chatrooms move back to Chats.
+            </>
+          ) : (
+            <>
+              <strong>{pinnedGroup.name}</strong> will be removed from your home
+              page. Its chatrooms are only unpinned, not deleted or left.
+            </>
+          )}
         </ConfirmModal>
       )}
     </Modal>

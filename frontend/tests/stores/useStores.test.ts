@@ -18,6 +18,7 @@ const makeChatroom = (id: string, index: number): Chatroom => ({
   lastViewedAt: new Date(0),
   unreadMessages: 0,
   chatroomIndex: index,
+  folderId: null,
   chatroom: { title: `Room ${id}`, privacy: "INVITE_ONLY", ownerId: "u1" },
 });
 
@@ -76,6 +77,43 @@ describe("useChatroomsStore", () => {
     useChatroomsStore.getState().updateChatroom(updated);
 
     expect(useChatroomsStore.getState().chatrooms[0].unreadMessages).toBe(9);
+  });
+
+  it("keeps fields an update doesn't carry", () => {
+    useChatroomsStore
+      .getState()
+      .setChatroomList([
+        { ...makeChatroom("a", 3), unreadMessages: 4, folderId: "f1" },
+      ]);
+    // websocket updates only send some of a chatroom's fields
+    useChatroomsStore.getState().updateChatroom({
+      chatroomId: "a",
+      chatroom: { title: "Renamed", privacy: "PUBLIC", ownerId: "u1" },
+    } as Chatroom);
+
+    const [a] = useChatroomsStore.getState().chatrooms;
+    expect(a.chatroom.title).toBe("Renamed");
+    expect(a.unreadMessages).toBe(4);
+    expect(a.chatroomIndex).toBe(3);
+    expect(a.folderId).toBe("f1");
+  });
+
+  it("moves chatrooms between folders and clears a deleted folder", () => {
+    useChatroomsStore
+      .getState()
+      .setChatroomList([makeChatroom("a", 0), makeChatroom("b", 1)]);
+    const { setChatroomFolder, clearFolder } = useChatroomsStore.getState();
+
+    setChatroomFolder("a", "f1");
+    setChatroomFolder("b", "f1");
+    expect(
+      useChatroomsStore.getState().chatrooms.map((c) => c.folderId),
+    ).toEqual(["f1", "f1"]);
+
+    clearFolder("f1");
+    expect(
+      useChatroomsStore.getState().chatrooms.map((c) => c.folderId),
+    ).toEqual([null, null]);
   });
 
   it("swaps two chatrooms' positions while preserving their indexes", () => {
