@@ -15,12 +15,16 @@ export const customMutation = async <T>({
 }: MutationArgs): Promise<T> => {
   const { user, handleSignIn } = useAuthStore.getState();
 
-  let res = await fetch(fetchUrl, {
-    method,
-    headers: makeHeaders(),
-    credentials: "include",
-    body: JSON.stringify(reqBody),
-  });
+  // headers are rebuilt on each call so a retry picks up a refreshed token
+  const send = () =>
+    fetch(fetchUrl, {
+      method,
+      headers: makeHeaders(),
+      credentials: "include",
+      body: JSON.stringify(reqBody),
+    });
+
+  let res = await send();
   let data = await res.json();
 
   if (!res.ok) {
@@ -31,15 +35,11 @@ export const customMutation = async <T>({
       }
       handleSignIn(result);
 
-      const fetchWithNewToken = await fetch(fetchUrl, {
-        method: "GET",
-        headers: makeHeaders(),
-        credentials: "include",
-      });
+      // retry the same request, not a GET, now that the token is fresh
+      const retry = await send();
+      data = await retry.json();
 
-      data = await fetchWithNewToken.json();
-
-      if (!fetchWithNewToken.ok) {
+      if (!retry.ok) {
         throw new Error(data.message || "Unauthorized");
       }
 
