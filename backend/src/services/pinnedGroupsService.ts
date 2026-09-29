@@ -4,6 +4,7 @@ import {
   chatroomPinSchema,
   editPinnedGroupSchema,
   PinnedGroupNameSchema,
+  pinGroupIdSchema,
   reorderPinnedGroupChatroomsSchema,
 } from "../validators/pinned-groups/pinnedGroupsValidation.js";
 import z from "zod";
@@ -31,12 +32,35 @@ export const getPinnedGroups = async (
         },
       },
     },
+    orderBy: {
+      index: "asc",
+    },
   });
 
   return pinnedGroups;
 };
 
-export const createPinnedGroup = async (userId: string) => {
+// throws unless the pin group exists and belongs to the user
+const verifyPinGroupOwner = async (userId: string, pinGroupId: string) => {
+  const pinGroup = await Prisma.pinGroup.findUnique({
+    where: {
+      id: pinGroupId,
+    },
+  });
+
+  if (!pinGroup) {
+    throw new Error("Pinned group not found");
+  }
+
+  if (pinGroup.userId !== userId) {
+    throw new Error("Not detected as owner of pin group");
+  }
+};
+
+export const createPinnedGroup = async (
+  userId: string,
+  data: z.infer<typeof PinnedGroupNameSchema>,
+): Promise<PinnedGroupsPayload> => {
   const verifyUser = await Prisma.user.findUnique({
     where: {
       id: userId,
@@ -63,13 +87,13 @@ export const createPinnedGroup = async (userId: string) => {
 
   const pinnedGroup = await Prisma.pinGroup.create({
     data: {
-      name: "Untitled " + index,
+      name: data.name,
       index,
       userId,
     },
   });
 
-  return pinnedGroup;
+  return { ...pinnedGroup, chatrooms: [] };
 };
 
 export const editPinnedGroup = async (
@@ -92,15 +116,7 @@ export const editPinnedGroup = async (
     throw new Error("Tried to edit pinned group with empty title");
   }
 
-  const pinGroup = await Prisma.pinGroup.findUnique({
-    where: {
-      id: pinGroupId,
-    },
-  });
-
-  if (pinGroup?.userId !== userId) {
-    throw new Error("Not detected as owner of pin group");
-  }
+  await verifyPinGroupOwner(userId, pinGroupId);
 
   await Prisma.pinGroup.update({
     where: {
@@ -133,6 +149,8 @@ export const pinChatroom = async (
     );
   }
 
+  await verifyPinGroupOwner(userId, pinGroupId);
+
   if (pin) {
     const existingPinnedIndex = await Prisma.memberPinnedGroups.findFirst({
       select: {
@@ -146,23 +164,43 @@ export const pinChatroom = async (
       },
     });
 
-    await Prisma.memberPinnedGroups.create({
-      data: {
-        pinGroupId,
-        chatroomId,
-        pinnedIndex: (existingPinnedIndex?.pinnedIndex || 0) + 1,
-      },
-    });
-  } else {
-    await Prisma.memberPinnedGroups.delete({
-      where: {
-        chatroomId_pinGroupId: {
-          chatroomId,
+    try {
+      await Prisma.memberPinnedGroups.create({
+        data: {
           pinGroupId,
+          chatroomId,
+          pinnedIndex: (existingPinnedIndex?.pinnedIndex || 0) + 1,
         },
+      });
+    } catch (error: any) {
+      // already pinned in this group
+      if (error.code !== "P2002") throw error;
+    }
+  } else {
+    // deleteMany so unpinning something that isn't pinned is a no-op
+    await Prisma.memberPinnedGroups.deleteMany({
+      where: {
+        chatroomId,
+        pinGroupId,
       },
     });
   }
+};
+
+export const deletePinnedGroup = async (
+  userId: string,
+  data: z.infer<typeof pinGroupIdSchema>,
+) => {
+  const { pinGroupId } = data;
+
+  await verifyPinGroupOwner(userId, pinGroupId);
+
+  // pinned chatrooms in the group are removed by the cascade
+  await Prisma.pinGroup.delete({
+    where: {
+      id: pinGroupId,
+    },
+  });
 };
 
 export const swapPinnedChatrooms = async (

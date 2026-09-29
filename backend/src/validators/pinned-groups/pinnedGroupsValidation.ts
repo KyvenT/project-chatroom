@@ -11,7 +11,7 @@ export const chatroomPinSchema = chatroomIdSchema.extend({
 });
 
 export const PinnedGroupNameSchema = z.object({
-  name: z.string().min(1).max(30),
+  name: z.string().trim().min(1).max(30),
 });
 
 export const editPinnedGroupSchema = PinnedGroupNameSchema.extend({

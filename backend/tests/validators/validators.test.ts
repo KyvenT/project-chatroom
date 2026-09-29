@@ -126,6 +126,8 @@ describe("pinned group schemas", () => {
   it("validates names and pin payloads", () => {
     ok(PinnedGroupNameSchema, { name: "Work" });
     bad(PinnedGroupNameSchema, { name: "" });
+    bad(PinnedGroupNameSchema, { name: "   " });
+    bad(PinnedGroupNameSchema, { name: "x".repeat(31) });
     ok(chatroomPinSchema, { chatroomId: uuid, pinGroupId: uuid, pin: true });
     bad(chatroomPinSchema, { chatroomId: uuid, pinGroupId: uuid, pin: "yes" });
   });
