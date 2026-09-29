@@ -1,8 +1,9 @@
 import {
-  useQueries,
+  useInfiniteQuery,
   useQuery,
-  type UseQueryOptions,
+  type InfiniteData,
 } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { customQuery } from "../utils/customQuery";
 import { useAuthStore, useChatroomsStore } from "./useStores";
@@ -44,31 +45,49 @@ export const useFetchMessages = (
   });
 };
 
-type MessageQueries = UseQueryOptions<Message[]>[];
+type MessagePage = { before: string; limit: number };
 
-export const useFetchMessagesMultiple = (
-  chatroomIds: string[],
-  getBefore: Date | null,
-  limit: number,
+// Newest messages first, then older pages as fetchNextPage is called. Pages
+// are fetched before the time the component mounted, so new messages that
+// arrive afterwards don't shift the pages.
+export const useFetchMessageHistory = (
+  chatroomId: string,
+  firstPageSize: number,
+  pageSize: number,
 ) => {
   const user = useAuthStore((state) => state.user);
+  const [firstBefore] = useState(() => new Date().toISOString());
 
-  return useQueries<MessageQueries>({
-    queries: chatroomIds.map((chatroomId) => ({
-      queryKey: ["messages", chatroomId, user.userId, getBefore?.toISOString()],
-      queryFn: () =>
-        customQuery<Message[]>({
-          fetchUrl: `${API_URL}/api/messages/${chatroomId}?getBefore=${getBefore?.toISOString()}&limit=${limit}`,
-        }),
-      enabled: !!user.token && !!getBefore && !!chatroomId,
-      staleTime: Infinity,
-      retryDelay: 1000,
-      retry: (failureCount, error) => {
-        if (error instanceof Error && error.message === "Unauthorized") {
-          return false;
-        }
-        return failureCount < 3;
-      },
-    })),
+  return useInfiniteQuery<
+    Message[],
+    Error,
+    InfiniteData<Message[], MessagePage>,
+    unknown[],
+    MessagePage
+  >({
+    queryKey: ["messageHistory", chatroomId, user.userId, firstBefore],
+    queryFn: ({ pageParam }) =>
+      customQuery<Message[]>({
+        fetchUrl: `${API_URL}/api/messages/${chatroomId}?getBefore=${pageParam.before}&limit=${pageParam.limit}`,
+      }),
+    initialPageParam: { before: firstBefore, limit: firstPageSize },
+    // a short page means there's nothing older left to fetch
+    getNextPageParam: (lastPage, _pages, lastPageParam) =>
+      lastPage.length < lastPageParam.limit
+        ? undefined
+        : {
+            before: new Date(
+              lastPage[lastPage.length - 1].createdAt,
+            ).toISOString(),
+            limit: pageSize,
+          },
+    enabled: !!user.token && !!chatroomId,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    retryDelay: 1000,
+    retry: (failureCount, error) => {
+      if (error.message === "Unauthorized") return false;
+      return failureCount < 3;
+    },
   });
 };
