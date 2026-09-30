@@ -7,6 +7,7 @@ import { COUNTDOWN_FROM, MAX_MESSAGE_LENGTH } from "../../utils/messageLimits";
 import { sendWSMessage } from "../../ws-router/ws";
 import { MessageHistoryList } from "../chat/MessageHistoryList";
 import { TypingIndicator } from "../chat/TypingIndicator";
+import { AttachButton } from "../chat/AttachButton";
 
 // how often (ms) typing tells others you're typing
 const TYPING_INTERVAL = 1000;
@@ -176,6 +177,7 @@ export const PopoutChatBody = ({
             {remaining}
           </span>
         )}
+        <AttachButton chatroomId={chatroomId} />
         <button
           type="submit"
           className="sendBtn"

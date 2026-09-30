@@ -9,4 +9,13 @@ export interface Message {
     username: string;
   };
   editedAt: Date | null;
+  attachment: Attachment | null;
+}
+
+// a file sent as a message; its bytes are fetched separately
+export interface Attachment {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
 }

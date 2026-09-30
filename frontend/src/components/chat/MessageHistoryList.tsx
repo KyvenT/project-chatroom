@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useFetchMessageHistory } from "../../hooks/useFetchMessages";
 import type { Message } from "../../types/REST-types/Message";
 import { Loader } from "../Loader";
+import { MessageAttachment } from "./MessageAttachment";
 
 // how close to the top (px) the list is scrolled before older messages load
 const LOAD_THRESHOLD = 24;
@@ -148,7 +149,15 @@ export const MessageHistoryList = ({
                 {formatPreviewTime(sentAt)}
               </time>
             </div>
-            <p className="previewContent">{message.content}</p>
+            {message.content && (
+              <p className="previewContent">{message.content}</p>
+            )}
+            {message.attachment && (
+              <MessageAttachment
+                attachment={message.attachment}
+                compact={clamp}
+              />
+            )}
           </li>
         );
       })}

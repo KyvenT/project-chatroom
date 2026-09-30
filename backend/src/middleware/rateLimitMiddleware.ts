@@ -37,6 +37,9 @@ export const rateLimitMiddleware = createRateLimiter(60, 60 * 1000);
 // down password guessing and mass account creation
 export const authRateLimitMiddleware = createRateLimiter(10, 15 * 60 * 1000);
 
+// sending files: 10 a minute, since each one is stored
+export const uploadRateLimitMiddleware = createRateLimiter(10, 60 * 1000);
+
 export const rateLimit = (
   identifier: string,
   requests: Map<string, RateLimitWindowCount>,

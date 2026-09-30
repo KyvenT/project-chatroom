@@ -29,8 +29,21 @@ model Message {
   chatroom      Chatroom       @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId    String
   notifications Notification[]
+  attachment    Attachment?
   createdAt     DateTime       @default(now())
   editedAt      DateTime?
+}
+
+// a file sent as a message; its bytes are only loaded when it's downloaded
+model Attachment {
+  id        String   @id @default(uuid())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String   @unique
+  fileName  String
+  mimeType  String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
 }
 
 model User {

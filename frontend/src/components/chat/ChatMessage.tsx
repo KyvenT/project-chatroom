@@ -4,10 +4,13 @@ import { useState } from "react";
 import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
 import { useMembersStore } from "../../hooks/useStores";
 import { MemberInfo } from "./MemberInfoPopup";
+import { MessageAttachment } from "./MessageAttachment";
+import type { Attachment } from "../../types/REST-types/Message";
 
 interface ChatMessageProps {
   id: string;
   content: string;
+  attachment?: Attachment | null;
   sender: { id: string; username: string };
   timestamp: Date;
 }
@@ -51,7 +54,6 @@ const styles = css({
     fontSize: "0.75rem",
     alignSelf: "center",
   },
-
 });
 
 const colors = (theme: Theme) =>
@@ -83,8 +85,15 @@ const colors = (theme: Theme) =>
     },
   });
 
-const ChatMessage = ({ id, content, sender, timestamp }: ChatMessageProps) => {
+const ChatMessage = ({
+  id,
+  content,
+  attachment,
+  sender,
+  timestamp,
+}: ChatMessageProps) => {
   const theme = useTheme();
+
   const members = useMembersStore((state) => state.members);
   const [clickedMember, setClickedMember] = useState<{
     member: ChatroomMember;
@@ -118,7 +127,8 @@ const ChatMessage = ({ id, content, sender, timestamp }: ChatMessageProps) => {
             })}`}
           </span>
         </div>
-        <p className="content">{content}</p>
+        {content && <p className="content">{content}</p>}
+        {attachment && <MessageAttachment attachment={attachment} />}
       </div>
       {clickedMember && (
         <MemberInfo

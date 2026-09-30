@@ -106,6 +106,15 @@ export interface MessagePayload {
   content: string;
   senderUserId: string;
   editedAt: Date | null;
+  attachment: AttachmentPayload | null;
+}
+
+// a message's file, without its bytes (those are downloaded separately)
+export interface AttachmentPayload {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
 }
 
 export interface MentionPayload {

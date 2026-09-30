@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 
 // Only this site's own scripts, data and connections are allowed; styles may
-// be inline since the app adds its styles at runtime. The page can't be
+// be inline since the app adds its styles at runtime. Images may be blob:
+// URLs, which is how sent image files are shown. The page can't be
 // framed by other sites.
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
+  "img-src 'self' data: blob:",
   "font-src 'self' data:",
   "connect-src 'self'",
   "object-src 'none'",

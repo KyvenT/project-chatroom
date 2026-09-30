@@ -31,6 +31,7 @@ const makeMessage = (id: string): Message => ({
   senderUserId: "u1",
   senderUser: { id: "u1", username: "alice" },
   editedAt: null,
+  attachment: null,
 });
 
 const makeMember = (

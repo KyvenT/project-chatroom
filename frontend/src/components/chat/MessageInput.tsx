@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { sendWSMessage } from "../../ws-router/ws";
 import { COUNTDOWN_FROM, MAX_MESSAGE_LENGTH } from "../../utils/messageLimits";
+import { AttachButton } from "./AttachButton";
 
 const styles = css({
   width: "100%",
@@ -36,7 +37,7 @@ const styles = css({
     padding: "4px 0",
   },
 
-  button: {
+  ".sendBtn": {
     width: "2.25rem",
     height: "2.25rem",
     flex: "0 0 auto",
@@ -47,7 +48,7 @@ const styles = css({
     transition: "background-color 0.15s ease",
   },
 
-  "button:hover": {
+  ".sendBtn:hover": {
     cursor: "pointer",
   },
 
@@ -75,12 +76,12 @@ const colors = (theme: Theme) =>
       color: theme.colors.white,
     },
 
-    button: {
+    ".sendBtn": {
       color: theme.colors.onAccent,
       backgroundColor: theme.colors.accent,
     },
 
-    "button:hover": {
+    ".sendBtn:hover": {
       backgroundColor: theme.colors.accentHover,
     },
 
@@ -167,7 +168,13 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
             {remaining}
           </span>
         )}
-        <button type="submit" form="message-form" aria-label="Send message">
+        {chatroomId && <AttachButton chatroomId={chatroomId} />}
+        <button
+          type="submit"
+          form="message-form"
+          className="sendBtn"
+          aria-label="Send message"
+        >
           <SendHorizonal size="1.25rem" />
         </button>
       </form>
