@@ -172,6 +172,23 @@ describe("chat window (picture-in-picture)", () => {
     expect(inWindow().getByLabelText("3 unread")).toBeInTheDocument();
   });
 
+  it("only lets the open tab be closed, so switching can't close one", async () => {
+    renderApp();
+    await act(() => openChatWindow("c1"));
+    await act(() => openChatWindow("c2"));
+
+    const closeButtons = (title: string) =>
+      inWindow()
+        .queryAllByRole("button", { name: `Close ${title}` })
+        .filter((b) => b.closest(".tab"));
+    expect(closeButtons("Design")).toHaveLength(1);
+    expect(closeButtons("Standup")).toHaveLength(0);
+
+    fireEvent.click(inWindow().getByRole("tab", { name: "Standup" }));
+    expect(closeButtons("Standup")).toHaveLength(1);
+    expect(closeButtons("Design")).toHaveLength(0);
+  });
+
   it("moves a chat back to the page", async () => {
     renderApp();
     await act(() => openChatWindow("c1"));

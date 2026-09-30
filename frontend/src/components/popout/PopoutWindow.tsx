@@ -79,6 +79,11 @@ const styles = (theme: Theme) =>
       },
     },
 
+    // tabs without a close button keep even spacing on both sides
+    ".tab:not(.active) .tabButton": {
+      paddingRight: "8px",
+    },
+
     ".tab:only-child .tabButton": {
       cursor: "default",
       fontSize: "0.9rem",
@@ -151,7 +156,9 @@ const WindowTab = ({
           </span>
         )}
       </button>
-      {!onlyTab && (
+      {/* only the open chat can be closed, so a click meant to switch tabs
+          can't close one by mistake */}
+      {active && !onlyTab && (
         <Button
           variant="icon"
           className="tabClose"
