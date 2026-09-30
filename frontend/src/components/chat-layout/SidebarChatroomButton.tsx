@@ -6,6 +6,7 @@ import Button from "../Button";
 import { FolderInput, Pin, UserRoundPlus } from "lucide-react";
 import { useAuthStore } from "../../hooks/useStores";
 import { InviteModal } from "./InviteModal";
+import { HighlightMatch } from "../HighlightMatch";
 import { PinToGroupsModal } from "../chat-home/PinToGroupsModal";
 import { MoveToFolderModal } from "./folders/MoveToFolderModal";
 import { useFolderActions } from "../../hooks/useFolders";
@@ -22,6 +23,8 @@ import { API_URL } from "../../env";
 
 interface SidebarChatroomButtonProps {
   isActive?: boolean;
+  // a search query to highlight in the title
+  highlight?: string;
   chatroom: Chatroom;
 }
 
@@ -124,6 +127,7 @@ export interface inviteFormInput {
 
 const SidebarChatroomButton = ({
   isActive = false,
+  highlight,
   chatroom,
 }: SidebarChatroomButtonProps) => {
   const {
@@ -227,7 +231,7 @@ const SidebarChatroomButton = ({
           onMouseLeave={() => setHovered(false)}
         >
           <NavLink className="chatroomLink" to={"/chat/" + chatroomId}>
-            {title}
+            <HighlightMatch text={title} query={highlight} />
           </NavLink>
           {unreadMessages > 0 && (
             <span className="unreadBadge">{unreadMessages}</span>
