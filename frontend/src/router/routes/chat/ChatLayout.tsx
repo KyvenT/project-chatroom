@@ -23,6 +23,7 @@ import { ShowMembersListBtn } from "../../../components/chat-layout/ShowMembersL
 import { ChatroomTitle } from "../../../components/chat-layout/ChatroomTitle";
 import { SidebarToggleBtn } from "../../../components/chat-layout/SidebarToggleBtn";
 import { PopoutDock } from "../../../components/popout/PopoutDock";
+import { useConnectionStore } from "../../../hooks/useConnectionStore";
 import { PopoutWindow } from "../../../components/popout/PopoutWindow";
 import { PopoutButton } from "../../../components/popout/PopoutButton";
 
@@ -102,6 +103,7 @@ function ChatLayout() {
   const setActiveChatroom = useActiveChatroomStore(
     (state) => state.setActiveChatroomId,
   );
+  const connectionId = useConnectionStore((state) => state.connectionId);
   useFetchUserChatrooms();
 
   useEffect(() => {
@@ -114,7 +116,8 @@ function ChatLayout() {
       type: "update-active-chatroom",
       chatroomId: chatroomId ? chatroomId : "home",
     });
-  }, [chatroomId]);
+    // (resent after reconnecting; the server forgets it with the connection)
+  }, [chatroomId, connectionId]);
 
   const outletContext = {
     showMembersList,

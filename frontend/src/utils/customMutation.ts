@@ -1,4 +1,4 @@
-import { useRefreshToken } from "./useRefreshToken";
+import { refreshAccessToken } from "./refreshAccessToken";
 import { makeHeaders } from "./customQuery";
 import { useAuthStore } from "../hooks/useStores";
 
@@ -29,7 +29,7 @@ export const customMutation = async <T>({
 
   if (!res.ok) {
     if (res.status === 401 && user.token) {
-      const result = await useRefreshToken();
+      const result = await refreshAccessToken();
       if (!result.ok) {
         throw new Error("Unauthorized");
       }

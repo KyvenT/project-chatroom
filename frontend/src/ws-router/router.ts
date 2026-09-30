@@ -6,7 +6,7 @@ import { handleUpdateMembers } from "./ws-routes/update-members";
 import { handleStatusUpdate } from "./ws-routes/status-update";
 import { handleTypingPresence } from "./ws-routes/typing-presence";
 import { handleUpdateInvites } from "./ws-routes/update-invites";
-import { sendQueuedMessages, setWsAuthenticated } from "./ws";
+import { handleAuthResult } from "./ws";
 
 export const wsMessageRouter = (message: WSMessage) => {
   switch (message.type) {
@@ -15,8 +15,7 @@ export const wsMessageRouter = (message: WSMessage) => {
         `WS auth ${message.success ? "succeeded" : "failed"}: ${message.error || ""}`,
       );
       console.log("setting ws auth state to: ", message.success);
-      setWsAuthenticated(message.success);
-      if (message.success) sendQueuedMessages();
+      handleAuthResult(message.success);
       break;
     case "chat-message":
       handleChatMessage(message);

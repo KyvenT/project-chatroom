@@ -4,6 +4,9 @@ type RefreshResponse =
   | {
       ok: false;
       message: string;
+      // the server refused the session (it ended), as opposed to e.g. the
+      // server being unreachable
+      rejected: boolean;
     }
   | {
       ok: true;
@@ -15,7 +18,8 @@ type RefreshResponse =
 
 let refreshPromise: Promise<RefreshResponse> | null = null;
 
-export const useRefreshToken = async (): Promise<RefreshResponse> => {
+// Gets a new access token with the refresh token cookie (not a React hook)
+export const refreshAccessToken = async (): Promise<RefreshResponse> => {
   if (refreshPromise) {
     return refreshPromise;
   }
@@ -32,7 +36,11 @@ export const useRefreshToken = async (): Promise<RefreshResponse> => {
       const newTokenData = await newToken.json();
 
       if (!newToken.ok) {
-        throw new Error(newTokenData.message || "Unauthorized");
+        return {
+          ok: false,
+          message: newTokenData.message || "Unauthorized",
+          rejected: newToken.status === 400 || newToken.status === 401,
+        };
       }
 
       if (!newTokenData.token || !newTokenData.username)
@@ -45,9 +53,10 @@ export const useRefreshToken = async (): Promise<RefreshResponse> => {
         token: newTokenData.token,
         username: newTokenData.username,
       };
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to refresh access token:", error);
-      return { ok: false, message: error.message };
+      const message = error instanceof Error ? error.message : String(error);
+      return { ok: false, message, rejected: false };
     } finally {
       refreshPromise = null;
     }
