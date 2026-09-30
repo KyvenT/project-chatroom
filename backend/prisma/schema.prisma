@@ -24,8 +24,9 @@ model Chatroom {
 model Message {
   id            String         @id @default(uuid())
   content       String
-  senderUser    User           @relation(fields: [senderUserId], references: [id], onDelete: SetDefault)
-  senderUserId  String         @default("b532df46-e953-415c-b9c0-5489ce777e70") // user ID to represent deleted users
+  // null once the sender's account is deleted; the message itself stays
+  senderUser    User?          @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
+  senderUserId  String?
   chatroom      Chatroom       @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId    String
   notifications Notification[]

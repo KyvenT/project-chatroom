@@ -105,6 +105,24 @@ describe("sendChatMessage", () => {
       ["c1", "u2", 1],
     ]);
   });
+
+  it("counts messages from deleted users as unread", async () => {
+    db.chatroomMember.findMany.mockResolvedValue([{ memberId: "u2" }]);
+    db.chatroomMember.findUnique.mockResolvedValue({
+      lastViewedAt: new Date(0),
+    });
+    db.message.count.mockResolvedValue(1);
+
+    await sendChatMessage(message);
+    await vi.waitFor(() => expect(db.message.count).toHaveBeenCalled());
+
+    // a bare `not` would leave out null senders in SQL
+    const { where } = db.message.count.mock.calls[0][0];
+    expect(where.OR).toEqual([
+      { senderUserId: null },
+      { senderUserId: { not: "u2" } },
+    ]);
+  });
 });
 
 describe("sendTypingPresence", () => {

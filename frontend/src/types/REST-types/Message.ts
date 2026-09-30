@@ -3,11 +3,12 @@ export interface Message {
   createdAt: Date;
   chatroomId: string;
   content: string;
-  senderUserId: string;
+  // both null once the sender's account has been deleted
+  senderUserId: string | null;
   senderUser: {
     id: string;
     username: string;
-  };
+  } | null;
   editedAt: Date | null;
   attachment: Attachment | null;
 }

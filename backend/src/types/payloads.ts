@@ -96,15 +96,16 @@ export interface MembersPayload {
 }
 
 export interface MessagePayload {
+  // null when the sender's account has been deleted
   senderUser: {
     id: string;
     username: string;
-  };
+  } | null;
   id: string;
   chatroomId: string;
   createdAt: Date;
   content: string;
-  senderUserId: string;
+  senderUserId: string | null;
   editedAt: Date | null;
   attachment: AttachmentPayload | null;
 }

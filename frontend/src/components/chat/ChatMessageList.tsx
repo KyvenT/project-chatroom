@@ -86,7 +86,7 @@ const ChatMessageList = () => {
               id={message.id}
               content={message.content}
               attachment={message.attachment}
-              sender={message.senderUser || "Unnamed User"}
+              sender={message.senderUser}
               timestamp={new Date(message.createdAt)}
             />
           );

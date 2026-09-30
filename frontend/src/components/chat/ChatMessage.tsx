@@ -5,13 +5,15 @@ import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
 import { useMembersStore } from "../../hooks/useStores";
 import { MemberInfo } from "./MemberInfoPopup";
 import { MessageAttachment } from "./MessageAttachment";
+import { DELETED_USER_NAME } from "../../utils/deletedUser";
 import type { Attachment } from "../../types/REST-types/Message";
 
 interface ChatMessageProps {
   id: string;
   content: string;
   attachment?: Attachment | null;
-  sender: { id: string; username: string };
+  // null when the sender's account has been deleted
+  sender: { id: string; username: string } | null;
   timestamp: Date;
 }
 
@@ -83,6 +85,12 @@ const colors = (theme: Theme) =>
     ".userBtn": {
       color: theme.colors.white,
     },
+
+    ".deletedSender": {
+      fontSize: "0.95rem",
+      fontStyle: "italic",
+      color: theme.colors.light_grey,
+    },
   });
 
 const ChatMessage = ({
@@ -103,6 +111,7 @@ const ChatMessage = ({
   const onMemberClick = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
+    if (!sender) return;
     const member = members.find((mem) => mem.memberId === sender.id);
     if (!member) return;
     setClickedMember({
@@ -115,9 +124,16 @@ const ChatMessage = ({
     <>
       <div key={id} css={[styles, colors(theme)]}>
         <div className="messageHeader">
-          <Button className="userBtn" onClick={(event) => onMemberClick(event)}>
-            <strong>{sender.username}</strong>
-          </Button>
+          {sender ? (
+            <Button
+              className="userBtn"
+              onClick={(event) => onMemberClick(event)}
+            >
+              <strong>{sender.username}</strong>
+            </Button>
+          ) : (
+            <strong className="deletedSender">{DELETED_USER_NAME}</strong>
+          )}
           <span className="timeStamp">
             {`${timestamp.getFullYear()}/${
               timestamp.getMonth() + 1

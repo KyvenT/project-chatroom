@@ -4,6 +4,7 @@ import { useFetchMessageHistory } from "../../hooks/useFetchMessages";
 import type { Message } from "../../types/REST-types/Message";
 import { Loader } from "../Loader";
 import { MessageAttachment } from "./MessageAttachment";
+import { DELETED_USER_NAME } from "../../utils/deletedUser";
 
 // how close to the top (px) the list is scrolled before older messages load
 const LOAD_THRESHOLD = 24;
@@ -43,6 +44,11 @@ const styles = (theme: Theme) =>
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
+    },
+
+    ".deletedSender": {
+      fontStyle: "italic",
+      color: theme.colors.light_grey,
     },
 
     ".previewTime": {
@@ -142,9 +148,15 @@ export const MessageHistoryList = ({
         return (
           <li key={message.id} className="previewMessage">
             <div className="previewMeta">
-              <span className="previewSender">
-                {message.senderUser?.username ?? "Unnamed User"}
-              </span>
+              {message.senderUser ? (
+                <span className="previewSender">
+                  {message.senderUser.username}
+                </span>
+              ) : (
+                <span className="previewSender deletedSender">
+                  {DELETED_USER_NAME}
+                </span>
+              )}
               <time className="previewTime" dateTime={sentAt.toISOString()}>
                 {formatPreviewTime(sentAt)}
               </time>

@@ -67,9 +67,12 @@ export const sendChatMessage = async (message: MessagePayload) => {
       const unreadMessages = await Prisma.message.count({
         where: {
           chatroomId: message.chatroomId,
-          senderUserId: {
-            not: recipient.memberId,
-          },
+          // `not` alone would skip messages from deleted users, whose sender
+          // is null
+          OR: [
+            { senderUserId: null },
+            { senderUserId: { not: recipient.memberId } },
+          ],
           createdAt: {
             gt: member.lastViewedAt,
           },

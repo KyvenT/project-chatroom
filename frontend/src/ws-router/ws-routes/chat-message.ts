@@ -14,12 +14,12 @@ export const handleChatMessage = (message: ChatMessage) => {
   usePopoutStore.getState().addLiveMessage(message.message);
 
   // whoever sent it has stopped typing
-  useTypingPresenceStore
-    .getState()
-    .removeTypingPresence(
-      message.message.senderUserId,
-      message.message.chatroomId,
-    );
+  const { senderUserId } = message.message;
+  if (senderUserId) {
+    useTypingPresenceStore
+      .getState()
+      .removeTypingPresence(senderUserId, message.message.chatroomId);
+  }
 
   // messages for other chatrooms are only for pop-outs
   if (message.message.chatroomId !== chatroomId) return;

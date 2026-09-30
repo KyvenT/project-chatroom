@@ -19,4 +19,13 @@ describe("ChatMessage", () => {
     expect(screen.getByText(/2025\/1\/15/)).toBeInTheDocument();
     expect(screen.getByText(/2:30\s?PM/)).toBeInTheDocument();
   });
+
+  it("shows messages from deleted accounts as from Deleted User", () => {
+    renderWithProviders(<ChatMessage {...props} sender={null} />);
+
+    expect(screen.getByText("Deleted User")).toBeInTheDocument();
+    expect(screen.getByText("hello world")).toBeInTheDocument();
+    // there's no member to show details of
+    expect(screen.queryByRole("button")).toBeNull();
+  });
 });
