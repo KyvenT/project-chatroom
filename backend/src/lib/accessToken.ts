@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import env from "../env.js";
 
 export type AccessTokenResult =
-  | { ok: true; userId: string; isGuest: boolean }
+  | { ok: true; userId: string; isGuest: boolean; sessionId?: string }
   | { ok: false; error: "Expired token" | "Invalid token" };
 
 // Checks an access token, accepting only the algorithm we sign with and
@@ -19,6 +19,8 @@ export const verifyAccessToken = (token: string): AccessTokenResult => {
       ok: true,
       userId: decoded.userId,
       isGuest: decoded.isGuest === true,
+      // the login session the token was issued for
+      sessionId: typeof decoded.sid === "string" ? decoded.sid : undefined,
     };
   } catch (err: any) {
     return {

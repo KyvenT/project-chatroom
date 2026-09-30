@@ -51,7 +51,8 @@ describe("auth schemas", () => {
     bad(userSchema, { username: "ab", password: "123456" });
     bad(userSchema, { username: "a".repeat(21), password: "123456" });
     bad(userSchema, { username: "abc", password: "12345" });
-    bad(userSchema, { username: "abc", password: "x".repeat(129) });
+    ok(userSchema, { username: "abc", password: "x".repeat(1024) });
+    bad(userSchema, { username: "abc", password: "x".repeat(1025) });
   });
 
   it("requires guest and refresh token fields", () => {

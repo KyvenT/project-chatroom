@@ -7,6 +7,7 @@ import {
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { wsMessageRouter } from "./router.js";
 import { WSMessageSchema } from "../validators/ws/wsValidation.js";
+import { socketSessions } from "../lib/socketSessions.js";
 import { validate } from "../validators/validate.js";
 import {
   rateLimit,
@@ -33,7 +34,10 @@ export const startWSS = (
     const authTimeout = setTimeout(() => {
       if (!socketMap.hasValue(ws)) ws.close(4001, "Authentication timeout");
     }, AUTH_TIMEOUT);
-    ws.on("close", () => clearTimeout(authTimeout));
+    ws.on("close", () => {
+      clearTimeout(authTimeout);
+      socketSessions.remove(ws);
+    });
 
     // e.g. an oversized or malformed frame; the socket is closed for it, but
     // an unhandled error event would take the whole server down
