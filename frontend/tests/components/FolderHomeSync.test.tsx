@@ -101,7 +101,7 @@ describe("syncing sidebar folders with the home page", () => {
     fireEvent.click(toggle);
 
     expect(toggle).toHaveAttribute("aria-checked", "true");
-    expect(JSON.parse(localStorage.getItem("preferences")!)).toEqual({
+    expect(JSON.parse(localStorage.getItem("preferences")!)).toMatchObject({
       syncFoldersWithHome: true,
     });
   });

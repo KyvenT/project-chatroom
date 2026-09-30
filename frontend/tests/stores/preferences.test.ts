@@ -24,3 +24,41 @@ describe("preferences", () => {
     expect(store.getState().syncFoldersWithHome).toBe(false);
   });
 });
+
+describe("message chain minutes", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.resetModules();
+  });
+
+  it("is 3 minutes by default", async () => {
+    const store = await loadStore();
+    expect(store.getState().messageChainMinutes).toBe(3);
+  });
+
+  it("keeps a saved value and falls back when it's unusable", async () => {
+    localStorage.setItem(
+      "preferences",
+      JSON.stringify({ messageChainMinutes: 10 }),
+    );
+    expect((await loadStore()).getState().messageChainMinutes).toBe(10);
+
+    for (const bad of [-1, 2.5, 999, "5", null]) {
+      vi.resetModules();
+      localStorage.setItem(
+        "preferences",
+        JSON.stringify({ messageChainMinutes: bad }),
+      );
+      expect((await loadStore()).getState().messageChainMinutes).toBe(3);
+    }
+  });
+
+  it("saves changes alongside other preferences", async () => {
+    const store = await loadStore();
+    store.getState().setPreference("messageChainMinutes", 0);
+    expect(JSON.parse(localStorage.getItem("preferences")!)).toEqual({
+      syncFoldersWithHome: true,
+      messageChainMinutes: 0,
+    });
+  });
+});

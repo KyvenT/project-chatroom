@@ -24,6 +24,9 @@ interface ChatMessageProps {
   editedAt?: Date | null;
   canEdit?: boolean;
   canDelete?: boolean;
+  // sent soon after the same person's previous message, so shown under it
+  // without a name
+  chained?: boolean;
 }
 
 const styles = css({
@@ -33,6 +36,40 @@ const styles = css({
   height: "auto",
   padding: "8px 24px",
   gap: "2px",
+
+  "&.chained": {
+    paddingTop: "2px",
+    paddingBottom: "2px",
+  },
+
+  // a chained message's time shows in its row while it's hovered
+  ".chainTime": {
+    position: "absolute",
+    top: "50%",
+    right: "24px",
+    transform: "translateY(-50%)",
+    fontSize: "0.7rem",
+    opacity: 0,
+    pointerEvents: "none",
+  },
+
+  // clear of the edit and delete toolbar, which shows at the same time
+  "&.hasToolbar .chainTime": {
+    right: "96px",
+  },
+
+  "&:hover .chainTime, &:focus-within .chainTime": {
+    opacity: 1,
+  },
+
+  ".visuallyHidden": {
+    position: "absolute",
+    width: "1px",
+    height: "1px",
+    overflow: "hidden",
+    clip: "rect(0 0 0 0)",
+    whiteSpace: "nowrap",
+  },
 
   strong: {
     fontWeight: 600,
@@ -85,7 +122,7 @@ const colors = (theme: Theme) =>
       color: theme.colors.white,
     },
 
-    ".timeStamp, .edited": {
+    ".timeStamp, .edited, .chainTime": {
       color: theme.colors.light_grey,
     },
 
@@ -115,11 +152,25 @@ const ChatMessage = ({
   editedAt = null,
   canEdit = false,
   canDelete = false,
+  chained = false,
 }: ChatMessageProps) => {
   const theme = useTheme();
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const shortTime = timestamp.toLocaleString("en-US", {
+    timeStyle: "short",
+    hour12: true,
+  });
+  const fullTime = `${timestamp.getFullYear()}/${
+    timestamp.getMonth() + 1
+  }/${timestamp.getDate()} ${shortTime}`;
+  const senderName = sender?.username ?? DELETED_USER_NAME;
+  const editedLabel = editedAt && (
+    <span className="edited" title={`Edited ${editedAt.toLocaleString()}`}>
+      (edited)
+    </span>
+  );
   const members = useMembersStore((state) => state.members);
   const [clickedMember, setClickedMember] = useState<{
     member: ChatroomMember;
@@ -140,7 +191,18 @@ const ChatMessage = ({
 
   return (
     <>
-      <div key={id} css={[styles, colors(theme), messageHostStyles]}>
+      <div
+        key={id}
+        className={
+          [
+            chained && "chained",
+            (canEdit || canDelete) && !editing && "hasToolbar",
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined
+        }
+        css={[styles, colors(theme), messageHostStyles]}
+      >
         {!editing && (
           <MessageToolbar
             canEdit={canEdit}
@@ -149,34 +211,36 @@ const ChatMessage = ({
             onDelete={() => setDeleting(true)}
           />
         )}
-        <div className="messageHeader">
-          {sender ? (
-            <Button
-              className="userBtn"
-              onClick={(event) => onMemberClick(event)}
-            >
-              <strong>{sender.username}</strong>
-            </Button>
-          ) : (
-            <strong className="deletedSender">{DELETED_USER_NAME}</strong>
-          )}
-          <span className="timeStamp">
-            {`${timestamp.getFullYear()}/${
-              timestamp.getMonth() + 1
-            }/${timestamp.getDate()} ${timestamp.toLocaleString("en-US", {
-              timeStyle: "short",
-              hour12: true,
-            })}`}
-          </span>
-          {editedAt && (
-            <span
-              className="edited"
-              title={`Edited ${editedAt.toLocaleString()}`}
-            >
-              (edited)
+        {chained ? (
+          <>
+            <span className="visuallyHidden">
+              {senderName}, {fullTime}
             </span>
-          )}
-        </div>
+            <time
+              className="chainTime"
+              dateTime={timestamp.toISOString()}
+              title={fullTime}
+              aria-hidden
+            >
+              {shortTime}
+            </time>
+          </>
+        ) : (
+          <div className="messageHeader">
+            {sender ? (
+              <Button
+                className="userBtn"
+                onClick={(event) => onMemberClick(event)}
+              >
+                <strong>{sender.username}</strong>
+              </Button>
+            ) : (
+              <strong className="deletedSender">{DELETED_USER_NAME}</strong>
+            )}
+            <span className="timeStamp">{fullTime}</span>
+            {editedLabel}
+          </div>
+        )}
         {editing ? (
           <MessageEditForm
             messageId={id}
@@ -184,7 +248,13 @@ const ChatMessage = ({
             onDone={() => setEditing(false)}
           />
         ) : (
-          content && <p className="content">{content}</p>
+          content && (
+            <p className="content">
+              {content}
+              {/* with no header, the edited mark goes after the text */}
+              {chained && <> {editedLabel}</>}
+            </p>
+          )
         )}
         {attachment && <MessageAttachment attachment={attachment} />}
       </div>

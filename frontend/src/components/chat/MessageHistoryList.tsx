@@ -6,6 +6,8 @@ import { Loader } from "../Loader";
 import { MessageAttachment } from "./MessageAttachment";
 import { DELETED_USER_NAME } from "../../utils/deletedUser";
 import { useMessagePermissions } from "../../hooks/useMessagePermissions";
+import { usePreferencesStore } from "../../hooks/usePreferencesStore";
+import { continuesChain } from "../../utils/messageChains";
 import { messageHostStyles } from "../../styles/messageHost";
 import {
   DeleteMessageModal,
@@ -36,6 +38,19 @@ const styles = (theme: Theme) =>
 
     ".previewMessage": {
       padding: "4px 12px",
+    },
+
+    ".previewMessage.chained": {
+      paddingTop: 0,
+    },
+
+    ".visuallyHidden": {
+      position: "absolute",
+      width: "1px",
+      height: "1px",
+      overflow: "hidden",
+      clip: "rect(0 0 0 0)",
+      whiteSpace: "nowrap",
     },
 
     ".previewMeta": {
@@ -100,20 +115,28 @@ const NO_PERMISSIONS = { canEdit: false, canDelete: false };
 interface HistoryMessageProps {
   message: Message;
   clamp: boolean;
+  // shown under the same person's previous message, without a name
+  chained: boolean;
   permissions: { canEdit: boolean; canDelete: boolean };
 }
 
 const HistoryMessage = ({
   message,
   clamp,
+  chained,
   permissions,
 }: HistoryMessageProps) => {
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const sentAt = new Date(message.createdAt);
+  const senderName = message.senderUser?.username ?? DELETED_USER_NAME;
 
   return (
-    <li className="previewMessage" css={messageHostStyles}>
+    <li
+      className={chained ? "previewMessage chained" : "previewMessage"}
+      css={messageHostStyles}
+      title={chained ? sentAt.toLocaleString() : undefined}
+    >
       {!editing && (
         <MessageToolbar
           {...permissions}
@@ -122,19 +145,25 @@ const HistoryMessage = ({
           onDelete={() => setDeleting(true)}
         />
       )}
-      <div className="previewMeta">
-        {message.senderUser ? (
-          <span className="previewSender">{message.senderUser.username}</span>
-        ) : (
-          <span className="previewSender deletedSender">
-            {DELETED_USER_NAME}
-          </span>
-        )}
-        <time className="previewTime" dateTime={sentAt.toISOString()}>
-          {formatPreviewTime(sentAt)}
-        </time>
-        {message.editedAt && <span className="previewTime">(edited)</span>}
-      </div>
+      {chained ? (
+        <span className="visuallyHidden">
+          {senderName}, {formatPreviewTime(sentAt)}
+        </span>
+      ) : (
+        <div className="previewMeta">
+          {message.senderUser ? (
+            <span className="previewSender">{message.senderUser.username}</span>
+          ) : (
+            <span className="previewSender deletedSender">
+              {DELETED_USER_NAME}
+            </span>
+          )}
+          <time className="previewTime" dateTime={sentAt.toISOString()}>
+            {formatPreviewTime(sentAt)}
+          </time>
+          {message.editedAt && <span className="previewTime">(edited)</span>}
+        </div>
+      )}
       {editing ? (
         <MessageEditForm
           messageId={message.id}
@@ -143,7 +172,14 @@ const HistoryMessage = ({
           compact
         />
       ) : (
-        message.content && <p className="previewContent">{message.content}</p>
+        message.content && (
+          <p className="previewContent">
+            {message.content}
+            {chained && message.editedAt && (
+              <span className="previewTime"> (edited)</span>
+            )}
+          </p>
+        )
       )}
       {message.attachment && (
         <MessageAttachment attachment={message.attachment} compact={clamp} />
@@ -185,6 +221,9 @@ export const MessageHistoryList = ({
 }: MessageHistoryListProps) => {
   const theme = useTheme();
   const permissionsFor = useMessagePermissions(chatroomId);
+  const chainMinutes = usePreferencesStore(
+    (state) => state.messageChainMinutes,
+  );
   const listRef = useRef<HTMLUListElement>(null);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useFetchMessageHistory(chatroomId, firstPageSize, pageSize);
@@ -220,11 +259,13 @@ export const MessageHistoryList = ({
       ref={listRef}
       onScroll={loadOlderIfAtTop}
     >
-      {messages.map((message) => (
+      {messages.map((message, index) => (
         <HistoryMessage
           key={message.id}
           message={message}
           clamp={clamp}
+          // newest first, so the message before this one is next
+          chained={continuesChain(message, messages[index + 1], chainMinutes)}
           permissions={editable ? permissionsFor(message) : NO_PERMISSIONS}
         />
       ))}

@@ -29,3 +29,37 @@ describe("ChatMessage", () => {
     expect(screen.queryByRole("button")).toBeNull();
   });
 });
+
+describe("chained ChatMessage", () => {
+  const props = {
+    id: "m2",
+    content: "and another thing",
+    sender: { id: "u1", username: "alice" },
+    timestamp: new Date(2025, 0, 15, 14, 31),
+  };
+
+  it("leaves out the name and time, keeping them for screen readers", () => {
+    const { container } = renderWithProviders(
+      <ChatMessage {...props} chained />,
+    );
+
+    expect(screen.getByText("and another thing")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "alice" })).toBeNull();
+    expect(container.querySelector(".visuallyHidden")).toHaveTextContent(
+      /alice, 2025\/1\/15 2:31\s?PM/,
+    );
+    // the time shown on hover
+    expect(container.querySelector("time.chainTime")).toHaveTextContent(
+      /2:31\s?PM/,
+    );
+  });
+
+  it("marks an edit after the text", () => {
+    renderWithProviders(
+      <ChatMessage {...props} chained editedAt={new Date()} />,
+    );
+    expect(screen.getByText("(edited)").closest("p")).toHaveTextContent(
+      "and another thing (edited)",
+    );
+  });
+});

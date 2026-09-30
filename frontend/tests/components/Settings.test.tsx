@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { SettingsPage } from "../../src/router/routes/utility/Settings";
 import { useThemeStore } from "../../src/hooks/useThemeStore";
+import { usePreferencesStore } from "../../src/hooks/usePreferencesStore";
 import { buildTheme, defaultColors } from "../../src/styles/theme";
 
 // builds the theme from the store, like App does
@@ -98,5 +99,40 @@ describe("SettingsPage colors", () => {
 
     expect(useThemeStore.getState().overrides).toEqual({});
     expect(screen.getByRole("button", { name: "Reset all" })).toBeDisabled();
+  });
+});
+
+describe("SettingsPage chat", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    usePreferencesStore.getState().setPreference("messageChainMinutes", 3);
+  });
+
+  const input = () =>
+    screen.getByLabelText("Group messages from the same person");
+
+  it("shows the message grouping time, 3 minutes by default", () => {
+    renderSettings();
+    expect(input()).toHaveValue(3);
+  });
+
+  it("saves a new time as it's typed", () => {
+    renderSettings();
+    fireEvent.change(input(), { target: { value: "10" } });
+    expect(usePreferencesStore.getState().messageChainMinutes).toBe(10);
+    expect(JSON.parse(localStorage.getItem("preferences")!)).toMatchObject({
+      messageChainMinutes: 10,
+    });
+  });
+
+  it("ignores times it can't use and restores the saved one", () => {
+    renderSettings();
+    fireEvent.change(input(), { target: { value: "90" } });
+    expect(input()).toHaveAttribute("aria-invalid", "true");
+    expect(usePreferencesStore.getState().messageChainMinutes).toBe(3);
+
+    fireEvent.blur(input());
+    expect(input()).toHaveValue(3);
+    expect(input()).toHaveAttribute("aria-invalid", "false");
   });
 });
