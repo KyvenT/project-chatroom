@@ -1,7 +1,11 @@
 import { MessagePayload } from "../types/payloads.js";
-import { retrieveMessageSchema } from "../validators/messages/messageValidation.js";
+import {
+  editMessageSchema,
+  retrieveMessageSchema,
+} from "../validators/messages/messageValidation.js";
 import z from "zod";
 import Prisma from "../prisma.js";
+import { ChatroomRoles } from "@prisma/client";
 import { isChatroomMember } from "../wss/membership.js";
 import { checkAttachment, cleanFileName } from "../lib/attachments.js";
 
@@ -66,7 +70,7 @@ export const getMessages = async (
   return messages;
 };
 
-export class AttachmentError extends Error {
+export class MessageError extends Error {
   constructor(
     public status: number,
     message: string,
@@ -82,10 +86,10 @@ export const createAttachmentMessage = async (
   file: { fileName: string; mimeType: string; data: Buffer },
 ): Promise<MessagePayload> => {
   const check = checkAttachment(file.mimeType, file.data);
-  if (!check.ok) throw new AttachmentError(check.status, check.message);
+  if (!check.ok) throw new MessageError(check.status, check.message);
 
   if (!(await isChatroomMember(userId, chatroomId))) {
-    throw new AttachmentError(403, "Not a member of the chatroom");
+    throw new MessageError(403, "Not a member of the chatroom");
   }
 
   return Prisma.message.create({
@@ -118,8 +122,78 @@ export const getAttachment = async (userId: string, attachmentId: string) => {
     !(await isChatroomMember(userId, attachment.message.chatroomId))
   ) {
     // the same answer either way, so ids of other chatrooms' files don't leak
-    throw new AttachmentError(404, "File not found");
+    throw new MessageError(404, "File not found");
   }
 
   return attachment;
+};
+
+// roles that can delete anyone's messages in their chatroom
+const MODERATOR_ROLES: ChatroomRoles[] = [
+  ChatroomRoles.OWNER,
+  ChatroomRoles.ADMIN,
+];
+
+const findMessage = async (messageId: string) => {
+  const message = await Prisma.message.findUnique({
+    where: { id: messageId },
+    select: {
+      id: true,
+      chatroomId: true,
+      senderUserId: true,
+      attachment: { select: { id: true } },
+    },
+  });
+  if (!message) throw new MessageError(404, "Message not found");
+  return message;
+};
+
+// Changes the text of one of the user's own messages
+export const editMessage = async (
+  userId: string,
+  data: z.infer<typeof editMessageSchema>,
+): Promise<MessagePayload> => {
+  const message = await findMessage(data.messageId);
+
+  if (message.senderUserId !== userId) {
+    throw new MessageError(403, "Only the sender can edit a message");
+  }
+  if (message.attachment) {
+    throw new MessageError(400, "Files can't be edited");
+  }
+  // a sender who has since left the chatroom can't change what it shows
+  if (!(await isChatroomMember(userId, message.chatroomId))) {
+    throw new MessageError(403, "Not a member of the chatroom");
+  }
+
+  return Prisma.message.update({
+    where: { id: message.id },
+    data: { content: data.content, editedAt: new Date() },
+    include: messageInclude,
+  });
+};
+
+// Deletes a message (and its file) if the user sent it or moderates its
+// chatroom; returns where it was so the chatroom can be told
+export const deleteMessage = async (userId: string, messageId: string) => {
+  const message = await findMessage(messageId);
+
+  const member = await Prisma.chatroomMember.findUnique({
+    where: {
+      chatroomId_memberId: { chatroomId: message.chatroomId, memberId: userId },
+    },
+    select: { role: true },
+  });
+  if (!member) throw new MessageError(403, "Not a member of the chatroom");
+
+  const isSender = message.senderUserId === userId;
+  if (!isSender && !MODERATOR_ROLES.includes(member.role)) {
+    throw new MessageError(
+      403,
+      "Only the sender or a chatroom moderator can delete a message",
+    );
+  }
+
+  await Prisma.message.delete({ where: { id: message.id } });
+  return { chatroomId: message.chatroomId, messageId: message.id };
 };

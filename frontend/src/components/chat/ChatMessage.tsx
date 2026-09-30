@@ -6,6 +6,12 @@ import { useMembersStore } from "../../hooks/useStores";
 import { MemberInfo } from "./MemberInfoPopup";
 import { MessageAttachment } from "./MessageAttachment";
 import { DELETED_USER_NAME } from "../../utils/deletedUser";
+import {
+  DeleteMessageModal,
+  MessageEditForm,
+  MessageToolbar,
+} from "./MessageActions";
+import { messageHostStyles } from "../../styles/messageHost";
 import type { Attachment } from "../../types/REST-types/Message";
 
 interface ChatMessageProps {
@@ -15,6 +21,9 @@ interface ChatMessageProps {
   // null when the sender's account has been deleted
   sender: { id: string; username: string } | null;
   timestamp: Date;
+  editedAt?: Date | null;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 const styles = css({
@@ -49,6 +58,10 @@ const styles = css({
     textDecoration: "underline",
   },
 
+  ".edited": {
+    fontSize: "0.7rem",
+  },
+
   ".timeStamp": {
     whiteSpace: "nowrap",
     overflow: "hidden",
@@ -72,7 +85,7 @@ const colors = (theme: Theme) =>
       color: theme.colors.white,
     },
 
-    ".timeStamp": {
+    ".timeStamp, .edited": {
       color: theme.colors.light_grey,
     },
 
@@ -99,8 +112,13 @@ const ChatMessage = ({
   attachment,
   sender,
   timestamp,
+  editedAt = null,
+  canEdit = false,
+  canDelete = false,
 }: ChatMessageProps) => {
   const theme = useTheme();
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const members = useMembersStore((state) => state.members);
   const [clickedMember, setClickedMember] = useState<{
@@ -122,7 +140,15 @@ const ChatMessage = ({
 
   return (
     <>
-      <div key={id} css={[styles, colors(theme)]}>
+      <div key={id} css={[styles, colors(theme), messageHostStyles]}>
+        {!editing && (
+          <MessageToolbar
+            canEdit={canEdit}
+            canDelete={canDelete}
+            onEdit={() => setEditing(true)}
+            onDelete={() => setDeleting(true)}
+          />
+        )}
         <div className="messageHeader">
           {sender ? (
             <Button
@@ -142,10 +168,33 @@ const ChatMessage = ({
               hour12: true,
             })}`}
           </span>
+          {editedAt && (
+            <span
+              className="edited"
+              title={`Edited ${editedAt.toLocaleString()}`}
+            >
+              (edited)
+            </span>
+          )}
         </div>
-        {content && <p className="content">{content}</p>}
+        {editing ? (
+          <MessageEditForm
+            messageId={id}
+            content={content}
+            onDone={() => setEditing(false)}
+          />
+        ) : (
+          content && <p className="content">{content}</p>
+        )}
         {attachment && <MessageAttachment attachment={attachment} />}
       </div>
+      {deleting && (
+        <DeleteMessageModal
+          messageId={id}
+          preview={content || attachment?.fileName || "This message"}
+          onClose={() => setDeleting(false)}
+        />
+      )}
       {clickedMember && (
         <MemberInfo
           clickedMember={clickedMember}

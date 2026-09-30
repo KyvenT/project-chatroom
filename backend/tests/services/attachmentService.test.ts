@@ -10,7 +10,7 @@ vi.mock("../../src/prisma.js", () => ({
 
 import Prisma from "../../src/prisma.js";
 import {
-  AttachmentError,
+  MessageError,
   createAttachmentMessage,
   getAttachment,
 } from "../../src/services/messageService.js";
@@ -81,7 +81,7 @@ describe("getAttachment", () => {
     db.attachment.findUnique.mockResolvedValue(stored);
     db.chatroomMember.findUnique.mockResolvedValue(null);
     const notMember = getAttachment("u2", "a1");
-    await expect(notMember).rejects.toBeInstanceOf(AttachmentError);
+    await expect(notMember).rejects.toBeInstanceOf(MessageError);
     await expect(notMember).rejects.toMatchObject({ status: 404 });
 
     db.attachment.findUnique.mockResolvedValue(null);

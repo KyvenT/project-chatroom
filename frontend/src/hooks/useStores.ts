@@ -113,6 +113,9 @@ interface MessageListState {
   addPreviousMessages: (existingMessages: Message[]) => void;
   setMessages: (messages: Message[]) => void;
   clearMessages: () => void;
+  // an edited message takes the place of the one with its id
+  updateMessage: (message: Message) => void;
+  removeMessage: (messageId: string) => void;
 }
 
 export const useMessagesStore = create<MessageListState>((set) => ({
@@ -123,6 +126,14 @@ export const useMessagesStore = create<MessageListState>((set) => ({
     set((state) => ({ messages: [...state.messages, ...existingMessages] })),
   setMessages: (messages) => set({ messages }),
   clearMessages: () => set({ messages: [] }),
+  updateMessage: (message) =>
+    set((state) => ({
+      messages: state.messages.map((m) => (m.id === message.id ? message : m)),
+    })),
+  removeMessage: (messageId) =>
+    set((state) => ({
+      messages: state.messages.filter((m) => m.id !== messageId),
+    })),
 }));
 
 interface InviteListState {

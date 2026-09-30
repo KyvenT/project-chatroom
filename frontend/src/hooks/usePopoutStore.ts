@@ -49,6 +49,8 @@ interface PopoutState {
   close: (chatroomId: string) => void;
   setMinimized: (chatroomId: string, minimized: boolean) => void;
   addLiveMessage: (message: Message) => void;
+  updateLiveMessage: (message: Message) => void;
+  removeLiveMessage: (chatroomId: string, messageId: string) => void;
   setChatWindow: (chatWindow: Window) => void;
   openInWindow: (chatroomId: string) => void;
   setActiveWindowTab: (chatroomId: string) => void;
@@ -178,6 +180,30 @@ export const usePopoutStore = create<PopoutState>((set) => {
         ),
       ),
 
+    updateLiveMessage: (message) =>
+      set((state) => {
+        const current = state.liveMessages[message.chatroomId];
+        if (!current) return state;
+        return {
+          liveMessages: {
+            ...state.liveMessages,
+            [message.chatroomId]: current.map((m) =>
+              m.id === message.id ? message : m,
+            ),
+          },
+        };
+      }),
+    removeLiveMessage: (chatroomId, messageId) =>
+      set((state) => {
+        const current = state.liveMessages[chatroomId];
+        if (!current) return state;
+        return {
+          liveMessages: {
+            ...state.liveMessages,
+            [chatroomId]: current.filter((m) => m.id !== messageId),
+          },
+        };
+      }),
     addLiveMessage: (message) =>
       set((state) => {
         const popout = state.popouts.find(

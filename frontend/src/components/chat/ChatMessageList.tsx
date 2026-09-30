@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { useMessagesStore } from "../../hooks/useStores";
 import { useFetchMessages } from "../../hooks/useFetchMessages";
 import { sendWSMessage } from "../../ws-router/ws";
+import { useMessagePermissions } from "../../hooks/useMessagePermissions";
 
 const styles = css({
   width: "100%",
@@ -37,6 +38,7 @@ const ChatMessageList = () => {
   const chatRef = useRef<HTMLDivElement>(null);
   const [getBefore, setBefore] = useState<Date>(new Date());
   const { data } = useFetchMessages(chatroomId, getBefore, 25);
+  const permissionsFor = useMessagePermissions(chatroomId);
 
   useEffect(() => {
     clearMessages();
@@ -88,6 +90,8 @@ const ChatMessageList = () => {
               attachment={message.attachment}
               sender={message.senderUser}
               timestamp={new Date(message.createdAt)}
+              editedAt={message.editedAt ? new Date(message.editedAt) : null}
+              {...permissionsFor(message)}
             />
           );
         })}

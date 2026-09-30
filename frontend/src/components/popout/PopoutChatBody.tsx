@@ -131,6 +131,7 @@ export const PopoutChatBody = ({
         firstPageSize={15}
         pageSize={15}
         liveMessages={liveMessages}
+        editable
       />
       <TypingIndicator chatroomId={chatroomId} className="popoutTyping" />
       <form

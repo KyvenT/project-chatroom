@@ -11,6 +11,17 @@ export interface ChatMessage {
   message: Message;
 }
 
+export interface MessageEditedMessage {
+  type: "message-edited";
+  message: Message;
+}
+
+export interface MessageDeletedMessage {
+  type: "message-deleted";
+  chatroomId: string;
+  messageId: string;
+}
+
 export interface NotificationMessage {
   type: "notification";
   notification: {
@@ -106,6 +117,8 @@ export interface AuthMessage {
 export type WSMessage =
   | AuthMessage
   | ChatMessage
+  | MessageEditedMessage
+  | MessageDeletedMessage
   | NotificationMessage
   | UpdateChatroomsMessage
   | UpdateMembersMessage

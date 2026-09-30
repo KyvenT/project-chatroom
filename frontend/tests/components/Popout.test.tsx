@@ -308,4 +308,17 @@ describe("chat pop-outs", () => {
       expect(within(popout).queryByText("bob is typing…")).toBeNull();
     });
   });
+
+  it("lets the chatroom's owner delete, but not edit, others' messages", async () => {
+    usePopoutStore.getState().open("c1");
+    renderDock();
+
+    const message = (await screen.findByText("Earlier message")).closest("li")!;
+    expect(
+      within(message).getByRole("button", { name: "Delete message" }),
+    ).toBeInTheDocument();
+    expect(
+      within(message).queryByRole("button", { name: "Edit message" }),
+    ).toBeNull();
+  });
 });

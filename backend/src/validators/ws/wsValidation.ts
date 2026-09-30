@@ -1,7 +1,7 @@
 import z from "zod";
 import { WSMessageTypes } from "../../types/ws-messages.js";
 
-const MAX_MESSAGE_LENGTH = 60;
+export const MAX_MESSAGE_LENGTH = 60;
 
 export const AuthMessageSchema = z.object({
   type: z.literal(WSMessageTypes.Auth),

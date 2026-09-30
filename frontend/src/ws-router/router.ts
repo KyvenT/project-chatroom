@@ -1,5 +1,9 @@
 import type { WSMessage } from "../types/ws-messages";
 import { handleChatMessage } from "./ws-routes/chat-message";
+import {
+  applyMessageDelete,
+  applyMessageEdit,
+} from "./ws-routes/message-changes";
 import { handleNewNotification } from "./ws-routes/notification";
 import { handleUpdateChatrooms } from "./ws-routes/update-chatrooms";
 import { handleUpdateMembers } from "./ws-routes/update-members";
@@ -19,6 +23,12 @@ export const wsMessageRouter = (message: WSMessage) => {
       break;
     case "chat-message":
       handleChatMessage(message);
+      break;
+    case "message-edited":
+      applyMessageEdit(message.message);
+      break;
+    case "message-deleted":
+      applyMessageDelete(message.chatroomId, message.messageId);
       break;
     case "notification":
       handleNewNotification(message);

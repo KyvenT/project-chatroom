@@ -1,5 +1,7 @@
 import express, { NextFunction, Request, Response, Router } from "express";
 import {
+  deleteMessage,
+  editMessage,
   getAttachment,
   getMessages,
   uploadAttachment,
@@ -8,6 +10,8 @@ import { validationMiddleware } from "../../middleware/validationMiddleware.js";
 import { uploadRateLimitMiddleware } from "../../middleware/rateLimitMiddleware.js";
 import {
   attachmentIdSchema,
+  editMessageSchema,
+  messageIdSchema,
   retrieveMessageSchema,
   uploadAttachmentSchema,
 } from "../../validators/messages/messageValidation.js";
@@ -61,4 +65,21 @@ messagesRouter.get(
     ...req.query,
   })),
   getMessages,
+);
+
+// the sender changes a message's text
+messagesRouter.patch(
+  "/:messageId",
+  validationMiddleware(editMessageSchema, (req) => ({
+    ...req.params,
+    ...req.body,
+  })),
+  editMessage,
+);
+
+// the sender, or a chatroom owner or admin, deletes a message
+messagesRouter.delete(
+  "/:messageId",
+  validationMiddleware(messageIdSchema, (req) => req.params),
+  deleteMessage,
 );
