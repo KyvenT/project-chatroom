@@ -15,6 +15,7 @@ export const messageInclude = {
     select: {
       id: true,
       username: true,
+      avatarUpdatedAt: true,
     },
   },
   attachment: {

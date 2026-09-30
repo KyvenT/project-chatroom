@@ -8,6 +8,8 @@ export interface Message {
   senderUser: {
     id: string;
     username: string;
+    // when their profile picture last changed; null if they have none
+    avatarUpdatedAt?: string | null;
   } | null;
   editedAt: Date | null;
   attachment: Attachment | null;

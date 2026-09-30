@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response, Router } from "express";
+import { Router } from "express";
 import {
   deleteMessage,
   editMessage,
@@ -16,29 +16,9 @@ import {
   uploadAttachmentSchema,
 } from "../../validators/messages/messageValidation.js";
 import { MAX_ATTACHMENT_SIZE } from "../../lib/attachments.js";
+import { readRawBody } from "../../middleware/readRawBody.js";
 
 export const messagesRouter = Router();
-
-// Reads the request body as the file's bytes, whatever its Content-Type (the
-// type is checked once the file is read). Errors are sent as JSON like the
-// rest of the API.
-const readFileBody = (req: Request, res: Response, next: NextFunction) =>
-  express.raw({ type: () => true, limit: MAX_ATTACHMENT_SIZE })(
-    req,
-    res,
-    (err?: any) => {
-      if (err) {
-        const tooLarge = err.type === "entity.too.large";
-        res.status(tooLarge ? 413 : 400).json({
-          message: tooLarge
-            ? "The file is too large"
-            : "Couldn't read the file",
-        });
-        return;
-      }
-      next();
-    },
-  );
 
 messagesRouter.get(
   "/attachments/:attachmentId",
@@ -54,7 +34,7 @@ messagesRouter.post(
     ...req.params,
     ...req.query,
   })),
-  readFileBody,
+  readRawBody(MAX_ATTACHMENT_SIZE),
   uploadAttachment,
 );
 

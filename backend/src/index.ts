@@ -6,7 +6,11 @@ import apiRouter from "./routes/routes.js";
 import cors from "cors";
 import { corsPreflightMiddleware } from "./middleware/corsPreflightMiddleware.js";
 import { startWSS } from "./wss/wss.js";
-import { rateLimitMiddleware } from "./middleware/rateLimitMiddleware.js";
+import {
+  avatarRateLimitMiddleware,
+  rateLimitMiddleware,
+} from "./middleware/rateLimitMiddleware.js";
+import { avatarsRouter } from "./routes/avatars/avatars.js";
 import cookieParser from "cookie-parser";
 import { securityHeaders } from "./middleware/securityHeaders.js";
 import { hideServerErrors } from "./middleware/hideServerErrors.js";
@@ -37,6 +41,8 @@ app.use(securityHeaders);
 app.use(hideServerErrors);
 app.use(express.json({ limit: "16kb" }));
 //app.use(corsPreflightMiddleware);
+// before the general rate limit, which pictures don't count towards
+app.use("/api/avatars", avatarRateLimitMiddleware, avatarsRouter);
 app.use(rateLimitMiddleware);
 app.use(cookieParser());
 

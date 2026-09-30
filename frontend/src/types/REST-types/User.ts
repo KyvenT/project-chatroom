@@ -19,4 +19,5 @@ export interface UserDetails {
   status: UserStatus;
   createdAt: Date;
   isGuest: boolean;
+  avatarUpdatedAt?: string | null;
 }

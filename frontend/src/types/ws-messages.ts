@@ -22,6 +22,13 @@ export interface MessageDeletedMessage {
   messageId: string;
 }
 
+// someone who shares a chatroom with you (or you) changed their picture
+export interface AvatarUpdatedMessage {
+  type: "avatar-updated";
+  userId: string;
+  avatarUpdatedAt: string | null;
+}
+
 export interface NotificationMessage {
   type: "notification";
   notification: {
@@ -119,6 +126,7 @@ export type WSMessage =
   | ChatMessage
   | MessageEditedMessage
   | MessageDeletedMessage
+  | AvatarUpdatedMessage
   | NotificationMessage
   | UpdateChatroomsMessage
   | UpdateMembersMessage

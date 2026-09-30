@@ -27,6 +27,10 @@ const ALLOWED_TYPES: Record<string, (data: Buffer) => boolean> = {
   "text/plain": (d) => !d.includes(0),
 };
 
+// whether the file's first bytes are really the given (allowed) type
+export const matchesSignature = (mimeType: string, data: Buffer) =>
+  !!ALLOWED_TYPES[mimeType]?.(data);
+
 export const INLINE_TYPES = new Set([
   "image/png",
   "image/jpeg",

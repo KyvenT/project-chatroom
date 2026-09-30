@@ -64,7 +64,7 @@ export const formatFileSize = (bytes: number) => {
 };
 
 // A fetch with the access token, retried once with a fresh one if it expired
-const fetchWithAuth = async (url: string, init: RequestInit = {}) => {
+export const fetchWithAuth = async (url: string, init: RequestInit = {}) => {
   const send = () => {
     const headers = new Headers(init.headers);
     const { token } = useAuthStore.getState().user;
@@ -81,7 +81,7 @@ const fetchWithAuth = async (url: string, init: RequestInit = {}) => {
   return send();
 };
 
-const errorMessage = async (res: Response, fallback: string) => {
+export const errorMessage = async (res: Response, fallback: string) => {
   try {
     const data = await res.json();
     return data.message || fallback;

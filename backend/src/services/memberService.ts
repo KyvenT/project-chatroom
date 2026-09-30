@@ -220,6 +220,7 @@ export const getChatroomMembers = async (
         select: {
           username: true,
           status: true,
+          avatarUpdatedAt: true,
         },
       },
     },
@@ -334,6 +335,7 @@ export const getMemberDetails = async (
           status: true,
           isGuest: true,
           createdAt: true,
+          avatarUpdatedAt: true,
         },
       },
     },

@@ -6,6 +6,7 @@ import { customQuery } from "../../utils/customQuery";
 import { css, useTheme } from "@emotion/react";
 import type { Theme } from "@emotion/react";
 import ProfileStatus from "./ProfileStatus";
+import { Avatar } from "../Avatar";
 import { useQuery } from "@tanstack/react-query";
 import { useMembersStore } from "../../hooks/useStores";
 import { mq } from "../../styles/breakpoints";
@@ -42,7 +43,7 @@ const styles = css(
       textOverflow: "ellipsis",
       display: "flex",
       alignItems: "center",
-      gap: "4px",
+      gap: "8px",
     },
 
     ".status": {
@@ -161,6 +162,12 @@ const MembersPanel = () => {
                           className="memberBtn"
                           onClick={(event) => onMemberClick(member, event)}
                         >
+                          <Avatar
+                            userId={member.memberId}
+                            username={member.member.username}
+                            avatarUpdatedAt={member.member.avatarUpdatedAt}
+                            size={24}
+                          />
                           {member.member.username}
                         </Button>
                       </li>

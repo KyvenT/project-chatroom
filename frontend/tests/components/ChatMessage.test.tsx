@@ -63,3 +63,22 @@ describe("chained ChatMessage", () => {
     );
   });
 });
+
+describe("ChatMessage pictures", () => {
+  const props = {
+    id: "m3",
+    content: "hi",
+    sender: { id: "u1", username: "alice" },
+    timestamp: new Date(2025, 0, 15, 14, 31),
+  };
+
+  it("shows the sender's picture on a message's first line only", () => {
+    const first = renderWithProviders(<ChatMessage {...props} />);
+    expect(first.container.querySelector(".avatarSlot")).toHaveTextContent("A");
+    first.unmount();
+
+    const chained = renderWithProviders(<ChatMessage {...props} chained />);
+    expect(chained.container.querySelector(".avatarSlot")).toBeNull();
+    expect(chained.container.querySelector(".avatarGutter")).not.toBeNull();
+  });
+});

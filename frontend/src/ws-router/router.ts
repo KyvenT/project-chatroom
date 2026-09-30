@@ -1,5 +1,6 @@
 import type { WSMessage } from "../types/ws-messages";
 import { handleChatMessage } from "./ws-routes/chat-message";
+import { useAvatarStore } from "../hooks/useAvatarStore";
 import {
   applyMessageDelete,
   applyMessageEdit,
@@ -29,6 +30,11 @@ export const wsMessageRouter = (message: WSMessage) => {
       break;
     case "message-deleted":
       applyMessageDelete(message.chatroomId, message.messageId);
+      break;
+    case "avatar-updated":
+      useAvatarStore
+        .getState()
+        .setAvatarVersion(message.userId, message.avatarUpdatedAt);
       break;
     case "notification":
       handleNewNotification(message);

@@ -55,6 +55,10 @@ model User {
   status          Status           @default(ONLINE)
   createdAt       DateTime         @default(now())
   isGuest         Boolean          @default(false)
+  // when the profile picture last changed, which also versions its URL;
+  // null when there's no picture
+  avatarUpdatedAt DateTime?
+  avatar          Avatar?
   sentMessages    Message[]
   joinedChatrooms ChatroomMember[]
   ownedChatrooms  Chatroom[]
@@ -64,6 +68,14 @@ model User {
   receivedInvites Invite[]         @relation("ReceivedInvite")
   notifications   Notification[]
   sessions        Session[]
+}
+
+// a user's profile picture; its bytes are only loaded when it's shown
+model Avatar {
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String @id
+  mimeType String
+  data     Bytes
 }
 
 model ChatroomMember {

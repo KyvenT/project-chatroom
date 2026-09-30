@@ -17,6 +17,7 @@ import { useOutsideClick } from "../../hooks/useHandleOutsideClick";
 import { useRef } from "react";
 import { createPortal } from "react-dom";
 import { API_URL } from "../../env";
+import { Avatar } from "../Avatar";
 
 type PopupPosition = "LEFT" | "RIGHT";
 
@@ -96,6 +97,13 @@ const styles = (
         cursor: "default",
       },
 
+      ".member-identity": {
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        minWidth: 0,
+      },
+
       ".username-container": {
         display: "flex",
         alignItems: "center",
@@ -152,11 +160,19 @@ export const MemberInfo = ({
 
   return createPortal(
     <div css={styles(theme, button, position)} ref={popupRef}>
-      <div className="username-container">
-        <h3 className="username">{member.member.username}</h3>
-        {member.memberId === user.userId && (
-          <span className="you-tag">(YOU)</span>
-        )}
+      <div className="member-identity">
+        <Avatar
+          userId={member.memberId}
+          username={member.member.username}
+          avatarUpdatedAt={member.member.avatarUpdatedAt}
+          size={48}
+        />
+        <div className="username-container">
+          <h3 className="username">{member.member.username}</h3>
+          {member.memberId === user.userId && (
+            <span className="you-tag">(YOU)</span>
+          )}
+        </div>
       </div>
       <p className="status">{member.member.status}</p>
       {data?.member.isGuest && <p className="isGuest">(Guest)</p>}

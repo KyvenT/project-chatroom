@@ -90,6 +90,7 @@ export interface MembersPayload {
   member: {
     status: Status;
     username: string;
+    avatarUpdatedAt: Date | null;
   };
   memberId: string;
   role: ChatroomRoles;
@@ -100,6 +101,7 @@ export interface MessagePayload {
   senderUser: {
     id: string;
     username: string;
+    avatarUpdatedAt: Date | null;
   } | null;
   id: string;
   chatroomId: string;
@@ -131,6 +133,7 @@ export interface UserDetailsPayload {
   status: Status;
   createdAt: Date;
   isGuest: boolean;
+  avatarUpdatedAt: Date | null;
 }
 
 export interface ChatroomMemberDetailsPayload {

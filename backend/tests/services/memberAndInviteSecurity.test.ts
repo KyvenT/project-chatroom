@@ -119,6 +119,7 @@ describe("getMemberDetails", () => {
 
     const { select } = db.chatroomMember.findUnique.mock.calls[1][0];
     expect(Object.keys(select.member.select).sort()).toEqual([
+      "avatarUpdatedAt",
       "createdAt",
       "id",
       "isGuest",

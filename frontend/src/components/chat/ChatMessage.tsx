@@ -12,6 +12,7 @@ import {
   MessageToolbar,
 } from "./MessageActions";
 import { messageHostStyles } from "../../styles/messageHost";
+import { Avatar } from "../Avatar";
 import type { Attachment } from "../../types/REST-types/Message";
 
 interface ChatMessageProps {
@@ -19,7 +20,11 @@ interface ChatMessageProps {
   content: string;
   attachment?: Attachment | null;
   // null when the sender's account has been deleted
-  sender: { id: string; username: string } | null;
+  sender: {
+    id: string;
+    username: string;
+    avatarUpdatedAt?: string | null;
+  } | null;
   timestamp: Date;
   editedAt?: Date | null;
   canEdit?: boolean;
@@ -29,13 +34,35 @@ interface ChatMessageProps {
   chained?: boolean;
 }
 
+// how big (px) the sender's picture is beside their messages
+const AVATAR_SIZE = 36;
+
 const styles = css({
   display: "flex",
-  flexDirection: "column",
+  alignItems: "flex-start",
   width: "100%",
   height: "auto",
   padding: "8px 24px",
-  gap: "2px",
+  gap: "12px",
+
+  ".messageBody": {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+  },
+
+  ".avatarSlot": {
+    flex: "0 0 auto",
+    marginTop: "2px",
+    cursor: "pointer",
+  },
+
+  // chained messages line up with the text of the one they follow
+  ".avatarGutter": {
+    flex: `0 0 ${AVATAR_SIZE}px`,
+  },
 
   "&.chained": {
     paddingTop: "2px",
@@ -177,9 +204,8 @@ const ChatMessage = ({
     button: HTMLButtonElement;
   } | null>(null);
 
-  const onMemberClick = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
+  // from the name, or the picture beside it
+  const onMemberClick = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if (!sender) return;
     const member = members.find((mem) => mem.memberId === sender.id);
     if (!member) return;
@@ -212,51 +238,65 @@ const ChatMessage = ({
           />
         )}
         {chained ? (
-          <>
-            <span className="visuallyHidden">
-              {senderName}, {fullTime}
-            </span>
-            <time
-              className="chainTime"
-              dateTime={timestamp.toISOString()}
-              title={fullTime}
-              aria-hidden
-            >
-              {shortTime}
-            </time>
-          </>
+          <span className="avatarGutter" />
         ) : (
-          <div className="messageHeader">
-            {sender ? (
-              <Button
-                className="userBtn"
-                onClick={(event) => onMemberClick(event)}
+          <span className="avatarSlot" onClick={onMemberClick}>
+            <Avatar
+              userId={sender?.id ?? null}
+              username={sender?.username}
+              avatarUpdatedAt={sender?.avatarUpdatedAt}
+              size={AVATAR_SIZE}
+            />
+          </span>
+        )}
+        <div className="messageBody">
+          {chained ? (
+            <>
+              <span className="visuallyHidden">
+                {senderName}, {fullTime}
+              </span>
+              <time
+                className="chainTime"
+                dateTime={timestamp.toISOString()}
+                title={fullTime}
+                aria-hidden
               >
-                <strong>{sender.username}</strong>
-              </Button>
-            ) : (
-              <strong className="deletedSender">{DELETED_USER_NAME}</strong>
-            )}
-            <span className="timeStamp">{fullTime}</span>
-            {editedLabel}
-          </div>
-        )}
-        {editing ? (
-          <MessageEditForm
-            messageId={id}
-            content={content}
-            onDone={() => setEditing(false)}
-          />
-        ) : (
-          content && (
-            <p className="content">
-              {content}
-              {/* with no header, the edited mark goes after the text */}
-              {chained && <> {editedLabel}</>}
-            </p>
-          )
-        )}
-        {attachment && <MessageAttachment attachment={attachment} />}
+                {shortTime}
+              </time>
+            </>
+          ) : (
+            <div className="messageHeader">
+              {sender ? (
+                <Button
+                  className="userBtn"
+                  onClick={(event) => onMemberClick(event)}
+                >
+                  <strong>{sender.username}</strong>
+                </Button>
+              ) : (
+                <strong className="deletedSender">{DELETED_USER_NAME}</strong>
+              )}
+              <span className="timeStamp">{fullTime}</span>
+              {editedLabel}
+            </div>
+          )}
+          {editing ? (
+            <MessageEditForm
+              messageId={id}
+              content={content}
+              onDone={() => setEditing(false)}
+            />
+          ) : (
+            content && (
+              <p className="content">
+                {content}
+                {/* with no header, the edited mark goes after the text */}
+                {chained && <> {editedLabel}</>}
+              </p>
+            )
+          )}
+          {attachment && <MessageAttachment attachment={attachment} />}
+        </div>
       </div>
       {deleting && (
         <DeleteMessageModal
