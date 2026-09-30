@@ -1,7 +1,15 @@
 import { css, useTheme, type Theme } from "@emotion/react";
 import { Link, useNavigate } from "react-router";
 import { mq } from "../../../styles/breakpoints";
-import { Menu } from "lucide-react";
+import {
+  ArrowRight,
+  Menu,
+  MessagesSquare,
+  Paperclip,
+  PictureInPicture2,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import Button from "../../../components/Button";
 import { useEffect, useRef, useState } from "react";
@@ -127,45 +135,149 @@ const styles = (theme: Theme) =>
         minHeight: 0,
         overflowY: "auto",
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
-        padding: "24px 16px",
-        backgroundImage: `radial-gradient(60% 50% at 50% 0%, ${theme.colors.accentSoft}, transparent)`,
+        padding: ["32px 16px 48px", "56px 24px 64px"],
+        backgroundImage: `radial-gradient(60% 45% at 50% 0%, ${theme.colors.accentSoft}, transparent)`,
       },
 
-      ".card": {
-        width: ["100%", "100%", "min(1100px, 90%)"],
+      // centered while there's room, scrolling from the top when there isn't
+      ".contentInner": {
+        width: "100%",
+        margin: "auto 0",
         display: "flex",
-        flexDirection: ["column", "column", "row"],
+        flexDirection: "column",
         alignItems: "center",
-        gap: ["24px", "48px"],
-        padding: ["20px", "40px"],
+      },
+
+      ".hero": {
+        maxWidth: "760px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "18px",
+        textAlign: "center",
+      },
+
+      ".eyebrow": {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "6px",
+        padding: "4px 12px",
+        fontSize: "0.8rem",
+        fontWeight: 500,
+        color: theme.colors.accent,
+        backgroundColor: theme.colors.accentSoft,
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: "999px",
+      },
+
+      ".heroTitle": {
+        fontSize: ["2rem", "2.6rem", "3.2rem"],
+        lineHeight: 1.1,
+        fontWeight: 800,
+        letterSpacing: "-0.04em",
+      },
+
+      ".accentText": {
+        color: theme.colors.accent,
+      },
+
+      ".heroText": {
+        maxWidth: "560px",
+        fontSize: ["1rem", "1.1rem"],
+        lineHeight: 1.6,
+        color: theme.colors.light_grey,
+      },
+
+      ".heroActions": {
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        gap: "10px",
+        marginTop: "6px",
+      },
+
+      ".heroBtn": {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "8px",
+        padding: "11px 20px",
+        font: "inherit",
+        fontSize: "0.95rem",
+        fontWeight: 600,
+        textDecoration: "none",
+        border: "1px solid transparent",
+        borderRadius: theme.radius.md,
+        cursor: "pointer",
+        transition: "background-color 0.15s ease, border-color 0.15s ease",
+
+        "&:focus-visible": {
+          outline: `2px solid ${theme.colors.accent}`,
+          outlineOffset: "2px",
+        },
+      },
+
+      ".heroBtn.primary": {
+        color: theme.colors.onAccent,
+        backgroundColor: theme.colors.accent,
+        "&:hover": { backgroundColor: theme.colors.accentHover },
+      },
+
+      ".heroBtn.secondary": {
+        color: theme.colors.white,
+        backgroundColor: theme.colors.dark_grey,
+        borderColor: theme.colors.borderStrong,
+        "&:hover": { backgroundColor: theme.colors.grey },
+      },
+
+      ".features": {
+        width: ["100%", "100%", "min(1000px, 100%)"],
+        display: "grid",
+        gridTemplateColumns: ["1fr", "repeat(2, 1fr)", "repeat(4, 1fr)"],
+        gap: "14px",
+        marginTop: ["40px", "56px"],
+        padding: 0,
+        listStyle: "none",
+      },
+
+      ".feature": {
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        padding: "20px",
         backgroundColor: theme.colors.dark_grey,
         border: `1px solid ${theme.colors.border}`,
         borderRadius: theme.radius.lg,
-        boxShadow: theme.shadow.popup,
+        transition: "border-color 0.15s ease, transform 0.15s ease",
+
+        "&:hover": {
+          borderColor: theme.colors.borderStrong,
+          transform: "translateY(-2px)",
+        },
+
+        h3: { fontSize: "1rem", fontWeight: 600 },
+        p: {
+          fontSize: "0.88rem",
+          lineHeight: 1.5,
+          color: theme.colors.light_grey,
+        },
       },
 
-      ".cardSection": {
-        flex: 1,
-        minWidth: 0,
-      },
-
-      ".cardSection h2": {
-        fontSize: ["1.6rem", "2.1rem"],
-        lineHeight: 1.2,
-        fontWeight: 700,
-        letterSpacing: "-0.03em",
-        marginBottom: "12px",
-      },
-
-      ".cardSection p": {
-        color: theme.colors.light_grey,
-        fontSize: "1.05rem",
+      ".featureIcon": {
+        width: "2.25rem",
+        height: "2.25rem",
+        display: "grid",
+        placeItems: "center",
+        marginBottom: "4px",
+        color: theme.colors.accent,
+        backgroundColor: theme.colors.accentSoft,
+        borderRadius: theme.radius.md,
       },
 
       ".joinCard": {
         width: ["100%", "100%", "min(520px, 90%)"],
+        margin: "auto 0",
         display: "flex",
         flexDirection: "column",
         gap: "12px",
@@ -236,16 +348,32 @@ const styles = (theme: Theme) =>
         alignItems: "center",
         gap: "8px",
       },
-
-      ".sampleImage": {
-        width: "100%",
-        height: "auto",
-        display: "block",
-        border: `1px solid ${theme.colors.border}`,
-        borderRadius: theme.radius.md,
-      },
     }),
   );
+
+// what the app offers, shown under the headline
+const FEATURES = [
+  {
+    icon: MessagesSquare,
+    title: "Rooms in seconds",
+    text: "Create a chatroom, choose who can join and share its invite link.",
+  },
+  {
+    icon: UserRound,
+    title: "Guest access",
+    text: "Jump in without registering. Sign up later to keep your chats.",
+  },
+  {
+    icon: Paperclip,
+    title: "Share files",
+    text: "Send images, videos, PDFs and more, with previews in the chat.",
+  },
+  {
+    icon: PictureInPicture2,
+    title: "Pop-out chats",
+    text: "Keep other chatrooms open in docked windows, or on top of everything.",
+  },
+];
 
 const LandingPage = () => {
   const theme = useTheme();
@@ -349,16 +477,46 @@ const LandingPage = () => {
       </div>
       <div className="content">
         {tab === "about" ? (
-          <div className="card">
-            <div className="cardSection">
-              <h2 className="">
-                Create chatrooms to manage group communication on the fly
+          <div className="contentInner">
+            <section className="hero">
+              <span className="eyebrow">
+                <Sparkles size="0.9rem" aria-hidden />
+                Free group chat, no sign-up needed
+              </span>
+              <h2 className="heroTitle">
+                Create chatrooms to manage group communication{" "}
+                <span className="accentText">on the fly</span>
               </h2>
-              <p>Supports guest access without registration!</p>
-            </div>
-            <div className="cardSection">
-              <img className="sampleImage" src="/sample.png" alt="Sample UI" />
-            </div>
+              <p className="heroText">
+                Start a room, share its link and start talking. Jump in as a
+                guest, or make an account to keep your chats, folders and
+                profile.
+              </p>
+              <div className="heroActions">
+                <Link to="/chat" className="heroBtn primary">
+                  {isLoggedIn ? "Open your chats" : "Start chatting"}
+                  <ArrowRight size="1rem" aria-hidden />
+                </Link>
+                <button
+                  type="button"
+                  className="heroBtn secondary"
+                  onClick={() => selectTab("join")}
+                >
+                  Join with an invite
+                </button>
+              </div>
+            </section>
+            <ul className="features">
+              {FEATURES.map(({ icon: Icon, title, text }) => (
+                <li className="feature" key={title}>
+                  <span className="featureIcon" aria-hidden>
+                    <Icon size="1.15rem" />
+                  </span>
+                  <h3>{title}</h3>
+                  <p>{text}</p>
+                </li>
+              ))}
+            </ul>
           </div>
         ) : (
           <div className="joinCard">

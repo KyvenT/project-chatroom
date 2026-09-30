@@ -90,3 +90,43 @@ describe("Landing page join tab", () => {
     expect(screen.queryByTestId("location")).not.toBeInTheDocument();
   });
 });
+
+describe("Landing page about tab", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockReturnValue({
+        matches: false,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      }),
+    );
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("has no screenshot, and lists what the app offers", () => {
+    const { container } = renderLanding();
+    expect(container.querySelector("img")).toBeNull();
+    for (const title of [
+      "Rooms in seconds",
+      "Guest access",
+      "Share files",
+      "Pop-out chats",
+    ]) {
+      expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
+    }
+  });
+
+  it("links to the chat and opens the join form", () => {
+    renderLanding();
+    expect(
+      screen.getByRole("link", { name: "Start chatting" }),
+    ).toHaveAttribute("href", "/chat");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Join with an invite" }),
+    );
+    expect(screen.getByLabelText("Invite id or link")).toBeInTheDocument();
+  });
+});

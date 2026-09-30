@@ -3,6 +3,8 @@ import { UserRound } from "lucide-react";
 import { useState } from "react";
 import { useAvatarStore } from "../hooks/useAvatarStore";
 import { avatarUrl } from "../utils/avatars";
+import { statusColor, STATUS_LABELS } from "../utils/status";
+import type { Status } from "./chat/ProfileStatus";
 
 const styles = (theme: Theme, size: number) =>
   css({
@@ -46,6 +48,8 @@ interface AvatarProps {
   size?: number;
   // what a screen reader says; left out where the name is already next to it
   label?: string;
+  // shows a dot in the corner for the user's status
+  status?: Status;
   className?: string;
 }
 
@@ -57,8 +61,57 @@ export const Avatar = ({
   avatarUpdatedAt = null,
   size = 32,
   label,
+  status,
   className,
 }: AvatarProps) => {
+  const theme = useTheme();
+  const picture = (
+    <AvatarPicture
+      userId={userId}
+      username={username}
+      avatarUpdatedAt={avatarUpdatedAt}
+      size={size}
+      label={label}
+      className={status ? undefined : className}
+    />
+  );
+  if (!status) return picture;
+
+  const dot = Math.max(8, Math.round(size * 0.28));
+  return (
+    <span
+      className={className}
+      css={css({
+        position: "relative",
+        display: "inline-flex",
+        flex: "0 0 auto",
+        ".statusDot": {
+          position: "absolute",
+          right: 0,
+          bottom: 0,
+          width: `${dot}px`,
+          height: `${dot}px`,
+          borderRadius: "50%",
+          backgroundColor: statusColor(theme, status),
+          // a ring in the surrounding color separates it from the picture
+          boxShadow: `0 0 0 2px var(--avatar-ring, ${theme.colors.dark_grey})`,
+        },
+      })}
+    >
+      {picture}
+      <span className="statusDot" title={STATUS_LABELS[status]} />
+    </span>
+  );
+};
+
+const AvatarPicture = ({
+  userId,
+  username,
+  avatarUpdatedAt = null,
+  size = 32,
+  label,
+  className,
+}: Omit<AvatarProps, "status">) => {
   const theme = useTheme();
   const liveVersion = useAvatarStore((state) =>
     userId ? state.versions[userId] : undefined,

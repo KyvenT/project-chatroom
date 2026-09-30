@@ -30,7 +30,11 @@ import { customQuery } from "../../utils/customQuery";
 import { API_URL } from "../../env";
 import { mq } from "../../styles/breakpoints";
 import { Loader } from "../Loader";
-import { fieldStyles, formModalStyles } from "../../styles/modalForm";
+import {
+  fieldStyles,
+  selectStyles,
+  formModalStyles,
+} from "../../styles/modalForm";
 import { ConfirmModal } from "../ConfirmModal";
 import { PinToGroupsModal } from "../chat-home/PinToGroupsModal";
 import { usePinnedGroups } from "../../hooks/usePinnedGroups";
@@ -433,7 +437,7 @@ export const ChatroomDetailsModal = ({
                       <select
                         {...register("privacy")}
                         id="privacy"
-                        css={fieldStyles(theme)}
+                        css={selectStyles(theme)}
                       >
                         {privacyOptions.map(({ value, label }) => (
                           <option key={value} value={value}>

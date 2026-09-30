@@ -5,57 +5,65 @@ import { useMutation } from "@tanstack/react-query";
 import { customMutation, type MutationArgs } from "../../utils/customMutation";
 import type { StatusUpdate } from "../../types/REST-types/User";
 import { API_URL } from "../../env";
+import { selectStyles } from "../../styles/modalForm";
+import { statusColor, STATUS_LABELS } from "../../utils/status";
+import { Avatar } from "../Avatar";
 
 export type Status = "ONLINE" | "AWAY" | "OFFLINE";
 
-const statusColor = (theme: Theme, status: Status) =>
-  ({
-    ONLINE: theme.colors.statusOnline,
-    AWAY: theme.colors.statusAway,
-    OFFLINE: theme.colors.statusOffline,
-  })[status];
+const STATUSES: Status[] = ["ONLINE", "AWAY", "OFFLINE"];
 
 const styles = (theme: Theme, status: Status) =>
   css({
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "10px",
+    minWidth: 0,
+    color: theme.colors.white,
 
-    ".status": {
-      borderRadius: "50%",
-      aspectRatio: 1,
-      width: "1.2rem",
-      appearance: "none",
-      backgroundColor: statusColor(theme, status),
-
-      option: {
-        fontSize: "1rem",
-        padding: "4px",
-      },
+    ".who": {
+      flex: 1,
+      minWidth: 0,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: "2px",
     },
 
     ".username": {
+      maxWidth: "100%",
+      fontSize: "0.9rem",
+      fontWeight: 600,
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
     },
-  });
 
-const colors = (theme: Theme) =>
-  css({
-    color: theme.colors.white,
+    ".statusPicker": {
+      position: "relative",
+      display: "inline-flex",
+      alignItems: "center",
+    },
+
+    // the dot sits over the select, left of its text
+    ".pickerDot": {
+      position: "absolute",
+      left: "8px",
+      width: "8px",
+      height: "8px",
+      borderRadius: "50%",
+      backgroundColor: statusColor(theme, status),
+      pointerEvents: "none",
+    },
 
     ".status": {
-      fontSize: 0,
-
-      option: {
-        backgroundColor: theme.colors.dark_grey,
-        color: theme.colors.white,
-      },
-
-      "option:hover": {
-        backgroundColor: theme.colors.grey,
-      },
+      fontSize: "0.75rem",
+      padding: "2px 24px 2px 21px",
+      borderRadius: "999px",
+      backgroundPosition: "right 6px center",
+      backgroundSize: "14px",
+      color: theme.colors.light_grey,
+      "&:hover, &:focus-visible": { color: theme.colors.white },
     },
   });
 
@@ -86,30 +94,40 @@ const ProfileStatus = ({ status }: ProfileStatusProps) => {
       memberId: member?.memberId,
       role: member?.role,
       member: {
+        ...member.member,
         status: event.target.value as Status,
-        username: member.member.username,
       },
     });
   };
 
   return (
-    <div css={[styles(theme, status), colors(theme)]}>
-      <select className="status" onChange={handleSubmit} value={status}>
-        <option
-          className="statusOption"
-          onMouseOver={() => {}}
-          value={"ONLINE"}
-        >
-          Online
-        </option>
-        <option className="statusOption" value={"AWAY"}>
-          Away
-        </option>
-        <option className="statusOption" value={"OFFLINE"}>
-          Offline
-        </option>
-      </select>
-      <p className="username">{user.username}</p>
+    <div css={styles(theme, status)}>
+      <Avatar
+        userId={user.userId || null}
+        username={user.username}
+        avatarUpdatedAt={member?.member.avatarUpdatedAt}
+        size={34}
+        status={status}
+      />
+      <div className="who">
+        <p className="username">{user.username}</p>
+        <span className="statusPicker">
+          <span className="pickerDot" aria-hidden />
+          <select
+            className="status"
+            css={selectStyles(theme)}
+            onChange={handleSubmit}
+            value={status}
+            aria-label="Your status"
+          >
+            {STATUSES.map((value) => (
+              <option key={value} value={value}>
+                {STATUS_LABELS[value]}
+              </option>
+            ))}
+          </select>
+        </span>
+      </div>
     </div>
   );
 };
