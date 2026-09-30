@@ -8,8 +8,9 @@ interface Preferences {
   syncFoldersWithHome: boolean;
 }
 
+// used until the user changes a setting (their choice is then remembered)
 const defaults: Preferences = {
-  syncFoldersWithHome: false,
+  syncFoldersWithHome: true,
 };
 
 const load = (): Preferences => {

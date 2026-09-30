@@ -3,6 +3,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ChatHome from "../../src/router/routes/chat/ChatHome";
 import { useAuthStore } from "../../src/hooks/useStores";
+import { usePreferencesStore } from "../../src/hooks/usePreferencesStore";
 import { renderWithProviders } from "../renderWithProviders";
 
 const jsonResponse = (body: unknown) =>
@@ -23,6 +24,8 @@ const groups = [
 describe("ChatHome pinned groups", () => {
   beforeEach(() => {
     localStorage.clear();
+    // these are about pinned groups, not synced folders
+    usePreferencesStore.getState().setPreference("syncFoldersWithHome", false);
     useAuthStore.getState().handleSignIn({
       userId: "u1",
       username: "alice",
