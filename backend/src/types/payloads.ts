@@ -125,7 +125,8 @@ export interface UserDetailsPayload {
 
 export interface ChatroomMemberDetailsPayload {
   joinedAt: Date;
-  member: UserDetailsPayload;
+  // another member's details, so not their email
+  member: Omit<UserDetailsPayload, "email">;
 }
 
 export interface FolderPayload {

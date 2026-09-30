@@ -54,8 +54,39 @@ describe("authMiddleware", () => {
   it("rejects a token with no user info", () => {
     const token = jwt.sign({}, "test-secret");
     const { res, next } = run(`Bearer ${token}`);
-    expect(res.json).toHaveBeenCalledWith({ error: "Error decrypting token" });
+    expect(res.json).toHaveBeenCalledWith({ error: "Invalid token" });
     expect(next).not.toHaveBeenCalled();
+  });
+
+  it("rejects a guest-flagged token that names no user", () => {
+    const token = jwt.sign({ isGuest: true }, "test-secret");
+    const { next } = run(`Bearer ${token}`);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("rejects tokens using another algorithm, including unsigned ones", () => {
+    const unsigned = jwt.sign({ userId: "u1" }, "", { algorithm: "none" });
+    const hs512 = jwt.sign({ userId: "u1" }, "test-secret", {
+      algorithm: "HS512",
+    });
+
+    for (const token of [unsigned, hs512]) {
+      const { res, next } = run(`Bearer ${token}`);
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(next).not.toHaveBeenCalled();
+    }
+  });
+
+  it("requires the Bearer scheme", () => {
+    const token = jwt.sign({ userId: "u1" }, "test-secret");
+    const { res, next } = run(`Basic ${token}`);
+    expect(res.json).toHaveBeenCalledWith({ error: "Missing token" });
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("doesn't send the verification error's details", () => {
+    const { res } = run("Bearer not.a.token");
+    expect(res.json).toHaveBeenCalledWith({ error: "Invalid token" });
   });
 
   it("sets userId and isGuest and calls next for a valid token", () => {

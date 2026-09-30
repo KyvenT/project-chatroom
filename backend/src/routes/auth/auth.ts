@@ -12,21 +12,25 @@ import {
   userSchema,
 } from "../../validators/auth/authValidation.js";
 import { validationMiddleware } from "../../middleware/validationMiddleware.js";
+import { authRateLimitMiddleware } from "../../middleware/rateLimitMiddleware.js";
 
 export const authRouter = Router();
 
 authRouter.post(
   "/register",
+  authRateLimitMiddleware,
   validationMiddleware(userSchema, (req) => req.body),
   createUser,
 );
 authRouter.post(
   "/login",
+  authRateLimitMiddleware,
   validationMiddleware(userSchema, (req) => req.body),
   authenticateUser,
 );
 authRouter.post(
   "/create-guest",
+  authRateLimitMiddleware,
   validationMiddleware(guestSchema, (req) => req.body),
   createGuest,
 );

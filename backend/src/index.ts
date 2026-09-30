@@ -8,6 +8,8 @@ import { corsPreflightMiddleware } from "./middleware/corsPreflightMiddleware.js
 import { startWSS } from "./wss/wss.js";
 import { rateLimitMiddleware } from "./middleware/rateLimitMiddleware.js";
 import cookieParser from "cookie-parser";
+import { securityHeaders } from "./middleware/securityHeaders.js";
+import { hideServerErrors } from "./middleware/hideServerErrors.js";
 
 /*
 const corsOptions = {
@@ -28,8 +30,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const pathToStaticFiles = path.join(__dirname, "../frontend");
 
+app.disable("x-powered-by");
+
 // middleware
-app.use(express.json());
+app.use(securityHeaders);
+app.use(hideServerErrors);
+app.use(express.json({ limit: "16kb" }));
 //app.use(corsPreflightMiddleware);
 app.use(rateLimitMiddleware);
 app.use(cookieParser());

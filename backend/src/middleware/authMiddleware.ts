@@ -1,36 +1,23 @@
 import { Request, Response, NextFunction } from "express";
-import env from "../env.js";
-import jwt from "jsonwebtoken";
+import { verifyAccessToken } from "../lib/accessToken.js";
 
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const authorization = req.headers.authorization;
-  const token = authorization?.split(" ")[1];
+  const [scheme, token] = req.headers.authorization?.split(" ") ?? [];
 
-  if (!token) {
-    console.log("missing token");
+  if (scheme !== "Bearer" || !token) {
     res.status(401).json({ error: "Missing token" });
     return;
   }
 
-  jwt.verify(token, env.JWT_SECRET, (err: any, decoded: any) => {
-    if (err) {
-      if (err.name === "TokenExpiredError") {
-        res.status(401).json({ error: "Expired token" });
-        return;
-      }
-      res.status(401).json({ err });
-      return;
-    }
+  const result = verifyAccessToken(token);
+  if (!result.ok) {
+    res.status(401).json({ error: result.error });
+    return;
+  }
 
-    if (!decoded.userId && !decoded.isGuest) {
-      res.status(401).json({ error: "Error decrypting token" });
-      return;
-    }
-
-    req.userId = decoded.userId;
-    req.isGuest = decoded.isGuest;
-    next();
-  });
+  req.userId = result.userId;
+  req.isGuest = result.isGuest;
+  next();
 };
 
 export default authMiddleware;

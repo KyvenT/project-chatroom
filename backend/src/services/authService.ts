@@ -11,9 +11,20 @@ import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.j
 
 export const REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
+// login failures don't say whether the username exists
+export const INVALID_LOGIN = "Invalid username or password";
+
+// compared against when the username doesn't exist, so a failed login takes
+// as long either way and timing doesn't reveal which usernames exist
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync(
+  crypto.randomBytes(16).toString("hex"),
+  12,
+);
+
 // helpers
 const getNewAccessToken = (userId: string, isGuest: boolean): string => {
   const token = jwt.sign({ userId, isGuest }, env.JWT_SECRET, {
+    algorithm: "HS256",
     expiresIn: env.JWT_EXPIRATION as StringValue,
   });
   return token;
@@ -82,14 +93,14 @@ export const loginUser = async (
     },
   });
 
-  if (!user) {
-    throw new Error("User not found");
-  }
+  const isPasswordValid = await bcrypt.compare(
+    password,
+    user?.passwordHash ?? DUMMY_PASSWORD_HASH,
+  );
 
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-
-  if (!isPasswordValid) {
-    throw new Error("Invalid password");
+  // guest accounts have random passwords and can't be logged into
+  if (!user || !isPasswordValid || user.isGuest) {
+    throw new Error(INVALID_LOGIN);
   }
 
   const session = await createSession(user.id, user.isGuest);
@@ -166,58 +177,69 @@ export const createGuest = async (
 };
 
 export const useRefreshToken = async (refreshToken: string) => {
-  try {
-    const token = await Prisma.session.findUnique({
-      where: {
-        refreshToken: hashRefreshToken(refreshToken),
-      },
-      include: {
-        user: {
-          select: {
-            username: true,
-            isGuest: true,
-          },
+  const hashed = hashRefreshToken(refreshToken);
+
+  const token = await Prisma.session.findUnique({
+    where: {
+      refreshToken: hashed,
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+          isGuest: true,
         },
       },
-    });
+    },
+  });
 
-    if (!token || token.expiresAt < new Date() || token.revokedAt !== null) {
-      throw new Error("Invalid refresh token");
-    }
-
-    const newRefreshToken = crypto.randomBytes(32).toString("hex");
-    const hashedNewRefreshToken = hashRefreshToken(newRefreshToken);
-
-    await Prisma.$transaction([
-      Prisma.session.update({
-        where: {
-          refreshToken: hashRefreshToken(refreshToken),
-        },
-        data: {
-          revokedAt: new Date(),
-        },
-      }),
-      Prisma.session.create({
-        data: {
-          userId: token.userId,
-          refreshToken: hashedNewRefreshToken,
-          expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
-        },
-      }),
-    ]);
-
-    const accessToken = getNewAccessToken(token.userId, token.user.isGuest);
-
-    return {
-      token: accessToken,
-      refreshToken: newRefreshToken,
-      username: token.user.username,
-      userId: token.userId,
-      isGuest: token.user.isGuest,
-    };
-  } catch (error) {
+  if (!token || token.expiresAt < new Date()) {
     throw new Error("Invalid refresh token");
   }
+
+  // each refresh token works once; seeing a used one again means it was
+  // copied, so end every session of that user to lock the copy out too
+  if (token.revokedAt !== null) {
+    await Prisma.session.updateMany({
+      where: { userId: token.userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    throw new Error("Invalid refresh token");
+  }
+
+  const newRefreshToken = crypto.randomBytes(32).toString("hex");
+
+  const rotated = await Prisma.$transaction(async (tx) => {
+    // only one of two simultaneous refreshes with the same token wins
+    const { count } = await tx.session.updateMany({
+      where: { refreshToken: hashed, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    if (count !== 1) return false;
+
+    await tx.session.create({
+      data: {
+        userId: token.userId,
+        refreshToken: hashRefreshToken(newRefreshToken),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
+      },
+    });
+    return true;
+  });
+
+  if (!rotated) {
+    throw new Error("Invalid refresh token");
+  }
+
+  const accessToken = getNewAccessToken(token.userId, token.user.isGuest);
+
+  return {
+    token: accessToken,
+    refreshToken: newRefreshToken,
+    username: token.user.username,
+    userId: token.userId,
+    isGuest: token.user.isGuest,
+  };
 };
 
 export const createSession = async (userId: string, isGuest: boolean) => {

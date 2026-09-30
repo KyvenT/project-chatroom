@@ -18,14 +18,28 @@ const messageCount = new Map<string, RateLimitWindowCount>();
 
 const WS_MESSAGE_LIMIT = 20;
 const WS_MESSAGE_INTERVAL = 1000; // 1000 = 1sec
+const AUTH_TIMEOUT = 10 * 1000;
 
 export const startWSS = (
   server: Server<typeof IncomingMessage, typeof ServerResponse>,
 ) => {
-  const wss = new WebSocketServer({ server });
+  // chat messages are short, so anything much bigger isn't from the app
+  const wss = new WebSocketServer({ server, maxPayload: 16 * 1024 });
 
   wss.on("connection", (ws) => {
     console.log("New client connected");
+
+    // connections have to sign in soon after opening
+    const authTimeout = setTimeout(() => {
+      if (!socketMap.hasValue(ws)) ws.close(4001, "Authentication timeout");
+    }, AUTH_TIMEOUT);
+    ws.on("close", () => clearTimeout(authTimeout));
+
+    // e.g. an oversized or malformed frame; the socket is closed for it, but
+    // an unhandled error event would take the whole server down
+    ws.on("error", (err) => {
+      console.error("websocket error", err.message);
+    });
 
     ws.on("message", (data: string) => {
       let message;
