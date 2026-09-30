@@ -79,11 +79,14 @@ const styles = (theme: Theme) =>
       backgroundColor: theme.colors.accent,
     },
 
+    // no padding and a fixed icon size, so the icon sits centered
     ".headerBtn": {
       flex: "0 0 auto",
       width: "1.75rem",
       height: "1.75rem",
-      padding: "5px",
+      padding: 0,
+
+      svg: { width: "1rem", height: "1rem" },
     },
   });
 

@@ -102,14 +102,19 @@ const styles = (theme: Theme) =>
       width: "1.4rem",
       height: "1.4rem",
       marginRight: "2px",
-      padding: "4px",
+      padding: 0,
+
+      svg: { width: "0.8rem", height: "0.8rem" },
     },
 
+    // no padding and a fixed icon size, so the icon sits centered
     ".headerBtn": {
       flex: "0 0 auto",
       width: "1.75rem",
       height: "1.75rem",
-      padding: "5px",
+      padding: 0,
+
+      svg: { width: "1rem", height: "1rem" },
     },
   });
 
