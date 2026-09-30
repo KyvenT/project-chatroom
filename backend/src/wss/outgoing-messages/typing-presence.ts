@@ -1,4 +1,8 @@
-import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
+import {
+  socketMap,
+  userActiveChatroomMap,
+  userWatchedChatroomsMap,
+} from "../../lib/socketMaps.js";
 import Prisma from "../../prisma.js";
 
 export const sendTypingPresence = async (
@@ -16,9 +20,13 @@ export const sendTypingPresence = async (
     return;
   }
 
-  const activeRecipients = userActiveChatroomMap.getByValue(chatroomId);
+  // users with the chatroom open, or watching it in a pop-out
+  const recipients = new Set([
+    ...(userActiveChatroomMap.getByValue(chatroomId) ?? []),
+    ...userWatchedChatroomsMap.getWatchers(chatroomId),
+  ]);
 
-  activeRecipients?.forEach((recipient) => {
+  recipients.forEach((recipient) => {
     if (recipient === memberId) return;
     const socket = socketMap.getByKey(recipient);
     if (socket) {

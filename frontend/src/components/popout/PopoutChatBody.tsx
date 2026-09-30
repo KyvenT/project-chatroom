@@ -6,6 +6,7 @@ import { useChatroomsStore } from "../../hooks/useStores";
 import { COUNTDOWN_FROM, MAX_MESSAGE_LENGTH } from "../../utils/messageLimits";
 import { sendWSMessage } from "../../ws-router/ws";
 import { MessageHistoryList } from "../chat/MessageHistoryList";
+import { TypingIndicator } from "../chat/TypingIndicator";
 
 // how often (ms) typing tells others you're typing
 const TYPING_INTERVAL = 1000;
@@ -16,6 +17,13 @@ const styles = (theme: Theme) =>
     minHeight: 0,
     display: "flex",
     flexDirection: "column",
+
+    ".popoutTyping": {
+      flex: "0 0 auto",
+      padding: "2px 12px",
+      fontSize: "0.75rem",
+      backgroundColor: theme.colors.black,
+    },
 
     ".popoutInput": {
       flex: "0 0 auto",
@@ -123,6 +131,7 @@ export const PopoutChatBody = ({
         pageSize={15}
         liveMessages={liveMessages}
       />
+      <TypingIndicator chatroomId={chatroomId} className="popoutTyping" />
       <form
         className="popoutInput"
         onSubmit={(e) => {

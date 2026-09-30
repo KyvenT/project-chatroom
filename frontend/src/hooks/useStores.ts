@@ -177,29 +177,61 @@ export const useMembersStore = create<MembersListState>((set) => ({
     })),
 }));
 
+// how long someone shows as typing after their last typing message
+export const TYPING_TIMEOUT = 3000;
+
+// each typing entry's removal timer, by chatroom and user
+const typingTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const typingKey = (chatroomId: string, userId: string) =>
+  `${chatroomId}:${userId}`;
+
 interface TypingPresenceState {
+  // who is typing, in any chatroom the user has open (page or pop-outs)
   typingUsers: TypingPresence[];
+  // (re)starts showing a user as typing in a chatroom
   addTypingPresence: (typingUser: TypingPresence) => void;
-  removeTypingPresence: (userId: string) => void;
-  popTypingUser: () => void;
+  removeTypingPresence: (userId: string, chatroomId: string) => void;
 }
 
-export const useTypingPresenceStore = create<TypingPresenceState>((set) => ({
-  typingUsers: [],
-  addTypingPresence: (typingUser) =>
-    set((state) => ({ typingUsers: [...state.typingUsers, typingUser] })),
-  removeTypingPresence: (userId) =>
+export const useTypingPresenceStore = create<TypingPresenceState>((set) => {
+  const remove = (userId: string, chatroomId: string) => {
+    const key = typingKey(chatroomId, userId);
+    clearTimeout(typingTimers.get(key));
+    typingTimers.delete(key);
     set((state) => ({
       typingUsers: state.typingUsers.filter(
-        (typingUser) => typingUser.userId !== userId,
+        (t) => !(t.userId === userId && t.chatroomId === chatroomId),
       ),
-    })),
-  popTypingUser: () => {
-    set((state) => ({
-      typingUsers: state.typingUsers.slice(1),
     }));
-  },
-}));
+  };
+
+  return {
+    typingUsers: [],
+    addTypingPresence: (typingUser) => {
+      const { userId, chatroomId } = typingUser;
+      const key = typingKey(chatroomId, userId);
+      clearTimeout(typingTimers.get(key));
+      typingTimers.set(
+        key,
+        setTimeout(() => remove(userId, chatroomId), TYPING_TIMEOUT),
+      );
+      set((state) =>
+        state.typingUsers.some(
+          (t) => t.userId === userId && t.chatroomId === chatroomId,
+        )
+          ? state
+          : { typingUsers: [...state.typingUsers, typingUser] },
+      );
+    },
+    removeTypingPresence: remove,
+  };
+});
+
+// the users typing in a chatroom
+export const useTypingUsers = (chatroomId: string | undefined) => {
+  const typingUsers = useTypingPresenceStore((state) => state.typingUsers);
+  return typingUsers.filter((t) => t.chatroomId === chatroomId);
+};
 
 interface AuthState {
   user: UserAuth;

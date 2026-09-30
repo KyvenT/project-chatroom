@@ -106,3 +106,37 @@ describe("sendChatMessage", () => {
     ]);
   });
 });
+
+describe("sendTypingPresence", () => {
+  it("tells users watching the chatroom, but not the typist", async () => {
+    const { sendTypingPresence } =
+      await import("../../src/wss/outgoing-messages/typing-presence.js");
+    const typist = socket();
+    const active = socket();
+    const watcher = socket();
+    socketMap.set("typist", typist);
+    socketMap.set("active", active);
+    socketMap.set("watcher", watcher);
+    userActiveChatroomMap.set("typist", "c1");
+    userActiveChatroomMap.set("active", "c1");
+    userWatchedChatroomsMap.set("watcher", ["c1"]);
+    (Prisma as any).user = {
+      findUnique: vi.fn().mockResolvedValue({ username: "tess" }),
+    };
+
+    await sendTypingPresence("c1", "typist");
+
+    const expected = {
+      type: "typing-presence",
+      userId: "typist",
+      username: "tess",
+      chatroomId: "c1",
+    };
+    expect(JSON.parse(active.send.mock.calls[0][0])).toEqual(expected);
+    expect(JSON.parse(watcher.send.mock.calls[0][0])).toEqual(expected);
+    expect(typist.send).not.toHaveBeenCalled();
+    userActiveChatroomMap.deleteByKey("typist");
+    userActiveChatroomMap.deleteByKey("active");
+    userWatchedChatroomsMap.deleteUser("watcher");
+  });
+});

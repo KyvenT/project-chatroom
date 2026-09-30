@@ -8,8 +8,13 @@ import { sendWSMessage } from "../../src/ws-router/ws";
 import { PopoutDock } from "../../src/components/popout/PopoutDock";
 import { PopoutButton } from "../../src/components/popout/PopoutButton";
 import { usePopoutStore, MAX_POPOUTS } from "../../src/hooks/usePopoutStore";
-import { useAuthStore, useChatroomsStore } from "../../src/hooks/useStores";
+import {
+  useAuthStore,
+  useChatroomsStore,
+  useTypingPresenceStore,
+} from "../../src/hooks/useStores";
 import { handleChatMessage } from "../../src/ws-router/ws-routes/chat-message";
+import { handleTypingPresence } from "../../src/ws-router/ws-routes/typing-presence";
 import type { Chatroom } from "../../src/types/REST-types/Chatroom";
 import type { Message } from "../../src/types/REST-types/Message";
 import { renderWithProviders } from "../renderWithProviders";
@@ -45,6 +50,7 @@ describe("chat pop-outs", () => {
     localStorage.clear();
     vi.mocked(sendWSMessage).mockClear();
     usePopoutStore.setState({ popouts: [], liveMessages: {} });
+    useTypingPresenceStore.setState({ typingUsers: [] });
     useAuthStore.getState().handleSignIn({
       userId: "u1",
       username: "alice",
@@ -268,6 +274,38 @@ describe("chat pop-outs", () => {
 
       fireEvent.change(input, { target: { value: "x".repeat(55) } });
       expect(screen.getByLabelText("5 characters left")).toBeInTheDocument();
+    });
+
+    it("shows who is typing in the pop-out's chatroom", () => {
+      renderDock();
+      fireEvent.click(screen.getByRole("button", { name: "Pop out Standup" }));
+      const popout = screen.getByRole("region", { name: "Standup chat" });
+
+      act(() => {
+        handleTypingPresence({
+          type: "typing-presence",
+          userId: "u2",
+          username: "bob",
+          chatroomId: "c1",
+        });
+        // someone typing elsewhere isn't shown here
+        handleTypingPresence({
+          type: "typing-presence",
+          userId: "u3",
+          username: "carol",
+          chatroomId: "c2",
+        });
+      });
+      expect(within(popout).getByText("bob is typing…")).toBeVisible();
+
+      // sending their message means they've stopped
+      act(() =>
+        handleChatMessage({
+          type: "chat-message",
+          message: makeMessage("m10", "c1", "done"),
+        }),
+      );
+      expect(within(popout).queryByText("bob is typing…")).toBeNull();
     });
   });
 });
