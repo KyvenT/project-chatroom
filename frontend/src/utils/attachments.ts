@@ -22,6 +22,23 @@ export const ALLOWED_TYPES = [
   "text/plain",
 ];
 
+export type AttachmentKind =
+  "image" | "video" | "audio" | "pdf" | "text" | "file";
+
+// how a file is shown: images in the chat, video and audio in a player, PDFs
+// and text in the file viewer; anything else is only downloaded
+export const attachmentKind = (mimeType: string): AttachmentKind => {
+  if (INLINE_TYPES.includes(mimeType)) return "image";
+  if (mimeType === "video/mp4") return "video";
+  if (mimeType === "audio/mpeg") return "audio";
+  if (mimeType === "application/pdf") return "pdf";
+  if (mimeType === "text/plain") return "text";
+  return "file";
+};
+
+// the kinds the file viewer can open
+export const isViewable = (kind: AttachmentKind) => kind !== "file";
+
 // what a file picker offers; some systems report zips differently, so the
 // extension is listed too
 export const ACCEPT = [...ALLOWED_TYPES, ".zip"].join(",");

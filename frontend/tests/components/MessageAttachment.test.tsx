@@ -16,38 +16,42 @@ const render = (ui: React.ReactElement) =>
     <QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>,
   );
 
-const image = {
-  id: "a1",
-  fileName: "cat.png",
-  mimeType: "image/png",
-  size: 10,
-};
-const pdf = {
-  id: "a2",
-  fileName: "notes.pdf",
-  mimeType: "application/pdf",
-  size: 2048,
-};
+const file = (fileName: string, mimeType: string, size = 2048) => ({
+  id: fileName,
+  fileName,
+  mimeType,
+  size,
+});
+const image = file("cat.png", "image/png");
+const pdf = file("notes.pdf", "application/pdf");
+const zip = file("stuff.zip", "application/zip");
+const video = file("clip.mp4", "video/mp4");
+const audio = file("song.mp3", "audio/mpeg");
 
 describe("MessageAttachment", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    URL.createObjectURL = vi.fn(() => "blob:cat");
+    URL.createObjectURL = vi.fn(() => "blob:file");
     URL.revokeObjectURL = vi.fn();
+    vi.mocked(fetchAttachment).mockResolvedValue(new Blob(["x"]));
   });
 
   it("shows images once they're fetched", async () => {
-    vi.mocked(fetchAttachment).mockResolvedValue(new Blob(["x"]));
     render(<MessageAttachment attachment={image} />);
 
     const img = await screen.findByAltText("cat.png");
-    expect(img).toHaveAttribute("src", "blob:cat");
-    expect(fetchAttachment).toHaveBeenCalledWith("a1");
+    expect(img).toHaveAttribute("src", "blob:file");
+    expect(fetchAttachment).toHaveBeenCalledWith("cat.png");
+  });
+
+  it("gives the blob the file's own type", async () => {
+    render(<MessageAttachment attachment={image} />);
+    await screen.findByAltText("cat.png");
+    const blob = vi.mocked(URL.createObjectURL).mock.calls[0][0] as Blob;
+    expect(blob.type).toBe("image/png");
   });
 
   it("only fetches other files when they're downloaded", async () => {
-    const blob = new Blob(["%PDF-"]);
-    vi.mocked(fetchAttachment).mockResolvedValue(blob);
     render(<MessageAttachment attachment={pdf} />);
 
     expect(screen.getByText("2 KB")).toBeInTheDocument();
@@ -55,15 +59,58 @@ describe("MessageAttachment", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Download notes.pdf" }));
     await waitFor(() =>
-      expect(saveBlob).toHaveBeenCalledWith(blob, "notes.pdf"),
+      expect(saveBlob).toHaveBeenCalledWith(expect.any(Blob), "notes.pdf"),
     );
   });
 
-  it("shows images as a file card when compact", () => {
-    render(<MessageAttachment attachment={image} compact />);
+  it("opens previewable files in the viewer", async () => {
+    render(<MessageAttachment attachment={pdf} />);
+    fireEvent.click(screen.getByRole("button", { name: "Open notes.pdf" }));
+
+    await waitFor(() =>
+      expect(document.querySelector("iframe")).toHaveAttribute(
+        "src",
+        "blob:file",
+      ),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Close viewer" }));
+    expect(document.querySelector("iframe")).toBeNull();
+  });
+
+  it("downloads files that can't be previewed", async () => {
+    render(<MessageAttachment attachment={zip} />);
+    fireEvent.click(screen.getByRole("button", { name: "Download stuff.zip" }));
+    await waitFor(() => expect(saveBlob).toHaveBeenCalled());
+    expect(screen.queryByRole("button", { name: /Open/ })).toBeNull();
+  });
+
+  it("plays videos and audio in the chat without fetching them first", () => {
+    render(
+      <>
+        <MessageAttachment attachment={video} />
+        <MessageAttachment attachment={audio} />
+      </>,
+    );
     expect(
-      screen.getByRole("button", { name: "Download cat.png" }),
+      screen.getByRole("group", { name: "Video player: clip.mp4" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "Audio player: song.mp3" }),
+    ).toBeInTheDocument();
+    expect(fetchAttachment).not.toHaveBeenCalled();
+  });
+
+  it("shows only a file card when compact", () => {
+    render(
+      <>
+        <MessageAttachment attachment={image} compact />
+        <MessageAttachment attachment={video} compact />
+      </>,
+    );
+    expect(
+      screen.getByRole("button", { name: "Open cat.png" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("group")).toBeNull();
     expect(fetchAttachment).not.toHaveBeenCalled();
   });
 });

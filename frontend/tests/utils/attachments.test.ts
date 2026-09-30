@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthStore } from "../../src/hooks/useStores";
 import {
+  attachmentKind,
   attachmentProblem,
   formatFileSize,
   MAX_ATTACHMENT_SIZE,
@@ -81,5 +82,17 @@ describe("uploadAttachment", () => {
     await expect(uploadAttachment("c1", fileOf("image/png"))).rejects.toThrow(
       "The file's contents don't match its type",
     );
+  });
+});
+
+describe("attachmentKind", () => {
+  it("sorts files by how they're shown", () => {
+    expect(attachmentKind("image/webp")).toBe("image");
+    expect(attachmentKind("video/mp4")).toBe("video");
+    expect(attachmentKind("audio/mpeg")).toBe("audio");
+    expect(attachmentKind("application/pdf")).toBe("pdf");
+    expect(attachmentKind("text/plain")).toBe("text");
+    expect(attachmentKind("application/zip")).toBe("file");
+    expect(attachmentKind("text/html")).toBe("file");
   });
 });
