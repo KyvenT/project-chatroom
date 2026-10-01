@@ -1,9 +1,11 @@
 import { Router } from "express";
 import {
+  addReaction,
   deleteMessage,
   editMessage,
   getAttachment,
   getMessages,
+  removeReaction,
   uploadAttachment,
 } from "../../controllers/messageController.js";
 import { validationMiddleware } from "../../middleware/validationMiddleware.js";
@@ -12,6 +14,7 @@ import {
   attachmentIdSchema,
   editMessageSchema,
   messageIdSchema,
+  reactionSchema,
   retrieveMessageSchema,
   uploadAttachmentSchema,
 } from "../../validators/messages/messageValidation.js";
@@ -62,4 +65,17 @@ messagesRouter.delete(
   "/:messageId",
   validationMiddleware(messageIdSchema, (req) => req.params),
   deleteMessage,
+);
+
+// a member reacts to a message with an emoji (URL-encoded), or takes it back
+messagesRouter.put(
+  "/:messageId/reactions/:emoji",
+  validationMiddleware(reactionSchema, (req) => req.params),
+  addReaction,
+);
+
+messagesRouter.delete(
+  "/:messageId/reactions/:emoji",
+  validationMiddleware(reactionSchema, (req) => req.params),
+  removeReaction,
 );

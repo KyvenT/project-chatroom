@@ -6,8 +6,8 @@ import {
   useTheme,
   type Theme,
 } from "@emotion/react";
-import { ArrowDownToLine, Maximize2, X } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { ArrowDownToLine, Maximize2, Users, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router";
 import { usePopoutStore } from "../../hooks/usePopoutStore";
@@ -15,6 +15,8 @@ import { useChatroomsStore } from "../../hooks/useStores";
 import { globalStyles } from "../../styles/global";
 import Button from "../Button";
 import { PopoutChatBody } from "./PopoutChatBody";
+import { AddTabMenu } from "./AddTabMenu";
+import { PopoutMembersPanel } from "./PopoutMembersPanel";
 
 const styles = (theme: Theme) =>
   css({
@@ -33,8 +35,9 @@ const styles = (theme: Theme) =>
       borderBottom: `1px solid ${theme.colors.border}`,
     },
 
+    // only as wide as the tabs, so the + button sits right after them
     ".tabs": {
-      flex: 1,
+      flex: "0 1 auto",
       minWidth: 0,
       display: "flex",
       gap: "2px",
@@ -121,6 +124,27 @@ const styles = (theme: Theme) =>
 
       svg: { width: "1rem", height: "1rem" },
     },
+
+    // pushes the window's own buttons to the far side
+    ".addTab": { marginRight: "auto" },
+
+    ".headerBtn.toggled": {
+      color: theme.colors.white,
+      backgroundColor: theme.colors.grey,
+    },
+
+    // the chat, and the members panel beside (or over) it
+    ".windowBody": {
+      position: "relative",
+      flex: 1,
+      minHeight: 0,
+      display: "flex",
+    },
+
+    ".windowBody > :first-child": {
+      flex: 1,
+      minWidth: 0,
+    },
   });
 
 const WindowTab = ({
@@ -180,6 +204,8 @@ const ChatWindowContent = () => {
   const activeTab = usePopoutStore((state) => state.activeWindowTab);
   const closeTab = usePopoutStore((state) => state.closeWindowTab);
   const open = usePopoutStore((state) => state.open);
+  // hidden until asked for; it stays as it is when switching tabs
+  const [showMembers, setShowMembers] = useState(false);
 
   // chatrooms the user has left drop out of the window
   const memberOf = new Set(chatrooms.map((c) => c.chatroomId));
@@ -209,6 +235,17 @@ const ChatWindowContent = () => {
             />
           ))}
         </div>
+        <AddTabMenu />
+        <Button
+          variant="icon"
+          className={showMembers ? "headerBtn toggled" : "headerBtn"}
+          aria-label={showMembers ? "Hide members" : "Show members"}
+          title={showMembers ? "Hide members" : "Show members"}
+          aria-pressed={showMembers}
+          onClick={() => setShowMembers((shown) => !shown)}
+        >
+          <Users />
+        </Button>
         <Button
           variant="icon"
           className="headerBtn"
@@ -242,7 +279,15 @@ const ChatWindowContent = () => {
           </Button>
         )}
       </div>
-      <PopoutChatBody key={active} chatroomId={active} autoFocus />
+      <div className="windowBody">
+        <PopoutChatBody key={active} chatroomId={active} autoFocus />
+        {showMembers && (
+          <PopoutMembersPanel
+            chatroomId={active}
+            onClose={() => setShowMembers(false)}
+          />
+        )}
+      </div>
     </div>
   );
 };

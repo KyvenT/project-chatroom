@@ -147,8 +147,11 @@ describe("useMessagePermissions", () => {
 
   it("lets members edit and delete only their own messages", () => {
     const { result } = renderHook(() => useMessagePermissions("c1"));
-    expect(result.current(own)).toEqual({ canEdit: true, canDelete: true });
-    expect(result.current(theirs)).toEqual({
+    expect(result.current(own)).toMatchObject({
+      canEdit: true,
+      canDelete: true,
+    });
+    expect(result.current(theirs)).toMatchObject({
       canEdit: false,
       canDelete: false,
     });
@@ -158,7 +161,7 @@ describe("useMessagePermissions", () => {
         ...own,
         attachment: { id: "a", fileName: "f", mimeType: "text/plain", size: 1 },
       }),
-    ).toEqual({ canEdit: false, canDelete: true });
+    ).toMatchObject({ canEdit: false, canDelete: true });
   });
 
   it("lets the owner and admins delete anyone's messages", () => {
@@ -169,7 +172,10 @@ describe("useMessagePermissions", () => {
       })),
     }));
     const { result } = renderHook(() => useMessagePermissions("c1"));
-    expect(result.current(theirs)).toEqual({ canEdit: false, canDelete: true });
+    expect(result.current(theirs)).toMatchObject({
+      canEdit: false,
+      canDelete: true,
+    });
   });
 
   it("uses the member's role in the open chatroom", () => {

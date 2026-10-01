@@ -110,6 +110,21 @@ export interface MessagePayload {
   senderUserId: string | null;
   editedAt: Date | null;
   attachment: AttachmentPayload | null;
+  // oldest first
+  reactions: ReactionPayload[];
+}
+
+// one user's reaction to a message
+export interface ReactionPayload {
+  emoji: string;
+  userId: string;
+}
+
+// all of a message's reactions, after one was added or taken away
+export interface MessageReactionsPayload {
+  chatroomId: string;
+  messageId: string;
+  reactions: ReactionPayload[];
 }
 
 // a message's file, without its bytes (those are downloaded separately)

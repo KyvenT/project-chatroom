@@ -1,8 +1,9 @@
 import { API_URL } from "../env";
-import type { Message } from "../types/REST-types/Message";
+import type { Message, Reaction } from "../types/REST-types/Message";
 import {
   applyMessageDelete,
   applyMessageEdit,
+  applyMessageReactions,
 } from "../ws-router/ws-routes/message-changes";
 import { customMutation } from "./customMutation";
 
@@ -28,4 +29,21 @@ export const deleteMessage = async (messageId: string) => {
     method: "DELETE",
   });
   applyMessageDelete(deleted.chatroomId, deleted.messageId);
+};
+
+// Reacts to a message with an emoji, or takes your reaction back
+export const setReaction = async (
+  messageId: string,
+  emoji: string,
+  reacted: boolean,
+) => {
+  const change = await customMutation<{
+    chatroomId: string;
+    messageId: string;
+    reactions: Reaction[];
+  }>({
+    fetchUrl: `${API_URL}/api/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`,
+    method: reacted ? "PUT" : "DELETE",
+  });
+  applyMessageReactions(change.chatroomId, change.messageId, change.reactions);
 };

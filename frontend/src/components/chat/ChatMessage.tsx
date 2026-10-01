@@ -13,7 +13,10 @@ import {
 } from "./MessageActions";
 import { messageHostStyles } from "../../styles/messageHost";
 import { Avatar } from "../Avatar";
-import type { Attachment } from "../../types/REST-types/Message";
+import type { Attachment, Reaction } from "../../types/REST-types/Message";
+import { MessageReactions } from "./MessageReactions";
+import { EmojiText } from "../emoji/EmojiText";
+import { useReactions } from "../../hooks/useReactions";
 
 interface ChatMessageProps {
   id: string;
@@ -27,6 +30,8 @@ interface ChatMessageProps {
   } | null;
   timestamp: Date;
   editedAt?: Date | null;
+  reactions?: Reaction[];
+  canReact?: boolean;
   canEdit?: boolean;
   canDelete?: boolean;
   // sent soon after the same person's previous message, so shown under it
@@ -80,9 +85,9 @@ const styles = css({
     pointerEvents: "none",
   },
 
-  // clear of the edit and delete toolbar, which shows at the same time
+  // clear of the react, edit and delete toolbar, which shows at the same time
   "&.hasToolbar .chainTime": {
-    right: "96px",
+    right: "120px",
   },
 
   "&:hover .chainTime, &:focus-within .chainTime": {
@@ -177,6 +182,8 @@ const ChatMessage = ({
   sender,
   timestamp,
   editedAt = null,
+  reactions = [],
+  canReact = false,
   canEdit = false,
   canDelete = false,
   chained = false,
@@ -184,6 +191,7 @@ const ChatMessage = ({
   const theme = useTheme();
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const reacting = useReactions(id, reactions);
 
   const shortTime = timestamp.toLocaleString("en-US", {
     timeStyle: "short",
@@ -222,7 +230,8 @@ const ChatMessage = ({
         className={
           [
             chained && "chained",
-            (canEdit || canDelete) && !editing && "hasToolbar",
+            (canReact || canEdit || canDelete) && !editing && "hasToolbar",
+            reacting.pickerOpen && "reacting",
           ]
             .filter(Boolean)
             .join(" ") || undefined
@@ -231,8 +240,10 @@ const ChatMessage = ({
       >
         {!editing && (
           <MessageToolbar
+            canReact={canReact}
             canEdit={canEdit}
             canDelete={canDelete}
+            onReact={reacting.openPicker}
             onEdit={() => setEditing(true)}
             onDelete={() => setDeleting(true)}
           />
@@ -289,15 +300,21 @@ const ChatMessage = ({
           ) : (
             content && (
               <p className="content">
-                {content}
+                <EmojiText text={content} />
                 {/* with no header, the edited mark goes after the text */}
                 {chained && <> {editedLabel}</>}
               </p>
             )
           )}
           {attachment && <MessageAttachment attachment={attachment} />}
+          <MessageReactions
+            reactions={reactions}
+            reacting={reacting}
+            canReact={canReact}
+          />
         </div>
       </div>
+      {reacting.picker}
       {deleting && (
         <DeleteMessageModal
           messageId={id}

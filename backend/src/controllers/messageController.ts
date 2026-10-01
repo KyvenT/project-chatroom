@@ -4,6 +4,7 @@ import { sendChatMessage } from "../wss/outgoing-messages/chat-message.js";
 import {
   sendMessageDelete,
   sendMessageEdit,
+  sendMessageReactions,
 } from "../wss/outgoing-messages/message-changes.js";
 import { contentDisposition, parseMimeType } from "../lib/attachments.js";
 
@@ -134,3 +135,31 @@ export const deleteMessage = async (req: Request, res: Response) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// adds (PUT) or takes back (DELETE) the user's reaction
+const changeReaction =
+  (change: typeof messageService.addReaction) =>
+  async (req: Request, res: Response) => {
+    const { userId, data } = req;
+
+    if (!userId) {
+      res.status(401).json({ message: "Must be signed in to react" });
+      return;
+    }
+
+    try {
+      const reactions = await change(userId, data);
+      sendMessageReactions(reactions);
+      res.status(200).json(reactions);
+    } catch (err: any) {
+      if (err instanceof messageService.MessageError) {
+        res.status(err.status).json({ message: err.message });
+        return;
+      }
+      console.error(err);
+      res.status(500).json({ message: err.message });
+    }
+  };
+
+export const addReaction = changeReaction(messageService.addReaction);
+export const removeReaction = changeReaction(messageService.removeReaction);

@@ -14,6 +14,9 @@ import {
   MessageEditForm,
   MessageToolbar,
 } from "./MessageActions";
+import { MessageReactions } from "./MessageReactions";
+import { EmojiText } from "../emoji/EmojiText";
+import { useReactions } from "../../hooks/useReactions";
 
 // how close to the top (px) the list is scrolled before older messages load
 const LOAD_THRESHOLD = 24;
@@ -110,14 +113,14 @@ const formatPreviewTime = (date: Date) =>
     ? date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
     : date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 
-const NO_PERMISSIONS = { canEdit: false, canDelete: false };
+const NO_PERMISSIONS = { canReact: false, canEdit: false, canDelete: false };
 
 interface HistoryMessageProps {
   message: Message;
   clamp: boolean;
   // shown under the same person's previous message, without a name
   chained: boolean;
-  permissions: { canEdit: boolean; canDelete: boolean };
+  permissions: { canReact: boolean; canEdit: boolean; canDelete: boolean };
 }
 
 const HistoryMessage = ({
@@ -128,12 +131,20 @@ const HistoryMessage = ({
 }: HistoryMessageProps) => {
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const reactions = message.reactions ?? [];
+  const reacting = useReactions(message.id, reactions);
   const sentAt = new Date(message.createdAt);
   const senderName = message.senderUser?.username ?? DELETED_USER_NAME;
 
   return (
     <li
-      className={chained ? "previewMessage chained" : "previewMessage"}
+      className={[
+        "previewMessage",
+        chained && "chained",
+        reacting.pickerOpen && "reacting",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       css={messageHostStyles}
       title={chained ? sentAt.toLocaleString() : undefined}
     >
@@ -141,6 +152,7 @@ const HistoryMessage = ({
         <MessageToolbar
           {...permissions}
           compact
+          onReact={reacting.openPicker}
           onEdit={() => setEditing(true)}
           onDelete={() => setDeleting(true)}
         />
@@ -174,7 +186,7 @@ const HistoryMessage = ({
       ) : (
         message.content && (
           <p className="previewContent">
-            {message.content}
+            <EmojiText text={message.content} />
             {chained && message.editedAt && (
               <span className="previewTime"> (edited)</span>
             )}
@@ -184,6 +196,13 @@ const HistoryMessage = ({
       {message.attachment && (
         <MessageAttachment attachment={message.attachment} compact={clamp} />
       )}
+      <MessageReactions
+        reactions={reactions}
+        reacting={reacting}
+        canReact={permissions.canReact}
+        compact
+      />
+      {reacting.picker}
       {deleting && (
         <DeleteMessageModal
           messageId={message.id}

@@ -5,6 +5,9 @@ import { useParams } from "react-router";
 import { sendWSMessage } from "../../ws-router/ws";
 import { COUNTDOWN_FROM, MAX_MESSAGE_LENGTH } from "../../utils/messageLimits";
 import { AttachButton } from "./AttachButton";
+import { EmojiButton } from "../emoji/EmojiButton";
+import { EmojiSuggestions } from "../emoji/EmojiSuggestions";
+import { useEmojiAutocomplete } from "../../hooks/useEmojiAutocomplete";
 
 const styles = css({
   width: "100%",
@@ -14,6 +17,7 @@ const styles = css({
   padding: "8px 24px 20px",
 
   form: {
+    position: "relative",
     width: "100%",
     display: "flex",
     justifyContent: "space-between",
@@ -106,9 +110,13 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
   const [hasTyped, setHasTyped] = useState<boolean>(false);
   const [length, setLength] = useState(0);
   const remaining = MAX_MESSAGE_LENGTH - length;
+  const emojiAutocomplete = useEmojiAutocomplete(messageInputRef, (value) =>
+    setLength(value.length),
+  );
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!messageInputRef.current || !chatroomId) return;
+    if (emojiAutocomplete.onKeyDown(event)) return;
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (messageInputRef.current.value === "") return;
@@ -145,15 +153,21 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
         onSubmit={(event) => {
           handleSubmit(event);
           setLength(0);
+          emojiAutocomplete.close();
         }}
         id="message-form"
       >
+        <EmojiSuggestions {...emojiAutocomplete.suggestions} />
         <textarea
           ref={messageInputRef}
           placeholder="Message..."
           rows={height}
           onKeyDown={handleKeyPress}
-          onInput={(event) => setLength(event.currentTarget.value.length)}
+          onInput={(event) => {
+            setLength(event.currentTarget.value.length);
+            emojiAutocomplete.onInput();
+          }}
+          onBlur={emojiAutocomplete.close}
           maxLength={MAX_MESSAGE_LENGTH}
           id="message"
           required
@@ -168,6 +182,10 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
             {remaining}
           </span>
         )}
+        <EmojiButton
+          inputRef={messageInputRef}
+          onChange={(value) => setLength(value.length)}
+        />
         {chatroomId && <AttachButton chatroomId={chatroomId} />}
         <button
           type="submit"

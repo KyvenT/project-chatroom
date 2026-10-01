@@ -19,6 +19,14 @@ export const messageIdSchema = z.object({
   messageId: z.uuid(),
 });
 
+// a single emoji, as Unicode recommends it (including skin tones and
+// sequences like 👩‍💻), so reactions can't be arbitrary text
+const EMOJI = /^\p{RGI_Emoji}$/v;
+
+export const reactionSchema = messageIdSchema.extend({
+  emoji: z.string().max(64).regex(EMOJI, "Must be a single emoji"),
+});
+
 export const editMessageSchema = messageIdSchema.extend({
   content: z.string().trim().min(1).max(MAX_MESSAGE_LENGTH),
 });

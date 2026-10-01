@@ -1,5 +1,8 @@
 import { socketMap } from "../../lib/socketMaps.js";
-import { MessagePayload } from "../../types/payloads.js";
+import {
+  MessagePayload,
+  MessageReactionsPayload,
+} from "../../types/payloads.js";
 import { chatroomViewers, sendUnreadCounts } from "./chat-message.js";
 
 const sendToViewers = (chatroomId: string, payload: object) => {
@@ -31,6 +34,15 @@ export const sendMessageDelete = async (
       messageId,
     });
     await sendUnreadCounts(chatroomId, chatroomViewers(chatroomId));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+// a message's reactions after one changed, for everyone showing the chatroom
+export const sendMessageReactions = (change: MessageReactionsPayload) => {
+  try {
+    sendToViewers(change.chatroomId, { type: "message-reactions", ...change });
   } catch (err) {
     console.error(err);
   }

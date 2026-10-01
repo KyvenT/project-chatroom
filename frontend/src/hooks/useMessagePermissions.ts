@@ -7,9 +7,9 @@ import {
   useMembersStore,
 } from "./useStores";
 
-// What the signed-in user may do to a chatroom's messages: edit the text of
-// their own, and delete their own or, as the chatroom's owner or an admin,
-// anyone's. The server checks the same rules.
+// What the signed-in user may do to a chatroom's messages: react to any, edit
+// the text of their own, and delete their own or, as the chatroom's owner or
+// an admin, anyone's. The server checks the same rules.
 export const useMessagePermissions = (chatroomId: string | undefined) => {
   const userId = useAuthStore((state) => state.user.userId);
   const ownerId = useChatroomsStore(
@@ -33,6 +33,7 @@ export const useMessagePermissions = (chatroomId: string | undefined) => {
     (message: Pick<Message, "senderUserId" | "attachment">) => {
       const isOwn = !!userId && message.senderUserId === userId;
       return {
+        canReact: !!userId,
         canEdit: isOwn && !message.attachment,
         canDelete: isOwn || moderates,
       };

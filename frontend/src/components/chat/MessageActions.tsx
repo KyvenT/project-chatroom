@@ -1,9 +1,11 @@
 import { css, useTheme, type Theme } from "@emotion/react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, SmilePlus, Trash2 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { deleteMessage, editMessage } from "../../utils/messageChanges";
 import { MAX_MESSAGE_LENGTH } from "../../utils/messageLimits";
 import { ConfirmModal } from "../ConfirmModal";
+import { EmojiSuggestions } from "../emoji/EmojiSuggestions";
+import { useEmojiAutocomplete } from "../../hooks/useEmojiAutocomplete";
 
 const toolbarStyles = (theme: Theme) =>
   css({
@@ -47,29 +49,44 @@ const toolbarStyles = (theme: Theme) =>
   });
 
 interface MessageToolbarProps {
+  canReact?: boolean;
   canEdit: boolean;
   canDelete: boolean;
+  // opens an emoji picker beside the react button
+  onReact?: (button: HTMLElement) => void;
   onEdit: () => void;
   onDelete: () => void;
   compact?: boolean;
 }
 
-// Edit and delete buttons for a message
+// React, edit and delete buttons for a message
 export const MessageToolbar = ({
+  canReact = false,
   canEdit,
   canDelete,
+  onReact,
   onEdit,
   onDelete,
   compact = false,
 }: MessageToolbarProps) => {
   const theme = useTheme();
-  if (!canEdit && !canDelete) return null;
+  const showReact = canReact && !!onReact;
+  if (!showReact && !canEdit && !canDelete) return null;
 
   return (
     <div
       className={compact ? "messageToolbar compact" : "messageToolbar"}
       css={toolbarStyles(theme)}
     >
+      {showReact && (
+        <button
+          type="button"
+          onClick={(event) => onReact(event.currentTarget)}
+          aria-label="Add a reaction"
+        >
+          <SmilePlus size="0.9rem" />
+        </button>
+      )}
       {canEdit && (
         <button type="button" onClick={onEdit} aria-label="Edit message">
           <Pencil size="0.9rem" />
@@ -91,6 +108,7 @@ export const MessageToolbar = ({
 
 const editStyles = (theme: Theme) =>
   css({
+    position: "relative",
     display: "flex",
     flexDirection: "column",
     gap: "4px",
@@ -152,6 +170,7 @@ export const MessageEditForm = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const emojiAutocomplete = useEmojiAutocomplete(inputRef, setDraft);
 
   // start with the cursor after the text, sized to fit it
   useEffect(() => {
@@ -190,6 +209,7 @@ export const MessageEditForm = ({
   };
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (emojiAutocomplete.onKeyDown(event)) return;
     if (event.key === "Escape") {
       event.preventDefault();
       // don't also close whatever the message is in
@@ -203,6 +223,7 @@ export const MessageEditForm = ({
 
   return (
     <div className={compact ? "compact" : undefined} css={editStyles(theme)}>
+      <EmojiSuggestions {...emojiAutocomplete.suggestions} />
       <textarea
         ref={inputRef}
         rows={1}
@@ -213,7 +234,9 @@ export const MessageEditForm = ({
         onChange={(e) => {
           setDraft(e.target.value);
           setError(null);
+          emojiAutocomplete.onInput();
         }}
+        onBlur={emojiAutocomplete.close}
         onKeyDown={onKeyDown}
       />
       {error && (

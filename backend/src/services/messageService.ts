@@ -1,6 +1,7 @@
-import { MessagePayload } from "../types/payloads.js";
+import { MessagePayload, MessageReactionsPayload } from "../types/payloads.js";
 import {
   editMessageSchema,
+  reactionSchema,
   retrieveMessageSchema,
 } from "../validators/messages/messageValidation.js";
 import z from "zod";
@@ -25,6 +26,10 @@ export const messageInclude = {
       mimeType: true,
       size: true,
     },
+  },
+  reactions: {
+    select: { emoji: true, userId: true },
+    orderBy: { createdAt: "asc" },
   },
 } as const;
 
@@ -197,4 +202,69 @@ export const deleteMessage = async (userId: string, messageId: string) => {
 
   await Prisma.message.delete({ where: { id: message.id } });
   return { chatroomId: message.chatroomId, messageId: message.id };
+};
+
+// how many different emojis a message can be reacted with
+export const MAX_REACTION_EMOJIS = 20;
+
+const messageReactions = async (
+  chatroomId: string,
+  messageId: string,
+): Promise<MessageReactionsPayload> => ({
+  chatroomId,
+  messageId,
+  reactions: await Prisma.reaction.findMany({
+    where: { messageId },
+    select: { emoji: true, userId: true },
+    orderBy: { createdAt: "asc" },
+  }),
+});
+
+// Reacts to a message in one of the user's chatrooms with an emoji (doing it
+// again changes nothing); returns all the message's reactions
+export const addReaction = async (
+  userId: string,
+  { messageId, emoji }: z.infer<typeof reactionSchema>,
+) => {
+  const message = await findMessage(messageId);
+  if (!(await isChatroomMember(userId, message.chatroomId))) {
+    throw new MessageError(403, "Not a member of the chatroom");
+  }
+
+  const emojis = await Prisma.reaction.findMany({
+    where: { messageId },
+    distinct: ["emoji"],
+    select: { emoji: true },
+  });
+  if (
+    emojis.length >= MAX_REACTION_EMOJIS &&
+    !emojis.some((e) => e.emoji === emoji)
+  ) {
+    throw new MessageError(
+      400,
+      `A message can have at most ${MAX_REACTION_EMOJIS} different reactions`,
+    );
+  }
+
+  // skipping duplicates means reacting twice at once can't fail
+  await Prisma.reaction.createMany({
+    data: [{ messageId, userId, emoji }],
+    skipDuplicates: true,
+  });
+  return messageReactions(message.chatroomId, messageId);
+};
+
+// Takes back the user's reaction to a message; returns all the message's
+// reactions
+export const removeReaction = async (
+  userId: string,
+  { messageId, emoji }: z.infer<typeof reactionSchema>,
+) => {
+  const message = await findMessage(messageId);
+  if (!(await isChatroomMember(userId, message.chatroomId))) {
+    throw new MessageError(403, "Not a member of the chatroom");
+  }
+
+  await Prisma.reaction.deleteMany({ where: { messageId, userId, emoji } });
+  return messageReactions(message.chatroomId, messageId);
 };

@@ -1,13 +1,24 @@
 import { useActiveChatroomStore, useMembersStore } from "../../hooks/useStores";
 import type { UpdateMembersMessage } from "../../types/ws-messages";
+import type { ChatroomMember } from "../../types/REST-types/ChatroomMember";
+import { updateCachedMembers } from "../../utils/membersCache";
 
 export const handleUpdateMembers = (message: UpdateMembersMessage) => {
-  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
-
-  if (message.chatroomId !== chatroomId) {
-    console.error("received update members message for wrong chatroom");
-    return;
+  const { member, memberId } = message;
+  // pop-outs show members of chatrooms other than the page's
+  if (message.action === "JOIN" && member) {
+    updateCachedMembers(message.chatroomId, (members) => [
+      ...members.filter((m) => m.memberId !== member.memberId),
+      member as ChatroomMember,
+    ]);
+  } else if (message.action === "LEAVE" && memberId) {
+    updateCachedMembers(message.chatroomId, (members) =>
+      members.filter((m) => m.memberId !== memberId),
+    );
   }
+
+  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
+  if (message.chatroomId !== chatroomId) return;
 
   switch (message.action) {
     case "JOIN":

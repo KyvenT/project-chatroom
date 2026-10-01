@@ -96,6 +96,7 @@ const ChatMessageList = () => {
               sender={message.senderUser}
               timestamp={new Date(message.createdAt)}
               editedAt={message.editedAt ? new Date(message.editedAt) : null}
+              reactions={message.reactions}
               {...permissionsFor(message)}
               // newest first, so the message before this one is next
               chained={continuesChain(

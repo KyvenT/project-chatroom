@@ -4,7 +4,7 @@ import type {
   ChatroomRoles,
 } from "./REST-types/ChatroomMember";
 import type { Invite } from "./REST-types/Invite";
-import type { Message } from "./REST-types/Message";
+import type { Message, Reaction } from "./REST-types/Message";
 
 export interface ChatMessage {
   type: "chat-message";
@@ -20,6 +20,14 @@ export interface MessageDeletedMessage {
   type: "message-deleted";
   chatroomId: string;
   messageId: string;
+}
+
+// all of a message's reactions, after one was added or taken away
+export interface MessageReactionsMessage {
+  type: "message-reactions";
+  chatroomId: string;
+  messageId: string;
+  reactions: Reaction[];
 }
 
 // someone who shares a chatroom with you (or you) changed their picture
@@ -126,6 +134,7 @@ export type WSMessage =
   | ChatMessage
   | MessageEditedMessage
   | MessageDeletedMessage
+  | MessageReactionsMessage
   | AvatarUpdatedMessage
   | NotificationMessage
   | UpdateChatroomsMessage

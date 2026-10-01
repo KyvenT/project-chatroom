@@ -8,6 +8,9 @@ import { sendWSMessage } from "../../ws-router/ws";
 import { MessageHistoryList } from "../chat/MessageHistoryList";
 import { TypingIndicator } from "../chat/TypingIndicator";
 import { AttachButton } from "../chat/AttachButton";
+import { EmojiButton } from "../emoji/EmojiButton";
+import { EmojiSuggestions } from "../emoji/EmojiSuggestions";
+import { useEmojiAutocomplete } from "../../hooks/useEmojiAutocomplete";
 
 // how often (ms) typing tells others you're typing
 const TYPING_INTERVAL = 1000;
@@ -27,6 +30,7 @@ const styles = (theme: Theme) =>
     },
 
     ".popoutInput": {
+      position: "relative",
       flex: "0 0 auto",
       display: "flex",
       alignItems: "flex-end",
@@ -101,6 +105,7 @@ export const PopoutChatBody = ({
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastTypingSent = useRef(0);
+  const emojiAutocomplete = useEmojiAutocomplete(inputRef, setDraft);
 
   useEffect(() => {
     sendWSMessage({ type: "update-last-viewed-at", chatroomId });
@@ -120,6 +125,7 @@ export const PopoutChatBody = ({
     if (!content) return;
     sendWSMessage({ type: "message", content, chatroomId });
     setDraft("");
+    emojiAutocomplete.close();
   };
 
   const remaining = MAX_MESSAGE_LENGTH - draft.length;
@@ -141,6 +147,7 @@ export const PopoutChatBody = ({
           send();
         }}
       >
+        <EmojiSuggestions {...emojiAutocomplete.suggestions} />
         <textarea
           ref={inputRef}
           rows={1}
@@ -149,8 +156,10 @@ export const PopoutChatBody = ({
           placeholder={`Message ${title}`}
           aria-label={`Message ${title}`}
           autoFocus={autoFocus}
+          onBlur={emojiAutocomplete.close}
           onChange={(e) => {
             setDraft(e.target.value);
+            emojiAutocomplete.onInput();
             // like the main chat box, let others see you're typing
             const now = Date.now();
             if (
@@ -162,6 +171,7 @@ export const PopoutChatBody = ({
             }
           }}
           onKeyDown={(e) => {
+            if (emojiAutocomplete.onKeyDown(e)) return;
             // Enter sends, Shift+Enter adds a line
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -178,6 +188,7 @@ export const PopoutChatBody = ({
             {remaining}
           </span>
         )}
+        <EmojiButton inputRef={inputRef} onChange={setDraft} size="2.1rem" />
         <AttachButton chatroomId={chatroomId} />
         <button
           type="submit"

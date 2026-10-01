@@ -13,6 +13,14 @@ export interface Message {
   } | null;
   editedAt: Date | null;
   attachment: Attachment | null;
+  // oldest first
+  reactions?: Reaction[];
+}
+
+// one user's reaction to a message
+export interface Reaction {
+  emoji: string;
+  userId: string;
 }
 
 // a file sent as a message; its bytes are fetched separately

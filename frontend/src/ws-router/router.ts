@@ -4,6 +4,7 @@ import { useAvatarStore } from "../hooks/useAvatarStore";
 import {
   applyMessageDelete,
   applyMessageEdit,
+  applyMessageReactions,
 } from "./ws-routes/message-changes";
 import { handleNewNotification } from "./ws-routes/notification";
 import { handleUpdateChatrooms } from "./ws-routes/update-chatrooms";
@@ -30,6 +31,13 @@ export const wsMessageRouter = (message: WSMessage) => {
       break;
     case "message-deleted":
       applyMessageDelete(message.chatroomId, message.messageId);
+      break;
+    case "message-reactions":
+      applyMessageReactions(
+        message.chatroomId,
+        message.messageId,
+        message.reactions,
+      );
       break;
     case "avatar-updated":
       useAvatarStore

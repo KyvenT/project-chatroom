@@ -28,17 +28,21 @@ export type MemberInfoProps = {
   };
   onClose: () => void;
   position?: PopupPosition;
+  // the chatroom and its members, when it isn't the page's (e.g. a pop-out)
+  chatroomId?: string;
+  members?: ChatroomMember[];
 };
 
 // how wide (px) the popup is, and how far it keeps from the window's edges
 const POPUP_WIDTH = 280;
 const EDGE_GAP = 8;
 
-// Next to the clicked name or picture, kept inside the window
+// Next to the clicked name or picture, kept inside its window
 const placePopup = (
   anchor: DOMRect,
   position: PopupPosition,
   height: number,
+  window: Window,
 ) => {
   const left =
     position === "LEFT"
@@ -196,10 +200,17 @@ export const MemberInfo = ({
   clickedMember: { member, button },
   onClose,
   position = "LEFT",
+  chatroomId: chatroomIdProp,
+  members: membersProp,
 }: MemberInfoProps) => {
-  const { chatroomId } = useParams();
+  const params = useParams();
+  const chatroomId = chatroomIdProp ?? params.chatroomId;
   const theme = useTheme();
-  const members = useMembersStore((state) => state.members);
+  const pageMembers = useMembersStore((state) => state.members);
+  const members = membersProp ?? pageMembers;
+  // a pop-out window has its own document, which the popup goes in
+  const doc = button.ownerDocument;
+  const win = doc.defaultView ?? window;
   const user = useAuthStore((state) => state.user);
 
   const popupRef = useRef<HTMLDivElement>(null);
@@ -209,7 +220,8 @@ export const MemberInfo = ({
   });
 
   const { data } = useQuery<ChatroomMemberDetails>({
-    queryKey: [member.memberId],
+    // when they joined differs by chatroom
+    queryKey: [member.memberId, chatroomId],
     queryFn: () =>
       customQuery({
         fetchUrl: `${API_URL}/api/members/${chatroomId}/${member.memberId}`,
@@ -220,6 +232,16 @@ export const MemberInfo = ({
   const canKick = userRole !== "MEMBER" && userRole !== member.role;
 
   useOutsideClick({ callbackFn: onClose, elementRef: popupRef });
+
+  // the page's clicks are watched above; a pop-out window's are watched here
+  useEffect(() => {
+    if (doc === document) return;
+    const onMouseDown = (event: MouseEvent) => {
+      if (!popupRef.current?.contains(event.target as Node)) onClose();
+    };
+    doc.addEventListener("mousedown", onMouseDown);
+    return () => doc.removeEventListener("mousedown", onMouseDown);
+  }, [doc, onClose]);
 
   // focus moves into the popup so Escape closes it, and back to what opened
   // it afterwards
@@ -234,9 +256,14 @@ export const MemberInfo = ({
     const popup = popupRef.current;
     if (!popup) return;
     setPlace(
-      placePopup(button.getBoundingClientRect(), position, popup.offsetHeight),
+      placePopup(
+        button.getBoundingClientRect(),
+        position,
+        popup.offsetHeight,
+        win,
+      ),
     );
-  }, [button, position, data, canKick]);
+  }, [button, position, data, canKick, win]);
 
   const handleKick = () => {
     mutation.mutate({
@@ -310,6 +337,6 @@ export const MemberInfo = ({
         </div>
       )}
     </div>,
-    document.body,
+    doc.body,
   );
 };

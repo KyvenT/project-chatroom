@@ -31,8 +31,22 @@ model Message {
   chatroomId    String
   notifications Notification[]
   attachment    Attachment?
+  reactions     Reaction[]
   createdAt     DateTime       @default(now())
   editedAt      DateTime?
+}
+
+// one emoji one user reacted to a message with; a user can react with
+// several different emojis
+model Reaction {
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@id([messageId, userId, emoji])
 }
 
 // a file sent as a message; its bytes are only loaded when it's downloaded
@@ -60,6 +74,7 @@ model User {
   avatarUpdatedAt DateTime?
   avatar          Avatar?
   sentMessages    Message[]
+  reactions       Reaction[]
   joinedChatrooms ChatroomMember[]
   ownedChatrooms  Chatroom[]
   pinnedGroups    PinGroup[]

@@ -4,7 +4,7 @@ import { useAuthStore } from "../hooks/useStores";
 
 export interface MutationArgs {
   fetchUrl: string;
-  method: "GET" | "POST" | "UPDATE" | "PATCH" | "DELETE";
+  method: "GET" | "POST" | "PUT" | "UPDATE" | "PATCH" | "DELETE";
   reqBody?: {};
 }
 
