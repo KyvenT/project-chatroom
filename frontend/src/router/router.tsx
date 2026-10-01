@@ -1,25 +1,24 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
-import LandingPage from "./routes/landing/Landing";
 import AuthLayout from "./routes/auth/AuthLayout";
 import { useMemo } from "react";
 import ErrorPage from "./ErrorPage";
 import Chat from "./routes/chat/Chat";
-import Login from "./routes/auth/Login";
-import Signup from "./routes/auth/Signup";
 import ChatLayout from "./routes/chat/ChatLayout";
 import ChatHome from "./routes/chat/ChatHome";
-import Logout from "./routes/auth/Logout";
-import { AccountProfilePage } from "./routes/utility/AccountProfile";
-import { SettingsPage } from "./routes/utility/Settings";
-import JoinChatroom from "./routes/join/JoinChatroom";
 
+// Pages outside the chat are only downloaded when first opened, keeping them
+// out of the bundle signed-in users load for the chat.
 const Router = () => {
   const router = useMemo(() => {
     return createBrowserRouter([
       {
         path: "/",
-        Component: LandingPage,
+        lazy: {
+          Component: async () =>
+            (await import("./routes/landing/Landing")).default,
+        },
         errorElement: <ErrorPage />,
+        hydrateFallbackElement: <></>,
       },
       {
         path: "/chat",
@@ -33,19 +32,58 @@ const Router = () => {
       {
         Component: AuthLayout,
         errorElement: <ErrorPage />,
+        hydrateFallbackElement: <></>,
         children: [
-          { path: "login", Component: Login },
-          { path: "register", Component: Signup },
-          { path: "logout", Component: Logout },
-          { path: "join/:joinKey", Component: JoinChatroom },
+          {
+            path: "login",
+            lazy: {
+              Component: async () =>
+                (await import("./routes/auth/Login")).default,
+            },
+          },
+          {
+            path: "register",
+            lazy: {
+              Component: async () =>
+                (await import("./routes/auth/Signup")).default,
+            },
+          },
+          {
+            path: "logout",
+            lazy: {
+              Component: async () =>
+                (await import("./routes/auth/Logout")).default,
+            },
+          },
+          {
+            path: "join/:joinKey",
+            lazy: {
+              Component: async () =>
+                (await import("./routes/join/JoinChatroom")).default,
+            },
+          },
         ],
       },
       {
         Component: ChatLayout,
         errorElement: <ErrorPage />,
+        hydrateFallbackElement: <></>,
         children: [
-          { path: "account", Component: AccountProfilePage },
-          { path: "settings", Component: SettingsPage },
+          {
+            path: "account",
+            lazy: {
+              Component: async () =>
+                (await import("./routes/utility/AccountProfile"))
+                  .AccountProfilePage,
+            },
+          },
+          {
+            path: "settings",
+            lazy: {
+              Component: async () =>
+                (await import("./routes/utility/Settings")).SettingsPage,
+            },
+          },
         ],
       },
     ]);
