@@ -1,6 +1,7 @@
 import z from "zod";
 import { guestSchema, userSchema } from "../validators/auth/authValidation.js";
-import bcrypt from "bcryptjs";
+import { hashPassword, verifyPassword } from "../lib/passwords.js";
+import { socketSessions } from "../lib/socketSessions.js";
 import Prisma from "../prisma.js";
 import jwt from "jsonwebtoken";
 import env from "../env.js";
@@ -11,9 +12,21 @@ import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.j
 
 export const REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
+// login failures don't say whether the username exists
+export const INVALID_LOGIN = "Invalid username or password";
+
+// checked against when the username doesn't exist, so a failed login takes
+// as long either way and timing doesn't reveal which usernames exist
+const dummyPasswordHash = hashPassword(crypto.randomBytes(16).toString("hex"));
+
 // helpers
-const getNewAccessToken = (userId: string, isGuest: boolean): string => {
-  const token = jwt.sign({ userId, isGuest }, env.JWT_SECRET, {
+const getNewAccessToken = (
+  userId: string,
+  isGuest: boolean,
+  sessionId: string,
+): string => {
+  const token = jwt.sign({ userId, isGuest, sid: sessionId }, env.JWT_SECRET, {
+    algorithm: "HS256",
     expiresIn: env.JWT_EXPIRATION as StringValue,
   });
   return token;
@@ -25,7 +38,7 @@ const hashRefreshToken = (refreshToken: string): string => {
 
 const revokeSession = async (refreshToken: string) => {
   try {
-    await Prisma.session.update({
+    const session = await Prisma.session.update({
       where: {
         refreshToken: hashRefreshToken(refreshToken),
       },
@@ -33,6 +46,7 @@ const revokeSession = async (refreshToken: string) => {
         revokedAt: new Date(),
       },
     });
+    socketSessions.endSessions([session.id]);
   } catch (error: any) {
     console.error("Failed to revoke session:", error);
     throw new Error("Failed to revoke session");
@@ -43,7 +57,7 @@ export const createUser = async (
   data: z.infer<typeof userSchema>,
 ): Promise<AuthPayload> => {
   const { username, password } = data;
-  const hashedPassword = await bcrypt.hash(password, 12);
+  const hashedPassword = await hashPassword(password);
 
   let user;
   try {
@@ -82,14 +96,22 @@ export const loginUser = async (
     },
   });
 
-  if (!user) {
-    throw new Error("User not found");
+  const { ok, needsRehash } = await verifyPassword(
+    password,
+    user?.passwordHash ?? (await dummyPasswordHash),
+  );
+
+  // guest accounts have random passwords and can't be logged into
+  if (!user || !ok || user.isGuest) {
+    throw new Error(INVALID_LOGIN);
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-
-  if (!isPasswordValid) {
-    throw new Error("Invalid password");
+  // upgrade hashes from before long passwords were supported
+  if (needsRehash) {
+    await Prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: await hashPassword(password) },
+    });
   }
 
   const session = await createSession(user.id, user.isGuest);
@@ -121,7 +143,7 @@ export const createGuest = async (
 
   const chatroomId = chatroom.id;
 
-  const passwordHash = await bcrypt.hash(randomlyGeneratedPassword, 12);
+  const passwordHash = await hashPassword(randomlyGeneratedPassword);
 
   let guest;
   try {
@@ -166,58 +188,81 @@ export const createGuest = async (
 };
 
 export const useRefreshToken = async (refreshToken: string) => {
-  try {
-    const token = await Prisma.session.findUnique({
-      where: {
-        refreshToken: hashRefreshToken(refreshToken),
-      },
-      include: {
-        user: {
-          select: {
-            username: true,
-            isGuest: true,
-          },
+  const hashed = hashRefreshToken(refreshToken);
+
+  const token = await Prisma.session.findUnique({
+    where: {
+      refreshToken: hashed,
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+          isGuest: true,
         },
       },
-    });
+    },
+  });
 
-    if (!token || token.expiresAt < new Date() || token.revokedAt !== null) {
-      throw new Error("Invalid refresh token");
-    }
-
-    const newRefreshToken = crypto.randomBytes(32).toString("hex");
-    const hashedNewRefreshToken = hashRefreshToken(newRefreshToken);
-
-    await Prisma.$transaction([
-      Prisma.session.update({
-        where: {
-          refreshToken: hashRefreshToken(refreshToken),
-        },
-        data: {
-          revokedAt: new Date(),
-        },
-      }),
-      Prisma.session.create({
-        data: {
-          userId: token.userId,
-          refreshToken: hashedNewRefreshToken,
-          expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
-        },
-      }),
-    ]);
-
-    const accessToken = getNewAccessToken(token.userId, token.user.isGuest);
-
-    return {
-      token: accessToken,
-      refreshToken: newRefreshToken,
-      username: token.user.username,
-      userId: token.userId,
-      isGuest: token.user.isGuest,
-    };
-  } catch (error) {
+  if (!token || token.expiresAt < new Date()) {
     throw new Error("Invalid refresh token");
   }
+
+  // each refresh token works once; seeing a used one again means it was
+  // copied, so end every session of that user to lock the copy out too
+  if (token.revokedAt !== null) {
+    const active = await Prisma.session.findMany({
+      where: { userId: token.userId, revokedAt: null },
+      select: { id: true },
+    });
+    await Prisma.session.updateMany({
+      where: { userId: token.userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    socketSessions.endSessions(active.map((session) => session.id));
+    throw new Error("Invalid refresh token");
+  }
+
+  const newRefreshToken = crypto.randomBytes(32).toString("hex");
+
+  const rotated = await Prisma.$transaction(async (tx) => {
+    // only one of two simultaneous refreshes with the same token wins
+    const { count } = await tx.session.updateMany({
+      where: { refreshToken: hashed, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    if (count !== 1) return null;
+
+    return tx.session.create({
+      data: {
+        userId: token.userId,
+        refreshToken: hashRefreshToken(newRefreshToken),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRATION),
+      },
+      select: { id: true },
+    });
+  });
+
+  if (!rotated) {
+    throw new Error("Invalid refresh token");
+  }
+
+  // sockets signed in with the old session carry on with the new one
+  socketSessions.rename(token.id, rotated.id);
+
+  const accessToken = getNewAccessToken(
+    token.userId,
+    token.user.isGuest,
+    rotated.id,
+  );
+
+  return {
+    token: accessToken,
+    refreshToken: newRefreshToken,
+    username: token.user.username,
+    userId: token.userId,
+    isGuest: token.user.isGuest,
+  };
 };
 
 export const createSession = async (userId: string, isGuest: boolean) => {
@@ -225,15 +270,16 @@ export const createSession = async (userId: string, isGuest: boolean) => {
   const hashedRefreshToken = hashRefreshToken(refreshToken);
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION);
 
-  await Prisma.session.create({
+  const session = await Prisma.session.create({
     data: {
       userId,
       refreshToken: hashedRefreshToken,
       expiresAt,
     },
+    select: { id: true },
   });
 
-  const accessToken = getNewAccessToken(userId, isGuest);
+  const accessToken = getNewAccessToken(userId, isGuest, session.id);
 
   return { refreshToken, accessToken };
 };

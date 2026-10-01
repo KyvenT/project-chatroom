@@ -69,7 +69,16 @@ export const respondToInvite = async (req: Request, res: Response) => {
     res.status(200).json("Invite response successful");
   } catch (err: any) {
     console.error("invite accept error", err);
-    res.status(500).json({ message: err.message });
+    switch (err.message) {
+      case "Invite not found":
+        return res.status(404).json({ message: err.message });
+      case "Not detected as receiver of this invite":
+        return res.status(403).json({ message: err.message });
+      case "Invite has already been answered":
+        return res.status(409).json({ message: err.message });
+      default:
+        return res.status(500).json({ message: err.message });
+    }
   }
 };
 

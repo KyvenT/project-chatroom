@@ -9,6 +9,7 @@ import {
 import type { ConfirmationResponse } from "../../../types/REST-types/Invite";
 import { Loader } from "../../../components/Loader";
 import { API_URL } from "../../../env";
+import { closeWs } from "../../../ws-router/ws";
 
 const Logout = () => {
   const handleLogOut = useAuthStore((state) => state.handleLogOut);
@@ -29,6 +30,9 @@ const Logout = () => {
   });
 
   useEffect(() => {
+    // closed by us, so the server ending the session doesn't look like a
+    // revocation to handle
+    closeWs();
     mutate({
       fetchUrl: `${API_URL}/api/auth/logout`,
       method: "POST",

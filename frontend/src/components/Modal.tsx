@@ -108,7 +108,7 @@ const Modal = ({
     } else {
       dialogRef.current?.close();
     }
-  }, [open]);
+  }, [open, variant]);
 
   const handleESCPress = (e: React.KeyboardEvent) => {
     if (variant === "requiredInteraction" || !onClose) return;
@@ -123,7 +123,7 @@ const Modal = ({
       <dialog
         ref={dialogRef}
         onKeyDown={handleESCPress}
-        /* @ts-ignore */
+        /* @ts-expect-error closedBy is missing from React's dialog types */
         closedBy="none"
         css={[dialogStyles(variant, theme), modalStyles]}
         onClick={(e) => e.stopPropagation()}

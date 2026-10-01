@@ -13,6 +13,10 @@ import {
 } from "../types/payloads.js";
 import { sendUpdateChatrooms } from "../wss/outgoing-messages/update-chatrooms.js";
 import { chatroomMemberSchema } from "../validators/members/memberValidation.js";
+import {
+  userActiveChatroomMap,
+  userWatchedChatroomsMap,
+} from "../lib/socketMaps.js";
 
 export const joinChatroom = async (
   userId: string,
@@ -216,6 +220,7 @@ export const getChatroomMembers = async (
         select: {
           username: true,
           status: true,
+          avatarUpdatedAt: true,
         },
       },
     },
@@ -242,44 +247,55 @@ export const removeMemberFromChatroom = async (
 ) => {
   const { chatroomId, memberId } = data;
 
-  const verify = await Prisma.chatroomMember.findUnique({
-    where: {
-      chatroomId_memberId: {
-        memberId: memberId,
-        chatroomId,
-      },
-    },
-    include: {
-      chatroom: {
-        select: {
-          ownerId: true,
-        },
-      },
-    },
+  const chatroom = await Prisma.chatroom.findUnique({
+    where: { id: chatroomId },
+    select: { ownerId: true },
   });
 
-  if (!verify) {
+  if (!chatroom) {
     throw new Error("Chatroom not found");
   }
 
-  if (
-    verify.role !== "OWNER" &&
-    memberId !== userId &&
-    userId !== verify.chatroom.ownerId
-  ) {
-    throw new Error(
-      "Not detected as the user that requested to leave, or is not owner of chatroom",
-    );
+  const ownerId = chatroom.ownerId;
+
+  // the owner can't leave (they delete the chatroom instead) or be removed;
+  // anyone else can leave, and the owner can remove them
+  if (memberId === ownerId) {
+    throw new Error("The owner can't leave or be removed from their chatroom");
+  }
+  if (memberId !== userId && userId !== ownerId) {
+    throw new Error("Only the owner can remove other members");
   }
 
-  await Prisma.chatroomMember.delete({
-    where: {
-      chatroomId_memberId: {
-        memberId,
-        chatroomId,
-      },
-    },
+  const membership = await Prisma.chatroomMember.findUnique({
+    where: { chatroomId_memberId: { chatroomId, memberId } },
   });
+
+  if (!membership) {
+    throw new Error("Member not found");
+  }
+
+  await Prisma.$transaction([
+    Prisma.chatroomMember.delete({
+      where: { chatroomId_memberId: { memberId, chatroomId } },
+    }),
+    // their pinned groups no longer show it
+    Prisma.memberPinnedGroups.deleteMany({
+      where: { chatroomId, pinGroup: { userId: memberId } },
+    }),
+  ]);
+
+  // stop sending them the chatroom's messages live
+  if (userActiveChatroomMap.getByKey(memberId) === chatroomId) {
+    userActiveChatroomMap.deleteByKey(memberId);
+  }
+  const watched = userWatchedChatroomsMap.getWatched(memberId);
+  if (watched.has(chatroomId)) {
+    userWatchedChatroomsMap.set(
+      memberId,
+      [...watched].filter((id) => id !== chatroomId),
+    );
+  }
 
   sendUpdateChatrooms(chatroomId, memberId, "LEAVE");
 };
@@ -311,9 +327,15 @@ export const getMemberDetails = async (
     },
     select: {
       joinedAt: true,
+      // what other members may see (not e.g. their email)
       member: {
-        omit: {
-          passwordHash: true,
+        select: {
+          id: true,
+          username: true,
+          status: true,
+          isGuest: true,
+          createdAt: true,
+          avatarUpdatedAt: true,
         },
       },
     },

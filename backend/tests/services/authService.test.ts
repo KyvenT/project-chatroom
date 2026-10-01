@@ -6,13 +6,22 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../../src/env.js", () => ({
   default: { JWT_SECRET: "test-secret", JWT_EXPIRATION: "15m" },
 }));
+vi.mock("../../src/lib/socketSessions.js", () => ({
+  socketSessions: { endSessions: vi.fn(), rename: vi.fn() },
+}));
 vi.mock("../../src/wss/outgoing-messages/update-chatrooms.js", () => ({
   sendUpdateChatrooms: vi.fn(),
 }));
 vi.mock("../../src/prisma.js", () => ({
   default: {
-    user: { create: vi.fn(), findUnique: vi.fn() },
-    session: { create: vi.fn(), update: vi.fn(), findUnique: vi.fn() },
+    user: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
+    session: {
+      create: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+    },
     chatroom: { findUnique: vi.fn() },
     chatroomMember: { create: vi.fn() },
     $transaction: vi.fn(),
@@ -20,8 +29,11 @@ vi.mock("../../src/prisma.js", () => ({
 }));
 
 import Prisma from "../../src/prisma.js";
+import { socketSessions } from "../../src/lib/socketSessions.js";
+import { hashPassword, verifyPassword } from "../../src/lib/passwords.js";
 import { sendUpdateChatrooms } from "../../src/wss/outgoing-messages/update-chatrooms.js";
 import {
+  INVALID_LOGIN,
   REFRESH_TOKEN_EXPIRATION,
   createGuest,
   createUser,
@@ -39,7 +51,7 @@ describe("authService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, "error").mockImplementation(() => {});
-    db.session.create.mockResolvedValue({});
+    db.session.create.mockResolvedValue({ id: "s-new" });
   });
 
   describe("createUser", () => {
@@ -52,8 +64,11 @@ describe("authService", () => {
       });
 
       const { passwordHash } = db.user.create.mock.calls[0][0].data;
-      expect(passwordHash).not.toBe("secret1");
-      expect(await bcrypt.compare("secret1", passwordHash)).toBe(true);
+      expect(passwordHash).not.toContain("secret1");
+      expect(await verifyPassword("secret1", passwordHash)).toEqual({
+        ok: true,
+        needsRehash: false,
+      });
 
       expect(result).toMatchObject({
         userId: "u1",
@@ -63,6 +78,8 @@ describe("authService", () => {
       expect(jwt.verify(result.token, "test-secret")).toMatchObject({
         userId: "u1",
         isGuest: false,
+        // the session the token belongs to
+        sid: "s-new",
       });
     });
 
@@ -95,14 +112,12 @@ describe("authService", () => {
   });
 
   describe("loginUser", () => {
-    it("throws when the user does not exist", async () => {
+    it("gives the same error for unknown users and wrong passwords", async () => {
       db.user.findUnique.mockResolvedValue(null);
       await expect(
         loginUser({ username: "ghost", password: "secret1" }),
-      ).rejects.toThrow("User not found");
-    });
+      ).rejects.toThrow(INVALID_LOGIN);
 
-    it("throws on a wrong password", async () => {
       db.user.findUnique.mockResolvedValue({
         id: "u1",
         isGuest: false,
@@ -110,15 +125,50 @@ describe("authService", () => {
       });
       await expect(
         loginUser({ username: "alice", password: "wrong-pass" }),
-      ).rejects.toThrow("Invalid password");
+      ).rejects.toThrow(INVALID_LOGIN);
       expect(db.session.create).not.toHaveBeenCalled();
+    });
+
+    it("still checks a password for unknown users, so timing gives nothing away", async () => {
+      const compare = vi.spyOn(bcrypt, "compare");
+      db.user.findUnique.mockResolvedValue(null);
+
+      await expect(
+        loginUser({ username: "ghost", password: "secret1" }),
+      ).rejects.toThrow(INVALID_LOGIN);
+      expect(compare).toHaveBeenCalledOnce();
+      compare.mockRestore();
+    });
+
+    it("refuses logging into guest accounts", async () => {
+      db.user.findUnique.mockResolvedValue({
+        id: "g1",
+        isGuest: true,
+        passwordHash: await bcrypt.hash("guessed", 4),
+      });
+      await expect(
+        loginUser({ username: "guest", password: "guessed" }),
+      ).rejects.toThrow(INVALID_LOGIN);
+    });
+
+    it("upgrades an old-style password hash on login", async () => {
+      db.user.findUnique.mockResolvedValue({
+        id: "u1",
+        isGuest: false,
+        passwordHash: await bcrypt.hash("right-pass", 4),
+      });
+      await loginUser({ username: "alice", password: "right-pass" });
+
+      const { passwordHash } = db.user.update.mock.calls[0][0].data;
+      expect(passwordHash.startsWith("v2$")).toBe(true);
+      expect((await verifyPassword("right-pass", passwordHash)).ok).toBe(true);
     });
 
     it("returns tokens on success", async () => {
       db.user.findUnique.mockResolvedValue({
         id: "u1",
         isGuest: false,
-        passwordHash: await bcrypt.hash("right-pass", 4),
+        passwordHash: await hashPassword("right-pass"),
       });
       const result = await loginUser({
         username: "alice",
@@ -175,6 +225,7 @@ describe("authService", () => {
 
   describe("useRefreshToken", () => {
     const validSession = (overrides = {}) => ({
+      id: "s-old",
       userId: "u1",
       expiresAt: new Date(Date.now() + 60_000),
       revokedAt: null,
@@ -182,9 +233,14 @@ describe("authService", () => {
       ...overrides,
     });
 
+    // run the interactive transaction against the mocked client
+    const runTransactions = () =>
+      db.$transaction.mockImplementation(async (fn: any) => fn(db));
+
     it("looks the session up by the token's hash", async () => {
       db.session.findUnique.mockResolvedValue(validSession());
-      db.$transaction.mockResolvedValue([]);
+      db.session.updateMany.mockResolvedValue({ count: 1 });
+      runTransactions();
       await useRefreshToken("raw-token");
 
       expect(db.session.findUnique.mock.calls[0][0].where.refreshToken).toBe(
@@ -195,7 +251,6 @@ describe("authService", () => {
     it.each([
       ["missing", null],
       ["expired", validSession({ expiresAt: new Date(Date.now() - 1000) })],
-      ["revoked", validSession({ revokedAt: new Date() })],
     ])("rejects a %s session", async (_label, session) => {
       db.session.findUnique.mockResolvedValue(session);
       await expect(useRefreshToken("raw-token")).rejects.toThrow(
@@ -204,15 +259,43 @@ describe("authService", () => {
       expect(db.$transaction).not.toHaveBeenCalled();
     });
 
+    it("ends all of the user's sessions when a used token comes back", async () => {
+      db.session.findUnique.mockResolvedValue(
+        validSession({ revokedAt: new Date() }),
+      );
+      db.session.findMany.mockResolvedValue([{ id: "s1" }, { id: "s2" }]);
+      db.session.updateMany.mockResolvedValue({ count: 2 });
+
+      await expect(useRefreshToken("raw-token")).rejects.toThrow(
+        "Invalid refresh token",
+      );
+      // their sockets are disconnected too
+      expect(socketSessions.endSessions).toHaveBeenCalledWith(["s1", "s2"]);
+      expect(db.session.updateMany.mock.calls[0][0].where).toEqual({
+        userId: "u1",
+        revokedAt: null,
+      });
+      expect(db.$transaction).not.toHaveBeenCalled();
+    });
+
     it("rotates the refresh token and issues a new access token", async () => {
       db.session.findUnique.mockResolvedValue(validSession());
-      db.$transaction.mockResolvedValue([]);
+      db.session.updateMany.mockResolvedValue({ count: 1 });
+      runTransactions();
 
       const result = await useRefreshToken("raw-token");
 
-      expect(db.$transaction).toHaveBeenCalledOnce();
+      expect(db.session.updateMany.mock.calls[0][0].where).toEqual({
+        refreshToken: sha256("raw-token"),
+        revokedAt: null,
+      });
       expect(result.refreshToken).not.toBe("raw-token");
       expect(result.username).toBe("alice");
+      // sockets signed in with the old session move to the new one
+      expect(socketSessions.rename).toHaveBeenCalledWith("s-old", "s-new");
+      expect(jwt.verify(result.token, "test-secret")).toMatchObject({
+        sid: "s-new",
+      });
       expect(jwt.verify(result.token, "test-secret")).toMatchObject({
         userId: "u1",
       });
@@ -224,18 +307,28 @@ describe("authService", () => {
       );
     });
 
-    it("reports a failed rotation as an invalid token", async () => {
+    it("lets only one of two simultaneous refreshes succeed", async () => {
       db.session.findUnique.mockResolvedValue(validSession());
-      db.$transaction.mockRejectedValue(new Error("db down"));
+      // the other request already used the token
+      db.session.updateMany.mockResolvedValue({ count: 0 });
+      runTransactions();
+
       await expect(useRefreshToken("raw-token")).rejects.toThrow(
         "Invalid refresh token",
       );
+      expect(db.session.create).not.toHaveBeenCalled();
     });
   });
 
   describe("logoutUser", () => {
+    it("disconnects the session's sockets", async () => {
+      db.session.update.mockResolvedValue({ id: "s1" });
+      await logoutUser("raw-token");
+      expect(socketSessions.endSessions).toHaveBeenCalledWith(["s1"]);
+    });
+
     it("revokes the session by hashed token", async () => {
-      db.session.update.mockResolvedValue({});
+      db.session.update.mockResolvedValue({ id: "s1" });
       await logoutUser("raw-token");
 
       const arg = db.session.update.mock.calls[0][0];

@@ -89,7 +89,11 @@ export const createInvite = async (
     receiverPromise,
   ]);
 
-  if (verifyUser?.member.isGuest === true) {
+  if (!verifyUser || !chatroomPrivacy) {
+    throw new Error("User does not have permission to invite to this chatroom");
+  }
+
+  if (verifyUser.member.isGuest) {
     throw new Error("Only users can send invites");
   }
 
@@ -110,30 +114,13 @@ export const createInvite = async (
     throw new Error("User is already a member of this chatroom");
   }
 
-  let canInvite: boolean = false;
-
-  switch (chatroomPrivacy?.privacy) {
-    case "INVITE_ONLY":
-      canInvite = chatroomPrivacy.ownerId === senderId;
-      break;
-    case "INVITE_PLUS":
-      const memberRecord = await Prisma.chatroomMember.findUnique({
-        where: {
-          chatroomId_memberId: {
-            chatroomId,
-            memberId: senderId,
-          },
-        },
-      });
-      canInvite = !!memberRecord;
-      break;
-    case "JOINABLE":
-      if (receiver?.isGuest) canInvite = false;
-      break;
-    case "PUBLIC":
-      canInvite = true;
-      break;
-  }
+  // the sender is a member (checked above); in invite-only chatrooms only
+  // the owner can invite, and guests can only be invited to public ones,
+  // matching who can join by link
+  const canInvite =
+    (chatroomPrivacy.privacy !== "INVITE_ONLY" ||
+      chatroomPrivacy.ownerId === senderId) &&
+    (!receiver.isGuest || chatroomPrivacy.privacy === "PUBLIC");
 
   if (!canInvite) {
     throw new Error("User does not have permission to invite to this chatroom");
@@ -214,16 +201,35 @@ export const respondToInvite = async (
     throw new Error("Not detected as receiver of this invite");
   }
 
-  const invite = await Prisma.invite.update({
+  // an invite is answered once
+  const { count } = await Prisma.invite.updateMany({
     where: {
       id: inviteId,
+      status: InviteStatus.PENDING,
     },
     data: {
       status,
     },
   });
 
+  if (count !== 1) {
+    throw new Error("Invite has already been answered");
+  }
+
+  const invite = verify;
+
   if (status === InviteStatus.REJECTED) return;
+
+  const alreadyMember = await Prisma.chatroomMember.findUnique({
+    where: {
+      chatroomId_memberId: { chatroomId: invite.chatroomId, memberId: userId },
+    },
+  });
+
+  if (alreadyMember) {
+    sendUpdateInvites({ memberId: userId, actionType: "DELETE", inviteId });
+    return;
+  }
 
   const existingChatroomIndex = await Prisma.chatroomMember.findFirst({
     select: {

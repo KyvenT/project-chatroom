@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { usePopoutStore } from "../../hooks/usePopoutStore";
 import { useAuthStore, useChatroomsStore } from "../../hooks/useStores";
 import { sendWSMessage } from "../../ws-router/ws";
+import { useConnectionStore } from "../../hooks/useConnectionStore";
 import { PopoutChat } from "./PopoutChat";
 
 const POPOUT_WIDTH = 320;
@@ -35,6 +36,7 @@ export const PopoutDock = () => {
   const activeWindowTab = usePopoutStore((state) => state.activeWindowTab);
   const chatrooms = useChatroomsStore((state) => state.chatrooms);
   const token = useAuthStore((state) => state.user.token);
+  const connectionId = useConnectionStore((state) => state.connectionId);
   const [maxVisible, setMaxVisible] = useState(fitCount);
 
   useEffect(() => {
@@ -63,7 +65,8 @@ export const PopoutDock = () => {
       type: "update-watched-chatrooms",
       chatroomIds: watched ? watched.split(",") : [],
     });
-  }, [watched, token]);
+    // (resent after reconnecting; the server forgets it with the connection)
+  }, [watched, token, connectionId]);
 
   // stop watching when the dock goes away (e.g. signing out)
   useEffect(

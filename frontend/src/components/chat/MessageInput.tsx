@@ -4,6 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { sendWSMessage } from "../../ws-router/ws";
 import { COUNTDOWN_FROM, MAX_MESSAGE_LENGTH } from "../../utils/messageLimits";
+import { AttachButton } from "./AttachButton";
+import { EmojiButton } from "../emoji/EmojiButton";
+import { EmojiSuggestions } from "../emoji/EmojiSuggestions";
+import { useEmojiAutocomplete } from "../../hooks/useEmojiAutocomplete";
 
 const styles = css({
   width: "100%",
@@ -13,6 +17,7 @@ const styles = css({
   padding: "8px 24px 20px",
 
   form: {
+    position: "relative",
     width: "100%",
     display: "flex",
     justifyContent: "space-between",
@@ -36,7 +41,7 @@ const styles = css({
     padding: "4px 0",
   },
 
-  button: {
+  ".sendBtn": {
     width: "2.25rem",
     height: "2.25rem",
     flex: "0 0 auto",
@@ -47,7 +52,7 @@ const styles = css({
     transition: "background-color 0.15s ease",
   },
 
-  "button:hover": {
+  ".sendBtn:hover": {
     cursor: "pointer",
   },
 
@@ -75,12 +80,12 @@ const colors = (theme: Theme) =>
       color: theme.colors.white,
     },
 
-    button: {
+    ".sendBtn": {
       color: theme.colors.onAccent,
       backgroundColor: theme.colors.accent,
     },
 
-    "button:hover": {
+    ".sendBtn:hover": {
       backgroundColor: theme.colors.accentHover,
     },
 
@@ -105,9 +110,13 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
   const [hasTyped, setHasTyped] = useState<boolean>(false);
   const [length, setLength] = useState(0);
   const remaining = MAX_MESSAGE_LENGTH - length;
+  const emojiAutocomplete = useEmojiAutocomplete(messageInputRef, (value) =>
+    setLength(value.length),
+  );
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!messageInputRef.current || !chatroomId) return;
+    if (emojiAutocomplete.onKeyDown(event)) return;
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (messageInputRef.current.value === "") return;
@@ -144,15 +153,21 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
         onSubmit={(event) => {
           handleSubmit(event);
           setLength(0);
+          emojiAutocomplete.close();
         }}
         id="message-form"
       >
+        <EmojiSuggestions {...emojiAutocomplete.suggestions} />
         <textarea
           ref={messageInputRef}
           placeholder="Message..."
           rows={height}
           onKeyDown={handleKeyPress}
-          onInput={(event) => setLength(event.currentTarget.value.length)}
+          onInput={(event) => {
+            setLength(event.currentTarget.value.length);
+            emojiAutocomplete.onInput();
+          }}
+          onBlur={emojiAutocomplete.close}
           maxLength={MAX_MESSAGE_LENGTH}
           id="message"
           required
@@ -167,7 +182,17 @@ const MessageInput = ({ handleSubmit, messageInputRef }: MessageInputProps) => {
             {remaining}
           </span>
         )}
-        <button type="submit" form="message-form" aria-label="Send message">
+        <EmojiButton
+          inputRef={messageInputRef}
+          onChange={(value) => setLength(value.length)}
+        />
+        {chatroomId && <AttachButton chatroomId={chatroomId} />}
+        <button
+          type="submit"
+          form="message-form"
+          className="sendBtn"
+          aria-label="Send message"
+        >
           <SendHorizonal size="1.25rem" />
         </button>
       </form>

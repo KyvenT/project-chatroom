@@ -11,7 +11,10 @@ import {
   type EditableColor,
 } from "../../../styles/theme";
 import { useThemeStore } from "../../../hooks/useThemeStore";
-import { usePreferencesStore } from "../../../hooks/usePreferencesStore";
+import {
+  MAX_MESSAGE_CHAIN_MINUTES,
+  usePreferencesStore,
+} from "../../../hooks/usePreferencesStore";
 import { useAuthStore } from "../../../hooks/useStores";
 import { fieldStyles, modalButtonStyles } from "../../../styles/modalForm";
 import { ConfirmModal } from "../../../components/ConfirmModal";
@@ -591,6 +594,98 @@ const HomePageSettings = () => {
   );
 };
 
+const minutesInputStyles = (theme: Theme) =>
+  css({
+    flex: "0 0 auto",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "0.85rem",
+    color: theme.colors.light_grey,
+
+    input: {
+      width: "4.5rem",
+      padding: "6px 8px",
+      font: "inherit",
+      color: theme.colors.white,
+      backgroundColor: theme.colors.black,
+      border: `1px solid ${theme.colors.borderStrong}`,
+      borderRadius: theme.radius.sm,
+
+      "&:focus-visible": {
+        outline: "none",
+        borderColor: theme.colors.accent,
+      },
+      "&[aria-invalid='true']": { borderColor: theme.colors.danger },
+    },
+  });
+
+const ChatSettings = () => {
+  const theme = useTheme();
+  const minutes = usePreferencesStore((state) => state.messageChainMinutes);
+  const setPreference = usePreferencesStore((state) => state.setPreference);
+  // what's typed, which may be briefly empty or out of range
+  const [draft, setDraft] = useState(String(minutes));
+
+  const parsed = Number(draft);
+  const valid =
+    draft.trim() !== "" &&
+    Number.isInteger(parsed) &&
+    parsed >= 0 &&
+    parsed <= MAX_MESSAGE_CHAIN_MINUTES;
+
+  return (
+    <section className="card" aria-labelledby="chatHeading">
+      <div className="cardHeader">
+        <div>
+          <h2 id="chatHeading">Chat</h2>
+          <p>Choose how messages are shown.</p>
+        </div>
+      </div>
+      <div css={switchStyles(theme)}>
+        <div>
+          <label htmlFor="chainMinutes">
+            Group messages from the same person
+          </label>
+          <p id="chainMinutesDescription">
+            A message sent within this many minutes of the same person's
+            previous message is shown under it, without their name again. Set it
+            to 0 to show every name. (0–{MAX_MESSAGE_CHAIN_MINUTES})
+          </p>
+        </div>
+        <div css={minutesInputStyles(theme)}>
+          <input
+            id="chainMinutes"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={MAX_MESSAGE_CHAIN_MINUTES}
+            step={1}
+            value={draft}
+            aria-describedby="chainMinutesDescription"
+            aria-invalid={!valid}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              const value = Number(e.target.value);
+              if (
+                e.target.value.trim() !== "" &&
+                Number.isInteger(value) &&
+                value >= 0 &&
+                value <= MAX_MESSAGE_CHAIN_MINUTES
+              ) {
+                setPreference("messageChainMinutes", value);
+              }
+            }}
+            // a number that can't be used goes back to the saved one
+            onBlur={() => !valid && setDraft(String(minutes))}
+          />
+          <span>minutes</span>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export const SettingsPage = () => {
   const theme = useTheme();
   const hasCustomColors = useThemeStore(
@@ -613,6 +708,7 @@ export const SettingsPage = () => {
         <div className="layout">
           <div className="mainColumn">
             <HomePageSettings />
+            <ChatSettings />
             <section className="card" aria-labelledby="colorsHeading">
               <div className="cardHeader">
                 <div>

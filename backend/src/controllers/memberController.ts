@@ -49,10 +49,19 @@ export const removeMemberFromChatroom = async (req: Request, res: Response) => {
 
   try {
     await membersService.removeMemberFromChatroom(userId, data);
-    res.status(201).json({ message: "Member left successfully" });
+    res.status(200).json({ message: "Member left successfully" });
   } catch (err: any) {
     console.error(err);
-    res.status(500).json({ message: err.message });
+    switch (err.message) {
+      case "Chatroom not found":
+      case "Member not found":
+        return res.status(404).json({ message: err.message });
+      case "The owner can't leave or be removed from their chatroom":
+      case "Only the owner can remove other members":
+        return res.status(403).json({ message: err.message });
+      default:
+        return res.status(500).json({ message: err.message });
+    }
   }
 };
 

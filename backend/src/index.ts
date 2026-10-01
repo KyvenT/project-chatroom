@@ -4,23 +4,28 @@ import { fileURLToPath } from "url";
 import env from "./env.js";
 import apiRouter from "./routes/routes.js";
 import cors from "cors";
-import { corsPreflightMiddleware } from "./middleware/corsPreflightMiddleware.js";
 import { startWSS } from "./wss/wss.js";
-import { rateLimitMiddleware } from "./middleware/rateLimitMiddleware.js";
+import {
+  avatarRateLimitMiddleware,
+  rateLimitMiddleware,
+} from "./middleware/rateLimitMiddleware.js";
+import { avatarsRouter } from "./routes/avatars/avatars.js";
 import cookieParser from "cookie-parser";
-
-/*
-const corsOptions = {
-  origin: ["http://localhost:5173"],
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
-*/
+import { securityHeaders } from "./middleware/securityHeaders.js";
+import { hideServerErrors } from "./middleware/hideServerErrors.js";
 
 const app = express();
 
-//app.use(cors(corsOptions));
+if (env.CORS_ORIGIN) {
+  app.use(
+    cors({
+      origin: env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    }),
+  );
+}
 
 // get file path from URL of current module
 const __filename = fileURLToPath(import.meta.url);
@@ -28,9 +33,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const pathToStaticFiles = path.join(__dirname, "../frontend");
 
+app.disable("x-powered-by");
+
 // middleware
-app.use(express.json());
-//app.use(corsPreflightMiddleware);
+app.use(securityHeaders);
+app.use(hideServerErrors);
+app.use(express.json({ limit: "16kb" }));
+// before the general rate limit, which pictures don't count towards
+app.use("/api/avatars", avatarRateLimitMiddleware, avatarsRouter);
 app.use(rateLimitMiddleware);
 app.use(cookieParser());
 

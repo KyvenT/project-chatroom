@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   isLoggedInSelector,
   useActiveChatroomStore,
@@ -8,6 +8,7 @@ import {
   useMembersStore,
   useMessagesStore,
   useTypingPresenceStore,
+  TYPING_TIMEOUT,
 } from "../../src/hooks/useStores";
 import type { Chatroom } from "../../src/types/REST-types/Chatroom";
 import type { ChatroomMember } from "../../src/types/REST-types/ChatroomMember";
@@ -30,6 +31,7 @@ const makeMessage = (id: string): Message => ({
   senderUserId: "u1",
   senderUser: { id: "u1", username: "alice" },
   editedAt: null,
+  attachment: null,
 });
 
 const makeMember = (
@@ -221,22 +223,47 @@ describe("useMembersStore", () => {
 describe("useTypingPresenceStore", () => {
   beforeEach(() => useTypingPresenceStore.setState({ typingUsers: [] }));
 
-  it("adds, removes and pops typing users", () => {
-    const { addTypingPresence, removeTypingPresence, popTypingUser } =
+  afterEach(() => vi.useRealTimers());
+
+  const typing = (userId: string, chatroomId = "c1") => ({
+    userId,
+    username: `user ${userId}`,
+    chatroomId,
+  });
+  const typingIn = (chatroomId: string) =>
+    useTypingPresenceStore
+      .getState()
+      .typingUsers.filter((u) => u.chatroomId === chatroomId)
+      .map((u) => u.userId);
+
+  it("tracks who is typing per chatroom", () => {
+    vi.useFakeTimers();
+    const { addTypingPresence, removeTypingPresence } =
       useTypingPresenceStore.getState();
-    addTypingPresence({ userId: "1", username: "a" } as never);
-    addTypingPresence({ userId: "2", username: "b" } as never);
-    addTypingPresence({ userId: "3", username: "c" } as never);
+    addTypingPresence(typing("1"));
+    addTypingPresence(typing("2"));
+    addTypingPresence(typing("1", "c2"));
 
-    removeTypingPresence("2");
-    expect(
-      useTypingPresenceStore.getState().typingUsers.map((u) => u.userId),
-    ).toEqual(["1", "3"]);
+    removeTypingPresence("1", "c1");
+    expect(typingIn("c1")).toEqual(["2"]);
+    expect(typingIn("c2")).toEqual(["1"]);
+  });
 
-    popTypingUser();
-    expect(
-      useTypingPresenceStore.getState().typingUsers.map((u) => u.userId),
-    ).toEqual(["3"]);
+  it("stops showing someone as typing a few seconds after they last typed", () => {
+    vi.useFakeTimers();
+    const { addTypingPresence } = useTypingPresenceStore.getState();
+    addTypingPresence(typing("1"));
+    vi.advanceTimersByTime(TYPING_TIMEOUT - 1000);
+
+    // typing again restarts their timer, without adding them twice
+    addTypingPresence(typing("1"));
+    addTypingPresence(typing("2"));
+    expect(typingIn("c1")).toEqual(["1", "2"]);
+
+    vi.advanceTimersByTime(TYPING_TIMEOUT - 1);
+    expect(typingIn("c1")).toEqual(["1", "2"]);
+    vi.advanceTimersByTime(1);
+    expect(typingIn("c1")).toEqual([]);
   });
 });
 

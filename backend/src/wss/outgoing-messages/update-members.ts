@@ -25,6 +25,7 @@ export const sendUpdateMembers = async (
             select: {
               username: true,
               status: true,
+              avatarUpdatedAt: true,
             },
           },
           role: true,

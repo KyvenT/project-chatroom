@@ -1,12 +1,18 @@
 import type { WSMessage } from "../types/ws-messages";
 import { handleChatMessage } from "./ws-routes/chat-message";
+import { useAvatarStore } from "../hooks/useAvatarStore";
+import {
+  applyMessageDelete,
+  applyMessageEdit,
+  applyMessageReactions,
+} from "./ws-routes/message-changes";
 import { handleNewNotification } from "./ws-routes/notification";
 import { handleUpdateChatrooms } from "./ws-routes/update-chatrooms";
 import { handleUpdateMembers } from "./ws-routes/update-members";
 import { handleStatusUpdate } from "./ws-routes/status-update";
 import { handleTypingPresence } from "./ws-routes/typing-presence";
 import { handleUpdateInvites } from "./ws-routes/update-invites";
-import { sendQueuedMessages, setWsAuthenticated } from "./ws";
+import { handleAuthResult } from "./ws";
 
 export const wsMessageRouter = (message: WSMessage) => {
   switch (message.type) {
@@ -15,11 +21,28 @@ export const wsMessageRouter = (message: WSMessage) => {
         `WS auth ${message.success ? "succeeded" : "failed"}: ${message.error || ""}`,
       );
       console.log("setting ws auth state to: ", message.success);
-      setWsAuthenticated(message.success);
-      if (message.success) sendQueuedMessages();
+      handleAuthResult(message.success);
       break;
     case "chat-message":
       handleChatMessage(message);
+      break;
+    case "message-edited":
+      applyMessageEdit(message.message);
+      break;
+    case "message-deleted":
+      applyMessageDelete(message.chatroomId, message.messageId);
+      break;
+    case "message-reactions":
+      applyMessageReactions(
+        message.chatroomId,
+        message.messageId,
+        message.reactions,
+      );
+      break;
+    case "avatar-updated":
+      useAvatarStore
+        .getState()
+        .setAvatarVersion(message.userId, message.avatarUpdatedAt);
       break;
     case "notification":
       handleNewNotification(message);

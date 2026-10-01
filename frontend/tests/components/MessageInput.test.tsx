@@ -82,3 +82,24 @@ describe("MessageInput", () => {
     expect(screen.queryByLabelText(/characters left/)).toBeNull();
   });
 });
+
+describe("MessageInput attachments", () => {
+  it("refuses file types the server won't take without uploading", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    setup();
+
+    const input = screen.getByTestId("attach-input");
+    fireEvent.change(input, {
+      target: {
+        files: [new File(["<svg/>"], "x.svg", { type: "image/svg+xml" })],
+      },
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "That file type can't be sent",
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+});

@@ -15,13 +15,14 @@ export const handleNewNotification = (message: NotificationMessage) => {
       break;
     case "MENTION":
       break;
-    case "NEW_MESSAGE":
+    case "NEW_MESSAGE": {
       const { unreadMessages, chatroomId: affectedChatroom } = message
         .notification.payload as UpdateUnreadMessage;
       useChatroomsStore
         .getState()
         .updateChatroomUnread(unreadMessages, affectedChatroom);
       break;
+    }
     default:
       console.log("Unknown notif type: " + message.notification.type);
   }

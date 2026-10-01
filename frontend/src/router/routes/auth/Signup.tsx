@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import type { UserAuth } from "../../../types/REST-types/User";
 import { useAuthStore } from "../../../hooks/useStores";
-import { authPageStyles, type LoginCredentials } from "./Login";
+import type { LoginCredentials } from "./Login";
+import { authPageStyles } from "../../../styles/authPage";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../components/Button";
 import { Eye, EyeClosed } from "lucide-react";
@@ -20,7 +21,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const next = searchParams.get("next");
-  const [error, setError] = useState<String>("");
+  const [error, setError] = useState<string>("");
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
   const [isRevealingPassword, setIsRevealingPassword] =
     useState<boolean>(false);

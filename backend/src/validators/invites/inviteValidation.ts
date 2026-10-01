@@ -10,6 +10,7 @@ export const inviteIdSchema = z.object({
   inviteId: z.uuid(),
 });
 
+// an invite can only be accepted or rejected
 export const updateInviteStatusSchema = inviteIdSchema.extend({
-  status: z.enum(InviteStatus),
+  status: z.enum([InviteStatus.ACCEPTED, InviteStatus.REJECTED]),
 });

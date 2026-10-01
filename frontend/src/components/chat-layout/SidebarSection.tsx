@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import type { Chatroom } from "../../types/REST-types/Chatroom";
 import SidebarChatroomButton from "./SidebarChatroomButton";
 import { readDraggedChatroomId } from "./chatroomDrag";
+import { HighlightMatch } from "../HighlightMatch";
 
 const styles = (theme: Theme, isDropTarget: boolean) =>
   css({
@@ -127,6 +128,8 @@ interface SidebarSectionProps {
   actions?: React.ReactNode;
   actionsOnHover?: boolean;
   emptyText: string;
+  // a search query to highlight in titles
+  highlight?: string;
 }
 
 export const SidebarSection = ({
@@ -140,6 +143,7 @@ export const SidebarSection = ({
   actions,
   actionsOnHover = false,
   emptyText,
+  highlight,
 }: SidebarSectionProps) => {
   const theme = useTheme();
   const [isDropTarget, setIsDropTarget] = useState(false);
@@ -184,7 +188,9 @@ export const SidebarSection = ({
             size="1rem"
             aria-hidden="true"
           />
-          <span className="sectionTitle">{title}</span>
+          <span className="sectionTitle">
+            <HighlightMatch text={title} query={highlight} />
+          </span>
           {collapsed && unread > 0 && (
             <span className="sectionUnread" aria-label={`${unread} unread`}>
               {unread}
@@ -208,6 +214,7 @@ export const SidebarSection = ({
               key={chatroom.chatroomId}
               isActive={activeChatroomId === chatroom.chatroomId}
               chatroom={chatroom}
+              highlight={highlight}
             />
           ))}
           {chatrooms.length === 0 && (

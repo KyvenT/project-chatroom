@@ -6,16 +6,39 @@ const STORAGE_KEY = "preferences";
 interface Preferences {
   // the home page shows sidebar folders instead of pinned groups
   syncFoldersWithHome: boolean;
+  // a message sent this many minutes or less after the same person's
+  // previous one is shown under it without its own name; 0 turns this off
+  messageChainMinutes: number;
 }
 
+export const MAX_MESSAGE_CHAIN_MINUTES = 60;
+
+// used until the user changes a setting (their choice is then remembered)
 const defaults: Preferences = {
-  syncFoldersWithHome: false,
+  syncFoldersWithHome: true,
+  messageChainMinutes: 3,
 };
+
+// saved values that aren't a usable number of minutes fall back to the default
+const validChainMinutes = (value: unknown) =>
+  typeof value === "number" &&
+  Number.isInteger(value) &&
+  value >= 0 &&
+  value <= MAX_MESSAGE_CHAIN_MINUTES
+    ? value
+    : defaults.messageChainMinutes;
 
 const load = (): Preferences => {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
-    return { ...defaults, ...(typeof stored === "object" ? stored : {}) };
+    const loaded = {
+      ...defaults,
+      ...(typeof stored === "object" ? stored : {}),
+    };
+    return {
+      ...loaded,
+      messageChainMinutes: validChainMinutes(loaded.messageChainMinutes),
+    };
   } catch {
     return defaults;
   }

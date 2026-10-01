@@ -1,6 +1,7 @@
 import { Status } from "@prisma/client";
-import { socketMap, userActiveChatroomMap } from "../../lib/socketMaps.js";
+import { socketMap } from "../../lib/socketMaps.js";
 import Prisma from "../../prisma.js";
+import { chatroomViewers } from "./chat-message.js";
 
 export const sendStatusUpdate = async (user: {
   username: string;
@@ -17,8 +18,9 @@ export const sendStatusUpdate = async (user: {
   });
 
   affectedChatrooms.forEach((chatroom) => {
-    const recipients = userActiveChatroomMap.getByValue(chatroom.chatroomId);
-    recipients?.forEach((recipient) => {
+    // users with the chatroom open, or watching it (e.g. in a pop-out)
+    const recipients = chatroomViewers(chatroom.chatroomId);
+    recipients.forEach((recipient) => {
       const socket = socketMap.getByKey(recipient);
       socket?.send(
         JSON.stringify({

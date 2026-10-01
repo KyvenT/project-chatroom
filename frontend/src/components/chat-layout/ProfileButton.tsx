@@ -1,4 +1,6 @@
-import { LogOut, User, UserRound } from "lucide-react";
+import { LogOut, UserRound } from "lucide-react";
+import { Avatar } from "../Avatar";
+import { useMyDetails } from "../../hooks/useMyDetails";
 import DropdownButton from "../DropdownButton";
 import { Link } from "react-router";
 import { useAuthStore } from "../../hooks/useStores";
@@ -10,19 +12,6 @@ const styles = (theme: Theme) =>
       display: "flex",
       alignItems: "center",
       gap: "10px",
-    },
-
-    ".avatar": {
-      flex: "0 0 auto",
-      width: "2.25rem",
-      height: "2.25rem",
-      display: "grid",
-      placeItems: "center",
-      borderRadius: "50%",
-      fontWeight: 600,
-      textTransform: "uppercase",
-      color: theme.colors.onAccent,
-      backgroundColor: theme.colors.accent,
     },
 
     ".profileText": {
@@ -47,19 +36,30 @@ const styles = (theme: Theme) =>
 
 export const ProfileButton = () => {
   const user = useAuthStore((state) => state.user);
+  const { data: details } = useMyDetails();
   const theme = useTheme();
 
   return (
     <DropdownButton
       aria-label="Open profile menu"
-      buttonText={<User className="headerIconBtn" />}
+      buttonText={
+        <Avatar
+          userId={user.userId || null}
+          username={user.username}
+          avatarUpdatedAt={details?.avatarUpdatedAt}
+          size={26}
+        />
+      }
       buttonVariant="icon"
       dropdownStyles={styles(theme)}
     >
       <div className="menuHeader profile">
-        <span className="avatar" aria-hidden="true">
-          {user.username.charAt(0)}
-        </span>
+        <Avatar
+          userId={user.userId || null}
+          username={user.username}
+          avatarUpdatedAt={details?.avatarUpdatedAt}
+          size={36}
+        />
         <div className="profileText">
           <span className="username">{user.username}</span>
           <span className="accountType">

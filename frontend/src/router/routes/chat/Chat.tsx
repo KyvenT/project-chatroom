@@ -4,9 +4,9 @@ import MessageInput from "../../../components/chat/MessageInput";
 import { useOutletContext, useParams } from "react-router";
 import MembersPanel from "../../../components/chat/MembersPanel";
 import { isLoggedInSelector, useAuthStore } from "../../../hooks/useStores";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import type { OutletContextType } from "./ChatLayout";
-import { useTypingPresenceStore } from "../../../hooks/useStores";
+import { TypingIndicator } from "../../../components/chat/TypingIndicator";
 import { sendWSMessage } from "../../../ws-router/ws";
 
 const chatStyles = css({
@@ -21,24 +21,13 @@ const chatStyles = css({
   },
 
   ".typingIndicator": {
-    display: "flex",
-    flexWrap: "wrap",
     padding: "0 24px",
-    minHeight: "1.25rem",
-    fontSize: "0.8rem",
-    fontStyle: "italic",
-    p: {
-      whiteSpace: "pre",
-    },
   },
 });
 
 const colors = (theme: Theme) =>
   css({
     color: theme.colors.white,
-    ".typingIndicator": {
-      color: theme.colors.light_grey,
-    },
   });
 
 function Chat() {
@@ -47,18 +36,6 @@ function Chat() {
   const isLoggedIn = useAuthStore(isLoggedInSelector);
   const messageInput = useRef<HTMLTextAreaElement>(null);
   const { showMembersList } = useOutletContext<OutletContextType>();
-  const typingUsers = useTypingPresenceStore((state) => state.typingUsers);
-  const popTypingUser = useTypingPresenceStore((state) => state.popTypingUser);
-
-  useEffect(() => {
-    if (typingUsers.length === 0) return;
-    const typingPresenceDuration = setTimeout(() => {
-      popTypingUser();
-    }, 3000);
-    return () => {
-      clearTimeout(typingPresenceDuration);
-    };
-  }, [typingUsers]);
 
   const handleSubmit = useCallback(
     (event: React.FormEvent) => {
@@ -82,18 +59,10 @@ function Chat() {
       {chatroomId && (
         <div className="chatContainer">
           <ChatMessageList key={chatroomId} />
-          {typingUsers.length > 0 && (
-            <div className="typingIndicator">
-              {typingUsers.map((typingUser, index) =>
-                index === typingUsers.length - 1 ? (
-                  <span key={typingUser.userId}>{typingUser.username}</span>
-                ) : (
-                  <span key={typingUser.userId}>{typingUser.username}, </span>
-                ),
-              )}
-              <p> is typing...</p>
-            </div>
-          )}
+          <TypingIndicator
+            chatroomId={chatroomId}
+            className="typingIndicator"
+          />
           <MessageInput
             messageInputRef={messageInput}
             handleSubmit={handleSubmit}

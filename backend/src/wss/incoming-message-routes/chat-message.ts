@@ -2,10 +2,10 @@ import Prisma from "../../prisma.js";
 import WebSocket from "ws";
 import { ChatMessage } from "../../types/ws-messages.js";
 import { socketMap } from "../../lib/socketMaps.js";
-import { type Message } from "@prisma/client";
 import { MessagePayload } from "../../types/payloads.js";
 import { sendChatMessage } from "../outgoing-messages/chat-message.js";
 import { isChatroomMember } from "../membership.js";
+import { messageInclude } from "../../services/messageService.js";
 
 const createMessage = async (
   userId: string,
@@ -19,14 +19,7 @@ const createMessage = async (
         chatroomId: message.chatroomId,
         senderUserId: userId,
       },
-      include: {
-        senderUser: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-      },
+      include: messageInclude,
     })) as MessagePayload;
 
     ws.send(

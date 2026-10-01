@@ -11,7 +11,11 @@ import Modal, { ModalCloseButton } from "../Modal";
 import type { Theme } from "@emotion/react";
 import type { ConfirmationResponse } from "../../types/REST-types/Invite";
 import { API_URL } from "../../env";
-import { fieldStyles, formModalStyles } from "../../styles/modalForm";
+import {
+  fieldStyles,
+  selectStyles,
+  formModalStyles,
+} from "../../styles/modalForm";
 import { privacyHint, privacyOptions } from "../../utils/chatroomPrivacy";
 import { Plus } from "lucide-react";
 
@@ -113,7 +117,7 @@ const NewChatButton = () => {
                 <select
                   {...register("privacy")}
                   id="privacy"
-                  css={fieldStyles(theme)}
+                  css={selectStyles(theme)}
                 >
                   {privacyOptions.map(({ value, label }) => (
                     <option key={value} value={value}>

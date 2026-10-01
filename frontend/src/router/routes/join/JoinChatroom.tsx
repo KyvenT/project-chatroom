@@ -12,7 +12,7 @@ import {
   type MutationArgs,
 } from "../../../utils/customMutation";
 import { customQuery } from "../../../utils/customQuery";
-import { authPageStyles } from "../auth/Login";
+import { authPageStyles } from "../../../styles/authPage";
 
 const JoinChatroom = () => {
   const theme = useTheme();

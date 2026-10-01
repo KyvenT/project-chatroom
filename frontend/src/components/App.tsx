@@ -1,16 +1,15 @@
 import { Global, ThemeProvider } from "@emotion/react";
 import Router from "../router/router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "../utils/queryClient";
 import { useEffect, useMemo } from "react";
-import { useRefreshToken } from "../utils/useRefreshToken";
+import { refreshAccessToken } from "../utils/refreshAccessToken";
 import { useAuthStore } from "../hooks/useStores";
 import { closeWs, startWSConnection } from "../ws-router/ws";
 import { buildTheme } from "../styles/theme";
 import { globalStyles } from "../styles/global";
 import { useThemeStore } from "../hooks/useThemeStore";
 import { usePreventScrollChaining } from "../hooks/usePreventScrollChaining";
-
-const queryClient = new QueryClient();
 
 function App() {
   const handleSignIn = useAuthStore((state) => state.handleSignIn);
@@ -22,7 +21,7 @@ function App() {
 
   useEffect(() => {
     const autoSignIn = async () => {
-      const result = await useRefreshToken();
+      const result = await refreshAccessToken();
       if (!result.ok) {
         console.log("No valid refresh token, user remains logged out");
       } else {
@@ -32,8 +31,10 @@ function App() {
     };
 
     autoSignIn();
-  }, []);
+  }, [handleSignIn, setSessionChecked]);
 
+  // keyed on the user, not the token, so refreshing the token doesn't
+  // reconnect the websocket
   useEffect(() => {
     if (user.token) {
       startWSConnection();
@@ -41,6 +42,7 @@ function App() {
     return () => {
       closeWs();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.userId]);
 
   return (

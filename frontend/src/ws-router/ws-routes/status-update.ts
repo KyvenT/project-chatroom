@@ -1,12 +1,19 @@
 import { useActiveChatroomStore, useMembersStore } from "../../hooks/useStores";
 import type { StatusMessage } from "../../types/ws-messages";
+import { updateCachedMembers } from "../../utils/membersCache";
 
 export const handleStatusUpdate = (message: StatusMessage) => {
-  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
+  const { member } = message;
+  // pop-outs show members of chatrooms other than the page's
+  updateCachedMembers(message.chatroomId, (members) =>
+    members.map((m) =>
+      m.memberId === member.memberId
+        ? { ...m, member: { ...m.member, status: member.member.status } }
+        : m,
+    ),
+  );
 
-  if (message.chatroomId !== chatroomId) {
-    console.error("received status update for wrong chatroom");
-    return;
-  }
-  useMembersStore.getState().updateMember(message.member);
+  const chatroomId = useActiveChatroomStore.getState().activeChatroomId;
+  if (message.chatroomId !== chatroomId) return;
+  useMembersStore.getState().updateMember(member);
 };

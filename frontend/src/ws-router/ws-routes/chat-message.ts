@@ -13,15 +13,15 @@ export const handleChatMessage = (message: ChatMessage) => {
   // an open pop-out of the chatroom shows it too
   usePopoutStore.getState().addLiveMessage(message.message);
 
+  // whoever sent it has stopped typing
+  const { senderUserId } = message.message;
+  if (senderUserId) {
+    useTypingPresenceStore
+      .getState()
+      .removeTypingPresence(senderUserId, message.message.chatroomId);
+  }
+
   // messages for other chatrooms are only for pop-outs
   if (message.message.chatroomId !== chatroomId) return;
-  const typingUsers = useTypingPresenceStore.getState().typingUsers;
-  typingUsers.forEach((typingUser) => {
-    if (typingUser.userId === message.message.senderUserId) {
-      useTypingPresenceStore
-        .getState()
-        .removeTypingPresence(message.message.senderUserId);
-    }
-  });
   useMessagesStore.getState().addNewMessage(message.message);
 };

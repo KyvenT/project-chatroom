@@ -1,4 +1,4 @@
-import { useRefreshToken } from "./useRefreshToken";
+import { refreshAccessToken } from "./refreshAccessToken";
 import { useAuthStore } from "../hooks/useStores";
 
 export interface QueryArgs {
@@ -16,7 +16,7 @@ export const makeHeaders = () => {
 export const customQuery = async <T>({ fetchUrl }: QueryArgs): Promise<T> => {
   const { user, handleSignIn } = useAuthStore.getState();
 
-  let res = await fetch(fetchUrl, {
+  const res = await fetch(fetchUrl, {
     method: "GET",
     headers: makeHeaders(),
     credentials: "include",
@@ -25,7 +25,7 @@ export const customQuery = async <T>({ fetchUrl }: QueryArgs): Promise<T> => {
 
   if (!res.ok) {
     if (res.status === 401 && user.token) {
-      const result = await useRefreshToken();
+      const result = await refreshAccessToken();
       if (!result.ok) {
         throw new Error("Unauthorized");
       }

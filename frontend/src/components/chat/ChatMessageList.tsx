@@ -5,6 +5,9 @@ import { useParams } from "react-router";
 import { useMessagesStore } from "../../hooks/useStores";
 import { useFetchMessages } from "../../hooks/useFetchMessages";
 import { sendWSMessage } from "../../ws-router/ws";
+import { useMessagePermissions } from "../../hooks/useMessagePermissions";
+import { usePreferencesStore } from "../../hooks/usePreferencesStore";
+import { continuesChain } from "../../utils/messageChains";
 
 const styles = css({
   width: "100%",
@@ -37,10 +40,14 @@ const ChatMessageList = () => {
   const chatRef = useRef<HTMLDivElement>(null);
   const [getBefore, setBefore] = useState<Date>(new Date());
   const { data } = useFetchMessages(chatroomId, getBefore, 25);
+  const permissionsFor = useMessagePermissions(chatroomId);
+  const chainMinutes = usePreferencesStore(
+    (state) => state.messageChainMinutes,
+  );
 
   useEffect(() => {
     clearMessages();
-  }, [chatroomId]);
+  }, [chatroomId, clearMessages]);
 
   useEffect(() => {
     if (!data) return;
@@ -79,14 +86,24 @@ const ChatMessageList = () => {
       onScroll={getHistoricalMessages}
     >
       {messages &&
-        messages.map((message) => {
+        messages.map((message, index) => {
           return (
             <ChatMessage
               key={message.id}
               id={message.id}
               content={message.content}
-              sender={message.senderUser || "Unnamed User"}
+              attachment={message.attachment}
+              sender={message.senderUser}
               timestamp={new Date(message.createdAt)}
+              editedAt={message.editedAt ? new Date(message.editedAt) : null}
+              reactions={message.reactions}
+              {...permissionsFor(message)}
+              // newest first, so the message before this one is next
+              chained={continuesChain(
+                message,
+                messages[index + 1],
+                chainMinutes,
+              )}
             />
           );
         })}

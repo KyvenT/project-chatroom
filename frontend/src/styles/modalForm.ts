@@ -30,6 +30,31 @@ export const fieldStyles = (theme: Theme) =>
     },
   });
 
+// a chevron for select boxes, drawn in the given color
+const chevron = (color: string) =>
+  `url("data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='${color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>`,
+  )}")`;
+
+// A select box that looks like the text fields, with its own arrow
+export const selectStyles = (theme: Theme) =>
+  css(fieldStyles(theme), {
+    appearance: "none",
+    cursor: "pointer",
+    paddingRight: "36px",
+    backgroundImage: chevron(theme.colors.light_grey),
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "right 10px center",
+    backgroundSize: "16px",
+
+    "&:hover": { backgroundImage: chevron(theme.colors.white) },
+
+    option: {
+      backgroundColor: theme.colors.dark_grey,
+      color: theme.colors.white,
+    },
+  });
+
 export const modalButtonStyles = (theme: Theme) =>
   css({
     ".btn": {

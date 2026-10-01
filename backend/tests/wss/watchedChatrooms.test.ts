@@ -105,4 +105,56 @@ describe("sendChatMessage", () => {
       ["c1", "u2", 1],
     ]);
   });
+
+  it("counts messages from deleted users as unread", async () => {
+    db.chatroomMember.findMany.mockResolvedValue([{ memberId: "u2" }]);
+    db.chatroomMember.findUnique.mockResolvedValue({
+      lastViewedAt: new Date(0),
+    });
+    db.message.count.mockResolvedValue(1);
+
+    await sendChatMessage(message);
+    await vi.waitFor(() => expect(db.message.count).toHaveBeenCalled());
+
+    // a bare `not` would leave out null senders in SQL
+    const { where } = db.message.count.mock.calls[0][0];
+    expect(where.OR).toEqual([
+      { senderUserId: null },
+      { senderUserId: { not: "u2" } },
+    ]);
+  });
+});
+
+describe("sendTypingPresence", () => {
+  it("tells users watching the chatroom, but not the typist", async () => {
+    const { sendTypingPresence } =
+      await import("../../src/wss/outgoing-messages/typing-presence.js");
+    const typist = socket();
+    const active = socket();
+    const watcher = socket();
+    socketMap.set("typist", typist);
+    socketMap.set("active", active);
+    socketMap.set("watcher", watcher);
+    userActiveChatroomMap.set("typist", "c1");
+    userActiveChatroomMap.set("active", "c1");
+    userWatchedChatroomsMap.set("watcher", ["c1"]);
+    (Prisma as any).user = {
+      findUnique: vi.fn().mockResolvedValue({ username: "tess" }),
+    };
+
+    await sendTypingPresence("c1", "typist");
+
+    const expected = {
+      type: "typing-presence",
+      userId: "typist",
+      username: "tess",
+      chatroomId: "c1",
+    };
+    expect(JSON.parse(active.send.mock.calls[0][0])).toEqual(expected);
+    expect(JSON.parse(watcher.send.mock.calls[0][0])).toEqual(expected);
+    expect(typist.send).not.toHaveBeenCalled();
+    userActiveChatroomMap.deleteByKey("typist");
+    userActiveChatroomMap.deleteByKey("active");
+    userWatchedChatroomsMap.deleteUser("watcher");
+  });
 });

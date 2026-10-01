@@ -90,22 +90,49 @@ export interface MembersPayload {
   member: {
     status: Status;
     username: string;
+    avatarUpdatedAt: Date | null;
   };
   memberId: string;
   role: ChatroomRoles;
 }
 
 export interface MessagePayload {
+  // null when the sender's account has been deleted
   senderUser: {
     id: string;
     username: string;
-  };
+    avatarUpdatedAt: Date | null;
+  } | null;
   id: string;
   chatroomId: string;
   createdAt: Date;
   content: string;
-  senderUserId: string;
+  senderUserId: string | null;
   editedAt: Date | null;
+  attachment: AttachmentPayload | null;
+  // oldest first
+  reactions: ReactionPayload[];
+}
+
+// one user's reaction to a message
+export interface ReactionPayload {
+  emoji: string;
+  userId: string;
+}
+
+// all of a message's reactions, after one was added or taken away
+export interface MessageReactionsPayload {
+  chatroomId: string;
+  messageId: string;
+  reactions: ReactionPayload[];
+}
+
+// a message's file, without its bytes (those are downloaded separately)
+export interface AttachmentPayload {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
 }
 
 export interface MentionPayload {
@@ -121,11 +148,13 @@ export interface UserDetailsPayload {
   status: Status;
   createdAt: Date;
   isGuest: boolean;
+  avatarUpdatedAt: Date | null;
 }
 
 export interface ChatroomMemberDetailsPayload {
   joinedAt: Date;
-  member: UserDetailsPayload;
+  // another member's details, so not their email
+  member: Omit<UserDetailsPayload, "email">;
 }
 
 export interface FolderPayload {

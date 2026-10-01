@@ -24,13 +24,41 @@ model Chatroom {
 model Message {
   id            String         @id @default(uuid())
   content       String
-  senderUser    User           @relation(fields: [senderUserId], references: [id], onDelete: SetDefault)
-  senderUserId  String         @default("b532df46-e953-415c-b9c0-5489ce777e70") // user ID to represent deleted users
+  // null once the sender's account is deleted; the message itself stays
+  senderUser    User?          @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
+  senderUserId  String?
   chatroom      Chatroom       @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   chatroomId    String
   notifications Notification[]
+  attachment    Attachment?
+  reactions     Reaction[]
   createdAt     DateTime       @default(now())
   editedAt      DateTime?
+}
+
+// one emoji one user reacted to a message with; a user can react with
+// several different emojis
+model Reaction {
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@id([messageId, userId, emoji])
+}
+
+// a file sent as a message; its bytes are only loaded when it's downloaded
+model Attachment {
+  id        String   @id @default(uuid())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String   @unique
+  fileName  String
+  mimeType  String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
 }
 
 model User {
@@ -41,7 +69,12 @@ model User {
   status          Status           @default(ONLINE)
   createdAt       DateTime         @default(now())
   isGuest         Boolean          @default(false)
+  // when the profile picture last changed, which also versions its URL;
+  // null when there's no picture
+  avatarUpdatedAt DateTime?
+  avatar          Avatar?
   sentMessages    Message[]
+  reactions       Reaction[]
   joinedChatrooms ChatroomMember[]
   ownedChatrooms  Chatroom[]
   pinnedGroups    PinGroup[]
@@ -50,6 +83,14 @@ model User {
   receivedInvites Invite[]         @relation("ReceivedInvite")
   notifications   Notification[]
   sessions        Session[]
+}
+
+// a user's profile picture; its bytes are only loaded when it's shown
+model Avatar {
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String @id
+  mimeType String
+  data     Bytes
 }
 
 model ChatroomMember {

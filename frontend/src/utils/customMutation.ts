@@ -1,11 +1,11 @@
-import { useRefreshToken } from "./useRefreshToken";
+import { refreshAccessToken } from "./refreshAccessToken";
 import { makeHeaders } from "./customQuery";
 import { useAuthStore } from "../hooks/useStores";
 
 export interface MutationArgs {
   fetchUrl: string;
-  method: "GET" | "POST" | "UPDATE" | "PATCH" | "DELETE";
-  reqBody?: {};
+  method: "GET" | "POST" | "PUT" | "UPDATE" | "PATCH" | "DELETE";
+  reqBody?: object;
 }
 
 export const customMutation = async <T>({
@@ -24,12 +24,12 @@ export const customMutation = async <T>({
       body: JSON.stringify(reqBody),
     });
 
-  let res = await send();
+  const res = await send();
   let data = await res.json();
 
   if (!res.ok) {
     if (res.status === 401 && user.token) {
-      const result = await useRefreshToken();
+      const result = await refreshAccessToken();
       if (!result.ok) {
         throw new Error("Unauthorized");
       }
