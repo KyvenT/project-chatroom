@@ -1,7 +1,9 @@
 import { z } from "zod";
-//import dotenv from "dotenv";
+import dotenv from "dotenv";
 
-//dotenv.config({ path: ".env" });
+// a local .env fills in variables the environment hasn't set; hosts like
+// Render set them directly and have no .env, which is fine
+dotenv.config({ path: ".env", quiet: true });
 
 const ENVSchema = z.object({
   DEV_DB_NAME: z.string(),
@@ -16,6 +18,10 @@ const ENVSchema = z.object({
   DB_USERNAME: z.string(),
   DB_PASSWORD: z.string(),
   DB_URL: z.string(),
+  // comma-separated origins allowed to call the API from another site, like
+  // the Vite dev server; unset in production, where the backend serves the
+  // frontend itself
+  CORS_ORIGIN: z.string().optional(),
 });
 
 const env = ENVSchema.parse(process.env);

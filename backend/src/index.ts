@@ -4,7 +4,6 @@ import { fileURLToPath } from "url";
 import env from "./env.js";
 import apiRouter from "./routes/routes.js";
 import cors from "cors";
-import { corsPreflightMiddleware } from "./middleware/corsPreflightMiddleware.js";
 import { startWSS } from "./wss/wss.js";
 import {
   avatarRateLimitMiddleware,
@@ -15,18 +14,18 @@ import cookieParser from "cookie-parser";
 import { securityHeaders } from "./middleware/securityHeaders.js";
 import { hideServerErrors } from "./middleware/hideServerErrors.js";
 
-/*
-const corsOptions = {
-  origin: ["http://localhost:5173"],
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
-*/
-
 const app = express();
 
-//app.use(cors(corsOptions));
+if (env.CORS_ORIGIN) {
+  app.use(
+    cors({
+      origin: env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    }),
+  );
+}
 
 // get file path from URL of current module
 const __filename = fileURLToPath(import.meta.url);
@@ -40,7 +39,6 @@ app.disable("x-powered-by");
 app.use(securityHeaders);
 app.use(hideServerErrors);
 app.use(express.json({ limit: "16kb" }));
-//app.use(corsPreflightMiddleware);
 // before the general rate limit, which pictures don't count towards
 app.use("/api/avatars", avatarRateLimitMiddleware, avatarsRouter);
 app.use(rateLimitMiddleware);
