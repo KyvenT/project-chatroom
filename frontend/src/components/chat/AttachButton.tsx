@@ -6,7 +6,7 @@ import {
   attachmentProblem,
   uploadAttachment,
 } from "../../utils/attachments";
-import { iconBtnStyles } from "../Button";
+import { iconBtnStyles } from "../../styles/iconButton";
 
 const styles = (theme: Theme) =>
   css({

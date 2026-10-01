@@ -23,5 +23,5 @@ export const useFetchUserChatrooms = () => {
 
   useEffect(() => {
     if (chatroomsData) setChatroomList(chatroomsData);
-  }, [chatroomsData]);
+  }, [chatroomsData, setChatroomList]);
 };

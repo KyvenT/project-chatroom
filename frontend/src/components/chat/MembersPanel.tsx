@@ -112,7 +112,7 @@ const MembersPanel = () => {
       return;
     }
     setMembers(data);
-  }, [data]);
+  }, [data, setMembers]);
 
   const onMemberClick = (
     member: ChatroomMember,

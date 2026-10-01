@@ -5,7 +5,7 @@ import { useAuthStore } from "../hooks/useStores";
 export interface MutationArgs {
   fetchUrl: string;
   method: "GET" | "POST" | "PUT" | "UPDATE" | "PATCH" | "DELETE";
-  reqBody?: {};
+  reqBody?: object;
 }
 
 export const customMutation = async <T>({
@@ -24,7 +24,7 @@ export const customMutation = async <T>({
       body: JSON.stringify(reqBody),
     });
 
-  let res = await send();
+  const res = await send();
   let data = await res.json();
 
   if (!res.ok) {

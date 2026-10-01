@@ -31,8 +31,10 @@ function App() {
     };
 
     autoSignIn();
-  }, []);
+  }, [handleSignIn, setSessionChecked]);
 
+  // keyed on the user, not the token, so refreshing the token doesn't
+  // reconnect the websocket
   useEffect(() => {
     if (user.token) {
       startWSConnection();
@@ -40,6 +42,7 @@ function App() {
     return () => {
       closeWs();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.userId]);
 
   return (

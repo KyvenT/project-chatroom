@@ -2,7 +2,7 @@ import { css, useTheme } from "@emotion/react";
 import Dropdown from "./Dropdown";
 import React, { useEffect, useRef, useState } from "react";
 import type { SerializedStyles } from "@emotion/react";
-import { iconBtnStyles } from "./Button";
+import { iconBtnStyles } from "../styles/iconButton";
 
 export type DropdownPosition = "left" | "right";
 

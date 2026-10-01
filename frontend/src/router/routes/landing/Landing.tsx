@@ -423,7 +423,7 @@ const LandingPage = () => {
   useEffect(() => {
     if (isMobile) return;
     if (mobileNavOpen) setMobileNavOpen(false);
-  }, [isMobile]);
+  }, [isMobile, mobileNavOpen, setMobileNavOpen]);
 
   return (
     <div css={styles(theme)}>

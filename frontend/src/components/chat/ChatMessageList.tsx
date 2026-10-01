@@ -47,7 +47,7 @@ const ChatMessageList = () => {
 
   useEffect(() => {
     clearMessages();
-  }, [chatroomId]);
+  }, [chatroomId, clearMessages]);
 
   useEffect(() => {
     if (!data) return;

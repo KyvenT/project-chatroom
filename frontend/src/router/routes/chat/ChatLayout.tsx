@@ -11,7 +11,7 @@ import {
   useAuthStore,
 } from "../../../hooks/useStores";
 import type { Theme } from "@emotion/react";
-import { iconBtnStyles } from "../../../components/Button";
+import { iconBtnStyles } from "../../../styles/iconButton";
 import { useChatroomsStore } from "../../../hooks/useStores";
 import AuthGuard from "../../../components/chat/AuthGuard";
 import { mq } from "../../../styles/breakpoints";
@@ -117,7 +117,7 @@ function ChatLayout() {
       chatroomId: chatroomId ? chatroomId : "home",
     });
     // (resent after reconnecting; the server forgets it with the connection)
-  }, [chatroomId, connectionId]);
+  }, [chatroomId, connectionId, setActiveChatroom]);
 
   const outletContext = {
     showMembersList,

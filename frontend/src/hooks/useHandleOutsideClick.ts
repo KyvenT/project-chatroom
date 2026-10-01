@@ -39,5 +39,7 @@ export const useOutsideClick = (element: OutsideClickElement) => {
         listenerCreated = false;
       }
     };
+    // registered once on mount, so the stack keeps the order elements opened in
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 };

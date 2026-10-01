@@ -104,7 +104,7 @@ const InboxButton = () => {
   useEffect(() => {
     if (!invitesData) return;
     setInvites(invitesData);
-  }, [invitesData]);
+  }, [invitesData, setInvites]);
 
   const handleInviteResponse = (inviteId: string, userAccepted: boolean) => {
     mutation.mutate({

@@ -10,7 +10,8 @@ import {
   Settings,
   X,
 } from "lucide-react";
-import Button, { iconBtnStyles } from "../Button";
+import Button from "../Button";
+import { iconBtnStyles } from "../../styles/iconButton";
 import { useRef, useState } from "react";
 import { matchesQuery, normalizeQuery } from "../../utils/search";
 import { useAuthStore } from "../../hooks/useStores";

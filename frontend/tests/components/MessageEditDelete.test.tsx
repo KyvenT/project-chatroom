@@ -17,6 +17,7 @@ import {
   useMembersStore,
   useMessagesStore,
 } from "../../src/hooks/useStores";
+import type { ChatroomMember } from "../../src/types/REST-types/ChatroomMember";
 import type { Message } from "../../src/types/REST-types/Message";
 import { deleteMessage, editMessage } from "../../src/utils/messageChanges";
 import { queryClient } from "../../src/utils/queryClient";
@@ -187,7 +188,7 @@ describe("useMessagePermissions", () => {
           role: "ADMIN",
           member: { username: "me", status: "ONLINE" },
         },
-      ] as any,
+      ] as unknown as ChatroomMember[],
     });
     const { result } = renderHook(() => useMessagePermissions("c1"));
     expect(result.current(theirs).canDelete).toBe(true);

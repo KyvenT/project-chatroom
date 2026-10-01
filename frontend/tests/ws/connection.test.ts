@@ -23,7 +23,7 @@ class FakeSocket {
   static CLOSED = 3;
   static instances: FakeSocket[] = [];
   readyState = FakeSocket.CONNECTING;
-  sent: any[] = [];
+  sent: unknown[] = [];
   onopen?: () => void;
   onmessage?: (e: { data: string }) => void;
   onclose?: (e: { code: number }) => void;

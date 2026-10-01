@@ -16,7 +16,7 @@ export const makeHeaders = () => {
 export const customQuery = async <T>({ fetchUrl }: QueryArgs): Promise<T> => {
   const { user, handleSignIn } = useAuthStore.getState();
 
-  let res = await fetch(fetchUrl, {
+  const res = await fetch(fetchUrl, {
     method: "GET",
     headers: makeHeaders(),
     credentials: "include",
